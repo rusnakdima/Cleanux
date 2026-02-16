@@ -12,7 +12,8 @@
   </developer>
 
   <description>
-    <p>Cleanux is a powerful system cleaning utility designed to keep your Linux system running smoothly.</p>
+    <p>Cleanux is a powerful system cleaning utility designed to keep your Linux system running
+      smoothly.</p>
     <p>Features include:</p>
     <ul>
       <li>Cache cleaning</li>
@@ -52,6 +53,24 @@
   </provides>
 
   <releases>
+    <release version="0.1.0" date="2026-02-16">
+      <description>
+        <p>Initial release of Cleanux - A comprehensive system cleaning and optimization utility.</p>
+        <p>Key features and improvements:</p>
+        <ul>
+          <li>Comprehensive file cleaning service with parallel processing for cache, logs, and
+            trash.</li>
+          <li>System service management for controlling and monitoring background processes.</li>
+          <li>Large file detection to help identify and manage disk space usage.</li>
+          <li>Modern Angular v21 frontend with real-time scanning and tabbed interface.</li>
+          <li>Modular backend architecture with Rust-based controllers, services, and models.</li>
+          <li>Dark mode support with theme persistence.</li>
+          <li>Automated build system with Flatpak packaging and GitHub Actions integration.</li>
+          <li>Optimized project structure following standardized naming conventions and modular
+            design.</li>
+        </ul>
+      </description>
+    </release>
   </releases>
 
   <content_rating type="oars-1.1" />
