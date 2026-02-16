@@ -1,0 +1,133 @@
+<div class="p-8 space-y-8 animate-in fade-in duration-500">
+  <!-- Header Section -->
+  <div class="mb-10">
+    <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Settings</h1>
+    <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">
+      Configure application behavior and view system information.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <!-- Scanning Settings -->
+    <div class="space-y-6">
+      <h2
+        class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
+      >
+        <mat-icon class="text-indigo-500">search</mat-icon>
+        Scanning & Cleaning
+      </h2>
+
+      <div class="glass-card p-8 space-y-8">
+        <div class="flex items-center justify-between">
+          <div class="space-y-1">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100">Deep Scan</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Scan additional system directories and hidden caches.
+            </p>
+          </div>
+          <button
+            (click)="toggleDeepScan()"
+            [class.bg-indigo-600]="deepScan()"
+            [class.bg-slate-200]="!deepScan()"
+            [class.dark:bg-slate-700]="!deepScan()"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+          >
+            <span
+              [class.translate-x-5]="deepScan()"
+              [class.translate-x-0]="!deepScan()"
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+            ></span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="space-y-1">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100">Auto-clean</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Automatically clean system junk when it exceeds 1GB.
+            </p>
+          </div>
+          <button
+            (click)="toggleAutoClean()"
+            [class.bg-indigo-600]="autoClean()"
+            [class.bg-slate-200]="!autoClean()"
+            [class.dark:bg-slate-700]="!autoClean()"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+          >
+            <span
+              [class.translate-x-5]="autoClean()"
+              [class.translate-x-0]="!autoClean()"
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
+            ></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Information -->
+    <div class="space-y-6">
+      <h2
+        class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
+      >
+        <mat-icon class="text-indigo-500">info</mat-icon>
+        Application Info
+      </h2>
+
+      <div class="glass-card p-8 space-y-6">
+        <div
+          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
+        >
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Version</span>
+          <span class="font-mono font-black text-indigo-600 dark:text-indigo-400">{{
+            version
+          }}</span>
+        </div>
+        <div
+          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
+        >
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Released</span>
+          <span class="font-semibold text-slate-700 dark:text-slate-200">{{ dateVersion() }}</span>
+        </div>
+        <div
+          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
+        >
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Last Checked</span>
+          <span class="font-semibold text-slate-700 dark:text-slate-200">{{ dateCheck() }}</span>
+        </div>
+        <div
+          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
+        >
+          <span class="text-slate-500 dark:text-slate-400 font-medium">Platform</span>
+          <span class="font-semibold text-slate-700 dark:text-slate-200">Linux (Tauri)</span>
+        </div>
+        <div class="pt-6">
+          <button
+            (click)="checkUpdate()"
+            [disabled]="isChecking()"
+            class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-3 active:scale-95 shadow-sm disabled:cursor-not-allowed"
+          >
+            @if (isChecking()) {
+              <mat-icon class="animate-spin">sync</mat-icon>
+              Checking...
+            } @else {
+              <mat-icon class="text-xl">update</mat-icon>
+              Check for Updates
+            }
+          </button>
+        </div>
+        @if (isUpdateAvailable()) {
+          <div
+            class="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl"
+          >
+            <div class="flex items-center gap-3">
+              <mat-icon class="text-emerald-600 dark:text-emerald-400">check_circle</mat-icon>
+              <span class="font-medium text-emerald-700 dark:text-emerald-300">
+                New version {{ lastVersion() }} is available!
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

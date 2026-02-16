@@ -1,0 +1,177 @@
+<app-header [title]="'Cleaner'"></app-header>
+
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+        <mat-icon class="text-purple-500 text-3xl">cleaning_services</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Total Junk
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">
+          {{ formatSize(totalJunk()) }}
+        </p>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+        <mat-icon class="text-orange-500 text-3xl">cached</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Cache Size
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">
+          {{ formatSize(cacheSize()) }}
+        </p>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+        <mat-icon class="text-blue-500 text-3xl">description</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Log Size
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">
+          {{ formatSize(logSize()) }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="glass-card flex flex-col h-[calc(100vh-250px)] overflow-hidden">
+    <div class="px-4 pt-2 border-b border-black/5 dark:border-white/5">
+      <div class="flex items-center justify-between">
+        <div class="flex">
+          <button
+            class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
+            [class.border-indigo-500]="activeTab() === 'cache'"
+            [class.text-indigo-600]="activeTab() === 'cache'"
+            [class.dark:text-indigo-400]="activeTab() === 'cache'"
+            [class.border-transparent]="activeTab() !== 'cache'"
+            [class.text-slate-400]="activeTab() !== 'cache'"
+            [class.hover:text-slate-600]="activeTab() !== 'cache'"
+            (click)="onTabChange('cache')"
+          >
+            Cache ({{ cacheData().length }})
+          </button>
+          <button
+            class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
+            [class.border-indigo-500]="activeTab() === 'trash'"
+            [class.text-indigo-600]="activeTab() === 'trash'"
+            [class.dark:text-indigo-400]="activeTab() === 'trash'"
+            [class.border-transparent]="activeTab() !== 'trash'"
+            [class.text-slate-400]="activeTab() !== 'trash'"
+            [class.hover:text-slate-600]="activeTab() !== 'trash'"
+            (click)="onTabChange('trash')"
+          >
+            Trash ({{ trashData().length }})
+          </button>
+          <button
+            class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
+            [class.border-indigo-500]="activeTab() === 'logs'"
+            [class.text-indigo-600]="activeTab() === 'logs'"
+            [class.dark:text-indigo-400]="activeTab() === 'logs'"
+            [class.border-transparent]="activeTab() !== 'logs'"
+            [class.text-slate-400]="activeTab() !== 'logs'"
+            [class.hover:text-slate-600]="activeTab() !== 'logs'"
+            (click)="onTabChange('logs')"
+          >
+            Logs ({{ logData().length }})
+          </button>
+        </div>
+        <div class="flex items-center gap-4">
+          <app-search
+            [data]="
+              activeTab() === 'cache'
+                ? cacheData()
+                : activeTab() === 'trash'
+                  ? trashData()
+                  : logData()
+            "
+            [searchFields]="getSearchFields()"
+            (filteredData)="
+              activeTab() === 'cache'
+                ? onFilteredCacheData($event)
+                : activeTab() === 'trash'
+                  ? onFilteredTrashData($event)
+                  : onFilteredLogData($event)
+            "
+          />
+          <button
+            (click)="loadData()"
+            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            matTooltip="Refresh"
+          >
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+        <button
+          (click)="clearSelectedFilesForTab(activeTab())"
+          [disabled]="
+            (activeTab() === 'cache'
+              ? selectedCacheFiles()
+              : activeTab() === 'trash'
+                ? selectedTrashFiles()
+                : selectedLogFiles()
+            ).size === 0
+          "
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+        >
+          <mat-icon class="text-sm">delete</mat-icon>
+          Delete Selected
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 p-6 overflow-hidden">
+      @if (activeTab() === "cache") {
+        <app-data-table
+          [columns]="cacheColumns"
+          [data]="filteredCacheData()"
+          [loading]="loading()"
+          [options]="getTableOptions('cache')"
+          [selectedKeys]="selectedCacheFiles()"
+          (selectionChange)="selectedCacheFiles.set($event)"
+          (preview)="onPreview($event)"
+        />
+      } @else if (activeTab() === "trash") {
+        <app-data-table
+          [columns]="trashColumns"
+          [data]="filteredTrashData()"
+          [loading]="loading()"
+          [options]="getTableOptions('trash')"
+          [selectedKeys]="selectedTrashFiles()"
+          (selectionChange)="selectedTrashFiles.set($event)"
+          (preview)="onPreview($event)"
+        />
+      } @else {
+        <app-data-table
+          [columns]="logColumns"
+          [data]="filteredLogData()"
+          [loading]="loading()"
+          [options]="getTableOptions('logs')"
+          [selectedKeys]="selectedLogFiles()"
+          (selectionChange)="selectedLogFiles.set($event)"
+          (preview)="onPreview($event)"
+        />
+      }
+    </div>
+  </div>
+</div>
+
+@if (previewData()) {
+  <app-file-preview
+    [fileData]="previewData()"
+    (close)="onClosePreview()"
+    (openInEditor)="onOpenInEditor($event)"
+  />
+}

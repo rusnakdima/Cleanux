@@ -1,0 +1,92 @@
+<app-header [title]="'System Services'"></app-header>
+
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+        <mat-icon class="text-blue-500 text-3xl">settings</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Total Services
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ totalServices() }}</p>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+        <mat-icon class="text-emerald-500 text-3xl">play_arrow</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Active
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ runningServices() }}</p>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+        <mat-icon class="text-red-500 text-3xl">stop</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Inactive
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ stoppedServices() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="glass-card flex flex-col h-[calc(100vh-280px)] overflow-hidden">
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800"
+    >
+      <div class="flex items-center gap-4">
+        <app-search
+          [data]="servicesData()"
+          [searchFields]="['name']"
+          (filteredData)="onFilteredData($event)"
+        />
+        <button
+          (click)="loadData()"
+          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          matTooltip="Refresh"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      <div class="flex gap-2">
+        <button
+          (click)="stopSelectedServices()"
+          [disabled]="selectedServices().size === 0"
+          class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+        >
+          <mat-icon class="text-sm">stop</mat-icon>
+          Stop Selected
+        </button>
+        <button
+          (click)="startSelectedServices()"
+          [disabled]="selectedServices().size === 0"
+          class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+        >
+          <mat-icon class="text-sm">play_arrow</mat-icon>
+          Start Selected
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 p-6 overflow-hidden">
+      <app-data-table
+        [columns]="serviceColumns"
+        [data]="filteredData()"
+        [loading]="loading()"
+        [options]="getTableOptions()"
+        [selectedKeys]="selectedServices()"
+        (selectionChange)="selectedServices.set($event)"
+      />
+    </div>
+  </div>
+</div>
