@@ -5,7 +5,7 @@
   "identifier": "com.tcs.cleanux",
   "build": {
     "beforeDevCommand": "bun run start",
-    "devUrl": "http://localhost:1422",
+    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "bun run build:prod",
     "frontendDist": "../dist/cleanux/browser"
   },
