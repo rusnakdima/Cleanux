@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Cleanux",
+  "version": "0.0.0",
+  "identifier": "com.tcs.cleanux",
+  "build": {
+    "beforeDevCommand": "bun run start",
+    "devUrl": "http://localhost:1422",
+    "beforeBuildCommand": "bun run build:prod",
+    "frontendDist": "../dist/cleanux/browser"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Cleanux",
+        "fullscreen": false,
+        "resizable": true,
+        "width": 800,
+        "height": 600,
+        "minHeight": 150,
+        "minWidth": 150
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "withGlobalTauri": true
+  },
+  "plugins": {
+    "updater": {
+      "active": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "appimage"]
+  }
+}

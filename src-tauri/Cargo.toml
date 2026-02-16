@@ -1,0 +1,29 @@
+[package]
+name = "cleanux"
+version = "0.0.0"
+description = "System cleanup tool"
+authors = ["Dmitriy303"]
+edition = "2021"
+repository = "https://github.com/rusnakdima/Cleanux"
+
+[lib]
+crate-type = ["staticlib", "cdylib", "rlib"]
+name = "cleanux_lib"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "5.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-fs = "2"
+tauri-plugin-opener = "2"
+rayon = "1.8"
+walkdir = "2.4"
+tauri-plugin-mcp-bridge = { version = "0.8", optional = true }
+
+[features]
+mcp-bridge = ["dep:tauri-plugin-mcp-bridge"]
