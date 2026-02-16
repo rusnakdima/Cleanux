@@ -1,0 +1,31 @@
+<div class="flex items-center gap-3">
+  @if (isVisible()) {
+    <div class="relative flex-1 max-w-md">
+      <input
+        type="text"
+        class="w-full h-10 px-4 pl-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        placeholder="Search..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearch()"
+        (keydown.escape)="hide()"
+      />
+      <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</mat-icon>
+      @if (searchQuery()) {
+        <button
+          (click)="clearSearch()"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+        >
+          <mat-icon class="text-sm">close</mat-icon>
+        </button>
+      }
+    </div>
+  } @else {
+    <button
+      (click)="show()"
+      class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+    >
+      <mat-icon>search</mat-icon>
+      <span class="text-sm font-medium">Search</span>
+    </button>
+  }
+</div>

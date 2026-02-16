@@ -1,0 +1,134 @@
+<div class="flex flex-col h-full">
+  <div class="table-container">
+    <!-- Fixed Table Header -->
+    @if (options.showHeader && columns.length > 0) {
+      <div class="table-header">
+        <div class="flex items-center px-4">
+          @if (showCheckbox) {
+            <div class="checkbox-container">
+              <label class="custom-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="allSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                />
+                <span class="checkmark" [class.indeterminate]="indeterminate()"></span>
+              </label>
+            </div>
+          }
+          @if (showPreviewButton) {
+            <div class="w-10 shrink-0"></div>
+          }
+          @for (column of columns; track column.key) {
+            <div
+              class="column-header {{ column.width || 'flex-1' }} {{ getAlignClass(column) }}"
+              [class.sortable]="column.sortable"
+              (click)="onSort(column)"
+            >
+              @if (column.sortable) {
+                <span class="flex items-center gap-1">
+                  {{ column.label }}
+                  <mat-icon class="sort-icon" [class.active]="isSortActive(column)">
+                    {{ getSortIcon(column) }}
+                  </mat-icon>
+                </span>
+              } @else {
+                {{ column.label }}
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Scrollable Table Body -->
+    <div class="flex-1 overflow-auto">
+      @if (loading) {
+        <div
+          class="flex items-center justify-center h-48 bg-white/50 dark:bg-slate-900/20 backdrop-blur-sm"
+        >
+          <mat-spinner diameter="48"></mat-spinner>
+        </div>
+      } @else {
+        <div class="table-body">
+          @for (item of paginatedData; track item) {
+            <div
+              class="table-row"
+              [class.table-row-hover]="options.hoverable !== false"
+              [class.table-row-selected]="isSelected(item)"
+              (click)="onRowClick(item, $event)"
+              (dblclick)="onRowDoubleClick(item)"
+            >
+              @if (showCheckbox) {
+                <div class="checkbox-container">
+                  <label class="custom-checkbox">
+                    <input
+                      type="checkbox"
+                      [checked]="isSelected(item)"
+                      (change)="toggleSelectItem(item, $any($event.target).checked)"
+                      (click)="$event.stopPropagation()"
+                    />
+                    <span class="checkmark"></span>
+                  </label>
+                </div>
+              }
+              @if (showPreviewButton) {
+                <div class="preview-btn-container">
+                  <button
+                    (click)="onPreview(item); $event.stopPropagation()"
+                    class="preview-btn"
+                    matTooltip="Preview file"
+                  >
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </div>
+              }
+              @for (column of columns; track column.key) {
+                <div class="column-cell {{ column.width || 'flex-1' }} {{ getAlignClass(column) }}">
+                  @switch (column.key) {
+                    @case ("status") {
+                      <span
+                        class="status-chip"
+                        [class.running]="item.status === 'running'"
+                        [class.stopped]="item.status !== 'running'"
+                      >
+                        {{ item.status }}
+                      </span>
+                    }
+                    @case ("size") {
+                      <span>{{ formatSize(item.size) }}</span>
+                    }
+                    @default {
+                      <span>{{ item[column.key] }}</span>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          } @empty {
+            <div class="no-data-msg">
+              <mat-icon class="w-15! h-15! text-5xl! mt-4 opacity-20 block mx-auto">inbox</mat-icon>
+              No items found to display
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Pagination controls moved inside table-container as footer -->
+    <div
+      class="table-footer border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30"
+    >
+      <app-pagination
+        [currentPage]="p"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [pageSizeOptions]="pageSizeOptions"
+        [showPageSizeSelector]="showPageSizeSelector"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      >
+      </app-pagination>
+    </div>
+  </div>
+</div>

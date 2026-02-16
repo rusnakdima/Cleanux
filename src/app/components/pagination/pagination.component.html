@@ -1,0 +1,84 @@
+<div class="pagination-container">
+  <div class="flex items-center gap-4">
+    <div class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+      Showing {{ (p() - 1) * pageSize() + 1 }}-{{
+        p() * pageSize() > totalItems() ? totalItems() : p() * pageSize()
+      }}
+      of {{ totalItems() }}
+    </div>
+
+    @if (showPageSizeSelector()) {
+      <select
+        [value]="pageSize()"
+        (change)="onPageSizeChange($any($event.target).value)"
+        class="pagination-select"
+      >
+        @for (size of pageSizeOptions(); track size) {
+          <option [value]="size">{{ size }} per page</option>
+        }
+      </select>
+    }
+  </div>
+
+  @if (totalPages() > 0) {
+    <div class="flex items-center gap-1.5">
+      <button
+        mat-icon-button
+        (click)="goToPage(1)"
+        [disabled]="p() === 1"
+        class="pagination-nav-btn"
+        matTooltip="First page"
+      >
+        <mat-icon class="pagination-icon">first_page</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        (click)="previousPage()"
+        [disabled]="p() === 1"
+        class="pagination-nav-btn"
+        matTooltip="Previous page"
+      >
+        <mat-icon class="pagination-icon">chevron_left</mat-icon>
+      </button>
+
+      <div class="flex items-center gap-1 mx-1">
+        @for (page of pages(); track $index) {
+          @if (page === "...") {
+            <span class="pagination-ellipsis">...</span>
+          } @else {
+            <button
+              (click)="goToPage(page)"
+              class="pagination-page-btn transition-all duration-200"
+              [class.pagination-page-btn-active]="p() === page"
+              [attr.aria-current]="p() === page ? 'page' : null"
+              [attr.aria-label]="'Page ' + page"
+            >
+              {{ page }}
+            </button>
+          }
+        }
+      </div>
+
+      <button
+        mat-icon-button
+        (click)="nextPage()"
+        [disabled]="p() === totalPages()"
+        class="pagination-nav-btn"
+        matTooltip="Next page"
+      >
+        <mat-icon class="pagination-icon">chevron_right</mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        (click)="goToPage(totalPages())"
+        [disabled]="p() === totalPages()"
+        class="pagination-nav-btn"
+        matTooltip="Last page"
+      >
+        <mat-icon class="pagination-icon">last_page</mat-icon>
+      </button>
+    </div>
+  }
+</div>
