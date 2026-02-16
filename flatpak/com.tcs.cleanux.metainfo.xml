@@ -53,6 +53,17 @@
   </provides>
 
   <releases>
+    <release version="0.1.3" date="2026-02-17">
+      <description>
+        <p>Resolved persistent build issues and harmonized documentation across projects:</p>
+        <ul>
+          <li>Fixed Tauri version mismatch in CI by updating Cargo.lock and aligning crate versions.</li>
+          <li>Standardized README structure and screenshot galleries across Cleanux, TaskFlow, and Translator projects.</li>
+          <li>Optimized build dependency declarations in Cargo.toml for improved stability.</li>
+          <li>Synchronized project metadata and release notes across all distribution formats.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.2" date="2026-02-17">
       <description>
         <p>Fixed package resolution and cleaned up dependencies:</p>

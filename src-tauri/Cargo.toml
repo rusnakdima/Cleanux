@@ -1,6 +1,6 @@
 [package]
 name = "cleanux"
-version = "0.1.2"
+version = "0.1.3"
 description = "System cleanup tool"
 authors = ["Dmitriy303"]
 edition = "2021"
