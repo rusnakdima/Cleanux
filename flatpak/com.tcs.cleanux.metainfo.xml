@@ -53,6 +53,34 @@
   </provides>
 
   <releases>
+    <release version="0.2.0" date="2026-03-29">
+      <description>
+        <p>Release 0.2.0 improves the Rust and Angular stacks, release metadata, and developer
+          workflows.</p>
+        <p>Rust backend:</p>
+        <ul>
+          <li>Shared helpers for responses, filesystem scans, and privilege elevation; centralized
+            AppError across listing flows.</li>
+          <li>File preview moved into a dedicated service with base64 handling; cleaner service
+            refactored for shared logic.</li>
+          <li>Tauri commands now call CleanerService, DashboardService, and SystemService directly
+            from routes (controller layer removed).</li>
+        </ul>
+        <p>Angular frontend:</p>
+        <ul>
+          <li>Stricter typing (object-based table rows, trackBy, unknown instead of any) and clearer
+            search filtering.</li>
+          <li>GitHub release DTOs for AboutService; CleanerViewStore for tabs, search, and bulk clear
+            with a slimmer CleanerView layout.</li>
+          <li>Safer error handling in settings, system, and large-files views.</li>
+        </ul>
+        <p>Packaging and tooling:</p>
+        <ul>
+          <li>npm scripts for lint (ng build) and CI (frontend build plus Rust test and clippy).</li>
+          <li>Flatpak description updated to reference the route-based command layer.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-02-18">
       <description>
         <p>Initial release of Cleanux - A comprehensive system cleaning and optimization utility.</p>
