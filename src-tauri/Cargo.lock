@@ -462,6 +462,7 @@ dependencies = [
 name = "cleanux"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "chrono",
  "dirs 5.0.1",
  "rayon",
@@ -472,6 +473,7 @@ dependencies = [
  "tauri-plugin-fs",
  "tauri-plugin-mcp-bridge",
  "tauri-plugin-opener",
+ "thiserror 1.0.69",
  "walkdir",
 ]
 

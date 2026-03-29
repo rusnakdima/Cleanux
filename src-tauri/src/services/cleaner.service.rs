@@ -1,726 +1,268 @@
+/* helpers */
+use crate::helpers::{
+  collect_cache_file_models, collect_log_file_models, collect_trash_file_models,
+  data_empty_string, data_string, error_response, info_response, models_into_data_array,
+  pkexec_rm_paths, remove_paths_with_errors, scan_large_file_models, stderr_message,
+  success_response,
+};
+/* models */
+use crate::models::{
+  AppError, CacheFileModel, LargeFileModel, LogFileModel, ResponseModel, TrashFileModel,
+};
+/* services */
+use crate::services::file_preview_service::FilePreviewService;
 /* sys lib */
 use std::fs;
 use std::path::Path;
 
-/* models */
-use crate::models::{
-  CacheFileModel, DataValue, LargeFileModel, LogFileModel, ResponseModel, ResponseStatus,
-  TrashFileModel,
-};
-
-/* helpers */
-use chrono::{DateTime, Local};
-use rayon::prelude::*;
-use serde_json::json;
-use walkdir::WalkDir;
-
 pub struct CleanerService;
+
+type CleanResult<T> = Result<T, AppError>;
 
 #[allow(non_snake_case)]
 impl CleanerService {
   pub fn getCacheFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    let cacheDir = dirs::cache_dir().ok_or("Cache directory not found")?;
+    self
+      .get_cache_files_inner()
+      .map_err(|e| e.into_response())
+  }
 
-    let files: Vec<CacheFileModel> = WalkDir::new(cacheDir)
-      .max_depth(4)
-      .into_iter()
-      .filter_map(|e| e.ok())
-      .filter(|e| e.file_type().is_file())
-      .take(1000)
-      .collect::<Vec<_>>()
-      .into_par_iter()
-      .filter_map(|entry| {
-        let path = entry.path();
-        let metadata = fs::metadata(path).ok()?;
-        let modified: DateTime<Local> = metadata
-          .modified()
-          .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-          .into();
-        Some(CacheFileModel {
-          path: path.to_string_lossy().to_string(),
-          size: metadata.len(),
-          modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
-        })
-      })
-      .collect();
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Cache files retrieved successfully".to_string(),
-      data: DataValue::Array(
-        files
-          .into_iter()
-          .map(|f| serde_json::to_value(f).unwrap_or(json!({})))
-          .collect(),
-      ),
-    })
+  fn get_cache_files_inner(&self) -> CleanResult<ResponseModel> {
+    let cache_dir = dirs::cache_dir()
+      .ok_or_else(|| AppError::message("Cache directory not found"))?;
+    let files: Vec<CacheFileModel> = collect_cache_file_models(cache_dir);
+    let data = models_into_data_array(files)?;
+    Ok(success_response(
+      "Cache files retrieved successfully",
+      data,
+    ))
   }
 
   pub fn getTrashFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
-    let trashDir = home.join(".local/share/Trash/files");
+    self
+      .get_trash_files_inner()
+      .map_err(|e| e.into_response())
+  }
 
-    let mut trashFiles = Vec::new();
-
-    if let Ok(entries) = fs::read_dir(&trashDir) {
-      for entry in entries.flatten() {
-        let path = entry.path();
-        if let Ok(metadata) = fs::metadata(&path) {
-          let deletedDate: DateTime<Local> = metadata
-            .modified()
-            .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-            .into();
-          trashFiles.push(TrashFileModel {
-            name: path
-              .file_name()
-              .unwrap_or_default()
-              .to_string_lossy()
-              .to_string(),
-            path: path.to_string_lossy().to_string(),
-            size: metadata.len(),
-            deletedDate: deletedDate.format("%Y-%m-%d %H:%M:%S").to_string(),
-          });
-        }
-      }
-    }
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Trash files retrieved successfully".to_string(),
-      data: DataValue::Array(
-        trashFiles
-          .into_iter()
-          .map(|f| serde_json::to_value(f).unwrap_or(json!({})))
-          .collect(),
-      ),
-    })
+  fn get_trash_files_inner(&self) -> CleanResult<ResponseModel> {
+    let home = dirs::home_dir().ok_or_else(|| AppError::message("Home directory not found"))?;
+    let trash_dir = home.join(".local/share/Trash/files");
+    let trash_files: Vec<TrashFileModel> = collect_trash_file_models(&trash_dir);
+    let data = models_into_data_array(trash_files)?;
+    Ok(success_response(
+      "Trash files retrieved successfully",
+      data,
+    ))
   }
 
   pub fn getSystemLogs(&self) -> Result<ResponseModel, ResponseModel> {
-    let logDir = Path::new("/var/log");
+    self
+      .get_system_logs_inner()
+      .map_err(|e| e.into_response())
+  }
 
-    let files: Vec<LogFileModel> = WalkDir::new(logDir)
-      .max_depth(3)
-      .into_iter()
-      .filter_map(|e| e.ok())
-      .filter(|e| e.file_type().is_file())
-      .take(500)
-      .collect::<Vec<_>>()
-      .into_par_iter()
-      .filter_map(|entry| {
-        let path = entry.path();
-        let metadata = fs::metadata(path).ok()?;
-        let modified: DateTime<Local> = metadata
-          .modified()
-          .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-          .into();
-        Some(LogFileModel {
-          path: path.to_string_lossy().to_string(),
-          size: metadata.len(),
-          modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
-        })
-      })
-      .collect();
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "System logs retrieved successfully".to_string(),
-      data: DataValue::Array(
-        files
-          .into_iter()
-          .map(|f| serde_json::to_value(f).unwrap_or(json!({})))
-          .collect(),
-      ),
-    })
+  fn get_system_logs_inner(&self) -> CleanResult<ResponseModel> {
+    let log_dir = Path::new("/var/log");
+    let files: Vec<LogFileModel> = collect_log_file_models(log_dir, 3, 500);
+    let data = models_into_data_array(files)?;
+    Ok(success_response(
+      "System logs retrieved successfully",
+      data,
+    ))
   }
 
   pub fn getLargeFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
-    let threshold = 100 * 1024 * 1024;
+    self
+      .get_large_files_inner()
+      .map_err(|e| e.into_response())
+  }
 
-    let dirsToScan = vec![
-      home.join("Downloads"),
-      home.join("Documents"),
-      home.join("Videos"),
-      home.join("Pictures"),
-      home.join("Desktop"),
-    ];
-
-    let mut files: Vec<LargeFileModel> = dirsToScan
-      .into_par_iter()
-      .map(|dir| {
-        if !dir.exists() {
-          return Vec::new();
-        }
-        WalkDir::new(dir)
-          .max_depth(3)
-          .into_iter()
-          .filter_map(|e| e.ok())
-          .filter(|e| e.file_type().is_file())
-          .filter_map(|entry| {
-            let metadata = entry.metadata().ok()?;
-            if metadata.len() > threshold {
-              let modified: DateTime<Local> = metadata
-                .modified()
-                .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-                .into();
-              Some(LargeFileModel {
-                name: entry.file_name().to_string_lossy().to_string(),
-                path: entry.path().to_string_lossy().to_string(),
-                size: metadata.len(),
-                modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
-              })
-            } else {
-              None
-            }
-          })
-          .take(50)
-          .collect::<Vec<_>>()
-      })
-      .flatten()
-      .collect();
-
-    files.sort_by(|a, b| b.size.cmp(&a.size));
-    if files.len() > 200 {
-      files.truncate(200);
-    }
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Large files retrieved successfully".to_string(),
-      data: DataValue::Array(
-        files
-          .into_iter()
-          .map(|f| serde_json::to_value(f).unwrap_or(json!({})))
-          .collect(),
-      ),
-    })
+  fn get_large_files_inner(&self) -> CleanResult<ResponseModel> {
+    let home = dirs::home_dir().ok_or_else(|| AppError::message("Home directory not found"))?;
+    let files: Vec<LargeFileModel> =
+      scan_large_file_models(&home, 3, 50, Some(200));
+    let data = models_into_data_array(files)?;
+    Ok(success_response(
+      "Large files retrieved successfully",
+      data,
+    ))
   }
 
   pub fn clearSelectedCacheFiles(
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
-    let mut cleared = 0;
-    let mut errors = Vec::new();
-
-    for path in paths {
-      if let Err(e) = fs::remove_file(&path) {
-        errors.push(format!("{}: {}", path, e));
-      } else {
-        cleared += 1;
-      }
-    }
-
-    if errors.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Successfully cleared {} cache files", cleared),
-        data: DataValue::String("".to_string()),
-      })
-    } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Cleared {} files, failed on: {}",
-          cleared,
-          errors.join("; ")
-        ),
-        data: DataValue::String("".to_string()),
-      })
-    }
+    map_bulk_remove(paths, "cache files")
   }
 
   pub fn clearSelectedTrashFiles(
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
-    let mut cleared = 0;
-    let mut errors = Vec::new();
-
-    for path in paths {
-      if let Err(e) = fs::remove_file(&path) {
-        errors.push(format!("{}: {}", path, e));
-      } else {
-        cleared += 1;
-      }
-    }
-
-    if errors.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Successfully cleared {} trash files", cleared),
-        data: DataValue::String("".to_string()),
-      })
-    } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Cleared {} files, failed on: {}",
-          cleared,
-          errors.join("; ")
-        ),
-        data: DataValue::String("".to_string()),
-      })
-    }
-  }
-
-  pub fn clearSelectedLogFiles(&self, paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
-    if paths.is_empty() {
-      return Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: "No log files selected".to_string(),
-        data: DataValue::String("".to_string()),
-      });
-    }
-
-    // Batch all paths into a single pkexec command
-    let mut cmd = std::process::Command::new("pkexec");
-    cmd.arg("rm").arg("-f");
-    for path in &paths {
-      cmd.arg(path);
-    }
-
-    let output = cmd.output().map_err(|e| ResponseModel {
-      status: ResponseStatus::Error,
-      message: format!("Failed to run pkexec: {}", e),
-      data: DataValue::String("".to_string()),
-    })?;
-
-    if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Successfully cleared {} log files", paths.len()),
-        data: DataValue::String("".to_string()),
-      })
-    } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Failed to clear log files: {}",
-          String::from_utf8_lossy(&output.stderr).trim()
-        ),
-        data: DataValue::String("".to_string()),
-      })
-    }
+    map_bulk_remove(paths, "trash files")
   }
 
   pub fn clearSelectedLargeFiles(
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
-    let mut cleared = 0;
-    let mut errors = Vec::new();
+    map_bulk_remove(paths, "large files")
+  }
 
-    for path in paths {
-      if let Err(e) = fs::remove_file(&path) {
-        errors.push(format!("{}: {}", path, e));
-      } else {
-        cleared += 1;
-      }
+  pub fn clearSelectedLogFiles(&self, paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
+    if paths.is_empty() {
+      return Ok(success_response(
+        "No log files selected",
+        data_empty_string(),
+      ));
     }
-
-    if errors.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Successfully cleared {} large files", cleared),
-        data: DataValue::String("".to_string()),
-      })
+    let output = pkexec_rm_paths(&paths).map_err(|e| {
+      error_response(format!("Failed to run pkexec: {}", e), data_empty_string())
+    })?;
+    if output.status.success() {
+      Ok(success_response(
+        format!("Successfully cleared {} log files", paths.len()),
+        data_empty_string(),
+      ))
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Cleared {} files, failed on: {}",
-          cleared,
-          errors.join("; ")
+      Err(error_response(
+        format!(
+          "Failed to clear log files: {}",
+          stderr_message(&output)
         ),
-        data: DataValue::String("".to_string()),
-      })
+        data_empty_string(),
+      ))
     }
   }
 
   pub fn clearTrash(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
-    let trashDir = home.join(".local/share/Trash/files");
-    match fs::read_dir(&trashDir) {
+    let home = dirs::home_dir()
+      .ok_or_else(|| AppError::message("Home directory not found"))
+      .map_err(|e| e.into_response())?;
+    let trash_dir = home.join(".local/share/Trash/files");
+    match fs::read_dir(&trash_dir) {
       Ok(entries) => {
         for entry in entries.flatten() {
           let path = entry.path();
           if path.is_file() {
             if let Err(e) = fs::remove_file(&path) {
-              return Err(ResponseModel {
-                status: ResponseStatus::Error,
-                message: format!("Failed to remove {}: {}", path.display(), e),
-                data: DataValue::String("".to_string()),
-              });
+              return Err(error_response(
+                format!("Failed to remove {}: {}", path.display(), e),
+                data_empty_string(),
+              ));
             }
           }
         }
-        Ok(ResponseModel {
-          status: ResponseStatus::Success,
-          message: "Trash cleared successfully".to_string(),
-          data: DataValue::String("".to_string()),
-        })
+        Ok(success_response(
+          "Trash cleared successfully",
+          data_empty_string(),
+        ))
       }
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to read trash: {}", e),
-        data: DataValue::String("".to_string()),
-      }),
+      Err(e) => Err(error_response(
+        format!("Failed to read trash: {}", e),
+        data_empty_string(),
+      )),
     }
   }
 
   pub fn clearCache(&self) -> Result<ResponseModel, ResponseModel> {
-    let cacheDir = dirs::cache_dir().ok_or("Cache directory not found")?;
-    if cacheDir.exists() {
-      match fs::remove_dir_all(&cacheDir) {
+    self
+      .clear_cache_inner()
+      .map_err(|e| e.into_response())
+  }
+
+  fn clear_cache_inner(&self) -> CleanResult<ResponseModel> {
+    let cache_dir = dirs::cache_dir()
+      .ok_or_else(|| AppError::message("Cache directory not found"))?;
+    if cache_dir.exists() {
+      match fs::remove_dir_all(&cache_dir) {
         Ok(_) => {
-          // Re-create the empty directory
-          let _ = fs::create_dir_all(&cacheDir);
-          Ok(ResponseModel {
-            status: ResponseStatus::Success,
-            message: "Cache directory cleared successfully".to_string(),
-            data: DataValue::String("".to_string()),
-          })
+          let _ = fs::create_dir_all(&cache_dir);
+          Ok(success_response(
+            "Cache directory cleared successfully",
+            data_empty_string(),
+          ))
         }
-        Err(e) => Err(ResponseModel {
-          status: ResponseStatus::Error,
-          message: format!("Failed to clear cache directory: {}", e),
-          data: DataValue::String("".to_string()),
-        }),
+        Err(e) => Err(AppError::message(format!(
+          "Failed to clear cache directory: {}",
+          e
+        ))),
       }
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Info,
-        message: "No cache to clear".to_string(),
-        data: DataValue::String("".to_string()),
-      })
+      Ok(info_response("No cache to clear", data_empty_string()))
     }
   }
 
   pub fn clearAllLogs(&self) -> Result<ResponseModel, ResponseModel> {
-    let logDir = Path::new("/var/log");
-
-    let files: Vec<LogFileModel> = WalkDir::new(logDir)
-      .max_depth(3)
-      .into_iter()
-      .filter_map(|e| e.ok())
-      .filter(|e| e.file_type().is_file())
-      .take(500)
-      .collect::<Vec<_>>()
-      .into_par_iter()
-      .filter_map(|entry| {
-        let path = entry.path();
-        let metadata = fs::metadata(path).ok()?;
-        let modified: DateTime<Local> = metadata
-          .modified()
-          .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-          .into();
-        Some(LogFileModel {
-          path: path.to_string_lossy().to_string(),
-          size: metadata.len(),
-          modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
-        })
-      })
-      .collect();
-
+    let log_dir = Path::new("/var/log");
+    let files: Vec<LogFileModel> = collect_log_file_models(log_dir, 3, 500);
     if files.is_empty() {
-      return Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: "No log files found to clear".to_string(),
-        data: DataValue::String("0".to_string()),
-      });
+      return Ok(success_response(
+        "No log files found to clear",
+        data_string("0"),
+      ));
     }
-
-    // Batch all paths into a single pkexec command
-    let mut cmd = std::process::Command::new("pkexec");
-    cmd.arg("rm").arg("-f");
-    for log in &files {
-      cmd.arg(&log.path);
-    }
-
-    let output = cmd.output().map_err(|e| ResponseModel {
-      status: ResponseStatus::Error,
-      message: format!("Failed to run pkexec: {}", e),
-      data: DataValue::String("0".to_string()),
+    let paths: Vec<String> = files.iter().map(|f| f.path.clone()).collect();
+    let output = pkexec_rm_paths(&paths).map_err(|e| {
+      error_response(
+        format!("Failed to run pkexec: {}", e),
+        data_string("0"),
+      )
     })?;
-
     if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Cleared {} log files", files.len()),
-        data: DataValue::String(files.len().to_string()),
-      })
+      Ok(success_response(
+        format!("Cleared {} log files", files.len()),
+        data_string(files.len().to_string()),
+      ))
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Failed to clear logs: {}",
-          String::from_utf8_lossy(&output.stderr).trim()
-        ),
-        data: DataValue::String("0".to_string()),
-      })
+      Err(error_response(
+        format!("Failed to clear logs: {}", stderr_message(&output)),
+        data_string("0"),
+      ))
     }
   }
 
   pub fn clearAllLargeFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
-    let threshold = 100 * 1024 * 1024;
+    self
+      .clear_all_large_files_inner()
+      .map_err(|e| e.into_response())
+  }
 
-    let dirsToScan = vec![
-      home.join("Downloads"),
-      home.join("Documents"),
-      home.join("Videos"),
-      home.join("Pictures"),
-      home.join("Desktop"),
-    ];
-
-    let files: Vec<LargeFileModel> = dirsToScan
-      .into_par_iter()
-      .flat_map(|dir| {
-        if !dir.exists() {
-          return Vec::new();
-        }
-        WalkDir::new(dir)
-          .max_depth(3)
-          .into_iter()
-          .filter_map(|e| e.ok())
-          .filter(|e| e.file_type().is_file())
-          .filter_map(|entry| {
-            let metadata = entry.metadata().ok()?;
-            if metadata.len() > threshold {
-              let modified: DateTime<Local> = metadata
-                .modified()
-                .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-                .into();
-              Some(LargeFileModel {
-                name: entry.file_name().to_string_lossy().to_string(),
-                path: entry.path().to_string_lossy().to_string(),
-                size: metadata.len(),
-                modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
-              })
-            } else {
-              None
-            }
-          })
-          .take(50)
-          .collect::<Vec<_>>()
-      })
-      .collect();
-
-    let mut clearedCount = 0;
+  fn clear_all_large_files_inner(&self) -> CleanResult<ResponseModel> {
+    let home = dirs::home_dir().ok_or_else(|| AppError::message("Home directory not found"))?;
+    let files: Vec<LargeFileModel> = scan_large_file_models(&home, 3, 50, None);
+    let mut cleared_count = 0;
     for file in files {
       if fs::remove_file(file.path).is_ok() {
-        clearedCount += 1;
+        cleared_count += 1;
       }
     }
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: format!("Cleared {} large files", clearedCount),
-      data: DataValue::String(clearedCount.to_string()),
-    })
+    Ok(success_response(
+      format!("Cleared {} large files", cleared_count),
+      data_string(cleared_count.to_string()),
+    ))
   }
 
   pub fn previewFile(&self, path: String) -> Result<ResponseModel, ResponseModel> {
-    let filePath = Path::new(&path);
-
-    if !filePath.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: "File not found".to_string(),
-        data: DataValue::String("".to_string()),
-      });
-    }
-
-    let extension = filePath
-      .extension()
-      .and_then(|e| e.to_str())
-      .unwrap_or("")
-      .to_lowercase();
-
-    let imageExtensions = vec!["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico"];
-    let textExtensions = vec![
-      "txt",
-      "md",
-      "json",
-      "xml",
-      "html",
-      "css",
-      "js",
-      "ts",
-      "rs",
-      "py",
-      "java",
-      "c",
-      "cpp",
-      "h",
-      "hpp",
-      "go",
-      "rb",
-      "php",
-      "sh",
-      "bash",
-      "zsh",
-      "yaml",
-      "yml",
-      "toml",
-      "ini",
-      "cfg",
-      "log",
-      "conf",
-      "properties",
-      "env",
-      "gitignore",
-      "dockerignore",
-      "editorconfig",
-    ];
-
-    let fileType = if imageExtensions.contains(&extension.as_str()) {
-      "image"
-    } else if textExtensions.contains(&extension.as_str()) {
-      let metadata = fs::metadata(&path).ok();
-      if let Some(meta) = metadata {
-        if meta.len() < 1024 * 1024 {
-          if fs::read(&path)
-            .map(|bytes| {
-              let valid_utf8 = String::from_utf8(bytes.clone()).is_ok();
-              if valid_utf8 {
-                let is_binary = bytes.iter().take(8000).any(|&b| b == 0);
-                !is_binary
-              } else {
-                false
-              }
-            })
-            .unwrap_or(false)
-          {
-            "text"
-          } else {
-            "binary"
-          }
-        } else {
-          "text"
-        }
-      } else {
-        "text"
-      }
-    } else {
-      let metadata = fs::metadata(&path).ok();
-      if let Some(meta) = metadata {
-        if meta.len() < 1024 * 1024 {
-          if fs::read(&path)
-            .map(|bytes| {
-              bytes
-                .iter()
-                .take(8000)
-                .all(|&b| b == 0 || (b >= 32 && b < 127) || b == 9 || b == 10 || b == 13)
-            })
-            .unwrap_or(false)
-          {
-            "text"
-          } else {
-            "binary"
-          }
-        } else {
-          "binary"
-        }
-      } else {
-        "unknown"
-      }
-    };
-
-    let name = filePath
-      .file_name()
-      .and_then(|n| n.to_str())
-      .unwrap_or("unknown")
-      .to_string();
-
-    let responseData = match fileType {
-      "image" => {
-        let bytes = fs::read(&path).map_err(|e| ResponseModel {
-          status: ResponseStatus::Error,
-          message: format!("Failed to read file: {}", e),
-          data: DataValue::String("".to_string()),
-        })?;
-        let base64 = base64_encode(&bytes);
-        let mimeType = match extension.as_str() {
-          "png" => "image/png",
-          "gif" => "image/gif",
-          "bmp" => "image/bmp",
-          "webp" => "image/webp",
-          "svg" => "image/svg+xml",
-          _ => "image/jpeg",
-        };
-        let dataUrl = format!("data:{};base64,{}", mimeType, base64);
-        json!({
-          "name": name,
-          "path": path,
-          "type": "image",
-          "imageUrl": dataUrl
-        })
-      }
-      "text" => {
-        let bytes = fs::read(&path).map_err(|e| ResponseModel {
-          status: ResponseStatus::Error,
-          message: format!("Failed to read file: {}", e),
-          data: DataValue::String("".to_string()),
-        })?;
-
-        let content = String::from_utf8_lossy(&bytes).into_owned();
-        let truncatedContent = if content.len() > 50000 {
-          format!(
-            "{}...\n\n[Content truncated - file too large]",
-            &content[..50000]
-          )
-        } else {
-          content
-        };
-        json!({
-          "name": name,
-          "path": path,
-          "type": "text",
-          "content": truncatedContent
-        })
-      }
-      _ => json!({
-        "name": name,
-        "path": path,
-        "type": fileType
-      }),
-    };
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "File preview retrieved".to_string(),
-      data: DataValue::Object(responseData),
-    })
+    FilePreviewService::preview_file(path)
   }
 }
 
-fn base64_encode(data: &[u8]) -> String {
-  const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  let mut result = String::new();
-
-  for chunk in data.chunks(3) {
-    let b0 = chunk[0] as usize;
-    let b1 = chunk.get(1).copied().unwrap_or(0) as usize;
-    let b2 = chunk.get(2).copied().unwrap_or(0) as usize;
-
-    result.push(CHARSET[b0 >> 2] as char);
-    result.push(CHARSET[((b0 & 0x03) << 4) | (b1 >> 4)] as char);
-
-    if chunk.len() > 1 {
-      result.push(CHARSET[((b1 & 0x0f) << 2) | (b2 >> 6)] as char);
-    } else {
-      result.push('=');
-    }
-
-    if chunk.len() > 2 {
-      result.push(CHARSET[b2 & 0x3f] as char);
-    } else {
-      result.push('=');
-    }
+fn map_bulk_remove(paths: Vec<String>, label: &str) -> Result<ResponseModel, ResponseModel> {
+  let outcome = remove_paths_with_errors(paths);
+  if outcome.errors.is_empty() {
+    Ok(success_response(
+      format!("Successfully cleared {} {}", outcome.cleared, label),
+      data_empty_string(),
+    ))
+  } else {
+    Err(error_response(
+      format!(
+        "Cleared {} files, failed on: {}",
+        outcome.cleared,
+        outcome.errors.join("; ")
+      ),
+      data_empty_string(),
+    ))
   }
-
-  result
 }

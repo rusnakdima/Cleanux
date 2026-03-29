@@ -1,40 +1,34 @@
-/* controllers */
-use crate::controllers::dashboard_controller::DashboardController;
-
 /* models */
 use crate::models::ResponseModel;
+/* services */
+use crate::services::dashboard_service::DashboardService;
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getSystemServices() -> Result<ResponseModel, ResponseModel> {
-  let controller = DashboardController::new();
-  controller.getRunningServices()
+  DashboardService.getRunningServices()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getCacheSummary() -> Result<ResponseModel, ResponseModel> {
-  let controller = DashboardController::new();
-  controller.getCacheSummary()
+  DashboardService.getCacheSummary()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getTrashSummary() -> Result<ResponseModel, ResponseModel> {
-  let controller = DashboardController::new();
-  controller.getTrashSummary()
+  DashboardService.getTrashSummary()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getLogSummary() -> Result<ResponseModel, ResponseModel> {
-  let controller = DashboardController::new();
-  controller.getLogSummary()
+  DashboardService.getLogSummary()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getLargeFilesSummary() -> Result<ResponseModel, ResponseModel> {
-  let controller = DashboardController::new();
-  controller.getLargeFilesSummary()
+  DashboardService.getLargeFilesSummary()
 }

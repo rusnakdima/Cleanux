@@ -1,96 +1,82 @@
-/* controllers */
-use crate::controllers::cleaner_controller::CleanerController;
-
 /* models */
 use crate::models::ResponseModel;
+/* services */
+use crate::services::cleaner_service::CleanerService;
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getCacheFiles() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.getCacheFiles()
+  CleanerService.getCacheFiles()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getTrashFiles() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.getTrashFiles()
+  CleanerService.getTrashFiles()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getSystemLogs() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.getSystemLogs()
+  CleanerService.getSystemLogs()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn getLargeFiles() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.getLargeFiles()
+  CleanerService.getLargeFiles()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn previewFile(path: String) -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.previewFile(path)
+  CleanerService.previewFile(path)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearSelectedCacheFiles(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearSelectedCacheFiles(paths)
+  CleanerService.clearSelectedCacheFiles(paths)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearSelectedTrashFiles(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearSelectedTrashFiles(paths)
+  CleanerService.clearSelectedTrashFiles(paths)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearSelectedLogFiles(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearSelectedLogFiles(paths)
+  CleanerService.clearSelectedLogFiles(paths)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearSelectedLargeFiles(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearSelectedLargeFiles(paths)
+  CleanerService.clearSelectedLargeFiles(paths)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearTrash() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearTrash()
+  CleanerService.clearTrash()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearCache() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearCache()
+  CleanerService.clearCache()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearAllLogs() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearAllLogs()
+  CleanerService.clearAllLogs()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn clearAllLargeFiles() -> Result<ResponseModel, ResponseModel> {
-  let controller = CleanerController::new();
-  controller.clearAllLargeFiles()
+  CleanerService.clearAllLargeFiles()
 }

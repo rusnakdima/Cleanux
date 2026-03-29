@@ -59,7 +59,7 @@ impl SystemService {
         data: DataValue::Array(
           services
             .into_iter()
-            .map(|s| serde_json::Value::String(s))
+            .map(serde_json::Value::String)
             .collect(),
         ),
       })
@@ -291,7 +291,7 @@ impl SystemService {
         data: DataValue::Array(
           services
             .into_iter()
-            .map(|s| serde_json::Value::String(s))
+            .map(serde_json::Value::String)
             .collect(),
         ),
       })
