@@ -31,7 +31,6 @@ modules:
         for size in 128x128 256x256; do
           install -Dm644 src-tauri/icons/icon.png /app/share/icons/hicolor/$size/apps/com.tcs.cleanux.png
         done
-      - install -Dm644 src-tauri/icons/icon.png /app/share/icons/hicolor/scalable/apps/com.tcs.cleanux.svg
 
     sources:
       - type: file

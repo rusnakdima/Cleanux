@@ -51,8 +51,8 @@ jobs:
         run: |
           flatpak install --user --noninteractive flathub org.gnome.Platform//48
           flatpak install --user --noninteractive flathub org.gnome.Sdk//48
-          flatpak install --user --noninteractive flathub org.freedesktop.Sdk.Extension.node22//24.08
-          flatpak install --user --noninteractive flathub org.freedesktop.Sdk.Extension.rust-stable//24.08
+          flatpak install --user --noninteractive flathub org.freedesktop.Sdk.Extension.node22//25.08
+          flatpak install --user --noninteractive flathub org.freedesktop.Sdk.Extension.rust-stable//25.08
 
       - name: Build Tauri application
         run: |
