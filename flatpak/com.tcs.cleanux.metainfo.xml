@@ -53,6 +53,15 @@
   </provides>
 
   <releases>
+    <release version="0.2.1" date="2026-03-30">
+      <description>
+        <p>Bug fix release for Flatpak builds on CI servers.</p>
+        <p>Fixes:</p>
+        <ul>
+          <li>Fixed Flatpak build failure on GitHub Actions by adding appstream dependency (appstream-compose was missing).</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.2.0" date="2026-03-29">
       <description>
         <p>Release 0.2.0 improves the Rust and Angular stacks, release metadata, and developer
