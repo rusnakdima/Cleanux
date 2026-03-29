@@ -84,8 +84,8 @@ export class LargeFilesView implements OnInit {
     }
   }
 
-  onFilteredData(files: LargeFileItem[]): void {
-    this.filteredFiles.set(files);
+  onFilteredData(files: object[]): void {
+    this.filteredFiles.set(files as LargeFileItem[]);
   }
 
   async clearSelectedFiles() {
@@ -153,8 +153,9 @@ export class LargeFilesView implements OnInit {
         content: result.content,
         imageUrl: result.imageUrl,
       });
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Unable to preview file';
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unable to preview file';
       this.previewData.set({
         name: file.name,
         path: file.path,
@@ -174,8 +175,11 @@ export class LargeFilesView implements OnInit {
     if (!event.path) return;
     try {
       await this.mainService.openFile(event.path, event.command);
-    } catch (error: any) {
-      alert('Failed to open file: ' + (error?.message || error));
+    } catch (error: unknown) {
+      alert(
+        'Failed to open file: ' +
+          (error instanceof Error ? error.message : String(error))
+      );
     }
   }
 }

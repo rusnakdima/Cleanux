@@ -1,5 +1,5 @@
 /* sys lib */
-import { Component, Input, Output, EventEmitter, signal, inject, computed, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 
 /* materials */
@@ -29,9 +29,10 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
   ],
   templateUrl: './data-table.component.html',
 })
-export class DataTableComponent implements OnChanges {
+export class DataTableComponent<T extends object = object>
+  implements OnChanges {
   @Input() columns: TableColumn[] = [];
-  @Input() data: any[] = [];
+  @Input() data: T[] = [];
   @Input() options: TableOptions = {};
   @Input() loading = false;
   @Input() currentPage: number = 1;
@@ -46,14 +47,14 @@ export class DataTableComponent implements OnChanges {
   public p: number = 1;
 
   @Output() selectionChange = new EventEmitter<Set<string>>();
-  @Output() rowClick = new EventEmitter<any>();
-  @Output() rowDoubleClick = new EventEmitter<any>();
+  @Output() rowClick = new EventEmitter<T>();
+  @Output() rowDoubleClick = new EventEmitter<T>();
   @Output() reload = new EventEmitter<void>();
   @Output() selectedAction = new EventEmitter<Set<string>>();
   @Output() pageChange = new EventEmitter<number>();
   @Output() newPageSize = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
-  @Output() preview = new EventEmitter<any>();
+  @Output() preview = new EventEmitter<T>();
 
   private document = inject(DOCUMENT);
 
@@ -76,15 +77,24 @@ export class DataTableComponent implements OnChanges {
     }
   }
 
-  get paginatedData(): any[] {
+  private rowRecord(item: T): Record<string, unknown> {
+    return item as unknown as Record<string, unknown>;
+  }
+
+  trackByKey(index: number, item: T): string {
+    const raw = this.rowRecord(item)[this.checkboxKey];
+    return raw !== undefined && raw !== null ? String(raw) : String(index);
+  }
+
+  get paginatedData(): T[] {
     let sortedData = [...this.data];
 
     if (this.sortKey()) {
       const key = this.sortKey()!;
       const direction = this.sortDirection();
       sortedData.sort((a, b) => {
-        const aVal = a[key];
-        const bVal = b[key];
+        const aVal = this.cellValue(a, key);
+        const bVal = this.cellValue(b, key);
 
         if (aVal === bVal) return 0;
         if (aVal === null || aVal === undefined) return 1;
@@ -107,6 +117,15 @@ export class DataTableComponent implements OnChanges {
     const startIndex = (this.p - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     return sortedData.slice(startIndex, endIndex);
+  }
+
+  cellValue(item: T, key: string): unknown {
+    return this.rowRecord(item)[key];
+  }
+
+  rowStatus(item: T): string {
+    const s = this.rowRecord(item)['status'];
+    return typeof s === 'string' ? s : '';
   }
 
   get totalItems(): number {
@@ -142,15 +161,15 @@ export class DataTableComponent implements OnChanges {
     return this.options.showSelectedActions ?? false;
   }
 
-  isSelected(item: any): boolean {
-    const key = item[this.checkboxKey];
+  isSelected(item: T): boolean {
+    const key = String(this.rowRecord(item)[this.checkboxKey]);
     return this._selectedKeys.has(key);
   }
 
   toggleSelectAll(checked: boolean): void {
     if (checked) {
       this.data.forEach(item => {
-        this._selectedKeys.add(item[this.checkboxKey]);
+        this._selectedKeys.add(String(this.rowRecord(item)[this.checkboxKey]));
       });
       this.allSelected.set(true);
       this.indeterminate.set(false);
@@ -162,8 +181,8 @@ export class DataTableComponent implements OnChanges {
     this.selectionChange.emit(new Set(this._selectedKeys));
   }
 
-  toggleSelectItem(item: any, checked: boolean): void {
-    const key = item[this.checkboxKey];
+  toggleSelectItem(item: T, checked: boolean): void {
+    const key = String(this.rowRecord(item)[this.checkboxKey]);
     if (checked) {
       this._selectedKeys.add(key);
     } else {
@@ -205,9 +224,17 @@ export class DataTableComponent implements OnChanges {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  onRowClick(item: any, event?: MouseEvent): void {
-    const key = item[this.checkboxKey];
-    const currentIndex = this.paginatedData.findIndex(d => d[this.checkboxKey] === key);
+  formatCell(columnKey: string, item: T): string {
+    const v = this.cellValue(item, columnKey);
+    if (v === null || v === undefined) return '';
+    return String(v);
+  }
+
+  onRowClick(item: T, event?: MouseEvent): void {
+    const key = String(this.rowRecord(item)[this.checkboxKey]);
+    const currentIndex = this.paginatedData.findIndex(
+      d => String(this.rowRecord(d)[this.checkboxKey]) === key
+    );
     const lastIndex = this.lastSelectedIndex();
     const isCurrentlySelected = this._selectedKeys.has(key);
 
@@ -216,7 +243,7 @@ export class DataTableComponent implements OnChanges {
       const end = Math.max(lastIndex, currentIndex);
 
       for (let i = start; i <= end; i++) {
-        const rangeKey = this.paginatedData[i][this.checkboxKey];
+        const rangeKey = String(this.rowRecord(this.paginatedData[i])[this.checkboxKey]);
         if (isCurrentlySelected) {
           this._selectedKeys.delete(rangeKey);
         } else {
@@ -253,7 +280,7 @@ export class DataTableComponent implements OnChanges {
 
   onPageSizeChange(size: number): void {
     this.pageSize = size;
-    this.p = 1; // Reset to first page
+    this.p = 1;
     this.newPageSize.emit(size);
     this.pageChange.emit(this.p);
   }
@@ -280,15 +307,20 @@ export class DataTableComponent implements OnChanges {
     return this.sortKey() === column.key;
   }
 
-  onRowDoubleClick(item: any): void {
+  onRowDoubleClick(item: T): void {
     this.rowDoubleClick.emit(item);
   }
 
-  onPreview(item: any): void {
+  onPreview(item: T): void {
     this.preview.emit(item);
   }
 
   get showPreviewButton(): boolean {
     return this.options.showPreviewButton ?? false;
+  }
+
+  sizeFromItem(item: T): number {
+    const s = this.rowRecord(item)['size'];
+    return typeof s === 'number' ? s : 0;
   }
 }

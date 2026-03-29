@@ -14,6 +14,9 @@ import { environment } from '@env/environment';
 /* services */
 import { AboutService } from '@services/about.service';
 
+/* models */
+import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
+
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -70,7 +73,7 @@ export class SettingsView {
 
   getDate() {
     this.aboutService.getDate(this.version).subscribe({
-      next: (res: any) => {
+      next: (res: GitHubReleaseByTag) => {
         if (res && res.published_at) {
           localStorage['dateVersion'] = String(this.formatDate(res.published_at));
           this.dateVersion.set(String(this.formatDate(res.published_at)));
@@ -86,7 +89,7 @@ export class SettingsView {
     this.dateCheck.set(localStorage['dateCheck']);
 
     this.aboutService.checkUpdate().subscribe({
-      next: (res: any) => {
+      next: (res: GitHubReleaseLatest) => {
         if (res && res.tag_name) {
           const ver: string = res.tag_name;
           setTimeout(() => {

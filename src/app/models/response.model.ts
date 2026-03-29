@@ -4,11 +4,11 @@ export type DataValue =
   | string
   | number
   | boolean
-  | Array<any>
-  | { [key: string]: any }
+  | unknown[]
+  | Record<string, unknown>
   | null;
 
-export interface Response<T = any> {
+export interface Response<T = unknown> {
   status: Status;
   message: string;
   data: T;
@@ -22,7 +22,7 @@ export function isError(response: Response): boolean {
   return response.status === 'error';
 }
 
-export function getData<T>(response: Response): T | null {
+export function getData<T>(response: Response<unknown>): T | null {
   if (response.data === null || response.data === undefined) {
     return null;
   }

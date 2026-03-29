@@ -51,7 +51,7 @@
         </div>
       } @else {
         <div class="table-body">
-          @for (item of paginatedData; track item) {
+          @for (item of paginatedData; track trackByKey($index, item)) {
             <div
               class="table-row"
               [class.table-row-hover]="options.hoverable !== false"
@@ -89,17 +89,17 @@
                     @case ("status") {
                       <span
                         class="status-chip"
-                        [class.running]="item.status === 'running'"
-                        [class.stopped]="item.status !== 'running'"
+                        [class.running]="rowStatus(item) === 'running'"
+                        [class.stopped]="rowStatus(item) !== 'running'"
                       >
-                        {{ item.status }}
+                        {{ rowStatus(item) }}
                       </span>
                     }
                     @case ("size") {
-                      <span>{{ formatSize(item.size) }}</span>
+                      <span>{{ formatSize(sizeFromItem(item)) }}</span>
                     }
                     @default {
-                      <span>{{ item[column.key] }}</span>
+                      <span>{{ formatCell(column.key, item) }}</span>
                     }
                   }
                 </div>

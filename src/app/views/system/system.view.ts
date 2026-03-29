@@ -67,15 +67,15 @@ export class SystemView implements OnInit {
       const data = await this.systemService.getAllServices();
       this.servicesData.set(data);
       this.filteredData.set(data);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to load system services:', error);
     } finally {
       this.loading.set(false);
     }
   }
 
-  onFilteredData(data: SystemServiceItem[]): void {
-    this.filteredData.set(data);
+  onFilteredData(data: object[]): void {
+    this.filteredData.set(data as SystemServiceItem[]);
   }
 
   async stopSelectedServices() {
@@ -90,8 +90,11 @@ export class SystemView implements OnInit {
       await this.systemService.stopSelectedServices(servicesToStop);
       this.selectedServices.set(new Set());
       await this.loadData();
-    } catch (error) {
-      alert('Failed to stop services: ' + error);
+    } catch (error: unknown) {
+      alert(
+        'Failed to stop services: ' +
+          (error instanceof Error ? error.message : String(error))
+      );
     } finally {
       this.loading.set(false);
     }
@@ -109,8 +112,11 @@ export class SystemView implements OnInit {
       await this.systemService.enableSelectedServices(servicesToStart);
       this.selectedServices.set(new Set());
       await this.loadData();
-    } catch (error) {
-      alert('Failed to start services: ' + error);
+    } catch (error: unknown) {
+      alert(
+        'Failed to start services: ' +
+          (error instanceof Error ? error.message : String(error))
+      );
     } finally {
       this.loading.set(false);
     }
@@ -124,8 +130,11 @@ export class SystemView implements OnInit {
       this.loading.set(true);
       await this.systemService.startService(service);
       await this.loadData();
-    } catch (error) {
-      alert('Failed to start service: ' + error);
+    } catch (error: unknown) {
+      alert(
+        'Failed to start service: ' +
+          (error instanceof Error ? error.message : String(error))
+      );
     } finally {
       this.loading.set(false);
     }

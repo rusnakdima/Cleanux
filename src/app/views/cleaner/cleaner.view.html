@@ -12,7 +12,7 @@
           Total Junk
         </p>
         <p class="text-4xl font-black text-slate-900 dark:text-white">
-          {{ formatSize(totalJunk()) }}
+          {{ formatSize(store.totalJunk()) }}
         </p>
       </div>
     </div>
@@ -26,7 +26,7 @@
           Cache Size
         </p>
         <p class="text-4xl font-black text-slate-900 dark:text-white">
-          {{ formatSize(cacheSize()) }}
+          {{ formatSize(store.cacheSize()) }}
         </p>
       </div>
     </div>
@@ -40,7 +40,7 @@
           Log Size
         </p>
         <p class="text-4xl font-black text-slate-900 dark:text-white">
-          {{ formatSize(logSize()) }}
+          {{ formatSize(store.logSize()) }}
         </p>
       </div>
     </div>
@@ -53,61 +53,49 @@
         <div class="flex">
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="activeTab() === 'cache'"
-            [class.text-indigo-600]="activeTab() === 'cache'"
-            [class.dark:text-indigo-400]="activeTab() === 'cache'"
-            [class.border-transparent]="activeTab() !== 'cache'"
-            [class.text-slate-400]="activeTab() !== 'cache'"
-            [class.hover:text-slate-600]="activeTab() !== 'cache'"
+            [class.border-indigo-500]="store.activeTab() === 'cache'"
+            [class.text-indigo-600]="store.activeTab() === 'cache'"
+            [class.dark:text-indigo-400]="store.activeTab() === 'cache'"
+            [class.border-transparent]="store.activeTab() !== 'cache'"
+            [class.text-slate-400]="store.activeTab() !== 'cache'"
+            [class.hover:text-slate-600]="store.activeTab() !== 'cache'"
             (click)="onTabChange('cache')"
           >
-            Cache ({{ cacheData().length }})
+            Cache ({{ store.cacheData().length }})
           </button>
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="activeTab() === 'trash'"
-            [class.text-indigo-600]="activeTab() === 'trash'"
-            [class.dark:text-indigo-400]="activeTab() === 'trash'"
-            [class.border-transparent]="activeTab() !== 'trash'"
-            [class.text-slate-400]="activeTab() !== 'trash'"
-            [class.hover:text-slate-600]="activeTab() !== 'trash'"
+            [class.border-indigo-500]="store.activeTab() === 'trash'"
+            [class.text-indigo-600]="store.activeTab() === 'trash'"
+            [class.dark:text-indigo-400]="store.activeTab() === 'trash'"
+            [class.border-transparent]="store.activeTab() !== 'trash'"
+            [class.text-slate-400]="store.activeTab() !== 'trash'"
+            [class.hover:text-slate-600]="store.activeTab() !== 'trash'"
             (click)="onTabChange('trash')"
           >
-            Trash ({{ trashData().length }})
+            Trash ({{ store.trashData().length }})
           </button>
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="activeTab() === 'logs'"
-            [class.text-indigo-600]="activeTab() === 'logs'"
-            [class.dark:text-indigo-400]="activeTab() === 'logs'"
-            [class.border-transparent]="activeTab() !== 'logs'"
-            [class.text-slate-400]="activeTab() !== 'logs'"
-            [class.hover:text-slate-600]="activeTab() !== 'logs'"
+            [class.border-indigo-500]="store.activeTab() === 'logs'"
+            [class.text-indigo-600]="store.activeTab() === 'logs'"
+            [class.dark:text-indigo-400]="store.activeTab() === 'logs'"
+            [class.border-transparent]="store.activeTab() !== 'logs'"
+            [class.text-slate-400]="store.activeTab() !== 'logs'"
+            [class.hover:text-slate-600]="store.activeTab() !== 'logs'"
             (click)="onTabChange('logs')"
           >
-            Logs ({{ logData().length }})
+            Logs ({{ store.logData().length }})
           </button>
         </div>
         <div class="flex items-center gap-4">
           <app-search
-            [data]="
-              activeTab() === 'cache'
-                ? cacheData()
-                : activeTab() === 'trash'
-                  ? trashData()
-                  : logData()
-            "
-            [searchFields]="getSearchFields()"
-            (filteredData)="
-              activeTab() === 'cache'
-                ? onFilteredCacheData($event)
-                : activeTab() === 'trash'
-                  ? onFilteredTrashData($event)
-                  : onFilteredLogData($event)
-            "
+            [data]="store.searchDataForActiveTab()"
+            [searchFields]="store.getSearchFields()"
+            (filteredData)="store.onSearchFiltered($event)"
           />
           <button
-            (click)="loadData()"
+            (click)="store.forceReloadActiveTab()"
             class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             matTooltip="Refresh"
           >
@@ -115,13 +103,13 @@
           </button>
         </div>
         <button
-          (click)="clearSelectedFilesForTab(activeTab())"
+          (click)="store.clearSelectedForActiveTab()"
           [disabled]="
-            (activeTab() === 'cache'
-              ? selectedCacheFiles()
-              : activeTab() === 'trash'
-                ? selectedTrashFiles()
-                : selectedLogFiles()
+            (store.activeTab() === 'cache'
+              ? store.selectedCacheFiles()
+              : store.activeTab() === 'trash'
+                ? store.selectedTrashFiles()
+                : store.selectedLogFiles()
             ).size === 0
           "
           class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
@@ -133,34 +121,34 @@
     </div>
 
     <div class="flex-1 p-6 overflow-hidden">
-      @if (activeTab() === "cache") {
+      @if (store.activeTab() === "cache") {
         <app-data-table
           [columns]="cacheColumns"
-          [data]="filteredCacheData()"
-          [loading]="loading()"
+          [data]="store.filteredCacheData()"
+          [loading]="store.loading()"
           [options]="getTableOptions('cache')"
-          [selectedKeys]="selectedCacheFiles()"
-          (selectionChange)="selectedCacheFiles.set($event)"
+          [selectedKeys]="store.selectedCacheFiles()"
+          (selectionChange)="store.selectedCacheFiles.set($event)"
           (preview)="onPreview($event)"
         />
-      } @else if (activeTab() === "trash") {
+      } @else if (store.activeTab() === "trash") {
         <app-data-table
           [columns]="trashColumns"
-          [data]="filteredTrashData()"
-          [loading]="loading()"
+          [data]="store.filteredTrashData()"
+          [loading]="store.loading()"
           [options]="getTableOptions('trash')"
-          [selectedKeys]="selectedTrashFiles()"
-          (selectionChange)="selectedTrashFiles.set($event)"
+          [selectedKeys]="store.selectedTrashFiles()"
+          (selectionChange)="store.selectedTrashFiles.set($event)"
           (preview)="onPreview($event)"
         />
       } @else {
         <app-data-table
           [columns]="logColumns"
-          [data]="filteredLogData()"
-          [loading]="loading()"
+          [data]="store.filteredLogData()"
+          [loading]="store.loading()"
           [options]="getTableOptions('logs')"
-          [selectedKeys]="selectedLogFiles()"
-          (selectionChange)="selectedLogFiles.set($event)"
+          [selectedKeys]="store.selectedLogFiles()"
+          (selectionChange)="store.selectedLogFiles.set($event)"
           (preview)="onPreview($event)"
         />
       }

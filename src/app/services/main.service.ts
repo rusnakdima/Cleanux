@@ -1,9 +1,19 @@
 /* sys lib */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 
 /* models */
 import { Response, getData } from '@models/response.model';
+
+function messageFromUnknown(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
 
 @Injectable({
   providedIn: 'root',
@@ -27,12 +37,10 @@ export class MainService {
       } else {
         throw new Error(response.message || `Operation failed: ${command}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (!options.suppressError) {
         console.error(`Error invoking command "${command}":`, error);
-        const errorMessage =
-          typeof error === 'string' ? error : error?.message || 'An unknown error occurred';
-        console.error(errorMessage);
+        console.error(messageFromUnknown(error));
       }
       throw error;
     }

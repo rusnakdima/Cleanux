@@ -13,13 +13,17 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './search.component.html',
 })
 export class SearchComponent implements OnChanges {
-  @Input() data: any[] = [];
+  @Input() data: object[] = [];
   @Input() searchFields: string[] = [];
-  @Output() filteredData = new EventEmitter<any[]>();
+  @Output() filteredData = new EventEmitter<object[]>();
 
   searchQuery = signal('');
   isVisible = signal(false);
-  private _originalData: any[] = [];
+  private _originalData: object[] = [];
+
+  private rowRecord(item: object): Record<string, unknown> {
+    return item as Record<string, unknown>;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
@@ -61,14 +65,15 @@ export class SearchComponent implements OnChanges {
     }
 
     const filtered = this._originalData.filter(item => {
+      const rec = this.rowRecord(item);
       if (this.searchFields.length > 0) {
         return this.searchFields.some(field => {
-          const value = this.getValue(item, field);
+          const value = this.getValue(rec, field);
           return String(value).toLowerCase().includes(query);
         });
       }
-      return Object.values(item).some(value => {
-        if (typeof value === 'object') return false;
+      return Object.values(rec).some(value => {
+        if (typeof value === 'object' && value !== null) return false;
         return String(value).toLowerCase().includes(query);
       });
     });
@@ -76,7 +81,12 @@ export class SearchComponent implements OnChanges {
     this.filteredData.emit(filtered);
   }
 
-  private getValue(obj: any, path: string): any {
-    return path.split('.').reduce((acc, part) => acc?.[part], obj);
+  private getValue(obj: Record<string, unknown>, path: string): unknown {
+    return path.split('.').reduce<unknown>((acc, part) => {
+      if (acc !== null && typeof acc === 'object' && part in (acc as Record<string, unknown>)) {
+        return (acc as Record<string, unknown>)[part];
+      }
+      return undefined;
+    }, obj);
   }
 }
