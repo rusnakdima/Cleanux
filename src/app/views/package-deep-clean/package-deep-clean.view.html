@@ -1,0 +1,359 @@
+<app-header [title]="'Package Deep Clean'"></app-header>
+
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  } @else {
+    <!-- Summary Header -->
+    <div class="glass-card p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div
+            class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"
+          >
+            <mat-icon class="text-white text-2xl">inventory_2</mat-icon>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+              Package Manager Deep Clean
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">
+              Clean package caches and remove orphaned packages
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button
+            (click)="loadData()"
+            class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <mat-icon class="text-sm">refresh</mat-icon>
+            Refresh
+          </button>
+          <button
+            (click)="deepCleanAll()"
+            [disabled]="loading()"
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <mat-icon class="text-sm">cleaning_services</mat-icon>
+            Clean All
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Package Manager Tabs -->
+    <mat-tab-group
+      [selectedIndex]="activeTabIndex()"
+      (selectedIndexChange)="activeTabIndex.set($event)"
+      class="glass-card"
+    >
+      @if (summary()?.aptAvailable) {
+        <mat-tab label="APT">
+          <div class="p-6 space-y-6">
+            <!-- APT Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <mat-icon class="text-blue-500">cached</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Cache Size</p>
+                    <p class="text-xl font-bold">{{ formatSize(summary()!.aptCacheSize) }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-orange-500">folder_delete</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Orphaned</p>
+                    <p class="text-xl font-bold">{{ summary()!.aptOrphanedCount }} packages</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-yellow-500">download</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">
+                      Partial Downloads
+                    </p>
+                    <p class="text-xl font-bold">{{ summary()!.aptPartialDownloads }} files</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- APT Actions -->
+            <div class="flex flex-wrap gap-3">
+              <button
+                (click)="aptClean()"
+                [disabled]="loading() || summary()!.aptCacheSize === 0"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">cleaning_services</mat-icon>
+                apt-get clean
+              </button>
+              <button
+                (click)="aptAutoclean()"
+                [disabled]="loading()"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">auto_delete</mat-icon>
+                apt-get autoclean
+              </button>
+              <button
+                (click)="aptAutoremove()"
+                [disabled]="loading()"
+                class="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">remove_circle</mat-icon>
+                apt-get autoremove
+              </button>
+            </div>
+
+            <!-- Orphaned Packages -->
+            @if (orphanedPackages().length > 0) {
+              <div class="mt-6">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">
+                  Orphaned Packages
+                </h3>
+                <div
+                  class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4"
+                >
+                  <p class="text-sm text-red-600 dark:text-red-400 mb-3">
+                    These packages are marked for removal but not fully cleaned:
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    @for (pkg of orphanedPackages(); track pkg.name) {
+                      <span
+                        class="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-sm"
+                      >
+                        <mat-icon class="text-red-500 text-sm">warning</mat-icon>
+                        {{ pkg.name }}
+                        <button
+                          (click)="removeOrphanedPackage(pkg)"
+                          class="ml-2 text-red-600 hover:text-red-800 dark:text-red-400"
+                          matTooltip="Remove"
+                        >
+                          <mat-icon class="text-sm">close</mat-icon>
+                        </button>
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Partial Downloads -->
+            @if (partialDownloads().length > 0) {
+              <div class="mt-6">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">
+                  Partial Downloads
+                </h3>
+                <div
+                  class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4"
+                >
+                  <p class="text-sm text-yellow-600 dark:text-yellow-400 mb-3">
+                    Incomplete package downloads (.part files):
+                  </p>
+                  <div class="flex flex-wrap gap-2">
+                    @for (file of partialDownloads(); track file) {
+                      <span
+                        class="px-3 py-1 bg-white dark:bg-slate-800 rounded-lg text-sm font-mono"
+                      >
+                        {{ file }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+      }
+
+      @if (summary()?.dnfAvailable) {
+        <mat-tab label="DNF/YUM">
+          <div class="p-6 space-y-6">
+            <!-- DNF Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-green-500">cached</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Cache Size</p>
+                    <p class="text-xl font-bold">{{ formatSize(summary()!.dnfCacheSize) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DNF Actions -->
+            <div class="flex flex-wrap gap-3">
+              <button
+                (click)="dnfCleanAll()"
+                [disabled]="loading() || summary()!.dnfCacheSize === 0"
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">cleaning_services</mat-icon>
+                dnf clean all
+              </button>
+            </div>
+
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Cleans all DNF/YUM cache including metadata, packages, and sqlite databases.
+            </p>
+          </div>
+        </mat-tab>
+      }
+
+      @if (summary()?.pacmanAvailable) {
+        <mat-tab label="Pacman">
+          <div class="p-6 space-y-6">
+            <!-- Pacman Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                    <mat-icon class="text-cyan-500">cached</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Cache Size</p>
+                    <p class="text-xl font-bold">{{ formatSize(summary()!.pacmanCacheSize) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pacman Keep Recent Setting -->
+            <div class="flex items-center gap-4">
+              <label class="text-sm font-medium text-slate-700 dark:text-slate-300"
+                >Keep most recent:</label
+              >
+              <input
+                type="number"
+                min="0"
+                max="10"
+                [value]="pacmanKeepRecent()"
+                (change)="pacmanKeepRecent.set(+$any($event.target).value)"
+                class="w-20 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-sm text-center"
+              />
+              <span class="text-sm text-slate-500">packages</span>
+            </div>
+
+            <!-- Pacman Actions -->
+            <div class="flex flex-wrap gap-3">
+              <button
+                (click)="pacmanClean()"
+                [disabled]="loading() || summary()!.pacmanCacheSize === 0"
+                class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">cleaning_services</mat-icon>
+                Clean Old Packages
+              </button>
+            </div>
+
+            <!-- Full Clean Warning -->
+            <div
+              class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4"
+            >
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-red-500">warning</mat-icon>
+                <div>
+                  <h4 class="font-bold text-red-600 dark:text-red-400">Dangerous Operation</h4>
+                  <p class="text-sm text-red-600 dark:text-red-400 mt-1">
+                    Full clean (<code class="px-1 py-0.5 bg-red-100 dark:bg-red-900/50 rounded"
+                      >pacman -Scc</code
+                    >) removes ALL cached packages, including those for currently installed
+                    packages. You will not be able to downgrade packages.
+                  </p>
+                  <button
+                    (click)="pacmanFullClean()"
+                    [disabled]="loading()"
+                    class="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    <mat-icon class="text-sm">delete_forever</mat-icon>
+                    Full Clean (Destructive)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      }
+
+      @if (summary()?.zypperAvailable) {
+        <mat-tab label="Zypper">
+          <div class="p-6 space-y-6">
+            <!-- Zypper Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-green-500">cached</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase">Cache Size</p>
+                    <p class="text-xl font-bold">{{ formatSize(summary()!.zypperCacheSize) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Zypper Actions -->
+            <div class="flex flex-wrap gap-3">
+              <button
+                (click)="zypperClean()"
+                [disabled]="loading() || summary()!.zypperCacheSize === 0"
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">cleaning_services</mat-icon>
+                zypper clean
+              </button>
+            </div>
+
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              Cleans all Zypper cache including downloaded packages and metadata.
+            </p>
+          </div>
+        </mat-tab>
+      }
+
+      @if (
+        !summary()?.aptAvailable &&
+        !summary()?.dnfAvailable &&
+        !summary()?.pacmanAvailable &&
+        !summary()?.zypperAvailable
+      ) {
+        <div class="p-12 text-center">
+          <mat-icon class="text-5xl text-slate-300 dark:text-slate-600">inventory_2</mat-icon>
+          <h3 class="text-xl font-semibold text-slate-700 dark:text-slate-300 mt-4">
+            No Package Manager Detected
+          </h3>
+          <p class="text-slate-500 dark:text-slate-400 mt-2">
+            No supported package managers (APT, DNF, Pacman, Zypper) were found on this system.
+          </p>
+        </div>
+      }
+    </mat-tab-group>
+  }
+</div>

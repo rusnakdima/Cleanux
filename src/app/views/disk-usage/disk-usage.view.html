@@ -1,0 +1,90 @@
+<app-header [title]="'Disk Usage Analyzer'"></app-header>
+
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  <div class="glass-card p-6">
+    <div class="flex items-center gap-4">
+      <mat-form-field class="flex-1" appearance="outline">
+        <mat-label>Directory Path</mat-label>
+        <input matInput [(ngModel)]="rootPath" placeholder="Enter directory path to scan" />
+      </mat-form-field>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="scanDirectory()"
+        [disabled]="loading() || !rootPath()"
+        class="scan-button"
+      >
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          <mat-icon>search</mat-icon>
+          Scan
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (directoryTree()) {
+    <div class="glass-card p-6">
+      <div class="flex items-center gap-2 mb-6 flex-wrap">
+        @for (crumb of breadcrumbs(); track crumb.path; let i = $index) {
+          @if (i > 0) {
+            <mat-icon class="text-slate-400">chevron_right</mat-icon>
+          }
+          <button
+            (click)="navigateToBreadcrumb(i)"
+            [class.font-bold]="i === breadcrumbs().length - 1"
+            class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
+          >
+            {{ crumb.name }}
+          </button>
+        }
+      </div>
+
+      <div class="mb-4 text-sm text-slate-500 dark:text-slate-400">Path: {{ currentPath() }}</div>
+
+      @if (currentNode(); as node) {
+        <div class="mb-4 flex items-center gap-2">
+          <span class="text-slate-500 dark:text-slate-400">Total Size:</span>
+          <span class="font-bold text-lg">{{ formatSize(node.size) }}</span>
+        </div>
+      }
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        @for (item of treemapData(); track item.node.path) {
+          <div
+            class="treemap-item bg-gradient-to-br {{
+              getDepthColor(item.depth)
+            }} rounded-lg p-4 cursor-pointer hover:scale-105 transition-transform"
+            [class.has-children]="item.node.children.length > 0"
+            (click)="item.node.children.length > 0 && navigateToNode(item.node)"
+          >
+            <div class="flex flex-col h-full">
+              <div class="text-white font-medium text-sm truncate" [matTooltip]="item.node.name">
+                {{ item.node.name }}
+              </div>
+              <div class="text-white/80 text-xs mt-1">
+                {{ formatSize(item.node.size) }}
+              </div>
+              <div class="text-white/60 text-xs mt-auto pt-2">
+                {{ item.percentage | number: "1.1-1" }}%
+              </div>
+              @if (item.node.children.length > 0) {
+                <div class="text-white/50 text-xs mt-1 flex items-center gap-1">
+                  <mat-icon class="text-xs">folder_open</mat-icon>
+                  {{ item.node.children.length }} items
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="flex items-center justify-center h-64">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  }
+</div>

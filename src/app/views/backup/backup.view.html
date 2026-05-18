@@ -1,0 +1,112 @@
+<app-header [title]="'Backups'"></app-header>
+
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Backup Management</h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">
+        Create and restore backups before cleaning operations
+      </p>
+    </div>
+    <button
+      (click)="loadBackups()"
+      class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+    >
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  } @else if (backups().length === 0) {
+    <div class="glass-card p-12 text-center">
+      <mat-icon class="text-6xl text-slate-300 dark:text-slate-600">backup</mat-icon>
+      <h3 class="text-xl font-semibold text-slate-700 dark:text-slate-300 mt-4">
+        No Backups Found
+      </h3>
+      <p class="text-slate-500 dark:text-slate-400 mt-2">
+        Backups created before cleaning operations will appear here
+      </p>
+    </div>
+  } @else {
+    <div class="glass-card overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-slate-50 dark:bg-slate-800/50">
+          <tr>
+            <th
+              class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
+              Name
+            </th>
+            <th
+              class="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
+              Size
+            </th>
+            <th
+              class="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
+              Date
+            </th>
+            <th
+              class="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-black/5 dark:divide-white/5">
+          @for (backup of backups(); track backup.path) {
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-indigo-600 dark:text-indigo-400">archive</mat-icon>
+                  </div>
+                  <span class="font-medium text-slate-900 dark:text-white">{{ backup.name }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-right text-slate-600 dark:text-slate-400">
+                {{ formatSize(backup.size) }}
+              </td>
+              <td class="px-6 py-4 text-right text-slate-600 dark:text-slate-400">
+                {{ formatDate(backup.modified) }}
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <button
+                    (click)="restoreBackup(backup)"
+                    [disabled]="isRestoring(backup.path)"
+                    class="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 transition-colors disabled:opacity-50"
+                    matTooltip="Restore"
+                  >
+                    @if (isRestoring(backup.path)) {
+                      <mat-progress-spinner
+                        mode="indeterminate"
+                        diameter="20"
+                      ></mat-progress-spinner>
+                    } @else {
+                      <mat-icon>restore</mat-icon>
+                    }
+                  </button>
+                  <button
+                    (click)="deleteBackup(backup)"
+                    class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors"
+                    matTooltip="Delete"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

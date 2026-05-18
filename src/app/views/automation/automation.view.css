@@ -1,0 +1,15 @@
+.recipe-step {
+  transition: transform 0.2s ease;
+}
+
+.recipe-step:hover {
+  transform: translateX(4px);
+}
+
+.step-drag-handle {
+  cursor: grab;
+}
+
+.step-drag-handle:active {
+  cursor: grabbing;
+}

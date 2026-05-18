@@ -1,0 +1,62 @@
+<app-header title="Dev Cache Cleaner" subtitle="Clean development tool caches"></app-header>
+
+<div class="p-6">
+  @if (loading()) {
+    <div class="flex items-center justify-center h-64">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  } @else {
+    <div class="mb-4 flex items-center justify-between">
+      <div>
+        <p class="text-lg text-gray-600">
+          Total cache size: <span class="font-semibold">{{ getTotalSize() }}</span>
+        </p>
+      </div>
+      <button mat-raised-button color="primary" (click)="cleanAll()" [disabled]="cleaning()">
+        <mat-icon>delete_sweep</mat-icon>
+        Clean All
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (tool of devTools(); track trackByName($index, tool)) {
+        <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                <mat-icon class="text-blue-600">{{ tool.icon }}</mat-icon>
+              </div>
+              <div>
+                <h3 class="font-semibold text-lg">{{ tool.displayName }}</h3>
+                <p class="text-sm text-gray-500">{{ tool.item?.description || "Cache" }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-2xl font-bold text-gray-900">{{ getToolSize(tool.item) }}</p>
+              @if (tool.item?.cache_path) {
+                <p
+                  class="text-xs text-gray-400 truncate max-w-[180px]"
+                  [matTooltip]="tool.item.cache_path"
+                >
+                  {{ tool.item.cache_path }}
+                </p>
+              }
+            </div>
+            <button
+              mat-raised-button
+              color="warn"
+              (click)="cleanTool(tool.name)"
+              [disabled]="cleaning()"
+            >
+              <mat-icon>cleaning_services</mat-icon>
+              Clean
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

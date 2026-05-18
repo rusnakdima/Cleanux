@@ -1,0 +1,360 @@
+<div class="reports-container p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
+      <p class="text-gray-500 dark:text-gray-400 mt-1">
+        View cleaning history and export detailed reports.
+      </p>
+    </div>
+    <div class="flex gap-3">
+      <button
+        (click)="generateReport()"
+        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+      >
+        <mat-icon class="text-sm">add</mat-icon>
+        Generate Demo Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Timeline Chart -->
+  @if (reportsWithChart().length > 1) {
+    <div class="glass-card p-6">
+      <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+        <mat-icon class="text-indigo-500">timeline</mat-icon>
+        Space Reclaimed Over Time
+      </h2>
+      <div class="h-40">
+        <svg viewBox="0 0 400 150" class="w-full h-full">
+          <line
+            x1="30"
+            y1="120"
+            x2="370"
+            y2="120"
+            stroke="currentColor"
+            class="text-slate-300 dark:text-slate-700"
+            stroke-width="1"
+          />
+          <line
+            x1="30"
+            y1="60"
+            x2="370"
+            y2="60"
+            stroke="currentColor"
+            class="text-slate-300 dark:text-slate-700"
+            stroke-width="1"
+            stroke-dasharray="4"
+          />
+          <line
+            x1="30"
+            y1="10"
+            x2="370"
+            y2="10"
+            stroke="currentColor"
+            class="text-slate-300 dark:text-slate-700"
+            stroke-width="1"
+          />
+          <text x="22" y="124" font-size="8" fill="currentColor" class="text-slate-400">0</text>
+          <text x="22" y="64" font-size="8" fill="currentColor" class="text-slate-400">50%</text>
+          <text x="22" y="14" font-size="8" fill="currentColor" class="text-slate-400">Max</text>
+          <path
+            [attr.d]="chartPath()"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="text-indigo-600"
+          />
+          @for (report of reportsWithChart(); track report.id; let i = $index) {
+            <circle
+              [attr.cx]="30 + (i / (reportsWithChart().length - 1)) * 340"
+              [attr.cy]="
+                120 -
+                (report.space_reclaimed /
+                  Math.max(...reportsWithChart().map((r) => r.space_reclaimed), 1)) *
+                  110
+              "
+              r="4"
+              fill="currentColor"
+              class="text-indigo-600 cursor-pointer"
+              (click)="selectReport(report)"
+            />
+          }
+        </svg>
+      </div>
+    </div>
+  }
+
+  <!-- Report List Table -->
+  <div class="glass-card overflow-hidden">
+    <div
+      class="px-6 py-4 border-b border-black/5 dark:border-white/5 flex items-center justify-between"
+    >
+      <h2 class="text-lg font-bold flex items-center gap-2">
+        <mat-icon class="text-indigo-500">history</mat-icon>
+        Cleaning History
+      </h2>
+      <button
+        (click)="loadReports()"
+        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        matTooltip="Refresh"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+      </div>
+    } @else if (reports().length === 0) {
+      <div class="flex flex-col items-center justify-center h-64 text-slate-400">
+        <mat-icon class="text-6xl mb-4">description</mat-icon>
+        <p class="text-lg font-medium">No reports yet</p>
+        <p class="text-sm">Run a cleaning session to generate your first report</p>
+      </div>
+    } @else {
+      <table class="w-full">
+        <thead class="bg-slate-50 dark:bg-slate-800/50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider"
+            >
+              Date
+            </th>
+            <th
+              class="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider"
+            >
+              Items Cleaned
+            </th>
+            <th
+              class="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider"
+            >
+              Space Reclaimed
+            </th>
+            <th
+              class="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider"
+            >
+              Duration
+            </th>
+            <th
+              class="px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-black/5 dark:divide-white/5">
+          @for (report of reports(); track report.id) {
+            <tr
+              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+              [class.bg-indigo-50]="selectedReport()?.id === report.id"
+              [class.dark:bg-indigo-900/20]="selectedReport()?.id === report.id"
+              (click)="selectReport(report)"
+            >
+              <td class="px-6 py-4 text-sm">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-indigo-500">description</mat-icon>
+                  </div>
+                  <div>
+                    <p class="font-medium">{{ formatDate(report.date) }}</p>
+                    <p class="text-xs text-slate-400">Report #{{ report.id }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center text-sm font-medium">{{ report.items_cleaned }}</td>
+              <td
+                class="px-6 py-4 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400"
+              >
+                {{ formatSize(report.space_reclaimed) }}
+              </td>
+              <td class="px-6 py-4 text-center text-sm text-slate-500">
+                {{ report.duration.toFixed(1) }}s
+              </td>
+              <td class="px-6 py-4 text-center" (click)="$event.stopPropagation()">
+                <div class="flex items-center justify-center gap-2">
+                  <button
+                    (click)="exportHtmlReport(report.id!)"
+                    class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-blue-600"
+                    matTooltip="Export HTML"
+                  >
+                    <mat-icon class="text-lg">code</mat-icon>
+                  </button>
+                  <button
+                    (click)="setBeforeReport(report.id!)"
+                    [class.bg-green-100]="comparingReportIds().before === report.id"
+                    [class.text-green-700]="comparingReportIds().before === report.id"
+                    class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    matTooltip="Set as Before"
+                  >
+                    <mat-icon class="text-lg">first_page</mat-icon>
+                  </button>
+                  <button
+                    (click)="setAfterReport(report.id!)"
+                    [class.bg-purple-100]="comparingReportIds().after === report.id"
+                    [class.text-purple-700]="comparingReportIds().after === report.id"
+                    class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                    matTooltip="Set as After"
+                  >
+                    <mat-icon class="text-lg">last_page</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            @if (selectedReport()?.id === report.id) {
+              <tr>
+                <td colspan="5" class="px-6 py-4 bg-slate-50 dark:bg-slate-800/30">
+                  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                      <p class="text-xs text-slate-500 mb-1">Cache</p>
+                      <p class="text-lg font-bold">{{ report.categories.cache }}</p>
+                    </div>
+                    <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                      <p class="text-xs text-slate-500 mb-1">Trash</p>
+                      <p class="text-lg font-bold">{{ report.categories.trash }}</p>
+                    </div>
+                    <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                      <p class="text-xs text-slate-500 mb-1">Logs</p>
+                      <p class="text-lg font-bold">{{ report.categories.logs }}</p>
+                    </div>
+                    <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                      <p class="text-xs text-slate-500 mb-1">Large Files</p>
+                      <p class="text-lg font-bold">{{ report.categories.large_files }}</p>
+                    </div>
+                    <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                      <p class="text-xs text-slate-500 mb-1">Duplicates</p>
+                      <p class="text-lg font-bold">{{ report.categories.duplicates }}</p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Compare Button -->
+  @if (comparingReportIds().before && comparingReportIds().after) {
+    <div class="flex justify-center">
+      <button
+        (click)="compareSnapshots()"
+        class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+      >
+        <mat-icon>compare</mat-icon>
+        Compare Snapshots
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Comparison Modal -->
+@if (showComparison() && comparison()) {
+  <div
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    (click)="closeComparison()"
+  >
+    <div
+      class="glass-card max-w-4xl w-full mx-4 max-h-[80vh] overflow-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between"
+      >
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <mat-icon class="text-green-500">compare</mat-icon>
+          Snapshot Comparison
+        </h2>
+        <button
+          (click)="closeComparison()"
+          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-2 gap-8">
+          <!-- Before -->
+          <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <mat-icon class="text-green-500 text-sm">first_page</mat-icon>
+              </div>
+              <h3 class="font-bold">Before (Report #{{ comparison()!.before_id }})</h3>
+            </div>
+          </div>
+          <!-- After -->
+          <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <mat-icon class="text-purple-500 text-sm">last_page</mat-icon>
+              </div>
+              <h3 class="font-bold">After (Report #{{ comparison()!.after_id }})</h3>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center p-4 bg-indigo-500/10 rounded-xl">
+            <p class="text-xs text-slate-500 mb-1">Space Reclaimed</p>
+            <p class="text-2xl font-bold text-indigo-600">
+              {{ formatSize(comparison()!.space_reclaimed) }}
+            </p>
+          </div>
+          <div class="text-center p-4 bg-green-500/10 rounded-xl">
+            <p class="text-xs text-slate-500 mb-1">Items Cleaned</p>
+            <p class="text-2xl font-bold text-green-600">{{ comparison()!.items_cleaned }}</p>
+          </div>
+          <div class="text-center p-4 bg-purple-500/10 rounded-xl">
+            <p class="text-xs text-slate-500 mb-1">Cache Change</p>
+            <p class="text-2xl font-bold text-purple-600">
+              {{ comparison()!.details.cache_change }}
+            </p>
+          </div>
+          <div class="text-center p-4 bg-orange-500/10 rounded-xl">
+            <p class="text-xs text-slate-500 mb-1">Trash Change</p>
+            <p class="text-2xl font-bold text-orange-600">
+              {{ comparison()!.details.trash_change }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- HTML Export Modal -->
+@if (exportHtml()) {
+  <div
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    (click)="closeExportHtml()"
+  >
+    <div
+      class="glass-card max-w-4xl w-full mx-4 max-h-[80vh] overflow-auto"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between"
+      >
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <mat-icon class="text-blue-500">code</mat-icon>
+          HTML Report Export
+        </h2>
+        <button
+          (click)="closeExportHtml()"
+          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="p-6">
+        <pre class="bg-slate-900 text-slate-100 p-4 rounded-lg overflow-auto text-sm max-h-96">{{
+          exportHtml()
+        }}</pre>
+      </div>
+    </div>
+  </div>
+}

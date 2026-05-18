@@ -1,0 +1,209 @@
+<app-header [title]="'Duplicate Finder'"></app-header>
+
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+        <mat-icon class="text-indigo-500 text-3xl">file_copy</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Duplicate Groups
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">
+          {{ duplicateGroups().length }}
+        </p>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-pink-500/10 flex items-center justify-center">
+        <mat-icon class="text-pink-500 text-3xl">content_copy</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Total Duplicates
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">
+          {{ totalDuplicates() }}
+        </p>
+      </div>
+    </div>
+
+    <div class="glass-card p-8 flex items-center gap-6">
+      <div class="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+        <mat-icon class="text-orange-500 text-3xl">storage</mat-icon>
+      </div>
+      <div>
+        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+          Wasted Space
+        </p>
+        <p class="text-4xl font-black text-slate-900 dark:text-white">
+          {{ formatSize(totalWastedSpace()) }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scan Controls -->
+  <div class="glass-card p-6">
+    <div class="flex items-center gap-4 flex-wrap">
+      <div class="flex-1 min-w-[300px]">
+        <label
+          class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2"
+        >
+          Scan Path
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="scanningPath"
+          placeholder="/home/user"
+          class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          (click)="toggleExtensionInput()"
+          class="px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition-colors flex items-center gap-2"
+          matTooltip="Filter by extension"
+        >
+          <mat-icon>filter_list</mat-icon>
+          Extension
+        </button>
+
+        @if (showExtensionInput()) {
+          <input
+            type="text"
+            [(ngModel)]="extensionFilter"
+            placeholder="e.g. jpg, png"
+            class="w-32 px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        }
+
+        <button
+          (click)="scanForDuplicates()"
+          [disabled]="loading() || !scanningPath()"
+          class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="20" color="accent"></mat-spinner>
+          } @else {
+            <mat-icon>search</mat-icon>
+          }
+          Scan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duplicate Groups -->
+  <div class="glass-card flex flex-col h-[calc(100vh-400px)] overflow-hidden">
+    <div
+      class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800"
+    >
+      <div class="flex items-center gap-4">
+        <app-search
+          [data]="duplicateGroups()"
+          [searchFields]="['files.0.name', 'files.0.path']"
+          (filteredData)="onFilteredData($event)"
+        />
+        <button
+          (click)="scanForDuplicates()"
+          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          matTooltip="Refresh"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      <button
+        (click)="deleteSelectedFiles()"
+        [disabled]="selectedFiles().size === 0"
+        class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+      >
+        <mat-icon class="text-sm">delete</mat-icon>
+        Delete Selected ({{ selectedFiles().size }})
+      </button>
+    </div>
+
+    <div class="flex-1 p-6 overflow-auto">
+      @if (loading() && duplicateGroups().length === 0) {
+        <div class="flex items-center justify-center h-full">
+          <mat-spinner diameter="48" color="accent"></mat-spinner>
+        </div>
+      } @else if (filteredGroups().length === 0) {
+        <div class="flex flex-col items-center justify-center h-full text-slate-400">
+          <mat-icon class="text-6xl mb-4">content_copy</mat-icon>
+          <p class="text-lg font-medium">No duplicates found</p>
+          <p class="text-sm">Enter a path and click Scan to search for duplicate files</p>
+        </div>
+      } @else {
+        <div class="space-y-4">
+          @for (group of filteredGroups(); track group.hash) {
+            <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+              <div
+                class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700"
+              >
+                <div class="flex items-center gap-4">
+                  <span class="text-sm font-bold text-slate-500 dark:text-slate-400">
+                    {{ group.files.length }} files
+                  </span>
+                  <span class="text-sm text-slate-400">•</span>
+                  <span class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ formatSize(group.file_size) }} each
+                  </span>
+                  <span class="text-sm text-slate-400">•</span>
+                  <span class="text-sm text-orange-500 font-medium">
+                    Wasted: {{ formatSize(group.wasted_space) }}
+                  </span>
+                </div>
+                <button
+                  (click)="onPreview(group.files[0])"
+                  class="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  matTooltip="Preview"
+                >
+                  <mat-icon class="text-sm">visibility</mat-icon>
+                </button>
+              </div>
+              <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                @for (file of group.files; track file.path; let i = $index) {
+                  <div
+                    class="flex items-center px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                    [class.bg-indigo-50 dark:bg-indigo-900/10]="selectedFiles().has(file.path)"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="selectedFiles().has(file.path)"
+                      (change)="toggleFileSelection(file.path)"
+                      class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <div class="flex-1 ml-4 min-w-0">
+                      <p class="text-sm font-medium text-slate-900 dark:text-white truncate">
+                        {{ file.name }}
+                      </p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        {{ file.path }}
+                      </p>
+                    </div>
+                    <span class="text-sm text-slate-500 dark:text-slate-400 ml-4">
+                      {{ formatSize(file.size) }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (previewData()) {
+  <app-file-preview
+    [fileData]="previewData()"
+    (close)="onClosePreview()"
+    (openInEditor)="onOpenInEditor($event)"
+  />
+}
