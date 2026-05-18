@@ -1,7 +1,5 @@
 use crate::models::ResponseModel;
-use crate::services::automation_service::{
-  AutomationRecipe, AutomationService, ExecutionHistoryEntry,
-};
+use crate::services::automation_service::{AutomationRecipe, AutomationService};
 
 #[tauri::command]
 #[allow(non_snake_case)]

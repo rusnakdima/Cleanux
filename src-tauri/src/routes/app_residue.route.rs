@@ -1,7 +1,5 @@
 use crate::models::ResponseModel;
-use crate::services::app_residue_service::{
-  AppResidue, AppResidueService, AppResidueSummary, OrphanedConfig,
-};
+use crate::services::app_residue_service::{AppResidueService, AppResidueSummary};
 
 #[tauri::command]
 #[allow(non_snake_case)]

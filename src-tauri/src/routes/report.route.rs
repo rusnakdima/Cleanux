@@ -1,7 +1,7 @@
 use crate::helpers::ResponseBuilder;
 use crate::models::DataValue;
 use crate::models::ResponseModel;
-use crate::services::report_service::{ReportCategories, SnapshotComparison};
+use crate::services::report_service::ReportCategories;
 
 static SERVICE: std::sync::OnceLock<crate::services::report_service::ReportService> =
   std::sync::OnceLock::new();

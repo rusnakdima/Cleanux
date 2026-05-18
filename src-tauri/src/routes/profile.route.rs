@@ -37,5 +37,5 @@ pub fn delete_profile(
 pub fn apply_profile(
   name: String,
 ) -> Result<crate::models::ResponseModel, crate::models::ResponseModel> {
-  ProfileService::apply_profile(&name)
+  ProfileService.apply_profile(&name)
 }
