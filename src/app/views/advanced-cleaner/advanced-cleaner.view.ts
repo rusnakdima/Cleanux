@@ -44,6 +44,8 @@ import { formatSize } from '@shared/utils/format.util';
 export class AdvancedCleanerView implements OnInit {
   private junkCleanerService = inject(JunkCleanerService);
 
+  formatSize = formatSize;
+
   junkSummary = signal<JunkCategorySummary[]>([]);
   loading = signal(false);
   scanningCategory = signal<string | null>(null);
@@ -132,10 +134,6 @@ export class AdvancedCleanerView implements OnInit {
 
   getCategorySummary(key: JunkCategoryKey): JunkCategorySummary | undefined {
     return this.junkSummary().find((s) => s.category.toLowerCase() === key);
-  }
-
-  formatSize(bytes: number): string {
-    return formatSize(bytes);
   }
 
   formatLastCleaned(key: string): string {

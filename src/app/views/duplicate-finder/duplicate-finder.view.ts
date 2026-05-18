@@ -52,6 +52,8 @@ export class DuplicateFinderView implements OnInit {
   private fileService = inject(FileService);
   private document = inject(DOCUMENT);
 
+  formatSize = formatSize;
+
   duplicateGroups = signal<DuplicateGroup[]>([]);
   filteredGroups = signal<DuplicateGroup[]>([]);
   loading = signal(false);
@@ -167,10 +169,6 @@ export class DuplicateFinderView implements OnInit {
     } catch (error: unknown) {
       alert('Failed to open file: ' + (error instanceof Error ? error.message : String(error)));
     }
-  }
-
-  formatSize(bytes: number): string {
-    return formatSize(bytes);
   }
 
   toggleFileSelection(path: string): void {

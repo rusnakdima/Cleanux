@@ -20,6 +20,7 @@ import {
 
 /* components */
 import { HeaderComponent } from '@components/header/header.component';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-package-deep-clean-view',
@@ -40,6 +41,8 @@ import { HeaderComponent } from '@components/header/header.component';
 })
 export class PackageDeepCleanView implements OnInit {
   private service = inject(PackageDeepCleanService);
+
+  formatSize = formatSize;
 
   summary = signal<PackageManagerSummary | null>(null);
   orphanedPackages = signal<OrphanedPackage[]>([]);
@@ -102,13 +105,6 @@ export class PackageDeepCleanView implements OnInit {
     const tabs = this.getAvailableTabs();
     const active = tabs.find((t) => t.index === this.activeTabIndex());
     return active?.name || '';
-  }
-
-  formatSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i];
   }
 
   async aptClean() {

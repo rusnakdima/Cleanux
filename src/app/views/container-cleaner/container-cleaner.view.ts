@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HeaderComponent } from '@components/header/header.component';
 import { ContainerService, ContainerSummary } from '@services/container.service';
+import { formatSize } from '@shared/utils/format.util';
 
 type ContainerTab = 'docker' | 'podman';
 
@@ -27,6 +28,8 @@ type ContainerTab = 'docker' | 'podman';
 })
 export class ContainerCleanerView {
   private containerService = inject(ContainerService);
+
+  formatSize = formatSize;
 
   loading = signal(false);
   activeTab = signal<ContainerTab>('docker');
@@ -211,9 +214,5 @@ export class ContainerCleanerView {
   onTabChange(index: number) {
     const tabs: ContainerTab[] = ['docker', 'podman'];
     this.activeTab.set(tabs[index]);
-  }
-
-  formatSize(bytes: number): string {
-    return this.containerService.formatSize(bytes);
   }
 }

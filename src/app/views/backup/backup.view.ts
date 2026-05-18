@@ -33,6 +33,8 @@ import { formatSize } from '@shared/utils/format.util';
 export class BackupView implements OnInit {
   private backupService = inject(BackupService);
 
+  formatSize = formatSize;
+
   backups = signal<BackupItem[]>([]);
   loading = signal(false);
   restoringId = signal<string | null>(null);
@@ -52,10 +54,6 @@ export class BackupView implements OnInit {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  formatSize(bytes: number): string {
-    return formatSize(bytes);
   }
 
   formatDate(dateStr: string): string {

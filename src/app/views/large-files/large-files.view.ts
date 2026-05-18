@@ -49,6 +49,8 @@ import { formatSize } from '@shared/utils/format.util';
 export class LargeFilesView implements OnInit {
   private fileService = inject(FileService);
 
+  formatSize = formatSize;
+
   largeFiles = signal<LargeFileItem[]>([]);
   filteredFiles = signal<LargeFileItem[]>([]);
   loading = signal(false);

@@ -114,7 +114,8 @@ export class SettingsView {
     return new Date(date).toISOString().split('T')[0];
   }
 
-  formatDateTime(date: string): string {
+  formatDateTime(date: string | null): string {
+    if (!date) return 'Never';
     return new Date(date).toLocaleString();
   }
 

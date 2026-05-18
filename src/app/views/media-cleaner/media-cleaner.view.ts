@@ -48,6 +48,8 @@ interface MediaCacheSummary {
 export class MediaCleanerView implements OnInit {
   private mediaCacheService = inject(MediaCacheService);
 
+  formatSize = formatSize;
+
   summary = signal<MediaCacheSummary | null>(null);
   loading = signal(false);
   cleaning = signal<string | null>(null);
@@ -166,10 +168,6 @@ export class MediaCleanerView implements OnInit {
 
   private confirmClean(type: string): boolean {
     return confirm(`Are you sure you want to clean the ${type}?\n\nThis action cannot be undone.`);
-  }
-
-  formatSize(bytes: number): string {
-    return formatSize(bytes);
   }
 
   isCleaning(key: string): boolean {

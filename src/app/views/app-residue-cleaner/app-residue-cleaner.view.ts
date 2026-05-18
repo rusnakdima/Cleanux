@@ -34,6 +34,8 @@ type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
 export class AppResidueCleanerView {
   private residueService = inject(AppResidueService);
 
+  formatSize = formatSize;
+
   activeTab = signal<ResidueTab>('configs');
   loading = signal(false);
   showBackupWarning = signal(true);

@@ -33,6 +33,8 @@ interface DevToolCard {
 export class DevCleanerView implements OnInit {
   private devCacheService = inject(DevCacheService);
 
+  formatSize = formatSize;
+
   loading = signal(true);
   cleaning = signal(false);
   summary = signal<DevCacheSummary | null>(null);

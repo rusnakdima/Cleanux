@@ -39,9 +39,9 @@
               @if (tool.item?.cache_path) {
                 <p
                   class="text-xs text-gray-400 truncate max-w-[180px]"
-                  [matTooltip]="tool.item.cache_path"
+                  [matTooltip]="tool.item?.cache_path"
                 >
-                  {{ tool.item.cache_path }}
+                  {{ tool.item?.cache_path }}
                 </p>
               }
             </div>

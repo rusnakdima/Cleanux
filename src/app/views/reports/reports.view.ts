@@ -18,6 +18,7 @@ import { ReportService } from '@services/report.service';
 
 /* models */
 import { CleaningReport, SnapshotComparison } from '@models/report.model';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-reports',
@@ -28,6 +29,9 @@ import { CleaningReport, SnapshotComparison } from '@models/report.model';
 })
 export class ReportsView implements OnInit {
   private reportService = inject(ReportService);
+
+  formatSize = formatSize;
+  Math = Math;
 
   reports = signal<CleaningReport[]>([]);
   loading = signal(false);
@@ -143,14 +147,6 @@ export class ReportsView implements OnInit {
   closeComparison() {
     this.showComparison.set(false);
     this.comparison.set(null);
-  }
-
-  formatSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   formatDate(dateStr: string): string {

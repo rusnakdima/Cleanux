@@ -91,7 +91,7 @@ export class ProcessesView implements OnInit {
   }
 
   onSelectionChange(selected: Set<string>): void {
-    this.selectedPids.set(new Set(selected).map((s) => Number(s)));
+    this.selectedPids.set(new Set(Array.from(selected).map((s) => Number(s))));
   }
 
   async killSelectedProcesses() {

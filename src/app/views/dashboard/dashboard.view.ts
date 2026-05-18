@@ -31,6 +31,7 @@ import {
   WidgetRecentActivityComponent,
   ActivityItem,
 } from '@components/widgets/widget-recent-activity/widget-recent-activity.component';
+import { formatSize } from '@shared/utils/format.util';
 
 interface WidgetState {
   id: string;
@@ -62,6 +63,8 @@ export class DashboardView implements OnInit {
   private fileService = inject(FileService);
   private systemService = inject(SystemService);
   private healthHistoryService = inject(HealthHistoryService);
+
+  formatSize = formatSize;
 
   isScanning = signal(false);
   isCleaning = signal(false);
@@ -343,14 +346,6 @@ export class DashboardView implements OnInit {
     } finally {
       this.isCleaning.set(false);
     }
-  }
-
-  formatSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   getChartPath(): string {

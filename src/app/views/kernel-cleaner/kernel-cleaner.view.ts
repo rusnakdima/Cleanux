@@ -13,7 +13,7 @@ import {
   InitramfsInfo,
   BootSpaceInfo,
 } from '@services/kernel-cleaner.service';
-import { formatSize as formatBytesUtil } from '@shared/utils/format.util';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-kernel-cleaner-view',
@@ -33,6 +33,8 @@ import { formatSize as formatBytesUtil } from '@shared/utils/format.util';
 })
 export class KernelCleanerView implements OnInit {
   private kernelService = inject(KernelCleanerService);
+
+  formatSize = formatSize;
 
   loading = signal(false);
   currentKernel = signal<string>('');
@@ -194,10 +196,6 @@ export class KernelCleanerView implements OnInit {
 
   isCurrentKernel(version: string): boolean {
     return version === this.currentKernel();
-  }
-
-  formatSize(bytes: number): string {
-    return formatBytesUtil(bytes);
   }
 
   getBootUsagePercent(): number {

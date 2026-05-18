@@ -58,6 +58,8 @@ export class CleanerView implements OnInit {
   private fileService = inject(FileService);
   private logAnalyzerService = inject(LogAnalyzerService);
 
+  formatSize = formatSize;
+
   previewData = signal<FilePreviewData | null>(null);
   errorPreview = signal<string | null>(null);
 

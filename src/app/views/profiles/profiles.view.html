@@ -75,7 +75,7 @@
             >Custom Paths (one per line)</label
           >
           <textarea
-            [ngModel]="editingProfile()?.paths.join('\n')"
+            [ngModel]="editingProfile()?.paths?.join('\n')"
             (ngModelChange)="onPathsChange($event)"
             class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white h-24"
             placeholder="/home/user/Downloads&#10;/home/user/Temp"
@@ -87,7 +87,7 @@
             >Exclude Patterns (one per line)</label
           >
           <textarea
-            [ngModel]="editingProfile()?.exclude_patterns.join('\n')"
+            [ngModel]="editingProfile()?.exclude_patterns?.join('\n')"
             (ngModelChange)="onExcludePatternsChange($event)"
             class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white h-24"
             placeholder="*.log&#10;node_modules&#10;.cache"
