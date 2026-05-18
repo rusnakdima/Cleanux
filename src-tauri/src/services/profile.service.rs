@@ -3,7 +3,6 @@ use crate::models::{AppError, CleaningProfile, DataValue, ResponseModel};
 /* helpers */
 use crate::helpers::{data_empty_string, data_string, success_response};
 /* sys lib */
-use chrono::{DateTime, Utc};
 use std::fs;
 use std::path::PathBuf;
 
@@ -64,7 +63,7 @@ impl ProfileService {
       .map_err(|e| AppError::message(format!("Failed to parse profile: {}", e)))?;
     Ok(success_response(
       format!("Profile '{}' loaded successfully", name),
-      serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null),
+      DataValue::Object(serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null)),
     ))
   }
 
@@ -124,7 +123,7 @@ impl ProfileService {
     ))
   }
 
-  pub fn apply_profile(name: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn apply_profile(&self, name: &str) -> Result<ResponseModel, ResponseModel> {
     Self::apply_profile_inner(name).map_err(|e| e.into_response())
   }
 
@@ -141,7 +140,7 @@ impl ProfileService {
     let mut results: Vec<String> = Vec::new();
 
     if profile.clean_cache {
-      if let Ok(cache_dir) = dirs::cache_dir() {
+      if let Some(cache_dir) = dirs::cache_dir() {
         if cache_dir.exists() {
           match fs::remove_dir_all(&cache_dir) {
             Ok(_) => {

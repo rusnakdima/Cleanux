@@ -174,13 +174,10 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
         _ => Err(AppError::message(format!("Unknown category: {}", category))),
       }
     }
-    ActionStep::RunProfile { profile_name } => {
-      let profile_service = ProfileService;
-      match profile_service.apply_profile(profile_name) {
-        Ok(result) => Ok(format!("Profile '{}' applied: {}", profile_name, result)),
-        Err(e) => Err(AppError::message(format!("Failed to run profile: {}", e))),
-      }
-    }
+    ActionStep::RunProfile { profile_name } => match ProfileService.apply_profile(profile_name) {
+      Ok(result) => Ok(format!("Profile '{}' applied: {}", profile_name, result)),
+      Err(e) => Err(AppError::message(format!("Failed to run profile: {}", e))),
+    },
     ActionStep::ExecuteCommand { command } => {
       use std::process::Command;
       let output = Command::new("sh")

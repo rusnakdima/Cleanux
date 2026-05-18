@@ -1,7 +1,16 @@
 /* sys lib */
+use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+
+fn is_cache_file(name: &OsStr) -> bool {
+  let name_str = name.to_string_lossy();
+  name_str.contains("cache")
+    || name_str.ends_with(".tmp")
+    || name_str.ends_with(".bak")
+    || name_str.ends_with(".log")
+}
 
 /* models */
 use crate::models::{DataValue, ResponseModel, ScanSummaryModel, SystemServiceModel};
@@ -73,26 +82,26 @@ impl DashboardService {
   pub fn getCacheSummary(&self) -> Result<ResponseModel, ResponseModel> {
     let cacheDir = dirs::cache_dir().ok_or("Cache directory not found")?;
 
-    let (totalSize, fileCount) = WalkDir::new(cacheDir)
+    let entries: Vec<_> = WalkDir::new(cacheDir)
       .max_depth(4)
-      .into_par_iter()
+      .into_iter()
       .filter_map(|e| e.ok())
       .filter(|e| e.file_type().is_file())
       .take(2000)
-      .filter_map(|entry| fs::metadata(entry.path()).ok())
-      .fold(
-        || (0u64, 0usize),
-        |mut acc, meta| {
-          acc.0 += meta.len();
-          acc.1 += 1;
-          acc
-        },
-      )
-      .reduce(|| (0u64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
+      .collect();
+
+    let (totalSize, fileCount) = entries
+      .into_par_iter()
+      .filter(|e| is_cache_file(e.file_name()))
+      .map(|e| {
+        let metadata = fs::metadata(e.path()).ok();
+        (metadata.as_ref().map(|m| m.len()).unwrap_or(0), 1)
+      })
+      .reduce(|| (0u64, 0usize), |(a, b), (c, d)| (a + c, b + d));
 
     let summary = ScanSummaryModel {
       totalSize,
-      fileCount,
+      totalItems: fileCount,
     };
 
     Ok(
@@ -122,7 +131,7 @@ impl DashboardService {
 
     let summary = ScanSummaryModel {
       totalSize,
-      fileCount,
+      totalItems: fileCount,
     };
 
     Ok(
@@ -138,12 +147,16 @@ impl DashboardService {
   pub fn getLogSummary(&self) -> Result<ResponseModel, ResponseModel> {
     let logDir = Path::new("/var/log");
 
-    let (totalSize, fileCount) = WalkDir::new(logDir)
+    let entries: Vec<_> = WalkDir::new(logDir)
       .max_depth(2)
-      .into_par_iter()
+      .into_iter()
       .filter_map(|e| e.ok())
       .filter(|e| e.file_type().is_file())
       .take(500)
+      .collect();
+
+    let (totalSize, fileCount) = entries
+      .into_par_iter()
       .filter_map(|entry| fs::metadata(entry.path()).ok())
       .fold(
         || (0u64, 0usize),
@@ -157,7 +170,7 @@ impl DashboardService {
 
     let summary = ScanSummaryModel {
       totalSize,
-      fileCount,
+      totalItems: fileCount,
     };
 
     Ok(
@@ -207,7 +220,7 @@ impl DashboardService {
 
     let summary = ScanSummaryModel {
       totalSize,
-      fileCount,
+      totalItems: fileCount,
     };
 
     Ok(

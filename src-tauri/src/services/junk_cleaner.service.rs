@@ -4,11 +4,11 @@ use crate::helpers::{data_string, success_response};
 use crate::models::{AppError, DataValue, ResponseModel};
 /* sys lib */
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 type CleanerResult<T> = Result<T, AppError>;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub enum JunkCategory {
   Browser,
   Thumbnails,
@@ -29,7 +29,7 @@ impl JunkCategory {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct JunkItem {
   pub path: String,
   pub size: u64,
@@ -156,9 +156,23 @@ impl JunkCleanerService {
   }
 
   pub fn scan_browser_caches(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .scan_browser_caches_inner()
-      .map_err(|e| e.into_response())
+    match self.scan_browser_caches_inner() {
+      Ok(items) => {
+        let size: u64 = items.iter().map(|i| i.size).sum();
+        let count: u32 = items.iter().map(|i| i.file_count).sum();
+        Ok(success_response(
+          format!("Found {} browser cache items ({} bytes)", items.len(), size),
+          DataValue::Object(serde_json::json!({
+            "category": "Browser",
+            "totalSize": size,
+            "fileCount": count,
+            "description": "Browser cache files (Firefox, Chrome, Brave, Edge)",
+            "items": items,
+          })),
+        ))
+      }
+      Err(e) => Err(e.into_response()),
+    }
   }
 
   fn scan_browser_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
@@ -202,9 +216,27 @@ impl JunkCleanerService {
   }
 
   pub fn scan_thumbnail_caches(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .scan_thumbnail_caches_inner()
-      .map_err(|e| e.into_response())
+    match self.scan_thumbnail_caches_inner() {
+      Ok(items) => {
+        let size: u64 = items.iter().map(|i| i.size).sum();
+        let count: u32 = items.iter().map(|i| i.file_count).sum();
+        Ok(success_response(
+          format!(
+            "Found {} thumbnail cache items ({} bytes)",
+            items.len(),
+            size
+          ),
+          DataValue::Object(serde_json::json!({
+            "category": "Thumbnails",
+            "totalSize": size,
+            "fileCount": count,
+            "description": "Image thumbnail cache",
+            "items": items,
+          })),
+        ))
+      }
+      Err(e) => Err(e.into_response()),
+    }
   }
 
   fn scan_thumbnail_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
@@ -227,9 +259,27 @@ impl JunkCleanerService {
   }
 
   pub fn scan_application_caches(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .scan_application_caches_inner()
-      .map_err(|e| e.into_response())
+    match self.scan_application_caches_inner() {
+      Ok(items) => {
+        let size: u64 = items.iter().map(|i| i.size).sum();
+        let count: u32 = items.iter().map(|i| i.file_count).sum();
+        Ok(success_response(
+          format!(
+            "Found {} application cache items ({} bytes)",
+            items.len(),
+            size
+          ),
+          DataValue::Object(serde_json::json!({
+            "category": "Applications",
+            "totalSize": size,
+            "fileCount": count,
+            "description": "Application caches (Flatpak, Snap, AppImage)",
+            "items": items,
+          })),
+        ))
+      }
+      Err(e) => Err(e.into_response()),
+    }
   }
 
   fn scan_application_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
@@ -285,7 +335,23 @@ impl JunkCleanerService {
   }
 
   pub fn scan_system_temp(&self) -> Result<ResponseModel, ResponseModel> {
-    self.scan_system_temp_inner().map_err(|e| e.into_response())
+    match self.scan_system_temp_inner() {
+      Ok(items) => {
+        let size: u64 = items.iter().map(|i| i.size).sum();
+        let count: u32 = items.iter().map(|i| i.file_count).sum();
+        Ok(success_response(
+          format!("Found {} system temp items ({} bytes)", items.len(), size),
+          DataValue::Object(serde_json::json!({
+            "category": "System",
+            "totalSize": size,
+            "fileCount": count,
+            "description": "System temporary files (/tmp, /var/tmp)",
+            "items": items,
+          })),
+        ))
+      }
+      Err(e) => Err(e.into_response()),
+    }
   }
 
   fn scan_system_temp_inner(&self) -> CleanerResult<Vec<JunkItem>> {
@@ -314,9 +380,23 @@ impl JunkCleanerService {
   }
 
   pub fn scan_log_rotations(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .scan_log_rotations_inner()
-      .map_err(|e| e.into_response())
+    match self.scan_log_rotations_inner() {
+      Ok(items) => {
+        let size: u64 = items.iter().map(|i| i.size).sum();
+        let count: u32 = items.iter().map(|i| i.file_count).sum();
+        Ok(success_response(
+          format!("Found {} log rotation items ({} bytes)", items.len(), size),
+          DataValue::Object(serde_json::json!({
+            "category": "Logs",
+            "totalSize": size,
+            "fileCount": count,
+            "description": "Rotated and old log files",
+            "items": items,
+          })),
+        ))
+      }
+      Err(e) => Err(e.into_response()),
+    }
   }
 
   fn scan_log_rotations_inner(&self) -> CleanerResult<Vec<JunkItem>> {
@@ -342,7 +422,7 @@ impl JunkCleanerService {
               }
             }
           }
-          if let Ok(filename) = path.file_name() {
+          if let Some(filename) = path.file_name() {
             let name = filename.to_string_lossy();
             if name.ends_with(".old")
               || name.ends_with(".bak")

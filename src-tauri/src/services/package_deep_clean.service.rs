@@ -114,10 +114,8 @@ impl PackageDeepCleanService {
         })),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to clean APT cache: {}",
-        stderr
-      )))
+      let err_msg = format!("Failed to clean APT cache: {}", stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 
@@ -134,10 +132,8 @@ impl PackageDeepCleanService {
         })),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to run apt-get autoremove: {}",
-        stderr
-      )))
+      let err_msg = format!("Failed to run apt-get autoremove: {}", stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 
@@ -157,10 +153,8 @@ impl PackageDeepCleanService {
         })),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to run apt-get autoclean: {}",
-        stderr
-      )))
+      let err_msg = format!("Failed to run apt-get autoclean: {}", stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 
@@ -202,10 +196,8 @@ impl PackageDeepCleanService {
         data_string(name),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to remove package {}: {}",
-        name, stderr
-      )))
+      let err_msg = format!("Failed to remove package {}: {}", name, stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 
@@ -256,10 +248,8 @@ impl PackageDeepCleanService {
         })),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to clean DNF cache: {}",
-        stderr
-      )))
+      let err_msg = format!("Failed to clean DNF cache: {}", stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 
@@ -285,7 +275,11 @@ impl PackageDeepCleanService {
         ),
       ],
     )?;
-    let packages: Vec<String> = output.lines().filter(|s| !s.is_empty()).collect();
+    let packages: Vec<String> = output
+      .lines()
+      .filter(|s| !s.is_empty())
+      .map(|s| s.to_string())
+      .collect();
 
     let mut freed: u64 = 0;
     for pkg in &packages {
@@ -329,10 +323,8 @@ impl PackageDeepCleanService {
         })),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to run pacman -Scc: {}",
-        stderr
-      )))
+      let err_msg = format!("Failed to run pacman -Scc: {}", stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 
@@ -361,10 +353,8 @@ impl PackageDeepCleanService {
         })),
       ))
     } else {
-      Err(AppError::message(format!(
-        "Failed to clean Zypper cache: {}",
-        stderr
-      )))
+      let err_msg = format!("Failed to clean Zypper cache: {}", stderr);
+      Err(AppError::message(err_msg).into_response())
     }
   }
 

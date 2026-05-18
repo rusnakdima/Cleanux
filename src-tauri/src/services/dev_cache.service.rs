@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 type DevCacheResult<T> = Result<T, AppError>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct DevCacheItem {
   pub name: String,
   pub cache_path: String,
@@ -29,7 +29,7 @@ pub struct DevCacheSummary {
 pub struct DevCacheService;
 
 impl DevCacheService {
-  pub fn get_all_dev_caches(&self) -> ResponseModel {
+  pub fn get_all_dev_caches(&self) -> Result<ResponseModel, ResponseModel> {
     self
       .get_all_dev_caches_inner()
       .map_err(|e| e.into_response())
@@ -244,7 +244,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_npm_cache(&self) -> ResponseModel {
+  pub fn clean_npm_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self.clean_npm_cache_inner().map_err(|e| e.into_response())
   }
 
@@ -272,7 +272,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_pip_cache(&self) -> ResponseModel {
+  pub fn clean_pip_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self.clean_pip_cache_inner().map_err(|e| e.into_response())
   }
 
@@ -300,7 +300,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_cargo_cache(&self) -> ResponseModel {
+  pub fn clean_cargo_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self
       .clean_cargo_cache_inner()
       .map_err(|e| e.into_response())
@@ -342,7 +342,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_go_cache(&self) -> ResponseModel {
+  pub fn clean_go_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self.clean_go_cache_inner().map_err(|e| e.into_response())
   }
 
@@ -367,7 +367,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_maven_cache(&self) -> ResponseModel {
+  pub fn clean_maven_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self
       .clean_maven_cache_inner()
       .map_err(|e| e.into_response())
@@ -397,7 +397,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_gradle_cache(&self) -> ResponseModel {
+  pub fn clean_gradle_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self
       .clean_gradle_cache_inner()
       .map_err(|e| e.into_response())
@@ -427,7 +427,7 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_all_dev_caches(&self) -> ResponseModel {
+  pub fn clean_all_dev_caches(&self) -> Result<ResponseModel, ResponseModel> {
     self
       .clean_all_dev_caches_inner()
       .map_err(|e| e.into_response())
