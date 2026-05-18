@@ -54,11 +54,16 @@ export class FilePreviewComponent {
     if (!file) return 'description';
 
     switch (file.type) {
-      case 'image': return 'image';
-      case 'text': return 'description';
-      case 'binary': return 'code';
-      case 'error': return 'error_outline';
-      default: return 'insert_drive_file';
+      case 'image':
+        return 'image';
+      case 'text':
+        return 'description';
+      case 'binary':
+        return 'code';
+      case 'error':
+        return 'error_outline';
+      default:
+        return 'insert_drive_file';
     }
   }
 
@@ -73,7 +78,7 @@ export class FilePreviewComponent {
   }
 
   toggleOpenWith(): void {
-    this.showOpenWith.update(v => !v);
+    this.showOpenWith.update((v) => !v);
   }
 
   openWith(command?: string): void {

@@ -1,5 +1,12 @@
 /* sys lib */
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+  inject,
+  computed,
+} from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 
 /* materials */
@@ -22,6 +29,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
 @Component({
   selector: 'app-system-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatButtonModule,
@@ -44,13 +52,13 @@ export class SystemView implements OnInit {
   selectedServices = signal<Set<string>>(new Set());
 
   totalServices = computed(() => this.servicesData().length);
-  runningServices = computed(() => this.servicesData().filter(s => s.isRunning).length);
-  stoppedServices = computed(() => this.servicesData().filter(s => !s.isRunning).length);
+  runningServices = computed(() => this.servicesData().filter((s) => s.isRunning).length);
+  stoppedServices = computed(() => this.servicesData().filter((s) => !s.isRunning).length);
 
   serviceColumns: TableColumn[] = [
     { key: 'name', label: 'Name', width: 'flex-1', sortable: true },
     { key: 'active', label: 'Active', width: 'w-32', sortable: true },
-    { key: 'status', label: 'Status', align: 'right', width: 'w-32', sortable: true }
+    { key: 'status', label: 'Status', align: 'right', width: 'w-32', sortable: true },
   ];
 
   get isDark(): boolean {
@@ -91,10 +99,7 @@ export class SystemView implements OnInit {
       this.selectedServices.set(new Set());
       await this.loadData();
     } catch (error: unknown) {
-      alert(
-        'Failed to stop services: ' +
-          (error instanceof Error ? error.message : String(error))
-      );
+      alert('Failed to stop services: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       this.loading.set(false);
     }
@@ -114,8 +119,7 @@ export class SystemView implements OnInit {
       await this.loadData();
     } catch (error: unknown) {
       alert(
-        'Failed to start services: ' +
-          (error instanceof Error ? error.message : String(error))
+        'Failed to start services: ' + (error instanceof Error ? error.message : String(error))
       );
     } finally {
       this.loading.set(false);
@@ -131,10 +135,7 @@ export class SystemView implements OnInit {
       await this.systemService.startService(service);
       await this.loadData();
     } catch (error: unknown) {
-      alert(
-        'Failed to start service: ' +
-          (error instanceof Error ? error.message : String(error))
-      );
+      alert('Failed to start service: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       this.loading.set(false);
     }

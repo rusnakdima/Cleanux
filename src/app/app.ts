@@ -1,10 +1,13 @@
 /* sys lib */
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, effect } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
 /* components */
 import { SidebarComponent } from '@components/sidebar/sidebar.component';
+
+/* services */
+import { ThemeService } from '@services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -14,30 +17,9 @@ import { SidebarComponent } from '@components/sidebar/sidebar.component';
 })
 export class App {
   private document = inject(DOCUMENT);
-  isDarkMode = signal(localStorage.getItem('theme') === 'dark');
-
-  get isDark(): boolean {
-    return this.document.body.classList.contains('dark');
-  }
-
-  toggleDarkMode() {
-    this.isDarkMode.update((value) => !value);
-    const theme = this.isDarkMode() ? 'dark' : 'light';
-    localStorage.setItem('theme', theme);
-
-    if (this.isDarkMode()) {
-      this.document.body.classList.add('dark');
-    } else {
-      this.document.body.classList.remove('dark');
-    }
-  }
+  private themeService = inject(ThemeService);
 
   constructor() {
-    // Ensure dark mode is applied on start
-    if (this.isDarkMode()) {
-      this.document.body.classList.add('dark');
-    } else {
-      this.document.body.classList.remove('dark');
-    }
+    this.themeService.applyTheme(this.themeService.currentTheme());
   }
 }

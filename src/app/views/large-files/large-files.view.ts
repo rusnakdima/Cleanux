@@ -1,6 +1,13 @@
 /* sys lib */
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  signal,
+  inject,
+  computed,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 /* materials */
 import { MatButtonModule } from '@angular/material/button';
@@ -9,8 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { SystemService, LargeFileItem } from '@services/system.service';
-import { MainService } from '@services/main.service';
+import { FileService, LargeFileItem } from '@services/file.service';
 
 /* components */
 import { DataTableComponent } from '@components/data-table/data-table.component';
@@ -21,10 +27,12 @@ import { SearchComponent } from '@components/search/search.component';
 
 /* models */
 import { TableColumn, TableOptions } from '@models/data-table.model';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-large-files-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatButtonModule,
@@ -39,9 +47,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
   templateUrl: './large-files.view.html',
 })
 export class LargeFilesView implements OnInit {
-  private systemService = inject(SystemService);
-  private mainService = inject(MainService);
-  private document = inject(DOCUMENT);
+  private fileService = inject(FileService);
 
   largeFiles = signal<LargeFileItem[]>([]);
   filteredFiles = signal<LargeFileItem[]>([]);
@@ -60,12 +66,8 @@ export class LargeFilesView implements OnInit {
     { key: 'name', label: 'Name', width: 'w-64', sortable: true },
     { key: 'path', label: 'Path', width: 'flex-1', sortable: true },
     { key: 'size', label: 'Size', align: 'right', width: 'w-32', sortable: true },
-    { key: 'modified', label: 'Modified', width: 'w-48', sortable: true }
+    { key: 'modified', label: 'Modified', width: 'w-48', sortable: true },
   ];
-
-  get isDark(): boolean {
-    return this.document.body.classList.contains('dark');
-  }
 
   async ngOnInit() {
     await this.loadData();
@@ -74,7 +76,7 @@ export class LargeFilesView implements OnInit {
   async loadData() {
     this.loading.set(true);
     try {
-      const files = await this.systemService.getLargeFiles();
+      const files = await this.fileService.getLargeFiles();
       this.largeFiles.set(files);
       this.filteredFiles.set(files);
     } catch (error) {
@@ -99,7 +101,7 @@ export class LargeFilesView implements OnInit {
 
     try {
       this.loading.set(true);
-      await this.systemService.clearSelectedLargeFiles(filesToClear);
+      await this.fileService.clearSelectedLargeFiles(filesToClear);
       this.selectedFiles.set(new Set());
       await this.loadData();
     } catch (error) {
@@ -107,16 +109,6 @@ export class LargeFilesView implements OnInit {
     } finally {
       this.loading.set(false);
     }
-  }
-
-  formatSize(size: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let i = 0;
-    while (size >= 1024 && i < units.length - 1) {
-      size /= 1024;
-      i++;
-    }
-    return `${size.toFixed(1)} ${units[i]}`;
   }
 
   getTableOptions(): TableOptions {
@@ -138,13 +130,7 @@ export class LargeFilesView implements OnInit {
     this.previewData.set({ name: file.name, path: file.path, type: 'unknown' });
 
     try {
-      const result = await this.mainService.previewFile<{
-        name: string;
-        path: string;
-        type: string;
-        content?: string;
-        imageUrl?: string;
-      }>(file.path);
+      const result = await this.fileService.previewFile(file.path);
 
       this.previewData.set({
         name: result.name,
@@ -154,8 +140,7 @@ export class LargeFilesView implements OnInit {
         imageUrl: result.imageUrl,
       });
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unable to preview file';
+      const errorMessage = error instanceof Error ? error.message : 'Unable to preview file';
       this.previewData.set({
         name: file.name,
         path: file.path,
@@ -174,12 +159,9 @@ export class LargeFilesView implements OnInit {
   async onOpenInEditor(event: { path: string; command?: string }): Promise<void> {
     if (!event.path) return;
     try {
-      await this.mainService.openFile(event.path, event.command);
+      await this.fileService.openFile(event.path, event.command);
     } catch (error: unknown) {
-      alert(
-        'Failed to open file: ' +
-          (error instanceof Error ? error.message : String(error))
-      );
+      alert('Failed to open file: ' + (error instanceof Error ? error.message : String(error)));
     }
   }
 }

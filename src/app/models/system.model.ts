@@ -37,3 +37,10 @@ export interface ScanSummary {
   totalSize: number;
   fileCount: number;
 }
+
+export interface ProcessItem {
+  pid: number;
+  name: string;
+  cpu_usage: number;
+  memory_usage: number;
+}

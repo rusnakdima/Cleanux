@@ -20,8 +20,13 @@
     </div>
   </div>
 
+  <!-- System Monitor Widget -->
+  <div class="mb-8">
+    <app-system-monitor></app-system-monitor>
+  </div>
+
   <!-- Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
     <!-- Health Score -->
     <div class="dashboard-card">
       <span class="card-label">System Health</span>
@@ -65,7 +70,44 @@
       <mat-icon class="text-indigo-500 text-3xl">auto_delete</mat-icon>
     </div>
 
-    <!-- System Status -->
+    <!-- Health Trend -->
+    <div class="dashboard-card delay-200">
+      <span class="card-label">Health Trend</span>
+      <div class="flex items-center justify-center h-full">
+        @if (healthTrend().trend === "improving") {
+          <div class="text-center">
+            <mat-icon class="text-emerald-500 text-4xl">trending_up</mat-icon>
+            <span class="text-emerald-500 font-bold block mt-2">Improving</span>
+            <span class="text-sm text-gray-500"
+              >+{{ healthTrend().change_percent | number: "1.1-1" }}%</span
+            >
+          </div>
+        } @else if (healthTrend().trend === "declining") {
+          <div class="text-center">
+            <mat-icon class="text-rose-500 text-4xl">trending_down</mat-icon>
+            <span class="text-rose-500 font-bold block mt-2">Declining</span>
+            <span class="text-sm text-gray-500"
+              >{{ healthTrend().change_percent | number: "1.1-1" }}%</span
+            >
+          </div>
+        } @else if (healthTrend().trend === "stable") {
+          <div class="text-center">
+            <mat-icon class="text-amber-500 text-4xl">trending_flat</mat-icon>
+            <span class="text-amber-500 font-bold block mt-2">Stable</span>
+            <span class="text-sm text-gray-500"
+              >{{ healthTrend().change_percent | number: "1.1-1" }}%</span
+            >
+          </div>
+        } @else {
+          <div class="text-center">
+            <mat-icon class="text-gray-400 text-4xl">hourglass_empty</mat-icon>
+            <span class="text-gray-400 font-bold block mt-2">Insufficient Data</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recommendation -->
     <div class="dashboard-card delay-200 text-center">
       <span class="card-label">Recommendation</span>
       <p class="font-semibold text-slate-600 dark:text-slate-400">
@@ -90,6 +132,90 @@
       }
     </div>
   </div>
+
+  <!-- Health History Chart -->
+  @if (healthHistory().length > 0) {
+    <div class="dashboard-card mt-8">
+      <div class="flex items-center justify-between mb-4">
+        <span class="card-label">Health History</span>
+        <div class="flex gap-2">
+          <button
+            (click)="setHealthHistoryDays(7)"
+            class="px-3 py-1 rounded text-sm font-medium transition-colors"
+            [class.bg-indigo-600]="healthHistoryDays() === 7"
+            [class.text-white]="healthHistoryDays() === 7"
+            [class.bg-gray-200]="healthHistoryDays() !== 7"
+            [class.dark:bg-gray-700]="healthHistoryDays() !== 7"
+          >
+            7 Days
+          </button>
+          <button
+            (click)="setHealthHistoryDays(30)"
+            class="px-3 py-1 rounded text-sm font-medium transition-colors"
+            [class.bg-indigo-600]="healthHistoryDays() === 30"
+            [class.text-white]="healthHistoryDays() === 30"
+            [class.bg-gray-200]="healthHistoryDays() !== 30"
+            [class.dark:bg-gray-700]="healthHistoryDays() !== 30"
+          >
+            30 Days
+          </button>
+        </div>
+      </div>
+      <div class="h-40 relative">
+        <svg viewBox="0 0 300 120" class="w-full h-full">
+          <line
+            x1="10"
+            y1="110"
+            x2="290"
+            y2="110"
+            stroke="currentColor"
+            class="text-slate-300 dark:text-slate-700"
+            stroke-width="1"
+          />
+          <line
+            x1="10"
+            y1="55"
+            x2="290"
+            y2="55"
+            stroke="currentColor"
+            class="text-slate-300 dark:text-slate-700"
+            stroke-width="1"
+            stroke-dasharray="4"
+          />
+          <line
+            x1="10"
+            y1="10"
+            x2="290"
+            y2="10"
+            stroke="currentColor"
+            class="text-slate-300 dark:text-slate-700"
+            stroke-width="1"
+          />
+          <text x="5" y="112" font-size="8" fill="currentColor" class="text-slate-400">0%</text>
+          <text x="5" y="57" font-size="8" fill="currentColor" class="text-slate-400">50%</text>
+          <text x="5" y="12" font-size="8" fill="currentColor" class="text-slate-400">100%</text>
+          @if (healthHistory().length > 0) {
+            <path
+              [attr.d]="getChartPath()"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="text-indigo-600"
+            />
+            @for (point of healthHistory(); track point.timestamp; let i = $index) {
+              <circle
+                [attr.cx]="10 + (i / (healthHistory().length - 1)) * 280"
+                [attr.cy]="10 + (100 - point.health_score) * 1"
+                r="3"
+                fill="currentColor"
+                class="text-indigo-600"
+              />
+            }
+          }
+        </svg>
+      </div>
+    </div>
+  }
 
   <!-- Main Scan Action -->
   <div class="scan-section min-h-[400px]">

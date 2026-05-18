@@ -2,115 +2,56 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { MainService } from './main.service';
+import { ApiService } from './api.service';
 
 /* models */
-import {
-  SystemServiceItem,
-  CacheFileItem,
-  TrashFileItem,
-  LogFileItem,
-  LargeFileItem,
-  ScanSummary,
-} from '@models/system.model';
+import { SystemServiceItem, ProcessItem } from '@models/system.model';
 
-export type { SystemServiceItem, CacheFileItem, TrashFileItem, LogFileItem, LargeFileItem, ScanSummary } from '@models/system.model';
+export type { SystemServiceItem, ProcessItem } from '@models/system.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SystemService {
-  private mainService = inject(MainService);
+  private api = inject(ApiService);
 
   async getSystemServices(): Promise<SystemServiceItem[]> {
-    return await this.mainService.getSystemServices<SystemServiceItem[]>();
-  }
-
-  async getCacheFiles(): Promise<CacheFileItem[]> {
-    return await this.mainService.getCacheFiles<CacheFileItem[]>();
-  }
-
-  async getTrashFiles(): Promise<TrashFileItem[]> {
-    return await this.mainService.getTrashFiles<TrashFileItem[]>();
-  }
-
-  async getSystemLogs(): Promise<LogFileItem[]> {
-    return await this.mainService.getSystemLogs<LogFileItem[]>();
-  }
-
-  async getLargeFiles(): Promise<LargeFileItem[]> {
-    return await this.mainService.getLargeFiles<LargeFileItem[]>();
-  }
-
-  async clearSelectedCacheFiles(paths: string[]): Promise<string> {
-    return await this.mainService.clearSelectedCacheFiles<string>(paths);
-  }
-
-  async clearSelectedTrashFiles(paths: string[]): Promise<string> {
-    return await this.mainService.clearSelectedTrashFiles<string>(paths);
-  }
-
-  async clearSelectedLogFiles(paths: string[]): Promise<string> {
-    return await this.mainService.clearSelectedLogFiles<string>(paths);
-  }
-
-  async clearSelectedLargeFiles(paths: string[]): Promise<string> {
-    return await this.mainService.clearSelectedLargeFiles<string>(paths);
-  }
-
-  async stopSelectedServices(services: string[]): Promise<string> {
-    return await this.mainService.stopSelectedServices<string>(services);
-  }
-
-  async clearTrash(): Promise<string> {
-    return await this.mainService.clearTrash<string>();
-  }
-
-  async clearCache(): Promise<string> {
-    return await this.mainService.clearCache<string>();
-  }
-
-  async clearAllLogs(): Promise<string> {
-    return await this.mainService.clearAllLogs<string>();
-  }
-
-  async clearAllLargeFiles(): Promise<string> {
-    return await this.mainService.clearAllLargeFiles<string>();
-  }
-
-  async stopService(service: string): Promise<string> {
-    return await this.mainService.stopService<string>(service);
-  }
-
-  async getCacheSummary(): Promise<ScanSummary> {
-    return await this.mainService.getCacheSummary<ScanSummary>();
-  }
-
-  async getTrashSummary(): Promise<ScanSummary> {
-    return await this.mainService.getTrashSummary<ScanSummary>();
-  }
-
-  async getLogSummary(): Promise<ScanSummary> {
-    return await this.mainService.getLogSummary<ScanSummary>();
-  }
-
-  async getLargeFilesSummary(): Promise<ScanSummary> {
-    return await this.mainService.getLargeFilesSummary<ScanSummary>();
+    return await this.api.invoke<SystemServiceItem[]>('getSystemServices');
   }
 
   async getAllServices(): Promise<SystemServiceItem[]> {
-    return await this.mainService.getAllServices<SystemServiceItem[]>();
+    return await this.api.invoke<SystemServiceItem[]>('getAllServices');
   }
 
-  async enableService(service: string): Promise<string> {
-    return await this.mainService.enableService<string>(service);
+  async stopService(service: string): Promise<string> {
+    return await this.api.invoke<string>('stopService', { service });
+  }
+
+  async stopSelectedServices(services: string[]): Promise<string> {
+    return await this.api.invoke<string>('stopSelectedServices', { services });
   }
 
   async startService(service: string): Promise<string> {
-    return await this.mainService.startService<string>(service);
+    return await this.api.invoke<string>('startService', { service });
+  }
+
+  async enableService(service: string): Promise<string> {
+    return await this.api.invoke<string>('enableService', { service });
   }
 
   async enableSelectedServices(services: string[]): Promise<string> {
-    return await this.mainService.enableSelectedServices<string>(services);
+    return await this.api.invoke<string>('enableSelectedServices', { services });
+  }
+
+  async getProcesses(): Promise<ProcessItem[]> {
+    return await this.api.invoke<ProcessItem[]>('getProcesses');
+  }
+
+  async killProcess(pid: number): Promise<string> {
+    return await this.api.invoke<string>('killProcess', { pid });
+  }
+
+  async killSelectedProcesses(pids: number[]): Promise<string> {
+    return await this.api.invoke<string>('killSelectedProcesses', { pids });
   }
 }

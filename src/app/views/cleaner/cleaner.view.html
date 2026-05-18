@@ -87,6 +87,18 @@
           >
             Logs ({{ store.logData().length }})
           </button>
+          <button
+            class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
+            [class.border-indigo-500]="store.activeTab() === 'packages'"
+            [class.text-indigo-600]="store.activeTab() === 'packages'"
+            [class.dark:text-indigo-400]="store.activeTab() === 'packages'"
+            [class.border-transparent]="store.activeTab() !== 'packages'"
+            [class.text-slate-400]="store.activeTab() !== 'packages'"
+            [class.hover:text-slate-600]="store.activeTab() !== 'packages'"
+            (click)="onTabChange('packages')"
+          >
+            Packages ({{ store.packageCacheData().length }})
+          </button>
         </div>
         <div class="flex items-center gap-4">
           <app-search
@@ -141,16 +153,197 @@
           (selectionChange)="store.selectedTrashFiles.set($event)"
           (preview)="onPreview($event)"
         />
-      } @else {
-        <app-data-table
-          [columns]="logColumns"
-          [data]="store.filteredLogData()"
-          [loading]="store.loading()"
-          [options]="getTableOptions('logs')"
-          [selectedKeys]="store.selectedLogFiles()"
-          (selectionChange)="store.selectedLogFiles.set($event)"
-          (preview)="onPreview($event)"
-        />
+      } @else if (store.activeTab() === "logs") {
+        <!-- Log Analyzer View -->
+        <div class="space-y-6 h-full flex flex-col">
+          <!-- Category Summary Cards -->
+          @if (logSummary()) {
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div
+                class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                [class.border-indigo-500]="selectedLogCategory() === 'system'"
+                (click)="selectedLogCategory.set('system')"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-purple-500">computer</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">System</p>
+                    <p class="text-lg font-bold">{{ formatSize(logSummary()!.system.size) }}</p>
+                    <p class="text-xs text-slate-400">{{ logSummary()!.system.count }} files</p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                [class.border-indigo-500]="selectedLogCategory() === 'application'"
+                (click)="selectedLogCategory.set('application')"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                    <mat-icon class="text-blue-500">apps</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Application</p>
+                    <p class="text-lg font-bold">
+                      {{ formatSize(logSummary()!.application.size) }}
+                    </p>
+                    <p class="text-xs text-slate-400">
+                      {{ logSummary()!.application.count }} files
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                [class.border-indigo-500]="selectedLogCategory() === 'security'"
+                (click)="selectedLogCategory.set('security')"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-green-500">security</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Security</p>
+                    <p class="text-lg font-bold">{{ formatSize(logSummary()!.security.size) }}</p>
+                    <p class="text-xs text-slate-400">{{ logSummary()!.security.count }} files</p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                [class.border-indigo-500]="selectedLogCategory() === 'hardware'"
+                (click)="selectedLogCategory.set('hardware')"
+              >
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center"
+                  >
+                    <mat-icon class="text-orange-500">memory</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Hardware</p>
+                    <p class="text-lg font-bold">{{ formatSize(logSummary()!.hardware.size) }}</p>
+                    <p class="text-xs text-slate-400">{{ logSummary()!.hardware.count }} files</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Log Entries Table -->
+            <div class="flex-1 overflow-auto">
+              <table class="w-full">
+                <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">
+                      Path
+                    </th>
+                    <th
+                      class="px-4 py-3 text-center text-xs font-bold text-slate-500 uppercase w-24"
+                    >
+                      Severity
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase w-24"
+                    >
+                      Count
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase w-32"
+                    >
+                      Size
+                    </th>
+                    <th
+                      class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase w-48"
+                    >
+                      Last Modified
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5 dark:divide-white/5">
+                  @for (entry of getFilteredLogEntries(); track entry.path) {
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td class="px-4 py-3 text-sm font-mono">{{ entry.path }}</td>
+                      <td class="px-4 py-3 text-center">
+                        <span
+                          class="px-2 py-1 rounded text-xs font-bold uppercase"
+                          [class.bg-red-500/10]="entry.severity === 'error'"
+                          [class.text-red-600]="entry.severity === 'error'"
+                          [class.bg-yellow-500/10]="entry.severity === 'warning'"
+                          [class.text-yellow-600]="entry.severity === 'warning'"
+                          [class.bg-blue-500/10]="entry.severity === 'info'"
+                          [class.text-blue-600]="entry.severity === 'info'"
+                        >
+                          {{ entry.severity }}
+                        </span>
+                      </td>
+                      <td class="px-4 py-3 text-right text-sm">{{ entry.count }}</td>
+                      <td class="px-4 py-3 text-right text-sm">{{ formatSize(entry.size) }}</td>
+                      <td class="px-4 py-3 text-right text-sm text-slate-500">
+                        {{ entry.lastModified }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Clear Old Logs Action -->
+            <div
+              class="flex items-center justify-between pt-4 border-t border-black/5 dark:border-white/5"
+            >
+              <div class="flex items-center gap-2">
+                <label class="text-sm text-slate-500">Clear logs older than:</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  [value]="cleanDays()"
+                  (change)="cleanDays.set(+$any($event.target).value)"
+                  class="w-20 px-2 py-1 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-sm"
+                />
+                <span class="text-sm text-slate-500">days</span>
+              </div>
+              <button
+                (click)="cleanOldLogs()"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <mat-icon class="text-sm">delete_sweep</mat-icon>
+                Clear Resolved
+              </button>
+            </div>
+          } @else {
+            <div class="flex items-center justify-center h-32">
+              <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+            </div>
+          }
+        </div>
+      }
+      @if (store.activeTab() === "packages") {
+        <div class="space-y-4">
+          <div class="flex justify-end">
+            <button
+              (click)="store.cleanAllPackageCaches()"
+              [disabled]="store.loading() || store.packageCacheData().length === 0"
+              class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <mat-icon class="text-sm">delete</mat-icon>
+              Clean All
+            </button>
+          </div>
+          <app-data-table
+            [columns]="packageColumns"
+            [data]="store.packageCacheData()"
+            [loading]="store.loading()"
+            [options]="getPackageTableOptions()"
+            (rowAction)="onPackageAction($event)"
+          />
+        </div>
       }
     </div>
   </div>

@@ -2,10 +2,10 @@ export const environment = {
   production: false,
   version: '0.2.1',
   gitRepoName: 'Cleanux',
-  githubUser: "TechCraft-Solutions",
+  githubUser: 'TechCraft-Solutions',
   nameProduct: 'Cleanux',
   yearCreate: 2026,
-  companyName: "TechCraft Solutions",
+  companyName: 'TechCraft Solutions',
   authors: [
     {
       name: 'Dmitriy303',

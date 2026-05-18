@@ -4,6 +4,14 @@ export interface TableColumn {
   width?: string;
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
+  actions?: TableAction[];
+}
+
+export interface TableAction {
+  label: string;
+  icon?: string;
+  class?: string;
+  callback: string;
 }
 
 export interface TableOptions {
@@ -15,4 +23,5 @@ export interface TableOptions {
   showSelectedActions?: boolean;
   selectedActionText?: string;
   showPreviewButton?: boolean;
+  showRowActions?: boolean;
 }

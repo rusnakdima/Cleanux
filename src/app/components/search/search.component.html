@@ -5,12 +5,11 @@
         type="text"
         class="w-full h-10 px-4 pl-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         placeholder="Search..."
-        [(ngModel)]="searchQuery"
-        (input)="onSearch()"
+        [formControl]="searchControl"
         (keydown.escape)="hide()"
       />
       <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</mat-icon>
-      @if (searchQuery()) {
+      @if (searchControl.value) {
         <button
           (click)="clearSearch()"
           class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"

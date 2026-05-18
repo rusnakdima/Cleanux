@@ -1,12 +1,6 @@
 export type Status = 'success' | 'info' | 'warning' | 'error';
 
-export type DataValue =
-  | string
-  | number
-  | boolean
-  | unknown[]
-  | Record<string, unknown>
-  | null;
+export type DataValue = string | number | boolean | unknown[] | Record<string, unknown> | null;
 
 export interface Response<T = unknown> {
   status: Status;

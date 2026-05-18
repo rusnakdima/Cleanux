@@ -1,7 +1,18 @@
 /* sys lib */
-import { Component, EventEmitter, Input, Output, signal, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  signal,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 /* materials */
 import { MatIconModule } from '@angular/material/icon';
@@ -9,10 +20,11 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './search.component.html',
 })
-export class SearchComponent implements OnChanges {
+export class SearchComponent implements OnChanges, OnDestroy {
   @Input() data: object[] = [];
   @Input() searchFields: string[] = [];
   @Output() filteredData = new EventEmitter<object[]>();
@@ -20,6 +32,17 @@ export class SearchComponent implements OnChanges {
   searchQuery = signal('');
   isVisible = signal(false);
   private _originalData: object[] = [];
+  private destroy$ = new Subject<void>();
+  searchControl = new FormControl('');
+
+  constructor() {
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((value) => {
+        this.searchQuery.set(value ?? '');
+        this.onSearch();
+      });
+  }
 
   private rowRecord(item: object): Record<string, unknown> {
     return item as Record<string, unknown>;
@@ -37,6 +60,11 @@ export class SearchComponent implements OnChanges {
     }
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   show(): void {
     this.isVisible.set(true);
     setTimeout(() => {
@@ -48,11 +76,13 @@ export class SearchComponent implements OnChanges {
   hide(): void {
     this.isVisible.set(false);
     this.searchQuery.set('');
+    this.searchControl.setValue('');
     this.filteredData.emit(this._originalData);
   }
 
   clearSearch(): void {
     this.searchQuery.set('');
+    this.searchControl.setValue('');
     this.filteredData.emit(this._originalData);
   }
 
@@ -64,15 +94,15 @@ export class SearchComponent implements OnChanges {
       return;
     }
 
-    const filtered = this._originalData.filter(item => {
+    const filtered = this._originalData.filter((item) => {
       const rec = this.rowRecord(item);
       if (this.searchFields.length > 0) {
-        return this.searchFields.some(field => {
+        return this.searchFields.some((field) => {
           const value = this.getValue(rec, field);
           return String(value).toLowerCase().includes(query);
         });
       }
-      return Object.values(rec).some(value => {
+      return Object.values(rec).some((value) => {
         if (typeof value === 'object' && value !== null) return false;
         return String(value).toLowerCase().includes(query);
       });

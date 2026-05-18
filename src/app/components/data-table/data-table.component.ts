@@ -1,6 +1,16 @@
 /* sys lib */
-import { Component, Input, Output, EventEmitter, signal, inject, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  signal,
+  inject,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 /* materials */
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -14,10 +24,12 @@ import { PaginationComponent } from '../pagination/pagination.component';
 
 /* models */
 import { TableColumn, TableOptions } from '@models/data-table.model';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-data-table',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MatCheckboxModule,
@@ -25,12 +37,11 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    PaginationComponent
+    PaginationComponent,
   ],
   templateUrl: './data-table.component.html',
 })
-export class DataTableComponent<T extends object = object>
-  implements OnChanges {
+export class DataTableComponent<T extends object = object> implements OnChanges {
   @Input() columns: TableColumn[] = [];
   @Input() data: T[] = [];
   @Input() options: TableOptions = {};
@@ -55,8 +66,7 @@ export class DataTableComponent<T extends object = object>
   @Output() newPageSize = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
   @Output() preview = new EventEmitter<T>();
-
-  private document = inject(DOCUMENT);
+  @Output() rowAction = new EventEmitter<{ action: string; item: T }>();
 
   _selectedKeys = new Set<string>();
 
@@ -105,7 +115,7 @@ export class DataTableComponent<T extends object = object>
         if (typeof aVal === 'number' && typeof bVal === 'number') {
           comparison = aVal - bVal;
         } else if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-          comparison = (aVal === bVal) ? 0 : aVal ? -1 : 1;
+          comparison = aVal === bVal ? 0 : aVal ? -1 : 1;
         } else {
           comparison = String(aVal).localeCompare(String(bVal));
         }
@@ -137,10 +147,6 @@ export class DataTableComponent<T extends object = object>
     this.pageChange.emit(this.p);
   }
 
-  get isDark(): boolean {
-    return this.document.body.classList.contains('dark');
-  }
-
   get showCheckbox(): boolean {
     return this.options.showCheckbox ?? false;
   }
@@ -168,7 +174,7 @@ export class DataTableComponent<T extends object = object>
 
   toggleSelectAll(checked: boolean): void {
     if (checked) {
-      this.data.forEach(item => {
+      this.data.forEach((item) => {
         this._selectedKeys.add(String(this.rowRecord(item)[this.checkboxKey]));
       });
       this.allSelected.set(true);
@@ -212,16 +218,8 @@ export class DataTableComponent<T extends object = object>
     return {
       left: 'text-left',
       center: 'text-center',
-      right: 'text-right'
+      right: 'text-right',
     }[column.align || 'left'];
-  }
-
-  formatSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   formatCell(columnKey: string, item: T): string {
@@ -233,7 +231,7 @@ export class DataTableComponent<T extends object = object>
   onRowClick(item: T, event?: MouseEvent): void {
     const key = String(this.rowRecord(item)[this.checkboxKey]);
     const currentIndex = this.paginatedData.findIndex(
-      d => String(this.rowRecord(d)[this.checkboxKey]) === key
+      (d) => String(this.rowRecord(d)[this.checkboxKey]) === key
     );
     const lastIndex = this.lastSelectedIndex();
     const isCurrentlySelected = this._selectedKeys.has(key);
@@ -289,7 +287,7 @@ export class DataTableComponent<T extends object = object>
     if (!column.sortable) return;
 
     if (this.sortKey() === column.key) {
-      this.sortDirection.update(d => d === 'asc' ? 'desc' : 'asc');
+      this.sortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
       this.sortKey.set(column.key);
       this.sortDirection.set('asc');
@@ -317,6 +315,10 @@ export class DataTableComponent<T extends object = object>
 
   get showPreviewButton(): boolean {
     return this.options.showPreviewButton ?? false;
+  }
+
+  get showRowActions(): boolean {
+    return this.options.showRowActions ?? false;
   }
 
   sizeFromItem(item: T): number {

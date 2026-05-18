@@ -1,5 +1,15 @@
 /* sys lib */
-import { Component, Output, EventEmitter, OnChanges, SimpleChanges, computed, signal, input, effect } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+  computed,
+  signal,
+  input,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /* materials */
@@ -70,14 +80,14 @@ export class PaginationComponent {
 
   nextPage(): void {
     if (this.p() < this.totalPages()) {
-      this.p.update(v => v + 1);
+      this.p.update((v) => v + 1);
       this.pageChange.emit(this.p());
     }
   }
 
   previousPage(): void {
     if (this.p() > 1) {
-      this.p.update(v => v - 1);
+      this.p.update((v) => v - 1);
       this.pageChange.emit(this.p());
     }
   }

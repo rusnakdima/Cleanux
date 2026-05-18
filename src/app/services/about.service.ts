@@ -19,7 +19,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class AboutService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   gitRepoName: string = environment.gitRepoName;
   githubUser: string = environment.githubUser;
