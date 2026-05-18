@@ -12,7 +12,6 @@ pub enum ResponseStatus {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(untagged)]
 pub enum DataValue {
   String(String),
   Number(f64),
@@ -21,11 +20,23 @@ pub enum DataValue {
   Object(serde_json::Value),
 }
 
+impl From<serde_json::Value> for DataValue {
+  fn from(v: serde_json::Value) -> Self {
+    DataValue::Object(v)
+  }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ResponseModel {
   pub status: ResponseStatus,
   pub message: String,
   pub data: DataValue,
+}
+
+impl std::fmt::Display for ResponseModel {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{}", self.message)
+  }
 }
 
 impl From<Box<dyn std::error::Error + Send + Sync>> for ResponseModel {
