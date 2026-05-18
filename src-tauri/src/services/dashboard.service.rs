@@ -4,13 +4,11 @@ use std::path::Path;
 use std::process::Command;
 
 /* models */
-use crate::models::{
-  DataValue, ResponseModel, ResponseStatus, ScanSummaryModel, SystemServiceModel,
-};
+use crate::models::{DataValue, ResponseModel, ScanSummaryModel, SystemServiceModel};
 
 /* helpers */
+use crate::helpers::ResponseBuilder;
 use rayon::prelude::*;
-use serde_json::json;
 use walkdir::WalkDir;
 
 pub struct DashboardService;
@@ -30,11 +28,11 @@ impl DashboardService {
       .map_err(|e| format!("Failed to run systemctl: {}", e))?;
 
     if !output.status.success() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: String::from_utf8_lossy(&output.stderr).to_string(),
-        data: DataValue::String("".to_string()),
-      });
+      return Err(
+        ResponseBuilder::new()
+          .error(&String::from_utf8_lossy(&output.stderr).to_string())
+          .build(),
+      );
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -59,16 +57,17 @@ impl DashboardService {
       }
     }
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Running services retrieved successfully".to_string(),
-      data: DataValue::Array(
-        services
-          .into_iter()
-          .map(|s| serde_json::to_value(s).unwrap_or(json!({})))
-          .collect(),
-      ),
-    })
+    Ok(
+      ResponseBuilder::new()
+        .success("Running services retrieved successfully")
+        .data(DataValue::Array(
+          services
+            .into_iter()
+            .map(|s| serde_json::to_value(s).map_err(|e| format!("Serialization error: {}", e)))
+            .collect::<Result<Vec<_>, _>>()?,
+        ))
+        .build(),
+    )
   }
 
   pub fn getCacheSummary(&self) -> Result<ResponseModel, ResponseModel> {
@@ -76,12 +75,10 @@ impl DashboardService {
 
     let (totalSize, fileCount) = WalkDir::new(cacheDir)
       .max_depth(4)
-      .into_iter()
+      .into_par_iter()
       .filter_map(|e| e.ok())
       .filter(|e| e.file_type().is_file())
       .take(2000)
-      .collect::<Vec<_>>()
-      .into_par_iter()
       .filter_map(|entry| fs::metadata(entry.path()).ok())
       .fold(
         || (0u64, 0usize),
@@ -98,11 +95,14 @@ impl DashboardService {
       fileCount,
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Cache summary retrieved successfully".to_string(),
-      data: DataValue::Object(serde_json::to_value(summary).unwrap_or(json!({}))),
-    })
+    Ok(
+      ResponseBuilder::new()
+        .success("Cache summary retrieved successfully")
+        .data(DataValue::Object(
+          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
+        ))
+        .build(),
+    )
   }
 
   pub fn getTrashSummary(&self) -> Result<ResponseModel, ResponseModel> {
@@ -125,11 +125,14 @@ impl DashboardService {
       fileCount,
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Trash summary retrieved successfully".to_string(),
-      data: DataValue::Object(serde_json::to_value(summary).unwrap_or(json!({}))),
-    })
+    Ok(
+      ResponseBuilder::new()
+        .success("Trash summary retrieved successfully")
+        .data(DataValue::Object(
+          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
+        ))
+        .build(),
+    )
   }
 
   pub fn getLogSummary(&self) -> Result<ResponseModel, ResponseModel> {
@@ -137,12 +140,10 @@ impl DashboardService {
 
     let (totalSize, fileCount) = WalkDir::new(logDir)
       .max_depth(2)
-      .into_iter()
+      .into_par_iter()
       .filter_map(|e| e.ok())
       .filter(|e| e.file_type().is_file())
       .take(500)
-      .collect::<Vec<_>>()
-      .into_par_iter()
       .filter_map(|entry| fs::metadata(entry.path()).ok())
       .fold(
         || (0u64, 0usize),
@@ -159,11 +160,14 @@ impl DashboardService {
       fileCount,
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Log summary retrieved successfully".to_string(),
-      data: DataValue::Object(serde_json::to_value(summary).unwrap_or(json!({}))),
-    })
+    Ok(
+      ResponseBuilder::new()
+        .success("Log summary retrieved successfully")
+        .data(DataValue::Object(
+          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
+        ))
+        .build(),
+    )
   }
 
   pub fn getLargeFilesSummary(&self) -> Result<ResponseModel, ResponseModel> {
@@ -206,10 +210,13 @@ impl DashboardService {
       fileCount,
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Large files summary retrieved successfully".to_string(),
-      data: DataValue::Object(serde_json::to_value(summary).unwrap_or(json!({}))),
-    })
+    Ok(
+      ResponseBuilder::new()
+        .success("Large files summary retrieved successfully")
+        .data(DataValue::Object(
+          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
+        ))
+        .build(),
+    )
   }
 }

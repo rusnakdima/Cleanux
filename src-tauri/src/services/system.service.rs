@@ -2,17 +2,24 @@
 use std::process::Command;
 
 /* models */
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 
 pub struct SystemService;
+
+type ServiceResult<T> = Result<T, AppError>;
 
 #[allow(non_snake_case)]
 impl SystemService {
   pub fn stopService(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
+    self
+      .stop_service_inner(service)
+      .map_err(|e| e.into_response())
+  }
+
+  fn stop_service_inner(&self, service: &str) -> ServiceResult<ResponseModel> {
     let output = Command::new("pkexec")
       .args(["systemctl", "stop", service])
-      .output()
-      .map_err(|e| format!("Failed to run command: {}", e))?;
+      .output()?;
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -20,11 +27,11 @@ impl SystemService {
         data: DataValue::String(service.to_string()),
       })
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: String::from_utf8_lossy(&output.stderr).to_string(),
-        data: DataValue::String("".to_string()),
-      })
+      Err(AppError::ServiceNotFound(format!(
+        "Failed to stop service {}: {}",
+        service,
+        String::from_utf8_lossy(&output.stderr)
+      )))
     }
   }
 
@@ -32,6 +39,12 @@ impl SystemService {
     &self,
     services: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
+    self
+      .stop_selected_services_inner(services)
+      .map_err(|e| e.into_response())
+  }
+
+  fn stop_selected_services_inner(&self, services: Vec<String>) -> ServiceResult<ResponseModel> {
     if services.is_empty() {
       return Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -46,11 +59,7 @@ impl SystemService {
       cmd.arg(service);
     }
 
-    let output = cmd.output().map_err(|e| ResponseModel {
-      status: ResponseStatus::Error,
-      message: format!("Failed to run pkexec: {}", e),
-      data: DataValue::Array(vec![]),
-    })?;
+    let output = cmd.output()?;
 
     if output.status.success() {
       Ok(ResponseModel {
@@ -64,14 +73,10 @@ impl SystemService {
         ),
       })
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Failed to stop services: {}",
-          String::from_utf8_lossy(&output.stderr).trim()
-        ),
-        data: DataValue::Array(vec![]),
-      })
+      Err(AppError::ServiceNotFound(format!(
+        "Failed to stop services: {}",
+        String::from_utf8_lossy(&output.stderr).trim()
+      )))
     }
   }
 
@@ -80,6 +85,12 @@ impl SystemService {
     path: &str,
     command: Option<String>,
   ) -> Result<ResponseModel, ResponseModel> {
+    self
+      .open_file_inner(path, command)
+      .map_err(|e| e.into_response())
+  }
+
+  fn open_file_inner(&self, path: &str, command: Option<String>) -> ServiceResult<ResponseModel> {
     let mut cmd = if let Some(custom_cmd) = command {
       let mut c = std::process::Command::new(custom_cmd);
       c.arg(path);
@@ -96,66 +107,15 @@ impl SystemService {
         message: format!("Started editor for file: {}", path),
         data: DataValue::String(path.to_string()),
       }),
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to start editor: {}", e),
-        data: DataValue::String("".to_string()),
-      }),
+      Err(e) => Err(AppError::Unknown(format!("Failed to start editor: {}", e))),
     }
-  }
-
-  #[allow(dead_code)]
-  pub fn getDisabledServices(&self) -> Result<ResponseModel, ResponseModel> {
-    let output = Command::new("systemctl")
-      .args([
-        "list-unit-files",
-        "--state=enabled",
-        "--no-pager",
-        "--no-legend",
-      ])
-      .output()
-      .map_err(|e| ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to list services: {}", e),
-        data: DataValue::Array(vec![]),
-      })?;
-
-    if !output.status.success() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: String::from_utf8_lossy(&output.stderr).to_string(),
-        data: DataValue::Array(vec![]),
-      });
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let services: Vec<serde_json::Value> = stdout
-      .lines()
-      .filter_map(|line| {
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        if parts.is_empty() {
-          return None;
-        }
-        let name = parts[0].to_string();
-        if name.ends_with(".service") {
-          Some(serde_json::json!({
-            "name": name,
-            "status": "enabled"
-          }))
-        } else {
-          None
-        }
-      })
-      .collect();
-
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: format!("Found {} enabled services", services.len()),
-      data: DataValue::Array(services),
-    })
   }
 
   pub fn getAllServices(&self) -> Result<ResponseModel, ResponseModel> {
+    self.get_all_services_inner().map_err(|e| e.into_response())
+  }
+
+  fn get_all_services_inner(&self) -> ServiceResult<ResponseModel> {
     let output = Command::new("systemctl")
       .args([
         "list-units",
@@ -164,19 +124,12 @@ impl SystemService {
         "--no-pager",
         "--no-legend",
       ])
-      .output()
-      .map_err(|e| ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to list services: {}", e),
-        data: DataValue::Array(vec![]),
-      })?;
+      .output()?;
 
     if !output.status.success() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: String::from_utf8_lossy(&output.stderr).to_string(),
-        data: DataValue::Array(vec![]),
-      });
+      return Err(AppError::Unknown(
+        String::from_utf8_lossy(&output.stderr).to_string(),
+      ));
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -211,15 +164,15 @@ impl SystemService {
   }
 
   pub fn enableService(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
+    self
+      .enable_service_inner(service)
+      .map_err(|e| e.into_response())
+  }
+
+  fn enable_service_inner(&self, service: &str) -> ServiceResult<ResponseModel> {
     let output = Command::new("pkexec")
       .args(["systemctl", "enable", service])
-      .output()
-      .map_err(|e| ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to run command: {}", e),
-        data: DataValue::String("".to_string()),
-      })?;
-
+      .output()?;
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -227,24 +180,22 @@ impl SystemService {
         data: DataValue::String(service.to_string()),
       })
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: String::from_utf8_lossy(&output.stderr).to_string(),
-        data: DataValue::String("".to_string()),
-      })
+      Err(AppError::ServiceNotFound(
+        String::from_utf8_lossy(&output.stderr).to_string(),
+      ))
     }
   }
 
   pub fn startService(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
+    self
+      .start_service_inner(service)
+      .map_err(|e| e.into_response())
+  }
+
+  fn start_service_inner(&self, service: &str) -> ServiceResult<ResponseModel> {
     let output = Command::new("pkexec")
       .args(["systemctl", "start", service])
-      .output()
-      .map_err(|e| ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to run command: {}", e),
-        data: DataValue::String("".to_string()),
-      })?;
-
+      .output()?;
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -252,11 +203,9 @@ impl SystemService {
         data: DataValue::String(service.to_string()),
       })
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: String::from_utf8_lossy(&output.stderr).to_string(),
-        data: DataValue::String("".to_string()),
-      })
+      Err(AppError::ServiceNotFound(
+        String::from_utf8_lossy(&output.stderr).to_string(),
+      ))
     }
   }
 
@@ -264,6 +213,12 @@ impl SystemService {
     &self,
     services: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
+    self
+      .enable_selected_services_inner(services)
+      .map_err(|e| e.into_response())
+  }
+
+  fn enable_selected_services_inner(&self, services: Vec<String>) -> ServiceResult<ResponseModel> {
     if services.is_empty() {
       return Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -278,11 +233,7 @@ impl SystemService {
       cmd.arg(service);
     }
 
-    let output = cmd.output().map_err(|e| ResponseModel {
-      status: ResponseStatus::Error,
-      message: format!("Failed to run pkexec: {}", e),
-      data: DataValue::Array(vec![]),
-    })?;
+    let output = cmd.output()?;
 
     if output.status.success() {
       Ok(ResponseModel {
@@ -296,14 +247,10 @@ impl SystemService {
         ),
       })
     } else {
-      Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!(
-          "Failed to enable services: {}",
-          String::from_utf8_lossy(&output.stderr).trim()
-        ),
-        data: DataValue::Array(vec![]),
-      })
+      Err(AppError::ServiceNotFound(format!(
+        "Failed to enable services: {}",
+        String::from_utf8_lossy(&output.stderr).trim()
+      )))
     }
   }
 }

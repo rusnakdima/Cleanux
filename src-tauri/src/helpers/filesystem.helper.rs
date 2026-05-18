@@ -7,6 +7,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
+use crate::helpers::validation_helper::{is_allowed_path, validate_path};
+
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 
 pub fn home_scan_dirs(home: &Path) -> Vec<PathBuf> {
@@ -27,72 +29,68 @@ pub fn modified_string(metadata: &std::fs::Metadata) -> String {
   modified.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
-pub fn collect_cache_file_models(cache_dir: PathBuf) -> Vec<CacheFileModel> {
-  WalkDir::new(cache_dir)
-    .max_depth(4)
+pub fn collect_file_models<T, F>(
+  root: &Path,
+  max_depth: u32,
+  take_count: usize,
+  filter: F,
+) -> Vec<T>
+where
+  F: Fn(&Path) -> Option<T> + Send + Sync + 'static,
+  T: Send,
+{
+  WalkDir::new(root)
+    .max_depth(max_depth as usize)
     .into_iter()
     .filter_map(|e| e.ok())
     .filter(|e| e.file_type().is_file())
-    .take(1000)
+    .take(take_count)
     .collect::<Vec<_>>()
     .into_par_iter()
-    .filter_map(|entry| {
-      let path = entry.path();
-      let metadata = fs::metadata(path).ok()?;
-      Some(CacheFileModel {
-        path: path.to_string_lossy().to_string(),
-        size: metadata.len(),
-        modified: modified_string(&metadata),
-      })
-    })
+    .filter_map(|entry| filter(entry.path()))
     .collect()
+}
+
+pub fn collect_cache_file_models(cache_dir: PathBuf) -> Vec<CacheFileModel> {
+  collect_file_models(cache_dir.as_path(), 4, 1000, |path| {
+    let metadata = fs::metadata(path).ok()?;
+    Some(CacheFileModel {
+      path: path.to_string_lossy().to_string(),
+      size: metadata.len(),
+      modified: modified_string(&metadata),
+    })
+  })
 }
 
 pub fn collect_trash_file_models(trash_dir: &Path) -> Vec<TrashFileModel> {
-  let mut trash_files = Vec::new();
-  if let Ok(entries) = fs::read_dir(trash_dir) {
-    for entry in entries.flatten() {
-      let path = entry.path();
-      if let Ok(metadata) = fs::metadata(&path) {
-        let deleted_date: DateTime<Local> = metadata
-          .modified()
-          .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
-          .into();
-        trash_files.push(TrashFileModel {
-          name: path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string(),
-          path: path.to_string_lossy().to_string(),
-          size: metadata.len(),
-          deletedDate: deleted_date.format("%Y-%m-%d %H:%M:%S").to_string(),
-        });
-      }
-    }
-  }
-  trash_files
+  collect_file_models(trash_dir, 1, 10000, |path| {
+    let metadata = fs::metadata(path).ok()?;
+    let deleted_date: DateTime<Local> = metadata
+      .modified()
+      .unwrap_or(std::time::SystemTime::UNIX_EPOCH)
+      .into();
+    Some(TrashFileModel {
+      name: path
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string(),
+      path: path.to_string_lossy().to_string(),
+      size: metadata.len(),
+      deletedDate: deleted_date.format("%Y-%m-%d %H:%M:%S").to_string(),
+    })
+  })
 }
 
 pub fn collect_log_file_models(log_dir: &Path, max_depth: usize, take: usize) -> Vec<LogFileModel> {
-  WalkDir::new(log_dir)
-    .max_depth(max_depth)
-    .into_iter()
-    .filter_map(|e| e.ok())
-    .filter(|e| e.file_type().is_file())
-    .take(take)
-    .collect::<Vec<_>>()
-    .into_par_iter()
-    .filter_map(|entry| {
-      let path = entry.path();
-      let metadata = fs::metadata(path).ok()?;
-      Some(LogFileModel {
-        path: path.to_string_lossy().to_string(),
-        size: metadata.len(),
-        modified: modified_string(&metadata),
-      })
+  collect_file_models(log_dir, max_depth as u32, take, |path| {
+    let metadata = fs::metadata(path).ok()?;
+    Some(LogFileModel {
+      path: path.to_string_lossy().to_string(),
+      size: metadata.len(),
+      modified: modified_string(&metadata),
     })
-    .collect()
+  })
 }
 
 /// Scan configured user folders for files above threshold (same rules as original getLargeFiles).
@@ -150,8 +148,32 @@ pub struct BulkRemoveOutcome {
 pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
   let mut cleared = 0usize;
   let mut errors = Vec::new();
+
+  let home = match dirs::home_dir() {
+    Some(h) => h,
+    None => {
+      return BulkRemoveOutcome {
+        cleared: 0,
+        errors: vec!["Home directory not found".to_string()],
+      };
+    }
+  };
+
   for path in paths {
-    if let Err(e) = fs::remove_file(&path) {
+    let canonical = match validate_path(&path) {
+      Ok(p) => p,
+      Err(e) => {
+        errors.push(format!("{}: {}", path, e));
+        continue;
+      }
+    };
+
+    if !is_allowed_path(&canonical, &home) {
+      errors.push(format!("Path not within allowed directories: {}", path));
+      continue;
+    }
+
+    if let Err(e) = fs::remove_file(&canonical) {
       errors.push(format!("{}: {}", path, e));
     } else {
       cleared += 1;

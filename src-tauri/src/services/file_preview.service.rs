@@ -37,8 +37,9 @@ impl FilePreviewService {
 
     let response_data = match file_type {
       FileKind::Image => {
-        let bytes =
-          fs::read(&path).map_err(|e| error_response(format!("Failed to read file: {}", e), data_empty_string()))?;
+        let bytes = fs::read(&path).map_err(|e| {
+          error_response(format!("Failed to read file: {}", e), data_empty_string())
+        })?;
         let base64 = STANDARD.encode(&bytes);
         let mime_type = match extension.as_str() {
           "png" => "image/png",
@@ -57,8 +58,9 @@ impl FilePreviewService {
         })
       }
       FileKind::Text => {
-        let bytes =
-          fs::read(&path).map_err(|e| error_response(format!("Failed to read file: {}", e), data_empty_string()))?;
+        let bytes = fs::read(&path).map_err(|e| {
+          error_response(format!("Failed to read file: {}", e), data_empty_string())
+        })?;
         let content = String::from_utf8_lossy(&bytes).into_owned();
         let truncated_content = if content.len() > 50000 {
           format!(
@@ -102,13 +104,41 @@ enum FileKind {
 }
 
 fn classify_file_type(path: &str, extension: &str) -> FileKind {
-  let image_ext = [
-    "jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico",
-  ];
+  let image_ext = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico"];
   let text_ext = [
-    "txt", "md", "json", "xml", "html", "css", "js", "ts", "rs", "py", "java", "c", "cpp", "h",
-    "hpp", "go", "rb", "php", "sh", "bash", "zsh", "yaml", "yml", "toml", "ini", "cfg", "log",
-    "conf", "properties", "env", "gitignore", "dockerignore", "editorconfig",
+    "txt",
+    "md",
+    "json",
+    "xml",
+    "html",
+    "css",
+    "js",
+    "ts",
+    "rs",
+    "py",
+    "java",
+    "c",
+    "cpp",
+    "h",
+    "hpp",
+    "go",
+    "rb",
+    "php",
+    "sh",
+    "bash",
+    "zsh",
+    "yaml",
+    "yml",
+    "toml",
+    "ini",
+    "cfg",
+    "log",
+    "conf",
+    "properties",
+    "env",
+    "gitignore",
+    "dockerignore",
+    "editorconfig",
   ];
 
   if image_ext.contains(&extension) {
@@ -151,9 +181,10 @@ fn sniff_printable_ascii(path: &str, meta_len: u64) -> FileKind {
   }
   match fs::read(path) {
     Ok(bytes) => {
-      let printable = bytes.iter().take(8000).all(|&b| {
-        b == 0 || (32..127).contains(&b) || b == 9 || b == 10 || b == 13
-      });
+      let printable = bytes
+        .iter()
+        .take(8000)
+        .all(|&b| b == 0 || (32..127).contains(&b) || b == 9 || b == 10 || b == 13);
       if printable {
         FileKind::Text
       } else {

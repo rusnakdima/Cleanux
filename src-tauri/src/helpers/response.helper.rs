@@ -3,6 +3,59 @@ use crate::models::{DataValue, ResponseModel, ResponseStatus};
 /* sys lib */
 use serde::Serialize;
 
+pub struct ResponseBuilder {
+  status: Option<ResponseStatus>,
+  message: Option<String>,
+  data: Option<DataValue>,
+}
+
+impl ResponseBuilder {
+  pub fn new() -> Self {
+    ResponseBuilder {
+      status: None,
+      message: None,
+      data: None,
+    }
+  }
+
+  pub fn success(mut self, msg: &str) -> Self {
+    self.status = Some(ResponseStatus::Success);
+    self.message = Some(msg.to_string());
+    self
+  }
+
+  pub fn info(mut self, msg: &str) -> Self {
+    self.status = Some(ResponseStatus::Info);
+    self.message = Some(msg.to_string());
+    self
+  }
+
+  pub fn error(mut self, msg: &str) -> Self {
+    self.status = Some(ResponseStatus::Error);
+    self.message = Some(msg.to_string());
+    self
+  }
+
+  pub fn data(mut self, value: DataValue) -> Self {
+    self.data = Some(value);
+    self
+  }
+
+  pub fn build(self) -> ResponseModel {
+    ResponseModel {
+      status: self.status.unwrap_or(ResponseStatus::Info),
+      message: self.message.unwrap_or_default(),
+      data: self.data.unwrap_or(DataValue::String(String::new())),
+    }
+  }
+}
+
+impl Default for ResponseBuilder {
+  fn default() -> Self {
+    Self::new()
+  }
+}
+
 pub fn success_response(message: impl Into<String>, data: DataValue) -> ResponseModel {
   ResponseModel {
     status: ResponseStatus::Success,
@@ -36,9 +89,7 @@ pub fn data_string(value: impl Into<String>) -> DataValue {
 }
 
 /// Serialize models to JSON values; propagates first serialization failure instead of swallowing it.
-pub fn models_into_data_array<T: Serialize>(
-  items: Vec<T>,
-) -> Result<DataValue, serde_json::Error> {
+pub fn models_into_data_array<T: Serialize>(items: Vec<T>) -> Result<DataValue, serde_json::Error> {
   let values: Vec<serde_json::Value> = items
     .into_iter()
     .map(|item| serde_json::to_value(item))
