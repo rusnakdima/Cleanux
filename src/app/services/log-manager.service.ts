@@ -10,7 +10,7 @@ import {
   VarLogUsage,
 } from '@models/log-manager.model';
 
-export {
+export type {
   JournalInfo,
   LogManagerSummary,
   LogFileInfo,
