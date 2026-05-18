@@ -1,0 +1,30 @@
+<div class="widget-container">
+  <div class="widget-grid">
+    @for (widget of widgets(); track widget.id) {
+      <div
+        class="widget-card"
+        [class.dragging]="draggingWidget() === widget.id"
+        [class.drag-over]="dragOverWidget() === widget.id"
+        draggable="true"
+        (dragstart)="onDragStart($event, widget.id)"
+        (dragend)="onDragEnd()"
+        (dragover)="onDragOver($event, widget.id)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event, widget.id)"
+      >
+        <div class="widget-header">
+          <div class="widget-title">
+            <mat-icon class="widget-icon">{{ widget.icon }}</mat-icon>
+            <span>{{ widget.title }}</span>
+          </div>
+          <button class="drag-handle" type="button" aria-label="Drag to reorder">
+            <mat-icon>drag_indicator</mat-icon>
+          </button>
+        </div>
+        <div class="widget-content">
+          <ng-content></ng-content>
+        </div>
+      </div>
+    }
+  </div>
+</div>

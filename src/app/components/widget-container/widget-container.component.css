@@ -1,0 +1,92 @@
+.widget-container {
+  width: 100%;
+}
+
+.widget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.widget-card {
+  background: var(--card-bg, white);
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.widget-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.widget-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.98);
+}
+
+.widget-card.drag-over {
+  border-color: var(--primary-color, #6366f1);
+  background: var(--hover-bg, #f5f3ff);
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  background: var(--header-bg, #f9fafb);
+}
+
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary, #374151);
+}
+
+.widget-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--primary-color, #6366f1);
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  cursor: grab;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #9ca3af);
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.drag-handle:hover {
+  background: var(--hover-bg, #e5e7eb);
+  color: var(--text-primary, #374151);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.widget-content {
+  padding: 1rem;
+  min-height: 120px;
+}
+
+@media (max-width: 640px) {
+  .widget-grid {
+    grid-template-columns: 1fr;
+  }
+}

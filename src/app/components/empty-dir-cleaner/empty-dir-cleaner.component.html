@@ -1,0 +1,139 @@
+<div class="empty-dir-cleaner">
+  <div class="header">
+    <div class="header-title">
+      <mat-icon>folder_delete</mat-icon>
+      <h2>Empty Directory Cleaner</h2>
+    </div>
+    <button class="close-btn" matTooltip="Close" (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="actions-bar">
+    <div class="scan-actions">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="scan()"
+        [disabled]="scanning() || !rootPath"
+      >
+        <mat-icon>search</mat-icon>
+        {{ scanning() ? "Scanning..." : "Find Empty Dirs" }}
+      </button>
+      <button mat-raised-button (click)="scanNested()" [disabled]="scanning() || !rootPath">
+        <mat-icon>account_tree</mat-icon>
+        {{ scanning() ? "Scanning..." : "Find Nested Empty" }}
+      </button>
+    </div>
+
+    @if (totalCount > 0) {
+      <div class="selection-info">
+        <span>{{ selectedCount }} / {{ totalCount }} selected</span>
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="error-banner">
+      <mat-icon>error</mat-icon>
+      <span>{{ error() }}</span>
+      <button mat-icon-button (click)="error.set(null)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <div class="content">
+    @if (scanning()) {
+      <div class="loading-state">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Scanning for empty directories...</p>
+      </div>
+    } @else if (emptyDirs().length === 0 && !scanning()) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">folder_open</mat-icon>
+        <p>No empty directories found</p>
+        <p class="hint">Click "Find Empty Dirs" or "Find Nested Empty" to scan</p>
+      </div>
+    } @else {
+      <div class="dirs-table">
+        <div class="table-header">
+          <div class="checkbox-col">
+            <label class="custom-checkbox">
+              <input
+                type="checkbox"
+                [checked]="allSelected()"
+                [indeterminate]="indeterminate()"
+                (change)="toggleSelectAll($any($event.target).checked)"
+              />
+              <span class="checkmark"></span>
+            </label>
+          </div>
+          <div class="name-col">Name</div>
+          <div class="path-col">Path</div>
+          <div class="depth-col">Depth</div>
+        </div>
+
+        <div class="table-body">
+          @for (dir of emptyDirs(); track dir.path) {
+            <div class="table-row" [class.selected]="isSelected(dir.path)">
+              <div class="checkbox-col">
+                <label class="custom-checkbox">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(dir.path)"
+                    (change)="toggleSelectItem(dir.path, $any($event.target).checked)"
+                  />
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+              <div class="name-col" [matTooltip]="dir.path">
+                <mat-icon class="folder-icon">folder</mat-icon>
+                {{ getDirName(dir.path) }}
+              </div>
+              <div class="path-col" [matTooltip]="dir.path">
+                {{ dir.path }}
+              </div>
+              <div class="depth-col">
+                <span class="depth-badge">{{ dir.depth }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (selectedCount > 0) {
+    <div class="footer">
+      <button mat-raised-button color="warn" (click)="openConfirmDialog()" [disabled]="loading()">
+        <mat-icon>delete</mat-icon>
+        Remove Selected ({{ selectedCount }})
+      </button>
+    </div>
+  }
+
+  @if (confirmDialogOpen()) {
+    <div class="confirm-overlay" (click)="closeConfirmDialog()">
+      <div class="confirm-dialog" (click)="$event.stopPropagation()">
+        <h3>Confirm Removal</h3>
+        <p>
+          Are you sure you want to remove {{ selectedCount }} empty director{{
+            selectedCount > 1 ? "ies" : "y"
+          }}?
+        </p>
+        <p class="warning">This action cannot be undone.</p>
+        <div class="dialog-actions">
+          <button mat-button (click)="closeConfirmDialog()">Cancel</button>
+          <button mat-raised-button color="warn" (click)="removeSelected()">Remove</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  }
+</div>

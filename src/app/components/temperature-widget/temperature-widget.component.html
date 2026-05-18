@@ -1,0 +1,71 @@
+<div class="temperature-container">
+  <div class="temperature-header">
+    <h3 class="temperature-title">
+      <mat-icon class="temperature-icon">thermostat</mat-icon>
+      Temperature
+    </h3>
+  </div>
+
+  <div class="temperature-grid">
+    <!-- CPU Temperature -->
+    <div class="temp-card cpu-temp" *ngIf="!isLoading()">
+      <div class="temp-header">
+        <mat-icon class="temp-icon cpu-icon">memory</mat-icon>
+        <span class="temp-label">CPU</span>
+      </div>
+      <div class="temp-value" [style.color]="getTemperatureColor(getTemperature(cpuTemp()))">
+        {{ getTemperature(cpuTemp()) | number: "1.0-0" }}°C
+      </div>
+      <div class="temp-progress-container">
+        <div
+          class="temp-progress-bar cpu-bar"
+          [style.width.%]="getProgressWidth(getTemperature(cpuTemp()))"
+          [style.backgroundColor]="getTemperatureColor(getTemperature(cpuTemp()))"
+        ></div>
+      </div>
+      <div class="temp-name" *ngIf="cpuTemp()">
+        {{ cpuTemp()!.name }}
+      </div>
+    </div>
+
+    <!-- GPU Temperature -->
+    <div class="temp-card gpu-temp" *ngIf="!isLoading() && gpuTemp()">
+      <div class="temp-header">
+        <mat-icon class="temp-icon gpu-icon">apps</mat-icon>
+        <span class="temp-label">GPU</span>
+      </div>
+      <div class="temp-value" [style.color]="getTemperatureColor(getTemperature(gpuTemp()))">
+        {{ getTemperature(gpuTemp()) | number: "1.0-0" }}°C
+      </div>
+      <div class="temp-progress-container">
+        <div
+          class="temp-progress-bar gpu-bar"
+          [style.width.%]="getProgressWidth(getTemperature(gpuTemp()))"
+          [style.backgroundColor]="getTemperatureColor(getTemperature(gpuTemp()))"
+        ></div>
+      </div>
+      <div class="temp-name">
+        {{ gpuTemp()!.name }}
+      </div>
+    </div>
+
+    <!-- No GPU Placeholder -->
+    <div class="temp-card gpu-temp gpu-unavailable" *ngIf="!isLoading() && !gpuTemp()">
+      <div class="temp-header">
+        <mat-icon class="temp-icon gpu-icon">apps</mat-icon>
+        <span class="temp-label">GPU</span>
+      </div>
+      <div class="temp-value unavailable">N/A</div>
+      <div class="temp-progress-container">
+        <div class="temp-progress-bar unavailable-bar"></div>
+      </div>
+      <div class="temp-name">Not available</div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="temp-card loading" *ngIf="isLoading()">
+      <div class="spinner"></div>
+      <span>Loading...</span>
+    </div>
+  </div>
+</div>
