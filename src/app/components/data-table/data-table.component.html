@@ -112,7 +112,7 @@
                   <button
                     class="p-1.5 rounded-md bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 transition-colors"
                     matTooltip="Clean"
-                    (click)="onRowAction.emit({ action: 'clean', item }); $event.stopPropagation()"
+                    (click)="rowAction.emit({ action: 'clean', item }); $event.stopPropagation()"
                   >
                     <mat-icon class="text-sm">delete</mat-icon>
                   </button>

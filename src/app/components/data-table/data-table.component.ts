@@ -78,6 +78,8 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   lastSelectedIndex = signal<number | null>(null);
 
+  formatSize = formatSize;
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentPage']) {
       this.p = this.currentPage;
