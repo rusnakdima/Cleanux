@@ -1,11 +1,9 @@
-<app-header [title]="'Large Files (> 100MB)'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <!-- Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="glass-card p-8 flex items-center gap-6">
       <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-        <mat-icon class="text-indigo-500 text-3xl">file_copy</mat-icon>
+        <mat-icon class="icon-accent icon-3xl" fontIcon="file_copy"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -17,7 +15,7 @@
 
     <div class="glass-card p-8 flex items-center gap-6">
       <div class="w-16 h-16 rounded-2xl bg-pink-500/10 flex items-center justify-center">
-        <mat-icon class="text-pink-500 text-3xl">storage</mat-icon>
+        <mat-icon class="icon-error icon-3xl" fontIcon="storage"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -45,7 +43,7 @@
           class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           matTooltip="Refresh"
         >
-          <mat-icon>refresh</mat-icon>
+          <mat-icon fontIcon="refresh"/>
         </button>
       </div>
       <button
@@ -53,7 +51,7 @@
         [disabled]="selectedFiles().size === 0"
         class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
       >
-        <mat-icon class="text-sm">delete</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="delete"/>
         Delete Selected
       </button>
     </div>

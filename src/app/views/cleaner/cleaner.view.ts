@@ -17,8 +17,8 @@ import { LogAnalyzerService } from '@services/log-analyzer.service';
 import { DataTableComponent } from '@components/data-table/data-table.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
-import { HeaderComponent } from '@components/header/header.component';
 import { SearchComponent } from '@components/search/search.component';
+import { HeaderComponent } from '@components/header/header.component';
 
 /* models */
 import { TableColumn, TableOptions } from '@models/data-table.model';
@@ -48,10 +48,11 @@ export type PackageManagerRow = {
     MatTooltipModule,
     DataTableComponent,
     FilePreviewComponent,
-    HeaderComponent,
     SearchComponent,
+    HeaderComponent,
   ],
   templateUrl: './cleaner.view.html',
+  styleUrls: ['./cleaner.view.css'],
 })
 export class CleanerView implements OnInit {
   readonly store = inject(CleanerViewStore);
@@ -126,7 +127,7 @@ export class CleanerView implements OnInit {
     }
   }
 
-  getFilteredLogEntries(): any[] {
+  filteredLogEntries(): any[] {
     const summary = this.logSummary();
     if (!summary) return [];
     if (this.selectedLogCategory() === 'all') {

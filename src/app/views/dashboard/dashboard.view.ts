@@ -6,6 +6,7 @@ import {
   computed,
   inject,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -14,24 +15,29 @@ import { MatIconModule } from '@angular/material/icon';
 
 /* services */
 import { FileService, ScanSummary } from '@services/file.service';
+import { ApiService } from '@services/api.service';
 import { SystemService } from '@services/system.service';
 import { HealthHistoryService } from '@services/health-history.service';
+import { MonitorStore } from '@stores/monitor.store';
 import { SystemMonitorComponent } from '@components/system-monitor/system-monitor.component';
 import {
   WidgetContainerComponent,
   WidgetConfig,
 } from '@components/widget-container/widget-container.component';
-import { WidgetHealthScoreComponent } from '@components/widgets/widget-health-score/widget-health-score.component';
-import {
-  WidgetQuickActionsComponent,
-  QuickAction,
-} from '@components/widgets/widget-quick-actions/widget-quick-actions.component';
-import { WidgetDiskUsageComponent } from '@components/widgets/widget-disk-usage/widget-disk-usage.component';
-import {
-  WidgetRecentActivityComponent,
-  ActivityItem,
-} from '@components/widgets/widget-recent-activity/widget-recent-activity.component';
+import { TemperatureWidgetComponent } from '@components/temperature-widget/temperature-widget.component';
+import { SpinnerComponent } from '@components/ui/spinner/spinner.component';
 import { formatSize } from '@shared/utils/format.util';
+
+/* types */
+import type { QuickAction } from '@components/widgets/widget-quick-actions/widget-quick-actions.component';
+import type { ActivityItem } from '@components/widgets/widget-recent-activity/widget-recent-activity.component';
+
+interface ScanProgress {
+  phase: string;
+  progress: number;
+  files_scanned: number;
+  current_path: string;
+}
 
 interface WidgetState {
   id: string;
@@ -52,17 +58,20 @@ const WIDGET_STORAGE_KEY = 'cleanux_widget_layout';
     MatIconModule,
     SystemMonitorComponent,
     WidgetContainerComponent,
-    WidgetHealthScoreComponent,
-    WidgetQuickActionsComponent,
-    WidgetDiskUsageComponent,
-    WidgetRecentActivityComponent,
+    TemperatureWidgetComponent,
+    SpinnerComponent,
   ],
   templateUrl: './dashboard.view.html',
+  styleUrls: ['./dashboard.view.css'],
 })
-export class DashboardView implements OnInit {
+export class DashboardView implements OnInit, OnDestroy {
   private fileService = inject(FileService);
+  private api = inject(ApiService);
   private systemService = inject(SystemService);
   private healthHistoryService = inject(HealthHistoryService);
+  protected monitorStore = inject(MonitorStore);
+
+  private unlisten: (() => void) | null = null;
 
   formatSize = formatSize;
 
@@ -75,6 +84,9 @@ export class DashboardView implements OnInit {
   logSize = signal(0);
   largeFileSize = signal(0);
   largeFilesCount = signal(0);
+  cacheCount = signal(0);
+  trashCount = signal(0);
+  logCount = signal(0);
 
   healthHistoryDays = signal<7 | 30>(7);
   healthHistory = signal<Array<{ timestamp: string; health_score: number }>>([]);
@@ -105,6 +117,8 @@ export class DashboardView implements OnInit {
     () => this.cacheSize() + this.trashSize() + this.logSize() + this.largeFileSize()
   );
 
+  largeFilesSize = computed(() => this.largeFileSize());
+
   systemStatus = computed(() => {
     const size = this.totalJunkSize();
     if (size > 1024 * 1024 * 1024 * 2) return 'Critical';
@@ -124,6 +138,21 @@ export class DashboardView implements OnInit {
     this.calculateJunkSize();
     this.loadHealthHistory();
     this.loadRecentActivities();
+    this.setupScanProgressListener();
+  }
+
+  async setupScanProgressListener() {
+    this.unlisten = await this.api.listen('scan-progress', (event) => {
+      const payload = event.payload as ScanProgress;
+      this.scanProgress.set(payload.progress * 100);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.unlisten) {
+      this.unlisten();
+      this.unlisten = null;
+    }
   }
 
   loadWidgetLayout() {
@@ -260,6 +289,7 @@ export class DashboardView implements OnInit {
         .getCacheSummary()
         .then((res) => {
           this.cacheSize.set(res.totalSize);
+          this.cacheCount.set(res.fileCount);
           return res;
         })
         .catch((e) => console.error(e));
@@ -267,6 +297,7 @@ export class DashboardView implements OnInit {
         .getTrashSummary()
         .then((res) => {
           this.trashSize.set(res.totalSize);
+          this.trashCount.set(res.fileCount);
           return res;
         })
         .catch((e) => console.error(e));
@@ -274,6 +305,7 @@ export class DashboardView implements OnInit {
         .getLogSummary()
         .then((res) => {
           this.logSize.set(res.totalSize);
+          this.logCount.set(res.fileCount);
           return res;
         })
         .catch((e) => console.error(e));
@@ -375,5 +407,12 @@ export class DashboardView implements OnInit {
   setHealthHistoryDays(days: 7 | 30) {
     this.healthHistoryDays.set(days);
     this.loadHealthHistory();
+  }
+
+  getHealthMessage(): string {
+    const score = this.healthScore();
+    if (score >= 80) return 'Your system is in great condition!';
+    if (score >= 50) return 'Consider running a cleanup to improve performance.';
+    return 'System needs attention. Run a deep clean recommended.';
   }
 }

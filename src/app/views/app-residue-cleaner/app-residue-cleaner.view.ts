@@ -123,6 +123,9 @@ export class AppResidueCleanerView {
       case 'caches':
         this.selectedCaches.set(allPaths);
         break;
+      case 'orphaned':
+        this.selectedOrphaned.set(allPaths);
+        break;
     }
   }
 

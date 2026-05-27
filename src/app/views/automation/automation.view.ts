@@ -175,6 +175,8 @@ export class AutomationView implements OnInit {
       case 'Wait':
         step = { Wait: { seconds: value } };
         break;
+      default:
+        return;
     }
     this.newRecipeSteps.update((steps) => [...steps, step]);
   }

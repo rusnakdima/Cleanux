@@ -26,6 +26,7 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule, FormsModule],
   templateUrl: './settings.view.html',
+  styleUrls: ['./settings.view.css'],
 })
 export class SettingsView {
   themeService = inject(ThemeService);

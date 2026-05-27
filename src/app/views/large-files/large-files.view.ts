@@ -62,6 +62,9 @@ export class LargeFilesView implements OnInit {
 
   errorPreview = signal<string | null>(null);
 
+  hasMore = signal(false);
+  total = signal(0);
+
   totalSize = computed(() => this.largeFiles().reduce((sum, file) => sum + file.size, 0));
 
   columns: TableColumn[] = [
@@ -78,11 +81,31 @@ export class LargeFilesView implements OnInit {
   async loadData() {
     this.loading.set(true);
     try {
-      const files = await this.fileService.getLargeFiles();
-      this.largeFiles.set(files);
-      this.filteredFiles.set(files);
+      const result = await this.fileService.getLargeFiles(50, 0);
+      this.largeFiles.set(result.data);
+      this.filteredFiles.set(result.data);
+      this.hasMore.set(result.has_more);
+      this.total.set(result.total);
     } catch (error) {
       console.error('Failed to load large files:', error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async loadMore() {
+    if (!this.hasMore() || this.loading()) return;
+
+    this.loading.set(true);
+    try {
+      const offset = this.largeFiles().length;
+      const result = await this.fileService.getLargeFiles(50, offset);
+      this.largeFiles.update(current => [...current, ...result.data]);
+      this.filteredFiles.update(current => [...current, ...result.data]);
+      this.hasMore.set(result.has_more);
+      this.total.set(result.total);
+    } catch (error) {
+      console.error('Failed to load more large files:', error);
     } finally {
       this.loading.set(false);
     }

@@ -158,6 +158,7 @@ export class ProfilesView implements OnInit {
         .split('\n')
         .map((p) => p.trim())
         .filter((p) => p);
+      this.editingProfile.set(profile);
     }
   }
 

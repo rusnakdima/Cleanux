@@ -11,7 +11,7 @@
         (click)="generateReport()"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
       >
-        <mat-icon class="text-sm">add</mat-icon>
+        <mat-icon class="text-sm" fontIcon="add"/>
         Generate Demo Report
       </button>
     </div>
@@ -21,7 +21,7 @@
   @if (reportsWithChart().length > 1) {
     <div class="glass-card p-6">
       <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-        <mat-icon class="text-indigo-500">timeline</mat-icon>
+        <mat-icon class="text-indigo-500" fontIcon="timeline"/>
         Space Reclaimed Over Time
       </h2>
       <div class="h-40">
@@ -90,7 +90,7 @@
       class="px-6 py-4 border-b border-black/5 dark:border-white/5 flex items-center justify-between"
     >
       <h2 class="text-lg font-bold flex items-center gap-2">
-        <mat-icon class="text-indigo-500">history</mat-icon>
+        <mat-icon class="icon-accent" fontIcon="history"/>
         Cleaning History
       </h2>
       <button
@@ -98,7 +98,7 @@
         class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         matTooltip="Refresh"
       >
-        <mat-icon>refresh</mat-icon>
+        <mat-icon fontIcon="refresh"/>
       </button>
     </div>
 
@@ -108,13 +108,13 @@
       </div>
     } @else if (reports().length === 0) {
       <div class="flex flex-col items-center justify-center h-64 text-slate-400">
-        <mat-icon class="text-6xl mb-4">description</mat-icon>
+        <mat-icon class="icon-4xl mb-4" fontIcon="description"/>
         <p class="text-lg font-medium">No reports yet</p>
         <p class="text-sm">Run a cleaning session to generate your first report</p>
       </div>
     } @else {
       <table class="w-full">
-        <thead class="bg-slate-50 dark:bg-slate-800/50">
+        <thead class="table-header">
           <tr>
             <th
               class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider"
@@ -151,12 +151,10 @@
               [class.dark:bg-indigo-900/20]="selectedReport()?.id === report.id"
               (click)="selectReport(report)"
             >
-              <td class="px-6 py-4 text-sm">
+              <td class="table-cell">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center"
-                  >
-                    <mat-icon class="text-indigo-500">description</mat-icon>
+                  <div class="icon-container icon-container-sm icon-container-accent">
+                    <mat-icon class="icon-sm" fontIcon="description"/>
                   </div>
                   <div>
                     <p class="font-medium">{{ formatDate(report.date) }}</p>
@@ -164,23 +162,21 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 text-center text-sm font-medium">{{ report.items_cleaned }}</td>
-              <td
-                class="px-6 py-4 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400"
-              >
+              <td class="table-cell text-center font-medium">{{ report.items_cleaned }}</td>
+              <td class="table-cell text-center font-medium">
                 {{ formatSize(report.space_reclaimed) }}
               </td>
-              <td class="px-6 py-4 text-center text-sm text-slate-500">
+              <td class="table-cell text-center text-slate-500">
                 {{ report.duration.toFixed(1) }}s
               </td>
-              <td class="px-6 py-4 text-center" (click)="$event.stopPropagation()">
+              <td class="table-cell text-center" (click)="$event.stopPropagation()">
                 <div class="flex items-center justify-center gap-2">
                   <button
                     (click)="exportHtmlReport(report.id!)"
                     class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-blue-600"
                     matTooltip="Export HTML"
                   >
-                    <mat-icon class="text-lg">code</mat-icon>
+                    <mat-icon class="icon-lg" fontIcon="code"/>
                   </button>
                   <button
                     (click)="setBeforeReport(report.id!)"
@@ -189,7 +185,7 @@
                     class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     matTooltip="Set as Before"
                   >
-                    <mat-icon class="text-lg">first_page</mat-icon>
+                    <mat-icon class="icon-lg" fontIcon="first_page"/>
                   </button>
                   <button
                     (click)="setAfterReport(report.id!)"
@@ -198,14 +194,14 @@
                     class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     matTooltip="Set as After"
                   >
-                    <mat-icon class="text-lg">last_page</mat-icon>
+                    <mat-icon class="icon-lg" fontIcon="last_page"/>
                   </button>
                 </div>
               </td>
             </tr>
             @if (selectedReport()?.id === report.id) {
               <tr>
-                <td colspan="5" class="px-6 py-4 bg-slate-50 dark:bg-slate-800/30">
+                <td colspan="5" class="table-cell bg-slate-50 dark:bg-slate-800/30">
                   <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
                       <p class="text-xs text-slate-500 mb-1">Cache</p>
@@ -244,7 +240,7 @@
         (click)="compareSnapshots()"
         class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
       >
-        <mat-icon>compare</mat-icon>
+        <mat-icon fontIcon="compare"/>
         Compare Snapshots
       </button>
     </div>
@@ -265,14 +261,14 @@
         class="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between"
       >
         <h2 class="text-xl font-bold flex items-center gap-2">
-          <mat-icon class="text-green-500">compare</mat-icon>
+          <mat-icon class="icon-success" fontIcon="compare"/>
           Snapshot Comparison
         </h2>
         <button
           (click)="closeComparison()"
           class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
         >
-          <mat-icon>close</mat-icon>
+          <mat-icon fontIcon="close"/>
         </button>
       </div>
       <div class="p-6">
@@ -281,7 +277,7 @@
           <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                <mat-icon class="text-green-500 text-sm">first_page</mat-icon>
+                <mat-icon class="icon-success icon-sm" fontIcon="first_page"/>
               </div>
               <h3 class="font-bold">Before (Report #{{ comparison()!.before_id }})</h3>
             </div>
@@ -290,7 +286,7 @@
           <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                <mat-icon class="text-purple-500 text-sm">last_page</mat-icon>
+                <mat-icon class="icon-accent icon-sm" fontIcon="last_page"/>
               </div>
               <h3 class="font-bold">After (Report #{{ comparison()!.after_id }})</h3>
             </div>
@@ -340,14 +336,14 @@
         class="p-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between"
       >
         <h2 class="text-xl font-bold flex items-center gap-2">
-          <mat-icon class="text-blue-500">code</mat-icon>
+          <mat-icon class="icon-info" fontIcon="code"/>
           HTML Report Export
         </h2>
         <button
           (click)="closeExportHtml()"
           class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
         >
-          <mat-icon>close</mat-icon>
+          <mat-icon fontIcon="close"/>
         </button>
       </div>
       <div class="p-6">

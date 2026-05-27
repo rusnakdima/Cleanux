@@ -1,11 +1,9 @@
-<app-header [title]="'App Residue Cleaner'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   @if (showBackupWarning()) {
     <div
       class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex items-start gap-3"
     >
-      <mat-icon class="text-amber-500 mt-0.5">warning</mat-icon>
+      <mat-icon class="icon-warning mt-0.5" fontIcon="warning"/>
       <div class="flex-1">
         <p class="text-sm font-medium text-amber-800 dark:text-amber-200">
           Warning: Back up your data before cleaning
@@ -20,7 +18,7 @@
         class="text-amber-500 hover:text-amber-600 p-1"
         matTooltip="Dismiss"
       >
-        <mat-icon class="text-lg">close</mat-icon>
+        <mat-icon class="icon-lg" fontIcon="close"/>
       </button>
     </div>
   }
@@ -35,7 +33,7 @@
               class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               matTooltip="Refresh"
             >
-              <mat-icon>refresh</mat-icon>
+              <mat-icon fontIcon="refresh"/>
             </button>
             @if (configsData().length > 0) {
               <button
@@ -75,7 +73,7 @@
           </div>
         } @else if (configsData().length === 0) {
           <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="text-6xl mb-4">folder_open</mat-icon>
+            <mat-icon class="icon-4xl mb-4" fontIcon="folder_open"/>
             <p class="text-lg font-medium">No config residues found</p>
           </div>
         } @else {
@@ -87,7 +85,7 @@
                 (click)="toggleSelection(item.path)"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon class="text-slate-400">folder</mat-icon>
+                  <mat-icon class="icon-muted">folder</mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
                       class="font-medium text-slate-900 dark:text-white truncate"
@@ -116,7 +114,7 @@
                   <span class="text-sm font-medium text-slate-600 dark:text-slate-300">{{
                     formatSize(item.size)
                   }}</span>
-                  <mat-icon class="text-green-500" [class.opacity-0]="!isSelected(item.path)"
+                  <mat-icon class="icon-success" [class.opacity-0]="!isSelected(item.path)"
                     >check_circle</mat-icon
                   >
                 </div>
@@ -136,7 +134,7 @@
               class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               matTooltip="Refresh"
             >
-              <mat-icon>refresh</mat-icon>
+              <mat-icon fontIcon="refresh"/>
             </button>
             @if (dataData().length > 0) {
               <button
@@ -176,7 +174,7 @@
           </div>
         } @else if (dataData().length === 0) {
           <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="text-6xl mb-4">storage</mat-icon>
+            <mat-icon class="icon-4xl mb-4" fontIcon="storage"/>
             <p class="text-lg font-medium">No data residues found</p>
           </div>
         } @else {
@@ -188,7 +186,7 @@
                 (click)="toggleSelection(item.path)"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon class="text-slate-400">folder</mat-icon>
+                  <mat-icon class="icon-muted">folder</mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
                       class="font-medium text-slate-900 dark:text-white truncate"
@@ -217,7 +215,7 @@
                   <span class="text-sm font-medium text-slate-600 dark:text-slate-300">{{
                     formatSize(item.size)
                   }}</span>
-                  <mat-icon class="text-green-500" [class.opacity-0]="!isSelected(item.path)"
+                  <mat-icon class="icon-success" [class.opacity-0]="!isSelected(item.path)"
                     >check_circle</mat-icon
                   >
                 </div>
@@ -237,7 +235,7 @@
               class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               matTooltip="Refresh"
             >
-              <mat-icon>refresh</mat-icon>
+              <mat-icon fontIcon="refresh"/>
             </button>
             @if (cachesData().length > 0) {
               <button
@@ -277,7 +275,7 @@
           </div>
         } @else if (cachesData().length === 0) {
           <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="text-6xl mb-4">cached</mat-icon>
+            <mat-icon class="icon-4xl mb-4" fontIcon="cached"/>
             <p class="text-lg font-medium">No cache residues found</p>
           </div>
         } @else {
@@ -289,7 +287,7 @@
                 (click)="toggleSelection(item.path)"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon class="text-slate-400">folder</mat-icon>
+                  <mat-icon class="icon-muted">folder</mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
                       class="font-medium text-slate-900 dark:text-white truncate"
@@ -318,7 +316,7 @@
                   <span class="text-sm font-medium text-slate-600 dark:text-slate-300">{{
                     formatSize(item.size)
                   }}</span>
-                  <mat-icon class="text-green-500" [class.opacity-0]="!isSelected(item.path)"
+                  <mat-icon class="icon-success" [class.opacity-0]="!isSelected(item.path)"
                     >check_circle</mat-icon
                   >
                 </div>
@@ -338,7 +336,7 @@
               class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               matTooltip="Refresh"
             >
-              <mat-icon>refresh</mat-icon>
+              <mat-icon fontIcon="refresh"/>
             </button>
           </div>
           @if (getSelectedCount() > 0) {
@@ -357,7 +355,7 @@
           </div>
         } @else if (orphanedData().length === 0) {
           <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="text-6xl mb-4">inventory_2</mat-icon>
+            <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2"/>
             <p class="text-lg font-medium">No orphaned configs found</p>
           </div>
         } @else {
@@ -369,7 +367,7 @@
                 (click)="toggleSelection(item.path)"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon class="text-slate-400">settings</mat-icon>
+                  <mat-icon class="icon-muted" fontIcon="settings"/>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
                       class="font-medium text-slate-900 dark:text-white truncate"
@@ -387,7 +385,7 @@
                   <span class="px-2 py-1 rounded text-xs bg-slate-500/10 text-slate-600">
                     {{ item.config_type }}
                   </span>
-                  <mat-icon class="text-green-500" [class.opacity-0]="!isSelected(item.path)"
+                  <mat-icon class="icon-success" [class.opacity-0]="!isSelected(item.path)"
                     >check_circle</mat-icon
                   >
                 </div>
@@ -415,7 +413,7 @@
           (click)="previewMode.set(false)"
           class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded"
         >
-          <mat-icon>close</mat-icon>
+          <mat-icon fontIcon="close"/>
         </button>
       </div>
       <div class="space-y-2 mb-4">

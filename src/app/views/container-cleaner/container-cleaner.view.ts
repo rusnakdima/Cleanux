@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,7 +26,7 @@ type ContainerTab = 'docker' | 'podman';
   ],
   templateUrl: './container-cleaner.view.html',
 })
-export class ContainerCleanerView {
+export class ContainerCleanerView implements OnInit {
   private containerService = inject(ContainerService);
 
   formatSize = formatSize;
@@ -40,6 +40,10 @@ export class ContainerCleanerView {
 
   dockerPreview = signal<string | null>(null);
   podmanPreview = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.loadSummary();
+  }
 
   async loadSummary() {
     this.loading.set(true);

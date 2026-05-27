@@ -24,7 +24,6 @@ import {
 } from '@services/memory-optimizer.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
 import { HeaderComponent } from '@components/header/header.component';
 
 @Component({
@@ -37,7 +36,6 @@ import { HeaderComponent } from '@components/header/header.component';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
     HeaderComponent,
   ],
   templateUrl: './memory-optimizer.view.html',

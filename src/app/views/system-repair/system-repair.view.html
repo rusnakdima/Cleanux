@@ -1,5 +1,3 @@
-<app-header [title]="'System Repair'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <mat-tab-group (selectedIndexChange)="onTabChange($event)" class="repair-tabs">
     <mat-tab label="Symlinks">
@@ -11,7 +9,7 @@
               class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               matTooltip="Refresh"
             >
-              <mat-icon>refresh</mat-icon>
+              <mat-icon fontIcon="refresh"/>
             </button>
             <span class="text-sm text-slate-500">{{ symlinkCount() }} broken symlinks found</span>
           </div>
@@ -31,7 +29,7 @@
           </div>
         } @else if (symlinksData().length === 0) {
           <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="text-6xl mb-4">link_off</mat-icon>
+            <mat-icon class="icon-4xl mb-4" fontIcon="link_off"/>
             <p class="text-lg font-medium">No broken symlinks found</p>
           </div>
         } @else {
@@ -41,9 +39,7 @@
                 class="glass-card p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon [class]="getSeverityColor(item.severity)">{{
-                    getSeverityIcon(item.severity)
-                  }}</mat-icon>
+                  <mat-icon [class]="getSeverityColor(item.severity)" [fontIcon]="getSeverityIcon(item.severity)"></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
                       class="font-medium text-slate-900 dark:text-white truncate"
@@ -81,7 +77,7 @@
               class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               matTooltip="Refresh"
             >
-              <mat-icon>refresh</mat-icon>
+              <mat-icon fontIcon="refresh"/>
             </button>
             <span class="text-sm text-slate-500"
               >{{ packagesCount() }} orphaned packages found</span
@@ -103,7 +99,7 @@
           </div>
         } @else if (packagesData().length === 0) {
           <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="text-6xl mb-4">inventory_2</mat-icon>
+            <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2"/>
             <p class="text-lg font-medium">No orphaned packages found</p>
           </div>
         } @else {
@@ -113,9 +109,7 @@
                 class="glass-card p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon [class]="getSeverityColor(item.severity)">{{
-                    getSeverityIcon(item.severity)
-                  }}</mat-icon>
+                  <mat-icon [class]="getSeverityColor(item.severity)" [fontIcon]="getSeverityIcon(item.severity)"></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
                       class="font-medium text-slate-900 dark:text-white truncate"

@@ -13,7 +13,7 @@
       <h2
         class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
       >
-        <mat-icon class="text-indigo-500">palette</mat-icon>
+        <mat-icon class="icon-accent" fontIcon="palette"/>
         Appearance
       </h2>
 
@@ -56,7 +56,7 @@
                 [style.color]="color"
               >
                 @if (themeService.currentTheme().accentColor === color) {
-                  <mat-icon class="text-white text-xl">check</mat-icon>
+                  <mat-icon class="icon-white icon-lg" fontIcon="check"/>
                 }
               </button>
             }
@@ -90,7 +90,7 @@
       <h2
         class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
       >
-        <mat-icon class="text-indigo-500">search</mat-icon>
+        <mat-icon class="icon-accent" fontIcon="search"/>
         Scanning & Cleaning
       </h2>
 
@@ -146,7 +146,7 @@
       <h2
         class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
       >
-        <mat-icon class="text-indigo-500">schedule</mat-icon>
+        <mat-icon class="icon-accent" fontIcon="schedule"/>
         Scheduled Cleaning
       </h2>
 
@@ -233,10 +233,10 @@
             class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 shadow-sm disabled:cursor-not-allowed"
           >
             @if (isSaving()) {
-              <mat-icon class="animate-spin">sync</mat-icon>
+              <mat-icon class="animate-spin" fontIcon="sync"/>
               Saving...
             } @else {
-              <mat-icon class="text-xl">save</mat-icon>
+              <mat-icon class="icon-lg" fontIcon="save"/>
               Save Schedule
             }
           </button>
@@ -246,10 +246,10 @@
             class="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 shadow-sm disabled:cursor-not-allowed"
           >
             @if (isRunning()) {
-              <mat-icon class="animate-spin">sync</mat-icon>
+              <mat-icon class="animate-spin" fontIcon="sync"/>
               Running...
             } @else {
-              <mat-icon class="text-xl">play_arrow</mat-icon>
+              <mat-icon class="icon-lg" fontIcon="play_arrow"/>
               Run Now
             }
           </button>
@@ -262,7 +262,7 @@
       <h2
         class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
       >
-        <mat-icon class="text-indigo-500">info</mat-icon>
+        <mat-icon class="icon-accent" fontIcon="info"/>
         Application Info
       </h2>
 
@@ -297,13 +297,13 @@
           <button
             (click)="checkUpdate()"
             [disabled]="isChecking()"
-            class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-3 active:scale-95 shadow-sm disabled:cursor-not-allowed"
+class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-3 active:scale-95 shadow-sm disabled:cursor-not-allowed"
           >
             @if (isChecking()) {
-              <mat-icon class="animate-spin">sync</mat-icon>
+              <mat-icon class="animate-spin" fontIcon="sync"/>
               Checking...
             } @else {
-              <mat-icon class="text-xl">update</mat-icon>
+              <mat-icon class="icon-lg" fontIcon="update"/>
               Check for Updates
             }
           </button>
@@ -313,7 +313,7 @@
             class="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl"
           >
             <div class="flex items-center gap-3">
-              <mat-icon class="text-emerald-600 dark:text-emerald-400">check_circle</mat-icon>
+              <mat-icon class="icon-success" fontIcon="check_circle"/>
               <span class="font-medium text-emerald-700 dark:text-emerald-300">
                 New version {{ lastVersion() }} is available!
               </span>

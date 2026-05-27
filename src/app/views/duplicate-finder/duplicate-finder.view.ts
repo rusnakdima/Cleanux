@@ -121,9 +121,11 @@ export class DuplicateFinderView implements OnInit {
 
     try {
       this.loading.set(true);
-      (await this.fileService.deleteFiles)
-        ? await this.fileService.deleteFiles(filesToDelete)
-        : await this.duplicateService.deleteFiles(filesToDelete);
+      if (this.fileService.deleteFiles) {
+        await this.fileService.deleteFiles(filesToDelete);
+      } else {
+        await this.duplicateService.deleteFiles(filesToDelete);
+      }
       this.selectedFiles.set(new Set());
       await this.scanForDuplicates();
     } catch (error) {

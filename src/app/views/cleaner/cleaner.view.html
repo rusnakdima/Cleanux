@@ -1,11 +1,9 @@
-<app-header [title]="'Cleaner'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <!-- Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-        <mat-icon class="text-purple-500 text-3xl">cleaning_services</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center">
+        <mat-icon class="icon-accent icon-3xl" fontIcon="cleaning_services"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -18,8 +16,8 @@
     </div>
 
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center">
-        <mat-icon class="text-orange-500 text-3xl">cached</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center">
+        <mat-icon class="icon-warning icon-3xl" fontIcon="cached"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -32,8 +30,8 @@
     </div>
 
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-        <mat-icon class="text-blue-500 text-3xl">description</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+        <mat-icon class="icon-info icon-3xl" fontIcon="description"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -53,48 +51,40 @@
         <div class="flex">
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="store.activeTab() === 'cache'"
-            [class.text-indigo-600]="store.activeTab() === 'cache'"
-            [class.dark:text-indigo-400]="store.activeTab() === 'cache'"
+            [class.border-accent]="store.activeTab() === 'cache'"
+            [class.text-accent]="store.activeTab() === 'cache'"
             [class.border-transparent]="store.activeTab() !== 'cache'"
             [class.text-slate-400]="store.activeTab() !== 'cache'"
-            [class.hover:text-slate-600]="store.activeTab() !== 'cache'"
             (click)="onTabChange('cache')"
           >
             Cache ({{ store.cacheData().length }})
           </button>
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="store.activeTab() === 'trash'"
-            [class.text-indigo-600]="store.activeTab() === 'trash'"
-            [class.dark:text-indigo-400]="store.activeTab() === 'trash'"
+            [class.border-accent]="store.activeTab() === 'trash'"
+            [class.text-accent]="store.activeTab() === 'trash'"
             [class.border-transparent]="store.activeTab() !== 'trash'"
             [class.text-slate-400]="store.activeTab() !== 'trash'"
-            [class.hover:text-slate-600]="store.activeTab() !== 'trash'"
             (click)="onTabChange('trash')"
           >
             Trash ({{ store.trashData().length }})
           </button>
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="store.activeTab() === 'logs'"
-            [class.text-indigo-600]="store.activeTab() === 'logs'"
-            [class.dark:text-indigo-400]="store.activeTab() === 'logs'"
+            [class.border-accent]="store.activeTab() === 'logs'"
+            [class.text-accent]="store.activeTab() === 'logs'"
             [class.border-transparent]="store.activeTab() !== 'logs'"
             [class.text-slate-400]="store.activeTab() !== 'logs'"
-            [class.hover:text-slate-600]="store.activeTab() !== 'logs'"
             (click)="onTabChange('logs')"
           >
             Logs ({{ store.logData().length }})
           </button>
           <button
             class="px-6 py-3 text-sm font-bold border-b-2 transition-all duration-200 uppercase tracking-wider"
-            [class.border-indigo-500]="store.activeTab() === 'packages'"
-            [class.text-indigo-600]="store.activeTab() === 'packages'"
-            [class.dark:text-indigo-400]="store.activeTab() === 'packages'"
+            [class.border-accent]="store.activeTab() === 'packages'"
+            [class.text-accent]="store.activeTab() === 'packages'"
             [class.border-transparent]="store.activeTab() !== 'packages'"
             [class.text-slate-400]="store.activeTab() !== 'packages'"
-            [class.hover:text-slate-600]="store.activeTab() !== 'packages'"
             (click)="onTabChange('packages')"
           >
             Packages ({{ store.packageCacheData().length }})
@@ -111,7 +101,7 @@
             class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             matTooltip="Refresh"
           >
-            <mat-icon>refresh</mat-icon>
+            <mat-icon class="icon-primary" fontIcon="refresh"/>
           </button>
         </div>
         <button
@@ -126,7 +116,7 @@
           "
           class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
         >
-          <mat-icon class="text-sm">delete</mat-icon>
+          <mat-icon class="icon-sm" fontIcon="delete"/>
           Delete Selected
         </button>
       </div>
@@ -161,37 +151,37 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div
                 class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                [class.border-indigo-500]="selectedLogCategory() === 'system'"
+                [class.border-accent]="selectedLogCategory() === 'system'"
                 (click)="selectedLogCategory.set('system')"
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center"
                   >
-                    <mat-icon class="text-purple-500">computer</mat-icon>
+                    <mat-icon class="icon-accent" fontIcon="computer"/>
                   </div>
                   <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">System</p>
                     <p class="text-lg font-bold">{{ formatSize(logSummary()!.system.size) }}</p>
-                    <p class="text-xs text-slate-400">{{ logSummary()!.system.count }} files</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ logSummary()!.system.count }} files</p>
                   </div>
                 </div>
               </div>
               <div
                 class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                [class.border-indigo-500]="selectedLogCategory() === 'application'"
+                [class.border-accent]="selectedLogCategory() === 'application'"
                 (click)="selectedLogCategory.set('application')"
               >
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                    <mat-icon class="text-blue-500">apps</mat-icon>
+                  <div class="w-10 h-10 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+                    <mat-icon class="icon-info" fontIcon="apps"/>
                   </div>
                   <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Application</p>
                     <p class="text-lg font-bold">
                       {{ formatSize(logSummary()!.application.size) }}
                     </p>
-                    <p class="text-xs text-slate-400">
+                    <p class="text-xs text-slate-400 dark:text-slate-500">
                       {{ logSummary()!.application.count }} files
                     </p>
                   </div>
@@ -199,37 +189,37 @@
               </div>
               <div
                 class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                [class.border-indigo-500]="selectedLogCategory() === 'security'"
+                [class.border-accent]="selectedLogCategory() === 'security'"
                 (click)="selectedLogCategory.set('security')"
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center"
                   >
-                    <mat-icon class="text-green-500">security</mat-icon>
+                    <mat-icon class="icon-success" fontIcon="security"/>
                   </div>
                   <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Security</p>
                     <p class="text-lg font-bold">{{ formatSize(logSummary()!.security.size) }}</p>
-                    <p class="text-xs text-slate-400">{{ logSummary()!.security.count }} files</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ logSummary()!.security.count }} files</p>
                   </div>
                 </div>
               </div>
               <div
                 class="glass-card p-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                [class.border-indigo-500]="selectedLogCategory() === 'hardware'"
+                [class.border-accent]="selectedLogCategory() === 'hardware'"
                 (click)="selectedLogCategory.set('hardware')"
               >
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 flex items-center justify-center"
                   >
-                    <mat-icon class="text-orange-500">memory</mat-icon>
+                    <mat-icon class="icon-warning" fontIcon="memory"/>
                   </div>
                   <div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Hardware</p>
                     <p class="text-lg font-bold">{{ formatSize(logSummary()!.hardware.size) }}</p>
-                    <p class="text-xs text-slate-400">{{ logSummary()!.hardware.count }} files</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ logSummary()!.hardware.count }} files</p>
                   </div>
                 </div>
               </div>
@@ -237,54 +227,60 @@
 
             <!-- Log Entries Table -->
             <div class="flex-1 overflow-auto">
-              <table class="w-full">
-                <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900">
+              <table class="table-grid">
+                <thead class="table-header sticky top-0">
                   <tr>
-                    <th class="px-4 py-3 text-left text-xs font-bold text-slate-500 uppercase">
+                    <th class="table-header-cell">
                       Path
                     </th>
                     <th
-                      class="px-4 py-3 text-center text-xs font-bold text-slate-500 uppercase w-24"
+                      class="table-header-cell w-24 text-center"
                     >
                       Severity
                     </th>
                     <th
-                      class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase w-24"
+                      class="table-header-cell w-24 text-right"
                     >
                       Count
                     </th>
                     <th
-                      class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase w-32"
+                      class="table-header-cell w-32 text-right"
                     >
                       Size
                     </th>
                     <th
-                      class="px-4 py-3 text-right text-xs font-bold text-slate-500 uppercase w-48"
+                      class="table-header-cell w-48 text-right"
                     >
                       Last Modified
                     </th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-black/5 dark:divide-white/5">
-                  @for (entry of getFilteredLogEntries(); track entry.path) {
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                      <td class="px-4 py-3 text-sm font-mono">{{ entry.path }}</td>
-                      <td class="px-4 py-3 text-center">
+                <tbody class="table-body divide-y divide-black/5 dark:divide-white/5">
+                  @for (entry of filteredLogEntries(); track entry.path) {
+                    <tr class="table-row hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <td class="table-cell font-mono">{{ entry.path }}</td>
+                      <td class="table-cell text-center">
                         <span
                           class="px-2 py-1 rounded text-xs font-bold uppercase"
                           [class.bg-red-500/10]="entry.severity === 'error'"
+                          [class.dark:bg-red-500/20]="entry.severity === 'error'"
                           [class.text-red-600]="entry.severity === 'error'"
+                          [class.dark:text-red-400]="entry.severity === 'error'"
                           [class.bg-yellow-500/10]="entry.severity === 'warning'"
+                          [class.dark:bg-yellow-500/20]="entry.severity === 'warning'"
                           [class.text-yellow-600]="entry.severity === 'warning'"
+                          [class.dark:text-yellow-400]="entry.severity === 'warning'"
                           [class.bg-blue-500/10]="entry.severity === 'info'"
+                          [class.dark:bg-blue-500/20]="entry.severity === 'info'"
                           [class.text-blue-600]="entry.severity === 'info'"
+                          [class.dark:text-blue-400]="entry.severity === 'info'"
                         >
                           {{ entry.severity }}
                         </span>
                       </td>
-                      <td class="px-4 py-3 text-right text-sm">{{ entry.count }}</td>
-                      <td class="px-4 py-3 text-right text-sm">{{ formatSize(entry.size) }}</td>
-                      <td class="px-4 py-3 text-right text-sm text-slate-500">
+                      <td class="table-cell text-center text-sm">{{ entry.count }}</td>
+                      <td class="table-cell text-right text-sm">{{ formatSize(entry.size) }}</td>
+                      <td class="table-cell text-right text-sm text-slate-500 dark:text-slate-400">
                         {{ entry.lastModified }}
                       </td>
                     </tr>
@@ -298,7 +294,7 @@
               class="flex items-center justify-between pt-4 border-t border-black/5 dark:border-white/5"
             >
               <div class="flex items-center gap-2">
-                <label class="text-sm text-slate-500">Clear logs older than:</label>
+                <label class="text-sm text-slate-500 dark:text-slate-400">Clear logs older than:</label>
                 <input
                   type="number"
                   min="1"
@@ -307,13 +303,13 @@
                   (change)="cleanDays.set(+$any($event.target).value)"
                   class="w-20 px-2 py-1 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-sm"
                 />
-                <span class="text-sm text-slate-500">days</span>
+                <span class="text-sm text-slate-500 dark:text-slate-400">days</span>
               </div>
               <button
                 (click)="cleanOldLogs()"
                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
               >
-                <mat-icon class="text-sm">delete_sweep</mat-icon>
+                <mat-icon class="icon-sm" fontIcon="delete_sweep"/>
                 Clear Resolved
               </button>
             </div>
@@ -332,7 +328,7 @@
               [disabled]="store.loading() || store.packageCacheData().length === 0"
               class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-              <mat-icon class="text-sm">delete</mat-icon>
+              <mat-icon class="icon-sm">delete</mat-icon>
               Clean All
             </button>
           </div>

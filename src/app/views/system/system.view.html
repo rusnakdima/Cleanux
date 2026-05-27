@@ -1,11 +1,9 @@
-<app-header [title]="'System Services'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <!-- Summary Cards -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-        <mat-icon class="text-blue-500 text-3xl">settings</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+        <mat-icon class="icon-info icon-3xl" fontIcon="settings"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -16,8 +14,8 @@
     </div>
 
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-        <mat-icon class="text-emerald-500 text-3xl">play_arrow</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
+        <mat-icon class="icon-success icon-3xl" fontIcon="play_arrow"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -28,8 +26,8 @@
     </div>
 
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
-        <mat-icon class="text-red-500 text-3xl">stop</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center">
+        <mat-icon class="icon-error icon-3xl" fontIcon="stop"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -56,7 +54,7 @@
           class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           matTooltip="Refresh"
         >
-          <mat-icon>refresh</mat-icon>
+          <mat-icon class="icon-primary" fontIcon="refresh"/>
         </button>
       </div>
       <div class="flex gap-2">
@@ -65,7 +63,7 @@
           [disabled]="selectedServices().size === 0"
           class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
         >
-          <mat-icon class="text-sm">stop</mat-icon>
+          <mat-icon class="icon-sm" fontIcon="stop"/>
           Stop Selected
         </button>
         <button
@@ -73,7 +71,7 @@
           [disabled]="selectedServices().size === 0"
           class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
         >
-          <mat-icon class="text-sm">play_arrow</mat-icon>
+          <mat-icon class="icon-sm" fontIcon="play_arrow"/>
           Start Selected
         </button>
       </div>

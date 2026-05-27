@@ -3,7 +3,7 @@
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold tracking-tight">System Dashboard</h1>
-      <p class="text-gray-500 dark:text-gray-400 mt-1">
+      <p class="text-slate-500 dark:text-slate-400 mt-1">
         Overview of your computer's health and junk files.
       </p>
     </div>
@@ -11,10 +11,13 @@
       <div
         class="status-dot animate-pulse"
         [class.bg-emerald-500]="systemStatus() === 'Healthy'"
+        [class.dark:bg-emerald-500]="systemStatus() === 'Healthy'"
         [class.bg-amber-500]="systemStatus() === 'Needs Attention'"
+        [class.dark:bg-amber-500]="systemStatus() === 'Needs Attention'"
         [class.bg-rose-500]="systemStatus() === 'Critical'"
+        [class.dark:bg-rose-500]="systemStatus() === 'Critical'"
       ></div>
-      <span class="text-sm font-bold tracking-wide uppercase text-slate-800 dark:text-slate-200">{{
+      <span class="text-sm font-bold tracking-wide uppercase text-slate-700 dark:text-slate-200">{{
         systemStatus()
       }}</span>
     </div>
@@ -52,8 +55,11 @@
             [attr.stroke-dashoffset]="301.6 - (301.6 * healthScore()) / 100"
             class="transition-all duration-1000 ease-out"
             [class.text-emerald-500]="healthScore() >= 80"
+            [class.dark:text-emerald-500]="healthScore() >= 80"
             [class.text-amber-500]="healthScore() >= 50 && healthScore() < 80"
+            [class.dark:text-amber-500]="healthScore() >= 50 && healthScore() < 80"
             [class.text-rose-500]="healthScore() < 50"
+            [class.dark:text-rose-500]="healthScore() < 50"
           />
         </svg>
         <span class="chart-value">{{ healthScore() }}%</span>
@@ -67,7 +73,7 @@
         <span class="junk-value-large">{{ formatSize(totalJunkSize()).split(" ")[0] }}</span>
         <span class="junk-value-unit">{{ formatSize(totalJunkSize()).split(" ")[1] }}</span>
       </div>
-      <mat-icon class="text-indigo-500 text-3xl">auto_delete</mat-icon>
+      <mat-icon class="icon-accent icon-3xl" fontIcon="auto_delete"/>
     </div>
 
     <!-- Health Trend -->
@@ -76,32 +82,32 @@
       <div class="flex items-center justify-center h-full">
         @if (healthTrend().trend === "improving") {
           <div class="text-center">
-            <mat-icon class="text-emerald-500 text-4xl">trending_up</mat-icon>
-            <span class="text-emerald-500 font-bold block mt-2">Improving</span>
-            <span class="text-sm text-gray-500"
+            <mat-icon class="icon-success icon-4xl" fontIcon="trending_up"/>
+            <span class="text-emerald-500 dark:text-emerald-400 font-bold block mt-2">Improving</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400"
               >+{{ healthTrend().change_percent | number: "1.1-1" }}%</span
             >
           </div>
         } @else if (healthTrend().trend === "declining") {
           <div class="text-center">
-            <mat-icon class="text-rose-500 text-4xl">trending_down</mat-icon>
-            <span class="text-rose-500 font-bold block mt-2">Declining</span>
-            <span class="text-sm text-gray-500"
+            <mat-icon class="icon-error icon-4xl" fontIcon="trending_down"/>
+            <span class="text-rose-500 dark:text-rose-400 font-bold block mt-2">Declining</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400"
               >{{ healthTrend().change_percent | number: "1.1-1" }}%</span
             >
           </div>
         } @else if (healthTrend().trend === "stable") {
           <div class="text-center">
-            <mat-icon class="text-amber-500 text-4xl">trending_flat</mat-icon>
-            <span class="text-amber-500 font-bold block mt-2">Stable</span>
-            <span class="text-sm text-gray-500"
+            <mat-icon class="icon-warning icon-4xl" fontIcon="trending_flat"/>
+            <span class="text-amber-500 dark:text-amber-400 font-bold block mt-2">Stable</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400"
               >{{ healthTrend().change_percent | number: "1.1-1" }}%</span
             >
           </div>
         } @else {
           <div class="text-center">
-            <mat-icon class="text-gray-400 text-4xl">hourglass_empty</mat-icon>
-            <span class="text-gray-400 font-bold block mt-2">Insufficient Data</span>
+            <mat-icon class="icon-muted icon-4xl" fontIcon="hourglass_empty"/>
+            <span class="text-slate-400 dark:text-slate-500 font-bold block mt-2">Insufficient Data</span>
           </div>
         }
       </div>
@@ -121,12 +127,12 @@
       </p>
       @if (totalJunkSize() > 0 && !isScanning() && !isCleaning()) {
         <button (click)="cleanAll()" class="clean-btn">
-          <mat-icon class="text-xl">cleaning_services</mat-icon>
+          <mat-icon class="icon-lg" fontIcon="cleaning_services"/>
           Deep Clean
         </button>
       } @else if (isCleaning()) {
-        <div class="flex items-center gap-3 text-indigo-600 font-bold animate-pulse">
-          <mat-icon class="animate-spin">sync</mat-icon>
+        <div class="flex items-center gap-3 text-accent dark:text-accent font-bold animate-pulse">
+          <mat-icon class="animate-spin" fontIcon="sync"/>
           Cleaning...
         </div>
       }
@@ -142,20 +148,20 @@
           <button
             (click)="setHealthHistoryDays(7)"
             class="px-3 py-1 rounded text-sm font-medium transition-colors"
-            [class.bg-indigo-600]="healthHistoryDays() === 7"
+            [class.bg-accent]="healthHistoryDays() === 7"
             [class.text-white]="healthHistoryDays() === 7"
-            [class.bg-gray-200]="healthHistoryDays() !== 7"
-            [class.dark:bg-gray-700]="healthHistoryDays() !== 7"
+            [class.bg-slate-200]="healthHistoryDays() !== 7"
+            [class.dark:bg-slate-700]="healthHistoryDays() !== 7"
           >
             7 Days
           </button>
           <button
             (click)="setHealthHistoryDays(30)"
             class="px-3 py-1 rounded text-sm font-medium transition-colors"
-            [class.bg-indigo-600]="healthHistoryDays() === 30"
+            [class.bg-accent]="healthHistoryDays() === 30"
             [class.text-white]="healthHistoryDays() === 30"
-            [class.bg-gray-200]="healthHistoryDays() !== 30"
-            [class.dark:bg-gray-700]="healthHistoryDays() !== 30"
+            [class.bg-slate-200]="healthHistoryDays() !== 30"
+            [class.dark:bg-slate-700]="healthHistoryDays() !== 30"
           >
             30 Days
           </button>
@@ -191,16 +197,16 @@
             class="text-slate-300 dark:text-slate-700"
             stroke-width="1"
           />
-          <text x="5" y="112" font-size="8" fill="currentColor" class="text-slate-400">0%</text>
-          <text x="5" y="57" font-size="8" fill="currentColor" class="text-slate-400">50%</text>
-          <text x="5" y="12" font-size="8" fill="currentColor" class="text-slate-400">100%</text>
+          <text x="5" y="112" font-size="8" fill="currentColor" class="text-slate-400 dark:text-slate-500">0%</text>
+          <text x="5" y="57" font-size="8" fill="currentColor" class="text-slate-400 dark:text-slate-500">50%</text>
+          <text x="5" y="12" font-size="8" fill="currentColor" class="text-slate-400 dark:text-slate-500">100%</text>
           @if (healthHistory().length > 0) {
             <path
               [attr.d]="getChartPath()"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
-              class="text-indigo-600"
+              class="text-accent dark:text-accent"
             />
             @for (point of healthHistory(); track point.timestamp; let i = $index) {
               <circle
@@ -208,7 +214,7 @@
                 [attr.cy]="10 + (100 - point.health_score) * 1"
                 r="3"
                 fill="currentColor"
-                class="text-indigo-600"
+                class="text-accent dark:text-accent"
               />
             }
           }
@@ -246,7 +252,7 @@
               stroke-linecap="round"
               [attr.stroke-dasharray]="766.5"
               [attr.stroke-dashoffset]="766.5 - (766.5 * scanProgress()) / 100"
-              class="text-indigo-600 transition-all duration-300 scan-progress-ring"
+              class="text-accent dark:text-accent transition-all duration-300 scan-progress-ring"
             />
           }
         </svg>

@@ -1,5 +1,3 @@
-<app-header [title]="'Automation'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <!-- Quick Actions Section -->
   <div class="space-y-4">
@@ -17,7 +15,7 @@
             <div
               class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center group-hover:bg-indigo-500/20 transition-colors"
             >
-              <mat-icon class="text-indigo-500 text-2xl">{{ getActionIcon(action) }}</mat-icon>
+              <mat-icon class="icon-accent icon-2xl" [fontIcon]="getActionIcon(action)"/>
             </div>
             <div class="flex-1 min-w-0">
               <h3 class="font-bold text-sm truncate">{{ action.name }}</h3>
@@ -33,7 +31,7 @@
               matTooltip="Execute"
               (click)="$event.stopPropagation(); executeQuickAction(action)"
             >
-              <mat-icon class="text-indigo-500">play_arrow</mat-icon>
+<mat-icon class="icon-accent" fontIcon="play_arrow"/>
             </button>
           </div>
         </div>
@@ -78,14 +76,14 @@
               (click)="openRecipeBuilder()"
               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-              <mat-icon class="text-sm">add</mat-icon>
+              <mat-icon class="icon-sm" fontIcon="add"/>
               New Recipe
             </button>
           </div>
 
           @if (recipes().length === 0) {
             <div class="text-center py-12 text-slate-500">
-              <mat-icon class="text-4xl mb-2">playlist_add</mat-icon>
+              <mat-icon class="icon-4xl mb-2" fontIcon="playlist_add"/>
               <p>No recipes yet. Create one to get started!</p>
             </div>
           } @else {
@@ -123,21 +121,21 @@
                       matTooltip="Edit"
                       (click)="openRecipeBuilder(recipe)"
                     >
-                      <mat-icon>edit</mat-icon>
+                      <mat-icon fontIcon="edit"/>
                     </button>
                     <button
                       class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                       matTooltip="Execute"
                       (click)="executeRecipe(recipe)"
                     >
-                      <mat-icon class="text-indigo-500">play_arrow</mat-icon>
+<mat-icon class="icon-accent">play_arrow</mat-icon>
                     </button>
                     <button
                       class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       matTooltip="Delete"
                       (click)="deleteRecipe(recipe)"
                     >
-                      <mat-icon class="text-red-500">delete</mat-icon>
+                      <mat-icon class="icon-error" fontIcon="delete"/>
                     </button>
                   </div>
                 </div>
@@ -150,7 +148,7 @@
       @if (activeTab() === "history") {
         @if (history().length === 0) {
           <div class="text-center py-12 text-slate-500">
-            <mat-icon class="text-4xl mb-2">history</mat-icon>
+            <mat-icon class="icon-4xl mb-2" fontIcon="history"/>
             <p>No execution history yet.</p>
           </div>
         } @else {
@@ -214,7 +212,7 @@
           class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
           (click)="closeRecipeBuilder()"
         >
-          <mat-icon>close</mat-icon>
+          <mat-icon fontIcon="close"/>
         </button>
       </div>
 
@@ -266,18 +264,18 @@
             <div
               class="text-center py-8 text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg"
             >
-              <mat-icon class="text-3xl mb-2">add_circle_outline</mat-icon>
+              <mat-icon class="icon-3xl mb-2" fontIcon="add_circle_outline"/>
               <p>Add steps to your recipe</p>
             </div>
           } @else {
             <div class="space-y-2">
               @for (step of newRecipeSteps(); track $index; let i = $index) {
                 <div class="flex items-center gap-3 p-3 glass-card">
-                  <mat-icon class="text-slate-400 cursor-grab">drag_handle</mat-icon>
+                  <mat-icon class="icon-muted cursor-grab">drag_handle</mat-icon>
                   <div
                     class="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center"
                   >
-                    <mat-icon class="text-indigo-500 text-sm">{{ getStepIcon(step) }}</mat-icon>
+                    <mat-icon class="icon-accent icon-sm" [fontIcon]="getStepIcon(step)"/>
                   </div>
                   <span class="flex-1 text-sm">{{ getStepDescription(step) }}</span>
                   <button
@@ -285,20 +283,20 @@
                     (click)="moveStep(i, 'up')"
                     [disabled]="i === 0"
                   >
-                    <mat-icon class="text-sm">arrow_upward</mat-icon>
+                    <mat-icon class="icon-sm" fontIcon="arrow_upward"/>
                   </button>
                   <button
                     class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
                     (click)="moveStep(i, 'down')"
                     [disabled]="i === newRecipeSteps().length - 1"
                   >
-                    <mat-icon class="text-sm">arrow_downward</mat-icon>
+                    <mat-icon class="icon-sm" fontIcon="arrow_downward"/>
                   </button>
                   <button
                     class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
                     (click)="removeStep(i)"
                   >
-                    <mat-icon class="text-sm text-red-500">close</mat-icon>
+                    <mat-icon class="icon-sm icon-error" fontIcon="close"/>
                   </button>
                 </div>
               }

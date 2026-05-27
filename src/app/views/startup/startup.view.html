@@ -1,10 +1,8 @@
-<app-header [title]="'Startup Manager'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-        <mat-icon class="text-blue-500 text-3xl">apps</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+        <mat-icon class="icon-info icon-3xl" fontIcon="apps"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -15,8 +13,8 @@
     </div>
 
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-        <mat-icon class="text-emerald-500 text-3xl">check_circle</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
+        <mat-icon class="icon-success icon-3xl" fontIcon="check_circle"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -27,8 +25,8 @@
     </div>
 
     <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
-        <mat-icon class="text-red-500 text-3xl">cancel</mat-icon>
+      <div class="w-16 h-16 rounded-2xl bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center">
+        <mat-icon class="icon-error icon-3xl" fontIcon="cancel"/>
       </div>
       <div>
         <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -54,7 +52,7 @@
           class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           matTooltip="Refresh"
         >
-          <mat-icon>refresh</mat-icon>
+          <mat-icon class="icon-primary" fontIcon="refresh"/>
         </button>
       </div>
     </div>
@@ -65,8 +63,8 @@
           <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
         </div>
       } @else if (filteredData().length === 0) {
-        <div class="flex flex-col items-center justify-center h-full text-slate-400">
-          <mat-icon class="text-6xl mb-4">rocket_launch</mat-icon>
+        <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+          <mat-icon class="icon-4xl mb-4" fontIcon="rocket_launch"/>
           <p class="text-lg font-medium">No startup items found</p>
         </div>
       } @else {
@@ -96,7 +94,9 @@
                 <mat-icon
                   class="text-lg cursor-pointer transition-colors"
                   [class.text-emerald-500]="item.enabled"
+                  [class.dark:text-emerald-500]="item.enabled"
                   [class.text-slate-400]="!item.enabled"
+                  [class.dark:text-slate-500]="!item.enabled"
                   [matTooltip]="
                     item.enabled ? 'Enabled - click to disable' : 'Disabled - click to enable'
                   "

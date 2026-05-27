@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 /* materials */
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { HeaderComponent } from '@components/header/header.component';
 
 /* services */
 import { ReportService } from '@services/report.service';
@@ -24,7 +25,7 @@ import { formatSize } from '@shared/utils/format.util';
   selector: 'app-reports',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, HeaderComponent],
   templateUrl: './reports.view.html',
 })
 export class ReportsView implements OnInit {

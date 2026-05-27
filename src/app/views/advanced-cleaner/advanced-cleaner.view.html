@@ -1,118 +1,111 @@
-<div class="min-h-screen bg-gray-900">
-  <app-header
-    title="Advanced Junk Cleaner"
-    subtitle="Deep cleaning of temporary and cached files"
-  ></app-header>
-
+<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   @if (loading()) {
     <div class="flex justify-center items-center py-20">
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
     </div>
   } @else {
-    <div class="p-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (category of junkCategories; track category.key) {
-          @let summary = getCategorySummary(category.key);
-          <mat-card class="bg-gray-800 border border-gray-700">
-            <mat-card-header class="pb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center">
-                  <span class="text-xl">{{
-                    getCategoryIcon(category.key) === "globe"
-                      ? "🌐"
-                      : getCategoryIcon(category.key) === "image"
-                        ? "🖼️"
-                        : getCategoryIcon(category.key) === "apps"
-                          ? "📱"
-                          : getCategoryIcon(category.key) === "computer"
-                            ? "💻"
-                            : "📄"
-                  }}</span>
-                </div>
-                <div>
-                  <mat-card-title class="text-white text-lg">{{ category.label }}</mat-card-title>
-                  <mat-card-subtitle class="text-gray-400 text-sm">
-                    {{ summary?.description || "No data" }}
-                  </mat-card-subtitle>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (category of junkCategories; track category.key) {
+        @let summary = getCategorySummary(category.key);
+        <mat-card class="bg-gray-800 border border-gray-700">
+          <mat-card-header class="pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center">
+                <span class="text-xl">{{
+                  getCategoryIcon(category.key) === "globe"
+                    ? "🌐"
+                    : getCategoryIcon(category.key) === "image"
+                      ? "🖼️"
+                      : getCategoryIcon(category.key) === "apps"
+                        ? "📱"
+                        : getCategoryIcon(category.key) === "computer"
+                          ? "💻"
+                          : "📄"
+                }}</span>
+              </div>
+              <div>
+                <mat-card-title class="text-white text-lg">{{ category.label }}</mat-card-title>
+                <mat-card-subtitle class="text-gray-400 text-sm">
+                  {{ summary?.description || "No data" }}
+                </mat-card-subtitle>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div class="bg-gray-700/50 rounded-lg p-3">
+                <div class="text-gray-400 text-xs uppercase tracking-wide">Total Size</div>
+                <div class="text-white text-xl font-semibold">
+                  {{ formatSize(summary?.totalSize || 0) }}
                 </div>
               </div>
-            </mat-card-header>
-
-            <mat-card-content>
-              <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="bg-gray-700/50 rounded-lg p-3">
-                  <div class="text-gray-400 text-xs uppercase tracking-wide">Total Size</div>
-                  <div class="text-white text-xl font-semibold">
-                    {{ formatSize(summary?.totalSize || 0) }}
-                  </div>
-                </div>
-                <div class="bg-gray-700/50 rounded-lg p-3">
-                  <div class="text-gray-400 text-xs uppercase tracking-wide">Files</div>
-                  <div class="text-white text-xl font-semibold">
-                    {{ summary?.fileCount || 0 }}
-                  </div>
+              <div class="bg-gray-700/50 rounded-lg p-3">
+                <div class="text-gray-400 text-xs uppercase tracking-wide">Files</div>
+                <div class="text-white text-xl font-semibold">
+                  {{ summary?.fileCount || 0 }}
                 </div>
               </div>
+            </div>
 
-              <div class="text-gray-400 text-xs mb-3">
-                Last cleaned: {{ formatLastCleaned(category.key) }}
-              </div>
+            <div class="text-gray-400 text-xs mb-3">
+              Last cleaned: {{ formatLastCleaned(category.key) }}
+            </div>
 
-              <mat-expansion-panel class="bg-gray-700/30">
-                <mat-expansion-panel-header>
-                  <mat-panel-title class="text-gray-300 text-sm">
-                    View Items ({{ summary?.items?.length || 0 }})
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
+            <mat-expansion-panel class="bg-gray-700/30">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="text-gray-300 text-sm">
+                  View Items ({{ summary?.items?.length || 0 }})
+                </mat-panel-title>
+              </mat-expansion-panel-header>
 
-                <div class="max-h-64 overflow-y-auto">
-                  @for (item of summary?.items || []; track item.path) {
-                    <div class="py-2 px-3 border-b border-gray-600/30 last:border-0">
-                      <div class="text-gray-300 text-sm truncate" [matTooltip]="item.path">
-                        {{ item.path }}
-                      </div>
-                      <div class="text-gray-500 text-xs mt-1">
-                        {{ formatSize(item.size) }} · {{ item.fileCount }} files
-                      </div>
+              <div class="max-h-64 overflow-y-auto">
+                @for (item of summary?.items || []; track item.path) {
+                  <div class="py-2 px-3 border-b border-gray-600/30 last:border-0">
+                    <div class="text-gray-300 text-sm truncate" [matTooltip]="item.path">
+                      {{ item.path }}
                     </div>
-                  } @empty {
-                    <div class="py-4 text-center text-gray-500 text-sm">No items found</div>
-                  }
-                </div>
-              </mat-expansion-panel>
-            </mat-card-content>
-
-            <mat-card-actions class="flex gap-2 p-4 pt-0">
-              <button
-                mat-button
-                color="primary"
-                class="flex-1"
-                [disabled]="scanningCategory() === category.key"
-                (click)="scanCategory(category.key)"
-              >
-                @if (scanningCategory() === category.key) {
-                  <mat-progress-spinner mode="indeterminate" diameter="16"></mat-progress-spinner>
-                } @else {
-                  Scan
+                    <div class="text-gray-500 text-xs mt-1">
+                      {{ formatSize(item.size) }} · {{ item.fileCount }} files
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="py-4 text-center text-gray-500 text-sm">No items found</div>
                 }
-              </button>
-              <button
-                mat-raised-button
-                color="warn"
-                class="flex-1"
-                [disabled]="(summary?.totalSize || 0) === 0"
-                (click)="cleanCategory(category.key)"
-              >
-                Clean
-              </button>
-            </mat-card-actions>
-          </mat-card>
-        }
-      </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-card-content>
 
-      <div class="mt-8 flex justify-end">
-        <button mat-raised-button color="primary" (click)="loadJunkSummary()">Refresh All</button>
-      </div>
+          <mat-card-actions class="flex gap-2 p-4 pt-0">
+            <button
+              mat-button
+              color="primary"
+              class="flex-1"
+              [disabled]="scanningCategory() === category.key"
+              (click)="scanCategory(category.key)"
+            >
+              @if (scanningCategory() === category.key) {
+                <mat-progress-spinner mode="indeterminate" diameter="16"></mat-progress-spinner>
+              } @else {
+                Scan
+              }
+            </button>
+            <button
+              mat-raised-button
+              color="warn"
+              class="flex-1"
+              [disabled]="(summary?.totalSize || 0) === 0"
+              (click)="cleanCategory(category.key)"
+            >
+              Clean
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+
+    <div class="mt-8 flex justify-end">
+      <button mat-raised-button color="primary" (click)="loadJunkSummary()">Refresh All</button>
     </div>
   }
 </div>

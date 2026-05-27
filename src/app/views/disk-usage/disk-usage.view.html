@@ -1,5 +1,3 @@
-<app-header [title]="'Disk Usage Analyzer'"></app-header>
-
 <div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
   <div class="glass-card p-6">
     <div class="flex items-center gap-4">
@@ -17,7 +15,7 @@
         @if (loading()) {
           <mat-spinner diameter="20"></mat-spinner>
         } @else {
-          <mat-icon>search</mat-icon>
+          <mat-icon class="icon-primary" fontIcon="search"/>
           Scan
         }
       </button>
@@ -29,7 +27,7 @@
       <div class="flex items-center gap-2 mb-6 flex-wrap">
         @for (crumb of breadcrumbs(); track crumb.path; let i = $index) {
           @if (i > 0) {
-            <mat-icon class="text-slate-400">chevron_right</mat-icon>
+            <mat-icon class="icon-muted" fontIcon="chevron_right"/>
           }
           <button
             (click)="navigateToBreadcrumb(i)"
@@ -71,7 +69,7 @@
               </div>
               @if (item.node.children.length > 0) {
                 <div class="text-white/50 text-xs mt-1 flex items-center gap-1">
-                  <mat-icon class="text-xs">folder_open</mat-icon>
+                  <mat-icon class="icon-xs" fontIcon="folder_open"/>
                   {{ item.node.children.length }} items
                 </div>
               }
