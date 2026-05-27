@@ -29,6 +29,9 @@ export class CleanerViewStore {
   readonly selectedTrashFiles = signal<Set<string>>(new Set());
   readonly selectedLogFiles = signal<Set<string>>(new Set());
 
+  readonly cacheHasMore = signal(false);
+  readonly cacheTotal = signal(0);
+
   readonly backupDir = signal<string>('');
 
   readonly cacheSize = computed(() => this.cacheData().reduce((sum, file) => sum + file.size, 0));
@@ -54,9 +57,11 @@ export class CleanerViewStore {
     this.loading.set(true);
     try {
       if (tab === 'cache') {
-        const cache = await this.fileService.getCacheFiles();
-        this.cacheData.set(cache);
-        this.filteredCacheData.set(cache);
+        const result = await this.fileService.getCacheFiles(50, 0);
+        this.cacheData.set(result.data);
+        this.filteredCacheData.set(result.data);
+        this.cacheHasMore.set(result.has_more);
+        this.cacheTotal.set(result.total);
       } else if (tab === 'trash') {
         const trash = await this.fileService.getTrashFiles();
         this.trashData.set(trash);
@@ -71,6 +76,24 @@ export class CleanerViewStore {
       }
     } catch (error: unknown) {
       console.error(`Failed to load ${tab} data:`, error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async loadMoreCache(): Promise<void> {
+    if (!this.cacheHasMore() || this.loading()) return;
+
+    this.loading.set(true);
+    try {
+      const offset = this.cacheData().length;
+      const result = await this.fileService.getCacheFiles(50, offset);
+      this.cacheData.update(current => [...current, ...result.data]);
+      this.filteredCacheData.update(current => [...current, ...result.data]);
+      this.cacheHasMore.set(result.has_more);
+      this.cacheTotal.set(result.total);
+    } catch (error: unknown) {
+      console.error('Failed to load more cache data:', error);
     } finally {
       this.loading.set(false);
     }

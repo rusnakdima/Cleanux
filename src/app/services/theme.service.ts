@@ -71,15 +71,34 @@ export class ThemeService {
 
   applyTheme(config: ThemeConfig) {
     const root = document.documentElement;
+    const body = document.body;
 
-    root.style.setProperty('--accent-color', config.accentColor);
+    const accentColor = config.accentColor;
+    const r = parseInt(accentColor.slice(1, 3), 16);
+    const g = parseInt(accentColor.slice(3, 5), 16);
+    const b = parseInt(accentColor.slice(5, 7), 16);
+
+    root.style.setProperty('--accent-color', accentColor);
+    root.style.setProperty('--accent-500', accentColor);
+    root.style.setProperty('--accent-light', `rgba(${r}, ${g}, ${b}, 0.1)`);
+    root.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
     root.style.setProperty('--glass-opacity', config.glassOpacity.toString());
+
+    root.style.setProperty('--icon-cpu', accentColor);
+    root.style.setProperty('--icon-memory', accentColor);
 
     const isDark =
       config.mode === 'dark' ||
       (config.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-    root.classList.toggle('dark', isDark);
+    body.classList.add('theme-transitioning');
+    requestAnimationFrame(() => {
+      root.classList.toggle('dark', isDark);
+      root.classList.toggle('light', !isDark);
+      setTimeout(() => {
+        body.classList.remove('theme-transitioning');
+      }, 300);
+    });
   }
 
   getEffectiveMode(): boolean {

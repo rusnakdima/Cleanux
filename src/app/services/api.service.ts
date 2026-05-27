@@ -1,38 +1,29 @@
 /* sys lib */
-import { Injectable } from '@angular/core';
-import { invoke } from '@tauri-apps/api/core';
+import { Injectable, inject } from '@angular/core';
+
+/* api */
+import { TauriApiService, ApiException } from '@api/tauri-api.service';
 
 /* models */
 import { Response, getData } from '@models/response.model';
-import { ApiException } from '@models/error.model';
+
+export { ApiException } from '@models/error.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  constructor() {}
+  private tauriApi = inject(TauriApiService);
 
   async invoke<T>(
     command: string,
     args?: Record<string, unknown>,
     options: { suppressError?: boolean } = {}
   ): Promise<T> {
-    try {
-      const response = await invoke<Response>(command, args);
-      if (response.status === 'success') {
-        return getData<T>(response) as T;
-      } else {
-        throw new ApiException(response.message || `Operation failed: ${command}`, command);
-      }
-    } catch (error: unknown) {
-      if (!options.suppressError) {
-        console.error(`Error invoking command "${command}":`, error);
-      }
-      if (error instanceof ApiException) {
-        throw error;
-      }
-      const message = error instanceof Error ? error.message : String(error);
-      throw new ApiException(message, command, error);
-    }
+    return this.tauriApi.invoke<T>(command, args, options);
+  }
+
+  async listen<T>(event: string, handler: (event: { payload: T }) => void): Promise<() => void> {
+    return this.tauriApi.listen<T>(event, handler);
   }
 }
