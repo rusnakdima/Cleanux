@@ -1,8 +1,24 @@
-<div class="flex min-h-screen transition-colors duration-300 text-black dark:text-white">
-  <app-sidebar></app-sidebar>
+<div class="app-container">
+  @if (isMobileMenuOpen()) {
+    <div class="mobile-overlay" (click)="closeMobileMenu()"></div>
+  }
 
-  <main class="flex-1 min-h-screen overflow-y-auto relative">
-    <div class="max-w-7xl mx-auto">
+  <app-sidebar 
+    [isOpen]="isMobileMenuOpen()" 
+    [isCollapsed]="isCollapsed()"
+    (close)="closeMobileMenu()">
+  </app-sidebar>
+
+  <main class="main-content" [class.sidebar-collapsed]="isCollapsed()">
+    <app-top-header
+      [title]="pageTitle()"
+      [breadcrumb]="pageBreadcrumb()"
+      [isCollapsed]="isCollapsed()"
+      (mobileMenuToggle)="toggleMobileMenu()"
+      (sidebarToggle)="toggleSidebar()">
+    </app-top-header>
+
+    <div class="page-content">
       <router-outlet></router-outlet>
     </div>
   </main>
