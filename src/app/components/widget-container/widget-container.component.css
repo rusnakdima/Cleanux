@@ -1,26 +1,25 @@
+@reference "tailwindcss";
+
 .widget-container {
-  width: 100%;
+  @apply w-full;
 }
 
 .widget-grid {
-  display: grid;
+  @apply grid gap-4 p-4;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  padding: 1rem 0;
 }
 
 .widget-card {
-  background: var(--card-bg, white);
-  border-radius: 12px;
-  border: 1px solid var(--border-color, #e5e7eb);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  overflow: hidden;
+  @apply rounded-xl overflow-hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  @apply transition-all duration-200;
 }
 
 .widget-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-elevated);
+  @apply -translate-y-0.5;
 }
 
 .widget-card.dragging {
@@ -29,64 +28,49 @@
 }
 
 .widget-card.drag-over {
-  border-color: var(--primary-color, #6366f1);
-  background: var(--hover-bg, #f5f3ff);
+  border-color: var(--accent-color);
+  background: var(--accent-light);
 }
 
 .widget-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  background: var(--header-bg, #f9fafb);
+  @apply flex items-center justify-between px-4 py-3;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-elevated);
 }
 
 .widget-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: var(--text-primary, #374151);
+  @apply flex items-center gap-2 font-semibold text-sm;
+  color: var(--text-primary);
 }
 
 .widget-icon {
-  font-size: 1.25rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--primary-color, #6366f1);
+  @apply text-xl w-5 h-5;
+  color: var(--accent-color);
 }
 
 .drag-handle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
-  cursor: grab;
+  @apply p-1 cursor-grab rounded;
   background: transparent;
   border: none;
-  color: var(--text-muted, #9ca3af);
-  border-radius: 4px;
-  transition: all 0.15s ease;
+  color: var(--text-muted);
+  @apply transition-all duration-150;
 }
 
 .drag-handle:hover {
-  background: var(--hover-bg, #e5e7eb);
-  color: var(--text-primary, #374151);
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .drag-handle:active {
-  cursor: grabbing;
+  @apply cursor-grabbing;
 }
 
 .widget-content {
-  padding: 1rem;
-  min-height: 120px;
+  @apply p-4 min-h-28;
 }
 
 @media (max-width: 640px) {
   .widget-grid {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 }

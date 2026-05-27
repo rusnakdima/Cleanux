@@ -49,47 +49,47 @@ import { MatIconModule } from '@angular/material/icon';
         justify-content: center;
         width: 40px;
         height: 40px;
-        background: var(--icon-bg, #e0e7ff);
+        background: var(--accent-light);
         border-radius: 8px;
       }
       .disk-icon mat-icon {
-        color: var(--primary-color, #6366f1);
+        color: var(--accent-color);
       }
       .disk-details {
         font-size: 0.875rem;
       }
       .disk-used {
         font-weight: 700;
-        color: var(--text-primary, #374151);
+        color: var(--text-primary);
       }
       .disk-separator {
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
         margin: 0 0.25rem;
       }
       .disk-total {
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
       }
       .usage-bar {
         height: 8px;
-        background: var(--bar-bg, #e5e7eb);
+        background: var(--progress-track);
         border-radius: 4px;
         overflow: hidden;
       }
       .usage-fill {
         height: 100%;
-        background: var(--fill-color, #22c55e);
+        background: var(--success);
         border-radius: 4px;
         transition: width 0.5s ease;
       }
       .usage-fill.warning {
-        background: #f59e0b;
+        background: var(--warning);
       }
       .usage-fill.critical {
-        background: #ef4444;
+        background: var(--error);
       }
       .usage-label {
         font-size: 0.75rem;
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
         text-align: center;
       }
     `,

@@ -1,92 +1,103 @@
-<aside
-  class="relative flex flex-col h-screen border-r transition-all duration-300 ease-in-out z-40"
-  [class.w-64]="!isCollapsed()"
-  [class.w-20]="isCollapsed()"
-  [class.bg-white]="!isDarkMode()"
-  [class.bg-slate-900]="isDarkMode()"
-  [class.border-slate-200]="!isDarkMode()"
-  [class.border-slate-800]="isDarkMode()"
->
-  <!-- Header / Logo -->
-  <div class="flex items-center gap-3 p-6 mb-6">
-    <div class="flex items-center justify-center w-10 h-10 shrink-0">
-      <img src="/assets/images/icon.png" alt="Cleanux Logo" class="w-8 h-8 object-contain" />
+<aside 
+  class="sidebar"
+  [class.sidebar-open]="isOpen()"
+  [class.sidebar-collapsed]="isCollapsed()">
+  
+  <!-- Logo Section -->
+  <header class="sidebar-header">
+    <a routerLink="/dashboard" class="logo-link" (click)="onClose()">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="logo-text">CleanUX</span>
+    </a>
+  </header>
+
+  <!-- Quick Stats Card -->
+  <div class="quick-stats" [class.collapsed]="isCollapsed()">
+    <div class="stat-item">
+      <span class="stat-value">{{ healthScore() }}</span>
+      <span class="stat-label">Health</span>
     </div>
-    @if (!isCollapsed()) {
-      <span class="text-xl font-black tracking-tight truncate text-slate-900 dark:text-white">
-        Cleanux
-      </span>
-    }
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value">{{ formatSize(totalJunk()) }}</span>
+      <span class="stat-label">Junk</span>
+    </div>
   </div>
 
   <!-- Navigation -->
-  <nav class="flex-1 px-3 space-y-1.5">
-    @for (item of navItems; track item.label) {
-      <a
-        [routerLink]="item.route"
-        routerLinkActive="bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 shadow-sm active-nav-item"
-        class="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group hover:bg-slate-100 dark:hover:bg-white/5"
-        [class.justify-center]="isCollapsed()"
-        [matTooltip]="isCollapsed() ? item.label : ''"
-        matTooltipPosition="right"
-      >
-        <mat-icon
-          class="text-2xl shrink-0 group-hover:scale-110 transition-transform duration-200 text-slate-400 group-[.active-nav-item]:text-indigo-600 dark:group-[.active-nav-item]:text-indigo-400"
-        >
-          {{ item.icon }}
-        </mat-icon>
-        @if (!isCollapsed()) {
-          <span
-            class="font-bold text-sm truncate text-slate-600 group-hover:text-slate-900 group-[.active-nav-item]:text-indigo-600 dark:text-slate-400 dark:group-hover:text-slate-100 dark:group-[.active-nav-item]:text-indigo-400"
-          >
-            {{ item.label }}
-          </span>
-        }
-      </a>
-    }
+  <nav class="sidebar-nav">
+    <!-- Main Section -->
+    <div class="nav-section">
+      <span class="nav-section-title">Main</span>
+      @for (item of mainNavItems; track item.route) {
+        <a 
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+          (click)="onClose()"
+          class="nav-item"
+          [matTooltip]="isCollapsed() ? item.label : ''"
+          matTooltipPosition="right">
+          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      }
+    </div>
+
+    <!-- Tools Section -->
+    <div class="nav-section">
+      <span class="nav-section-title">Tools</span>
+      @for (item of toolsNavItems; track item.route) {
+        <a 
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          (click)="onClose()"
+          class="nav-item"
+          [matTooltip]="isCollapsed() ? item.label : ''"
+          matTooltipPosition="right">
+          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="nav-badge">{{ item.badge }}</span>
+          }
+        </a>
+      }
+    </div>
   </nav>
 
-  <!-- Footer Actions -->
-  <div
-    class="p-4 mt-auto border-t space-y-1.5"
-    [class.border-slate-100]="!isDarkMode()"
-    [class.border-slate-800]="isDarkMode()"
-  >
-    <!-- Dark Mode Toggle -->
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <!-- Settings Link -->
+    @for (item of footerNavItems; track item.route) {
+      <a 
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        (click)="onClose()"
+        class="nav-item"
+        [matTooltip]="isCollapsed() ? item.label : ''"
+        matTooltipPosition="right">
+        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+    
+    <!-- Divider -->
+    <div class="nav-divider"></div>
+    
+    <!-- Theme Toggle -->
     <button
+      class="nav-item theme-toggle"
       (click)="onToggleDarkMode()"
-      class="flex items-center w-full gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-slate-100 dark:hover:bg-white/5"
-      [class.justify-center]="isCollapsed()"
-      [matTooltip]="isCollapsed() ? 'Toggle Dark Mode' : ''"
+      [matTooltip]="isCollapsed() ? (isDarkMode() ? 'Light Mode' : 'Dark Mode') : ''"
       matTooltipPosition="right"
+      [attr.aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
     >
-      <mat-icon class="text-2xl shrink-0 text-slate-400">
-        {{ isDarkMode() ? "light_mode" : "dark_mode" }}
-      </mat-icon>
-      @if (!isCollapsed()) {
-        <span class="font-bold text-sm truncate text-slate-600 dark:text-slate-400">
-          {{ isDarkMode() ? "Light Mode" : "Dark Mode" }}
-        </span>
-      }
-    </button>
-
-    <!-- Collapse Toggle -->
-    <button
-      (click)="toggleSidebar()"
-      class="flex items-center w-full gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-slate-100 dark:hover:bg-white/5"
-      [class.justify-center]="isCollapsed()"
-    >
-      <mat-icon
-        class="text-2xl shrink-0 transition-transform duration-300 text-slate-400"
-        [class.rotate-180]="isCollapsed()"
-      >
-        chevron_left
-      </mat-icon>
-      @if (!isCollapsed()) {
-        <span class="font-bold text-sm truncate text-slate-600 dark:text-slate-400">
-          Collapse
-        </span>
-      }
+      <mat-icon class="nav-icon" aria-hidden="true">{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      <span class="nav-label">{{ isDarkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
     </button>
   </div>
 </aside>

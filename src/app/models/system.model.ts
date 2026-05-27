@@ -44,3 +44,9 @@ export interface ProcessItem {
   cpu_usage: number;
   memory_usage: number;
 }
+
+export interface PaginatedData<T> {
+  data: T[];
+  has_more: boolean;
+  total: number;
+}

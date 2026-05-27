@@ -1,149 +1,112 @@
+@reference "tailwindcss";
+
 .temperature-container {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border-radius: 16px;
-  padding: 20px;
-  color: #e2e8f0;
+  @apply rounded-xl p-5;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
 }
 
 .temperature-header {
-  margin-bottom: 20px;
+  @apply mb-5;
 }
 
 .temperature-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
+  @apply flex items-center gap-2 text-lg font-semibold m-0;
 }
 
 .temperature-icon {
-  color: #f59e0b;
+  color: var(--icon-temperature);
 }
 
 .temperature-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  @apply grid grid-cols-2 gap-4;
 }
 
 .temp-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 16px;
-  transition:
-    transform 0.2s,
-    background 0.2s;
+  @apply rounded-xl p-4 transition-all duration-200;
+  background: var(--bg-card);
 }
 
 .temp-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
+  background: var(--bg-tertiary);
+  @apply -translate-y-0.5;
 }
 
 .temp-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  @apply flex items-center gap-2 mb-2;
 }
 
 .temp-icon {
-  font-size: 20px !important;
-  width: 20px;
-  height: 20px;
+  @apply text-xl w-5 h-5;
 }
 
 .cpu-icon {
-  color: #3b82f6;
+  color: var(--icon-cpu);
 }
 .gpu-icon {
-  color: #a855f7;
+  color: var(--icon-memory);
 }
 
 .temp-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #94a3b8;
+  @apply text-sm font-medium;
+  color: var(--text-secondary);
 }
 
 .temp-value {
-  font-size: 28px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  margin-bottom: 8px;
+  @apply text-3xl font-bold tabular-nums mb-2;
 }
 
 .temp-value.unavailable {
-  color: #64748b;
-  font-size: 20px;
+  color: var(--text-muted);
+  @apply text-xl;
 }
 
 .temp-progress-container {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 8px;
+  @apply h-1.5 rounded overflow-hidden mb-2;
+  background: var(--progress-track);
 }
 
 .temp-progress-bar {
-  height: 100%;
-  border-radius: 3px;
-  transition:
-    width 0.5s ease-out,
-    background-color 0.3s;
+  @apply h-full rounded transition-all duration-500;
 }
 
 .cpu-bar {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  background: var(--accent-color);
 }
 
 .gpu-bar {
-  background: linear-gradient(90deg, #a855f7, #c084fc);
+  background: var(--icon-memory);
 }
 
 .unavailable-bar {
   width: 0%;
-  background: #64748b;
+  background: var(--text-muted);
 }
 
 .temp-name {
-  font-size: 11px;
-  color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  @apply text-xs truncate whitespace-nowrap overflow-hidden;
+  color: var(--text-muted);
 }
 
 .temp-card.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #64748b;
-  font-size: 13px;
+  @apply flex flex-col items-center justify-center gap-2;
+  color: var(--text-muted);
+  @apply text-sm;
 }
 
 .spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #60a5fa;
-  border-radius: 50%;
+  @apply w-6 h-6 rounded-full;
+  border: 2px solid var(--progress-track);
+  border-top-color: var(--accent-color);
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 480px) {
   .temperature-grid {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 }

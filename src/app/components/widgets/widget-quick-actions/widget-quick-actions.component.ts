@@ -36,26 +36,26 @@ export interface QuickAction {
         align-items: center;
         gap: 0.5rem;
         padding: 1rem;
-        background: var(--btn-bg, #f3f4f6);
+        background: var(--bg-tertiary);
         border: none;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s ease;
       }
       .action-btn:hover {
-        background: var(--btn-hover, #e5e7eb);
+        background: var(--hover-bg);
         transform: translateY(-1px);
       }
       .action-icon {
         font-size: 1.5rem;
         width: 1.5rem;
         height: 1.5rem;
-        color: var(--primary-color, #6366f1);
+        color: var(--accent-color);
       }
       .action-label {
         font-size: 0.75rem;
         font-weight: 500;
-        color: var(--text-primary, #374151);
+        color: var(--text-primary);
       }
     `,
   ],

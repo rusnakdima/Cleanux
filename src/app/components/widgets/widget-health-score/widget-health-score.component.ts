@@ -72,10 +72,10 @@ import { MatIconModule } from '@angular/material/icon';
         transform: rotate(-90deg);
       }
       .ring-bg {
-        color: var(--ring-bg, #e5e7eb);
+        color: var(--progress-track);
       }
       .score-ring-progress {
-        color: var(--score-color, #22c55e);
+        color: var(--success);
         transition: stroke-dashoffset 1s ease-out;
       }
       .score-value {
@@ -88,11 +88,11 @@ import { MatIconModule } from '@angular/material/icon';
       .score-number {
         font-size: 2rem;
         font-weight: 700;
-        color: var(--text-primary, #374151);
+        color: var(--text-primary);
       }
       .score-label {
         font-size: 1rem;
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
       }
       .trend-display {
         display: flex;
@@ -100,26 +100,26 @@ import { MatIconModule } from '@angular/material/icon';
         gap: 0.5rem;
       }
       .trend-up {
-        color: #22c55e;
+        color: var(--success);
       }
       .trend-down {
-        color: #ef4444;
+        color: var(--error);
       }
       .trend-flat {
-        color: #f59e0b;
+        color: var(--warning);
       }
       .trend-text {
         font-weight: 600;
         font-size: 0.875rem;
       }
       .positive {
-        color: #22c55e;
+        color: var(--success);
       }
       .negative {
-        color: #ef4444;
+        color: var(--error);
       }
       .neutral {
-        color: #f59e0b;
+        color: var(--warning);
       }
     `,
   ],

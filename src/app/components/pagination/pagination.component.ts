@@ -36,6 +36,7 @@ export class PaginationComponent {
   p = signal(1);
 
   constructor() {
+    this.p.set(this.currentPage());
     effect(() => {
       this.p.set(this.currentPage());
     });

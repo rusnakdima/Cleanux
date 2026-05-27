@@ -4,9 +4,9 @@
       <mat-icon class="monitor-icon">monitor_heart</mat-icon>
       System Monitor
     </h3>
-    <div class="status-badge" [class.active]="isMonitoring()">
+    <div class="status-badge" [class.active]="store.isMonitoring()">
       <span class="status-dot"></span>
-      {{ isMonitoring() ? "Live" : "Paused" }}
+      {{ store.isMonitoring() ? "Live" : "Paused" }}
     </div>
   </div>
 
@@ -16,12 +16,12 @@
       <div class="stat-header">
         <mat-icon class="stat-icon cpu-icon">memory</mat-icon>
         <span class="stat-label">CPU</span>
-        <span class="stat-value" [style.color]="getCpuColor(cpuUsage())">
-          {{ cpuUsage() | number: "1.0-1" }}%
+        <span class="stat-value" [style.color]="getCpuColor(store.systemStats().cpuUsage)">
+          {{ store.systemStats().cpuUsage | number: "1.0-1" }}%
         </span>
       </div>
       <div class="progress-bar-container">
-        <div class="progress-bar cpu-bar" [style.width.%]="cpuUsage()"></div>
+        <div class="progress-bar cpu-bar" [style.width.%]="store.systemStats().cpuUsage"></div>
       </div>
       <canvas class="mini-chart" #cpuCanvas height="40"></canvas>
     </div>
@@ -31,19 +31,19 @@
       <div class="stat-header">
         <mat-icon class="stat-icon memory-icon">storage</mat-icon>
         <span class="stat-label">RAM</span>
-        <span class="stat-value" [style.color]="getUsageColor(memoryUsage())">
-          {{ memoryUsage() | number: "1.0-1" }}%
+        <span class="stat-value" [style.color]="getUsageColor(store.systemStats().memoryUsagePercent)">
+          {{ store.systemStats().memoryUsagePercent | number: "1.0-1" }}%
         </span>
       </div>
       <div class="progress-bar-container">
         <div
           class="progress-bar memory-bar"
-          [style.width.%]="memoryUsage()"
-          [style.backgroundColor]="getUsageColor(memoryUsage())"
+          [style.width.%]="store.systemStats().memoryUsagePercent"
+          [style.backgroundColor]="getUsageColor(store.systemStats().memoryUsagePercent)"
         ></div>
       </div>
       <div class="stat-details">
-        <span>{{ formatBytes(memoryUsed()) }} / {{ formatBytes(memoryTotal()) }}</span>
+        <span>{{ store.memoryUsedFormatted() }} / {{ store.memoryTotalFormatted() }}</span>
       </div>
       <canvas class="mini-chart" #memoryCanvas height="40"></canvas>
     </div>
@@ -53,19 +53,19 @@
       <div class="stat-header">
         <mat-icon class="stat-icon disk-icon">disc_full</mat-icon>
         <span class="stat-label">Disk</span>
-        <span class="stat-value" [style.color]="getUsageColor(diskUsage())">
-          {{ diskUsage() | number: "1.0-1" }}%
+        <span class="stat-value" [style.color]="getUsageColor(store.systemStats().diskUsage)">
+          {{ store.systemStats().diskUsage | number: "1.0-1" }}%
         </span>
       </div>
       <div class="progress-bar-container">
         <div
           class="progress-bar disk-bar"
-          [style.width.%]="diskUsage()"
-          [style.backgroundColor]="getUsageColor(diskUsage())"
+          [style.width.%]="store.systemStats().diskUsage"
+          [style.backgroundColor]="getUsageColor(store.systemStats().diskUsage)"
         ></div>
       </div>
       <div class="stat-details">
-        <span>{{ formatBytes(diskUsed()) }} / {{ formatBytes(diskTotal()) }}</span>
+        <span>{{ store.diskUsedFormatted() }} / {{ store.diskTotalFormatted() }}</span>
       </div>
       <canvas class="mini-chart" #diskCanvas height="40"></canvas>
     </div>

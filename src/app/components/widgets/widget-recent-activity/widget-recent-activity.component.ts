@@ -53,7 +53,7 @@ export interface ActivityItem {
         gap: 0.75rem;
         padding: 0.5rem;
         border-radius: 6px;
-        background: var(--item-bg, #f9fafb);
+        background: var(--bg-secondary);
       }
       .activity-icon {
         display: flex;
@@ -64,28 +64,28 @@ export interface ActivityItem {
         border-radius: 6px;
       }
       .activity-icon.scan {
-        background: #dbeafe;
-        color: #3b82f6;
+        background: var(--info-bg);
+        color: var(--info);
       }
       .activity-icon.clean {
-        background: #d1fae5;
-        color: #22c55e;
+        background: var(--success-bg);
+        color: var(--success);
       }
       .activity-icon.cache {
-        background: #e0e7ff;
-        color: #6366f1;
+        background: var(--accent-light);
+        color: var(--accent-color);
       }
       .activity-icon.trash {
-        background: #fef3c7;
-        color: #f59e0b;
+        background: var(--warning-bg);
+        color: var(--warning);
       }
       .activity-icon.logs {
-        background: #fce7f3;
-        color: #ec4899;
+        background: rgba(236, 72, 153, 0.15);
+        color: var(--cyber-rose);
       }
       .activity-icon.large_files {
-        background: #fee2e2;
-        color: #ef4444;
+        background: var(--error-bg);
+        color: var(--error);
       }
       .activity-icon mat-icon {
         font-size: 1rem;
@@ -101,19 +101,19 @@ export interface ActivityItem {
       .activity-desc {
         font-size: 0.75rem;
         font-weight: 500;
-        color: var(--text-primary, #374151);
+        color: var(--text-primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
       .activity-time {
         font-size: 0.625rem;
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
       }
       .activity-size {
         font-size: 0.75rem;
         font-weight: 600;
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
       }
       .empty-state {
         display: flex;
@@ -121,7 +121,7 @@ export interface ActivityItem {
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted);
         gap: 0.5rem;
       }
       .empty-state mat-icon {

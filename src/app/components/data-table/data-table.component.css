@@ -1,0 +1,223 @@
+@reference "tailwindcss";
+
+.data-table-wrapper {
+  @apply flex flex-col h-full;
+}
+
+.table-container {
+  @apply rounded-xl overflow-hidden flex flex-col flex-1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .table-container {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+.table-header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dark .table-header {
+  background: color-mix(in srgb, var(--bg-tertiary) 50%, transparent);
+}
+
+.table-body-wrapper {
+  @apply flex-1 overflow-auto;
+}
+
+.table-body {
+  @apply divide-y;
+  border-color: var(--border-light);
+}
+
+.dark .table-body {
+  border-color: var(--border-light);
+}
+
+.table-row {
+  @apply flex items-center px-4 py-3.5 transition-colors duration-150 cursor-pointer;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:hover {
+  background: var(--bg-secondary);
+}
+
+.dark .table-row:hover {
+  background: var(--bg-tertiary);
+}
+
+.table-row-selected {
+  background: var(--accent-light) !important;
+}
+
+.dark .table-row-selected {
+  background: rgba(99, 102, 241, 0.15) !important;
+}
+
+.table-header .column-header {
+  @apply px-3 py-3 font-semibold text-xs uppercase tracking-wider;
+  color: var(--text-tertiary);
+}
+
+.column-header.sortable {
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.column-header.sortable:hover {
+  color: var(--accent-color);
+}
+
+.column-header .sort-icon {
+  @apply text-sm opacity-40 transition-opacity;
+  font-size: 16px !important;
+  width: 16px;
+  height: 16px;
+}
+
+.column-header .sort-icon.active {
+  @apply opacity-100;
+  color: var(--accent-color);
+}
+
+.column-cell {
+  @apply px-3 py-1 text-sm;
+  color: var(--text-primary);
+}
+
+.dark .column-cell {
+  color: var(--text-primary);
+}
+
+.checkbox-container {
+  @apply flex items-center justify-center w-12 h-12 flex-shrink-0;
+}
+
+.custom-checkbox {
+  @apply relative inline-flex items-center cursor-pointer select-none;
+}
+
+.custom-checkbox input {
+  @apply absolute opacity-0 w-0 h-0;
+}
+
+.checkmark {
+  @apply relative h-5 w-5 rounded-lg border-2 transition-all duration-200 ease-out;
+  border-color: var(--border-medium);
+  background: var(--bg-card);
+}
+
+.dark .checkmark {
+  border-color: var(--border-medium);
+  background: var(--bg-card);
+}
+
+.custom-checkbox:hover .checkmark {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.checkmark:after {
+  content: "";
+  @apply absolute hidden left-[5px] top-[1px] w-[6px] h-[11px] border-white border-r-[2.5px] border-b-[2.5px] rotate-45 transition-all duration-200;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+  @apply block;
+}
+
+.checkmark.indeterminate {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.checkmark.indeterminate:after {
+  content: "";
+  @apply absolute block left-[4px] top-[7px] w-[8px] h-[2px] bg-white border-none rotate-0;
+}
+
+.preview-btn-container {
+  @apply flex items-center justify-center w-12 flex-shrink-0;
+}
+
+.preview-btn {
+  @apply p-2 rounded-lg transition-all duration-200;
+  color: var(--text-tertiary);
+}
+
+.preview-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.action-icon-btn {
+  @apply p-1.5 rounded-lg transition-all duration-200;
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.action-icon-btn:hover {
+  background: var(--error);
+  color: white;
+}
+
+.no-data-msg {
+  @apply flex flex-col items-center justify-center py-20 text-center;
+}
+
+.no-data-icon {
+  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.no-data-text {
+  @apply text-sm font-medium;
+  color: var(--text-tertiary);
+}
+
+.loading-state {
+  @apply flex items-center justify-center h-48;
+}
+
+.table-footer {
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+}
+
+.dark .table-footer {
+  background: color-mix(in srgb, var(--bg-tertiary) 50%, transparent);
+}
+
+.status-chip {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+}
+
+.status-chip.running {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.status-chip.stopped {
+  background: var(--error-bg);
+  color: var(--error);
+}

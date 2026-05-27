@@ -8,49 +8,50 @@
 
   <div class="temperature-grid">
     <!-- CPU Temperature -->
-    <div class="temp-card cpu-temp" *ngIf="!isLoading()">
+    <div class="temp-card cpu-temp">
       <div class="temp-header">
         <mat-icon class="temp-icon cpu-icon">memory</mat-icon>
         <span class="temp-label">CPU</span>
       </div>
-      <div class="temp-value" [style.color]="getTemperatureColor(getTemperature(cpuTemp()))">
-        {{ getTemperature(cpuTemp()) | number: "1.0-0" }}°C
+      <div class="temp-value" [style.color]="getTemperatureColor(getTemperature(store.cpuTemp()))">
+        {{ getTemperature(store.cpuTemp()) | number: "1.0-0" }}°C
       </div>
       <div class="temp-progress-container">
         <div
           class="temp-progress-bar cpu-bar"
-          [style.width.%]="getProgressWidth(getTemperature(cpuTemp()))"
-          [style.backgroundColor]="getTemperatureColor(getTemperature(cpuTemp()))"
+          [style.width.%]="getProgressWidth(getTemperature(store.cpuTemp()))"
+          [style.backgroundColor]="getTemperatureColor(getTemperature(store.cpuTemp()))"
         ></div>
       </div>
-      <div class="temp-name" *ngIf="cpuTemp()">
-        {{ cpuTemp()!.name }}
-      </div>
+      @if (store.cpuTemp()) {
+        <div class="temp-name">
+          {{ store.cpuTemp()!.name }}
+        </div>
+      }
     </div>
 
-    <!-- GPU Temperature -->
-    <div class="temp-card gpu-temp" *ngIf="!isLoading() && gpuTemp()">
+    @if (!store.temperaturesLoading() && store.gpuTemp()) {
+    <div class="temp-card gpu-temp">
       <div class="temp-header">
         <mat-icon class="temp-icon gpu-icon">apps</mat-icon>
         <span class="temp-label">GPU</span>
       </div>
-      <div class="temp-value" [style.color]="getTemperatureColor(getTemperature(gpuTemp()))">
-        {{ getTemperature(gpuTemp()) | number: "1.0-0" }}°C
+      <div class="temp-value" [style.color]="getTemperatureColor(getTemperature(store.gpuTemp()))">
+        {{ getTemperature(store.gpuTemp()) | number: "1.0-0" }}°C
       </div>
       <div class="temp-progress-container">
         <div
           class="temp-progress-bar gpu-bar"
-          [style.width.%]="getProgressWidth(getTemperature(gpuTemp()))"
-          [style.backgroundColor]="getTemperatureColor(getTemperature(gpuTemp()))"
+          [style.width.%]="getProgressWidth(getTemperature(store.gpuTemp()))"
+          [style.backgroundColor]="getTemperatureColor(getTemperature(store.gpuTemp()))"
         ></div>
       </div>
       <div class="temp-name">
-        {{ gpuTemp()!.name }}
+        {{ store.gpuTemp()!.name }}
       </div>
     </div>
-
-    <!-- No GPU Placeholder -->
-    <div class="temp-card gpu-temp gpu-unavailable" *ngIf="!isLoading() && !gpuTemp()">
+  } @else if (!store.temperaturesLoading() && !store.gpuTemp()) {
+    <div class="temp-card gpu-temp gpu-unavailable">
       <div class="temp-header">
         <mat-icon class="temp-icon gpu-icon">apps</mat-icon>
         <span class="temp-label">GPU</span>
@@ -61,11 +62,11 @@
       </div>
       <div class="temp-name">Not available</div>
     </div>
-
-    <!-- Loading State -->
-    <div class="temp-card loading" *ngIf="isLoading()">
+  } @else {
+    <div class="temp-card loading">
       <div class="spinner"></div>
       <span>Loading...</span>
     </div>
+  }
   </div>
 </div>

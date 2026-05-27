@@ -1,0 +1,79 @@
+@reference "tailwindcss";
+
+.search-wrapper {
+  @apply flex items-center;
+}
+
+.search-input-wrapper {
+  @apply relative flex items-center;
+  width: 280px;
+}
+
+.search-input {
+  @apply w-full h-10 pl-10 pr-10 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.search-input:focus {
+  border-color: var(--accent-color);
+}
+
+.dark .search-input {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.search-icon {
+  @apply absolute left-3 text-lg;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.search-clear-btn {
+  @apply absolute right-2 p-1 rounded-lg transition-all duration-200;
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.search-clear-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.clear-icon {
+  font-size: 18px !important;
+  width: 18px;
+  height: 18px;
+}
+
+.search-toggle-btn {
+  @apply flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.search-toggle-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.dark .search-toggle-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.toggle-icon {
+  font-size: 20px !important;
+  width: 20px;
+  height: 20px;
+}
+
+.toggle-text {
+  @apply font-semibold;
+}

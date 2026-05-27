@@ -6,7 +6,6 @@ import {
   Output,
   EventEmitter,
   signal,
-  inject,
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
@@ -85,17 +84,17 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
       this.p = this.currentPage;
     }
     if (changes['data'] && !changes['data'].firstChange) {
-      this.p = 1;
+      const currLength = changes['data'].currentValue?.length ?? 0;
+      const prevLength = changes['data'].previousValue?.length ?? 0;
+
+      if (currLength < prevLength) {
+        this.p = 1;
+      }
     }
   }
 
   private rowRecord(item: T): Record<string, unknown> {
     return item as unknown as Record<string, unknown>;
-  }
-
-  trackByKey(index: number, item: T): string {
-    const raw = this.rowRecord(item)[this.checkboxKey];
-    return raw !== undefined && raw !== null ? String(raw) : String(index);
   }
 
   get paginatedData(): T[] {

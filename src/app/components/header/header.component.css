@@ -1,0 +1,21 @@
+@reference "tailwindcss";
+
+.header-content {
+  @apply flex items-center justify-between w-full;
+}
+
+.header-info {
+  @apply flex flex-col;
+}
+
+.header-title {
+  @apply text-xl font-bold text-[var(--text-primary)] tracking-tight;
+}
+
+.header-subtitle {
+  @apply text-sm text-[var(--text-secondary)] mt-0.5;
+}
+
+.header-actions {
+  @apply flex items-center gap-2;
+}

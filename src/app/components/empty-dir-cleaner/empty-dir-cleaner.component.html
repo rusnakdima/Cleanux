@@ -1,11 +1,11 @@
 <div class="empty-dir-cleaner">
   <div class="header">
     <div class="header-title">
-      <mat-icon>folder_delete</mat-icon>
+      <mat-icon fontIcon="folder_delete"/>
       <h2>Empty Directory Cleaner</h2>
     </div>
     <button class="close-btn" matTooltip="Close" (click)="onClose()">
-      <mat-icon>close</mat-icon>
+      <mat-icon fontIcon="close"/>
     </button>
   </div>
 
@@ -17,11 +17,11 @@
         (click)="scan()"
         [disabled]="scanning() || !rootPath"
       >
-        <mat-icon>search</mat-icon>
+        <mat-icon fontIcon="search"/>
         {{ scanning() ? "Scanning..." : "Find Empty Dirs" }}
       </button>
       <button mat-raised-button (click)="scanNested()" [disabled]="scanning() || !rootPath">
-        <mat-icon>account_tree</mat-icon>
+        <mat-icon fontIcon="account_tree"/>
         {{ scanning() ? "Scanning..." : "Find Nested Empty" }}
       </button>
     </div>
@@ -35,10 +35,10 @@
 
   @if (error()) {
     <div class="error-banner">
-      <mat-icon>error</mat-icon>
+      <mat-icon fontIcon="error"/>
       <span>{{ error() }}</span>
       <button mat-icon-button (click)="error.set(null)">
-        <mat-icon>close</mat-icon>
+<mat-icon fontIcon="close"/>
       </button>
     </div>
   }
@@ -51,7 +51,7 @@
       </div>
     } @else if (emptyDirs().length === 0 && !scanning()) {
       <div class="empty-state">
-        <mat-icon class="empty-icon">folder_open</mat-icon>
+        <mat-icon class="empty-icon" fontIcon="folder_open"/>
         <p>No empty directories found</p>
         <p class="hint">Click "Find Empty Dirs" or "Find Nested Empty" to scan</p>
       </div>
@@ -88,7 +88,7 @@
                 </label>
               </div>
               <div class="name-col" [matTooltip]="dir.path">
-                <mat-icon class="folder-icon">folder</mat-icon>
+                <mat-icon class="folder-icon" fontIcon="folder"/>
                 {{ getDirName(dir.path) }}
               </div>
               <div class="path-col" [matTooltip]="dir.path">
@@ -107,7 +107,7 @@
   @if (selectedCount > 0) {
     <div class="footer">
       <button mat-raised-button color="warn" (click)="openConfirmDialog()" [disabled]="loading()">
-        <mat-icon>delete</mat-icon>
+        <mat-icon fontIcon="delete"/>
         Remove Selected ({{ selectedCount }})
       </button>
     </div>

@@ -1,44 +1,30 @@
+@reference "tailwindcss";
+
 .empty-dir-cleaner {
-  display: flex;
-  flex-direction: column;
+  @apply flex flex-col rounded-lg overflow-hidden;
   height: 100%;
-  background: var(--surface-color, #fff);
-  border-radius: 8px;
-  overflow: hidden;
+  background: var(--bg-primary);
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: var(--primary-color, #3f51b5);
+  @apply flex items-center justify-between px-5 py-4;
+  background: var(--accent-color);
   color: white;
 }
 
 .header-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  @apply flex items-center gap-3;
 }
 
 .header-title h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
+  @apply m-0 text-lg font-medium;
 }
 
 .close-btn {
+  @apply p-1 rounded-full cursor-pointer border-none flex items-center justify-center;
   background: transparent;
-  border: none;
   color: white;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.2s;
+  @apply transition-colors duration-200;
 }
 
 .close-btn:hover {
@@ -46,296 +32,207 @@
 }
 
 .actions-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-  background: var(--surface-variant, #f5f5f5);
+  @apply flex items-center justify-between px-5 py-4;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .scan-actions {
-  display: flex;
-  gap: 12px;
+  @apply flex gap-3;
 }
 
 .selection-info {
-  font-size: 14px;
-  color: var(--text-secondary, #666);
+  @apply text-sm;
+  color: var(--text-secondary);
 }
 
 .error-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: var(--error-bg, #ffebee);
-  color: var(--error-color, #c62828);
-  border-bottom: 1px solid var(--error-border, #ffcdd2);
+  @apply flex items-center gap-2 px-5 py-3;
+  background: var(--error-bg);
+  color: var(--error-color);
+  border-bottom: 1px solid var(--error-border);
 }
 
 .error-banner button {
-  margin-left: auto;
+  @apply ml-auto;
 }
 
 .content {
-  flex: 1;
-  overflow: auto;
-  padding: 0;
+  @apply flex-1 overflow-auto p-0;
 }
 
 .loading-state,
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 200px;
-  color: var(--text-secondary, #666);
+  @apply flex flex-col items-center justify-center h-full min-h-48;
+  color: var(--text-secondary);
 }
 
 .empty-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  opacity: 0.3;
-  margin-bottom: 16px;
+  @apply text-6xl w-16 h-16 opacity-30 mb-4;
 }
 
 .hint {
-  font-size: 13px;
-  opacity: 0.7;
-  margin-top: 4px;
+  @apply text-sm opacity-70 mt-1;
 }
 
 .dirs-table {
-  display: flex;
-  flex-direction: column;
+  @apply flex flex-col;
 }
 
 .table-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  background: var(--header-bg, #fafafa);
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-  font-weight: 500;
-  font-size: 13px;
-  color: var(--text-secondary, #666);
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  @apply flex items-center px-5 py-3 sticky top-0 z-10 font-medium text-sm;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .table-body {
-  flex: 1;
-  overflow: auto;
+  @apply flex-1 overflow-auto;
 }
 
 .table-row {
-  display: flex;
-  align-items: center;
-  padding: 10px 20px;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
-  cursor: pointer;
-  transition: background 0.15s;
+  @apply flex items-center px-5 py-2.5 cursor-pointer border-b;
+  border-bottom: 1px solid var(--border-color);
+  @apply transition-colors duration-150;
 }
 
 .table-row:hover {
-  background: var(--row-hover, #f5f5f5);
+  background: var(--hover-bg);
 }
 
 .table-row.selected {
-  background: var(--row-selected, #e3f2fd);
+  background: var(--accent-light);
 }
 
 .checkbox-col {
-  width: 40px;
-  flex-shrink: 0;
+  @apply w-10 flex-shrink-0;
 }
 
 .name-col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow: hidden;
+  @apply flex-1 min-w-0 flex items-center gap-2 overflow-hidden;
 }
 
 .folder-icon {
-  color: var(--warning-color, #ff9800);
-  flex-shrink: 0;
+  color: var(--warning);
+  @apply flex-shrink-0;
 }
 
 .path-col {
-  flex: 2;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 13px;
-  color: var(--text-secondary, #666);
-  padding-right: 16px;
+  @apply flex-2 min-w-0 truncate pr-4 text-sm;
+  color: var(--text-secondary);
 }
 
 .depth-col {
-  width: 80px;
-  flex-shrink: 0;
-  text-align: center;
+  @apply w-20 flex-shrink-0 text-center;
 }
 
 .depth-badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  background: var(--depth-bg, #e0e0e0);
-  color: var(--text-secondary, #666);
+  @apply inline-block px-2 py-0.5 rounded-full text-xs;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 .footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 16px 20px;
-  border-top: 1px solid var(--border-color, #e0e0e0);
-  background: var(--surface-variant, #f5f5f5);
+  @apply flex items-center justify-end px-5 py-4 border-t;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .custom-checkbox {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
+  @apply inline-flex items-center cursor-pointer;
 }
 
 .custom-checkbox input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+  @apply absolute opacity-0 w-0 h-0;
 }
 
 .custom-checkbox .checkmark {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--checkbox-border, #757575);
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-  background: white;
+  @apply w-4.5 h-4.5 rounded flex items-center justify-center border-2;
+  border-color: var(--text-muted);
+  background: var(--bg-primary);
+  @apply transition-all duration-150;
 }
 
 .custom-checkbox input:checked + .checkmark {
-  background: var(--primary-color, #3f51b5);
-  border-color: var(--primary-color, #3f51b5);
+  background: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .custom-checkbox input:checked + .checkmark::after {
   content: "";
-  width: 5px;
-  height: 9px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  margin-bottom: 2px;
+  @apply w-1 h-2 border-solid border-0 border-r-2 border-b-2 rotate-45 mb-0.5;
+  border-color: white;
 }
 
 .custom-checkbox input:indeterminate + .checkmark {
-  background: var(--primary-color, #3f51b5);
-  border-color: var(--primary-color, #3f51b5);
+  background: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .custom-checkbox input:indeterminate + .checkmark::after {
   content: "";
-  width: 8px;
-  height: 2px;
-  background: white;
+  @apply w-2 h-0.5 bg-white;
 }
 
 .confirm-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  @apply fixed inset-0 flex items-center justify-center;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1000;
 }
 
 .confirm-dialog {
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: var(--bg-card-solid);
+  @apply rounded-lg p-6 max-w-md;
+  box-shadow: var(--shadow-elevated);
 }
 
 .confirm-dialog h3 {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 500;
+  @apply m-0 mb-3 text-lg font-medium;
 }
 
 .confirm-dialog p {
-  margin: 0 0 8px;
-  color: var(--text-secondary, #666);
+  @apply m-0 mb-2;
+  color: var(--text-secondary);
 }
 
 .confirm-dialog .warning {
-  color: var(--error-color, #c62828);
-  font-weight: 500;
-  margin-bottom: 16px;
+  color: var(--error-color);
+  @apply font-medium mb-4;
 }
 
 .dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  @apply flex justify-end gap-2;
 }
 
 .loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  @apply fixed inset-0 flex items-center justify-center;
   background: rgba(255, 255, 255, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 999;
 }
 
 :host {
-  --primary-color: #3f51b5;
-  --warn-color: #f44336;
-  --surface-color: #ffffff;
-  --surface-variant: #f5f5f5;
-  --border-color: #e0e0e0;
-  --text-secondary: #666;
-  --error-color: #c62828;
-  --error-bg: #ffebee;
-  --error-border: #ffcdd2;
-  --row-hover: #f5f5f5;
-  --row-selected: #e3f2fd;
-  --checkbox-border: #757575;
-  --depth-bg: #e0e0e0;
+  --primary-color: var(--accent-color);
+  --warn-color: var(--warning);
+  --surface-color: var(--bg-primary);
+  --surface-variant: var(--bg-secondary);
+  --border-color: var(--border-color);
+  --text-secondary: var(--text-secondary);
+  --error-color: var(--error-color);
+  --error-bg: var(--error-bg);
+  --error-border: var(--error-border);
+  --row-hover: var(--hover-bg);
+  --row-selected: var(--accent-light);
+  --checkbox-border: var(--text-muted);
+  --depth-bg: var(--bg-tertiary);
 }
 
 :host-context(.dark-theme) {
-  --surface-color: #1e1e1e;
-  --surface-variant: #2d2d2d;
-  --border-color: #404040;
-  --text-secondary: #aaa;
-  --row-hover: #2d2d2d;
-  --row-selected: #1a3a5c;
-  --checkbox-border: #aaa;
-  --depth-bg: #404040;
+  --surface-color: var(--bg-elevated);
+  --surface-variant: var(--bg-secondary);
+  --border-color: var(--border-color);
+  --text-secondary: var(--text-secondary);
+  --row-hover: var(--hover-bg);
+  --row-selected: var(--accent-light);
+  --checkbox-border: var(--text-muted);
+  --depth-bg: var(--bg-tertiary);
 }

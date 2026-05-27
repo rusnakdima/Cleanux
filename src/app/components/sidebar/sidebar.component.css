@@ -1,0 +1,214 @@
+@reference "tailwindcss";
+
+:host {
+  display: block;
+}
+
+/* Sidebar Container */
+.sidebar {
+  @apply fixed inset-y-0 left-0 z-50 w-72;
+  @apply flex flex-col;
+  background: var(--bg-card-solid);
+  border-right: 1px solid var(--border-color);
+  @apply transform transition-all duration-300 ease-out;
+  box-shadow: var(--shadow-sidebar);
+}
+
+.sidebar {
+  @apply -translate-x-full;
+}
+
+.sidebar-open {
+  @apply translate-x-0;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    @apply translate-x-0;
+  }
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  @apply h-16 flex items-center justify-between px-6;
+  border-bottom: 1px solid var(--border-color);
+  @apply shrink-0;
+}
+
+.logo-link {
+  @apply flex items-center gap-3 no-underline;
+}
+
+.logo-icon {
+  @apply w-10 h-10 rounded-xl;
+  background: linear-gradient(135deg, var(--accent-color), var(--info));
+  @apply flex items-center justify-center text-white;
+  box-shadow: 0 0 20px var(--accent-glow);
+  @apply transition-transform duration-200;
+}
+
+.logo-link:hover .logo-icon {
+  @apply scale-105;
+}
+
+.logo-text {
+  @apply text-lg font-bold tracking-tight;
+  color: var(--text-primary);
+  background: linear-gradient(to right, var(--accent-color), var(--info));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Quick Stats */
+.quick-stats {
+  @apply flex items-center gap-2 mx-4 mt-4 p-3 rounded-xl;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  @apply transition-all duration-300;
+}
+
+.quick-stats.collapsed {
+  @apply justify-center px-2;
+}
+
+.stat-item {
+  @apply flex flex-col items-center flex-1;
+}
+
+.stat-value {
+  @apply text-lg font-bold;
+  color: var(--accent-color);
+}
+
+.stat-label {
+  @apply text-[10px] font-semibold uppercase tracking-wider;
+  color: var(--text-muted);
+}
+
+.stat-divider {
+  @apply w-px h-8;
+  background: var(--border-color);
+}
+
+/* Sidebar Collapsed State */
+.sidebar-collapsed {
+  @apply lg:w-20;
+}
+
+.sidebar-collapsed .logo-text,
+.sidebar-collapsed .nav-label,
+.sidebar-collapsed .nav-section-title,
+.sidebar-collapsed .nav-badge,
+.sidebar-collapsed .quick-stats,
+.sidebar-collapsed .stat-item,
+.sidebar-collapsed .stat-divider {
+  @apply hidden;
+}
+
+.sidebar-collapsed .sidebar-header {
+  @apply justify-center px-2;
+}
+
+.sidebar-collapsed .logo-link {
+  @apply justify-center;
+}
+
+.sidebar-collapsed .nav-item {
+  @apply justify-center px-2;
+}
+
+.sidebar-collapsed .quick-stats {
+  @apply hidden;
+}
+
+/* Navigation */
+.sidebar-nav {
+  @apply flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-6;
+}
+
+.nav-section {
+  @apply flex flex-col gap-1;
+}
+
+.nav-section-title {
+  @apply text-[10px] font-bold uppercase tracking-widest px-3 mb-2;
+  color: var(--text-muted);
+  @apply hidden lg:block;
+}
+
+.nav-item {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-lg;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  @apply no-underline transition-all duration-150 cursor-pointer;
+  border-left: 2px solid transparent;
+}
+
+.nav-item:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--accent-light);
+  color: var(--accent-color);
+  border-left-color: var(--accent-color);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--accent-color);
+}
+
+.nav-icon {
+  @apply w-5 h-5 shrink-0;
+  color: inherit;
+}
+
+.nav-label {
+  @apply text-sm truncate;
+}
+
+.nav-badge {
+  @apply ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full;
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+/* Footer */
+.sidebar-footer {
+  @apply px-3 py-4;
+  border-top: 1px solid var(--border-color);
+  @apply flex flex-col gap-1;
+}
+
+.nav-divider {
+  @apply h-px my-2;
+  background: var(--border-color);
+}
+
+.theme-toggle {
+  @apply w-full text-left;
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+  .sidebar {
+    @apply w-72;
+  }
+
+  .logo-text {
+    @apply hidden;
+  }
+
+  .quick-stats.collapsed {
+    @apply hidden;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    @apply w-80;
+  }
+}
