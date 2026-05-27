@@ -25,58 +25,71 @@ pub struct DashboardService;
 #[allow(non_snake_case)]
 impl DashboardService {
   pub fn getRunningServices(&self) -> Result<ResponseModel, ResponseModel> {
-    let output = Command::new("systemctl")
-      .args([
-        "list-units",
-        "--type=service",
-        "--state=running",
-        "--no-pager",
-        "--plain",
-      ])
-      .output()
-      .map_err(|e| format!("Failed to run systemctl: {}", e))?;
+    #[cfg(target_os = "linux")]
+    {
+      let output = Command::new("systemctl")
+        .args([
+          "list-units",
+          "--type=service",
+          "--state=running",
+          "--no-pager",
+          "--plain",
+        ])
+        .output()
+        .map_err(|e| format!("Failed to run systemctl: {}", e))?;
 
-    if !output.status.success() {
-      return Err(
-        ResponseBuilder::new()
-          .error(&String::from_utf8_lossy(&output.stderr).to_string())
-          .build(),
-      );
-    }
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let mut services = Vec::new();
-
-    for line in stdout.lines().skip(1) {
-      let parts: Vec<&str> = line.split_whitespace().collect();
-      if parts.len() >= 4 {
-        let name = parts[0].to_string();
-        let status = parts[3].to_string();
-        let description = if parts.len() > 4 {
-          parts[4..].join(" ")
-        } else {
-          "No description".to_string()
-        };
-        services.push(SystemServiceModel {
-          name,
-          description,
-          status: status.clone(),
-          isRunning: status == "running",
-        });
+      if !output.status.success() {
+        return Err(
+          ResponseBuilder::new()
+            .error(&String::from_utf8_lossy(&output.stderr).to_string())
+            .build(),
+        );
       }
+
+      let stdout = String::from_utf8_lossy(&output.stdout);
+      let mut services = Vec::new();
+
+      for line in stdout.lines().skip(1) {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() >= 4 {
+          let name = parts[0].to_string();
+          let status = parts[3].to_string();
+          let description = if parts.len() > 4 {
+            parts[4..].join(" ")
+          } else {
+            "No description".to_string()
+          };
+          services.push(SystemServiceModel {
+            name,
+            description,
+            status: status.clone(),
+            isRunning: status == "running",
+          });
+        }
+      }
+
+      Ok(
+        ResponseBuilder::new()
+          .success("Running services retrieved successfully")
+          .data(DataValue::Array(
+            services
+              .into_iter()
+              .map(|s| serde_json::to_value(s).map_err(|e| format!("Serialization error: {}", e)))
+              .collect::<Result<Vec<_>, _>>()?,
+          ))
+          .build(),
+      )
     }
 
-    Ok(
-      ResponseBuilder::new()
-        .success("Running services retrieved successfully")
-        .data(DataValue::Array(
-          services
-            .into_iter()
-            .map(|s| serde_json::to_value(s).map_err(|e| format!("Serialization error: {}", e)))
-            .collect::<Result<Vec<_>, _>>()?,
-        ))
-        .build(),
-    )
+    #[cfg(not(target_os = "linux"))]
+    {
+      Ok(
+        ResponseBuilder::new()
+          .error("Service listing not available on dieses Plattform")
+          .data(DataValue::Array(vec![]))
+          .build(),
+      )
+    }
   }
 
   pub fn getCacheSummary(&self) -> Result<ResponseModel, ResponseModel> {

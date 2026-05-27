@@ -14,8 +14,10 @@ pub struct CleanerService;
 impl CleanerService {
   pub fn getCacheFiles(
     &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
   ) -> Result<crate::models::ResponseModel, crate::models::ResponseModel> {
-    CacheCleaningService.getCacheFiles()
+    CacheCleaningService.getCacheFiles(limit, offset)
   }
 
   pub fn getTrashFiles(
@@ -32,8 +34,10 @@ impl CleanerService {
 
   pub fn getLargeFiles(
     &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
   ) -> Result<crate::models::ResponseModel, crate::models::ResponseModel> {
-    LargeFileCleaningService.getLargeFiles()
+    LargeFileCleaningService.getLargeFiles(limit, offset)
   }
 
   pub fn clearSelectedCacheFiles(

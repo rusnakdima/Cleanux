@@ -51,15 +51,37 @@ where
     .collect()
 }
 
-pub fn collect_cache_file_models(cache_dir: PathBuf) -> Vec<CacheFileModel> {
-  collect_file_models(cache_dir.as_path(), 4, 1000, |path| {
+pub fn collect_cache_file_models(
+  cache_dir: PathBuf,
+  skip: Option<usize>,
+  limit: Option<usize>,
+) -> (Vec<CacheFileModel>, bool, usize) {
+  let all_files: Vec<CacheFileModel> = collect_file_models(cache_dir.as_path(), 4, 10000, |path| {
     let metadata = fs::metadata(path).ok()?;
     Some(CacheFileModel {
       path: path.to_string_lossy().to_string(),
       size: metadata.len(),
       modified: modified_string(&metadata),
     })
-  })
+  });
+
+  let total = all_files.len();
+  let skip_count = skip.unwrap_or(0);
+  let limit_count = limit.unwrap_or(usize::MAX);
+
+  let has_more = if skip_count >= total {
+    false
+  } else {
+    skip_count + limit_count < total
+  };
+
+  let result: Vec<CacheFileModel> = all_files
+    .into_iter()
+    .skip(skip_count)
+    .take(limit_count)
+    .collect();
+
+  (result, has_more, total)
 }
 
 pub fn collect_trash_file_models(trash_dir: &Path) -> Vec<TrashFileModel> {
@@ -93,13 +115,15 @@ pub fn collect_log_file_models(log_dir: &Path, max_depth: usize, take: usize) ->
   })
 }
 
-/// Scan configured user folders for files above threshold (same rules as original getLargeFiles).
+/// Scan configured user folders for files above threshold with pagination support.
 pub fn scan_large_file_models(
   home: &Path,
   max_depth: usize,
   per_dir_cap: usize,
   sort_truncate: Option<usize>,
-) -> Vec<LargeFileModel> {
+  skip: Option<usize>,
+  limit: Option<usize>,
+) -> (Vec<LargeFileModel>, bool, usize) {
   let dirs = home_scan_dirs(home);
   let mut files: Vec<LargeFileModel> = dirs
     .into_par_iter()
@@ -132,12 +156,31 @@ pub fn scan_large_file_models(
     .collect();
 
   files.sort_by(|a, b| b.size.cmp(&a.size));
+
+  let total = files.len();
+
   if let Some(max) = sort_truncate {
     if files.len() > max {
       files.truncate(max);
     }
   }
-  files
+
+  let skip_count = skip.unwrap_or(0);
+  let limit_count = limit.unwrap_or(usize::MAX);
+
+  let has_more = if skip_count >= total {
+    false
+  } else {
+    skip_count + limit_count < total
+  };
+
+  let result: Vec<LargeFileModel> = files
+    .into_iter()
+    .skip(skip_count)
+    .take(limit_count)
+    .collect();
+
+  (result, has_more, total)
 }
 
 pub struct BulkRemoveOutcome {

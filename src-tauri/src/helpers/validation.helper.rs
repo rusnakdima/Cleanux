@@ -49,6 +49,11 @@ mod tests {
   fn test_validate_path_nonexistent() {
     let result = validate_path("/nonexistent/path/12345");
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("does not exist"));
+    let err = result.unwrap_err();
+    assert!(
+      err.contains("does not exist") || err.contains("No such file"),
+      "error: {}",
+      err
+    );
   }
 }

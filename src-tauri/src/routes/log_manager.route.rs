@@ -1,5 +1,6 @@
 /* models */
-use crate::models::ResponseModel;
+use crate::helpers::ResponseBuilder;
+use crate::models::{DataValue, ResponseModel};
 /* services */
 use crate::services::log_manager_service::{
   JournalInfo, LogFileInfo, LogManagerService, LogManagerSummary, LogrotateAnalysis,
@@ -8,14 +9,29 @@ use crate::services::log_manager_service::{
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_journal_size() -> u64 {
-  LogManagerService::get_journal_size()
+pub fn get_journal_size() -> Result<ResponseModel, ResponseModel> {
+  Ok(
+    ResponseBuilder::new()
+      .success("Journal size retrieved")
+      .data(DataValue::Number(
+        LogManagerService::get_journal_size() as f64
+      ))
+      .build(),
+  )
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_journal_usage() -> JournalInfo {
-  LogManagerService::get_journal_usage()
+pub fn get_journal_usage() -> Result<ResponseModel, ResponseModel> {
+  let info = LogManagerService::get_journal_usage();
+  Ok(
+    ResponseBuilder::new()
+      .success("Journal usage retrieved")
+      .data(DataValue::Object(
+        serde_json::to_value(info).map_err(|e| format!("Serialization error: {}", e))?,
+      ))
+      .build(),
+  )
 }
 
 #[tauri::command]
@@ -32,14 +48,32 @@ pub fn vacuum_journal_by_days(days: u32) -> Result<ResponseModel, ResponseModel>
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_rotated_logs_size() -> u64 {
-  LogManagerService::get_rotated_logs_size()
+pub fn get_rotated_logs_size() -> Result<ResponseModel, ResponseModel> {
+  Ok(
+    ResponseBuilder::new()
+      .success("Rotated logs size retrieved")
+      .data(DataValue::Number(
+        LogManagerService::get_rotated_logs_size() as f64,
+      ))
+      .build(),
+  )
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_rotated_logs() -> Vec<RotatedLogInfo> {
-  LogManagerService::get_rotated_logs()
+pub fn get_rotated_logs() -> Result<ResponseModel, ResponseModel> {
+  let logs = LogManagerService::get_rotated_logs();
+  let values: Vec<serde_json::Value> = logs
+    .into_iter()
+    .map(serde_json::to_value)
+    .collect::<Result<_, _>>()
+    .map_err(|e| format!("Serialization error: {}", e))?;
+  Ok(
+    ResponseBuilder::new()
+      .success("Rotated logs retrieved")
+      .data(DataValue::Array(values))
+      .build(),
+  )
 }
 
 #[tauri::command]
@@ -50,30 +84,76 @@ pub fn clean_rotated_logs(days: u32) -> Result<ResponseModel, ResponseModel> {
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_logrotate_configs() -> Vec<LogrotateConfig> {
-  LogManagerService::get_logrotate_configs()
+pub fn get_logrotate_configs() -> Result<ResponseModel, ResponseModel> {
+  let configs = LogManagerService::get_logrotate_configs();
+  let values: Vec<serde_json::Value> = configs
+    .into_iter()
+    .map(serde_json::to_value)
+    .collect::<Result<_, _>>()
+    .map_err(|e| format!("Serialization error: {}", e))?;
+  Ok(
+    ResponseBuilder::new()
+      .success("Logrotate configs retrieved")
+      .data(DataValue::Array(values))
+      .build(),
+  )
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn analyze_logrotate() -> LogrotateAnalysis {
-  LogManagerService::analyze_logrotate()
+pub fn analyze_logrotate() -> Result<ResponseModel, ResponseModel> {
+  let analysis = LogManagerService::analyze_logrotate();
+  Ok(
+    ResponseBuilder::new()
+      .success("Logrotate analysis retrieved")
+      .data(DataValue::Object(
+        serde_json::to_value(analysis).map_err(|e| format!("Serialization error: {}", e))?,
+      ))
+      .build(),
+  )
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_var_log_usage() -> VarLogUsage {
-  LogManagerService::get_var_log_usage()
+pub fn get_var_log_usage() -> Result<ResponseModel, ResponseModel> {
+  let usage = LogManagerService::get_var_log_usage();
+  Ok(
+    ResponseBuilder::new()
+      .success("Var log usage retrieved")
+      .data(DataValue::Object(
+        serde_json::to_value(usage).map_err(|e| format!("Serialization error: {}", e))?,
+      ))
+      .build(),
+  )
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_largest_log_files(limit: usize) -> Vec<LogFileInfo> {
-  LogManagerService::get_largest_log_files(limit)
+pub fn get_largest_log_files(limit: usize) -> Result<ResponseModel, ResponseModel> {
+  let files = LogManagerService::get_largest_log_files(limit);
+  let values: Vec<serde_json::Value> = files
+    .into_iter()
+    .map(serde_json::to_value)
+    .collect::<Result<_, _>>()
+    .map_err(|e| format!("Serialization error: {}", e))?;
+  Ok(
+    ResponseBuilder::new()
+      .success("Largest log files retrieved")
+      .data(DataValue::Array(values))
+      .build(),
+  )
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn get_log_manager_summary() -> LogManagerSummary {
-  LogManagerService::get_log_manager_summary()
+pub fn get_log_manager_summary() -> Result<ResponseModel, ResponseModel> {
+  let summary = LogManagerService::get_log_manager_summary();
+  Ok(
+    ResponseBuilder::new()
+      .success("Log manager summary retrieved")
+      .data(DataValue::Object(
+        serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
+      ))
+      .build(),
+  )
 }

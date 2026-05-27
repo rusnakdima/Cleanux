@@ -21,7 +21,7 @@ impl BackupService {
 
   fn create_backup_inner(paths: Vec<String>, archive_path: &str) -> BackupResult<ResponseModel> {
     let tar_gz = File::create(archive_path)?;
-    let mut encoder = GzEncoder::new(tar_gz, Compression::default());
+    let encoder = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(encoder);
 
     for path_str in paths {

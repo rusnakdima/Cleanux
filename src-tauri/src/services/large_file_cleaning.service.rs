@@ -1,10 +1,10 @@
 /* helpers */
 use crate::helpers::{
-  data_empty_string, data_string, models_into_data_array, remove_paths_with_errors,
-  scan_large_file_models, success_response,
+  data_empty_string, data_string, remove_paths_with_errors, scan_large_file_models,
+  success_response,
 };
 /* models */
-use crate::models::{LargeFileModel, ResponseModel};
+use crate::models::{PaginatedData, ResponseModel};
 /* errors */
 use crate::models::AppError;
 
@@ -12,20 +12,31 @@ use std::fs;
 
 pub struct LargeFileCleaningService;
 
-type CleanResult<T> = Result<T, AppError>;
+type CleanResult<T> = Result<T, ResponseModel>;
 
 #[allow(non_snake_case)]
 impl LargeFileCleaningService {
-  pub fn getLargeFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    self.get_large_files_inner().map_err(|e| e.into_response())
+  pub fn getLargeFiles(
+    &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
+  ) -> Result<ResponseModel, ResponseModel> {
+    self.get_large_files_inner(limit, offset)
   }
 
-  fn get_large_files_inner(&self) -> CleanResult<ResponseModel> {
+  fn get_large_files_inner(
+    &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
+  ) -> CleanResult<ResponseModel> {
     let home = dirs::home_dir()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
-    let files: Vec<LargeFileModel> = scan_large_file_models(&home, 3, 50, Some(200));
-    let data = models_into_data_array(files)?;
-    Ok(success_response("Large files retrieved successfully", data))
+    let (files, has_more, total) = scan_large_file_models(&home, 3, 50, Some(200), offset, limit);
+    let paginated = PaginatedData::new(files, has_more, total);
+    Ok(success_response(
+      "Large files retrieved successfully",
+      serde_json::to_value(paginated).unwrap().into(),
+    ))
   }
 
   pub fn clearSelectedLargeFiles(
@@ -51,15 +62,13 @@ impl LargeFileCleaningService {
   }
 
   pub fn clearAllLargeFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clear_all_large_files_inner()
-      .map_err(|e| e.into_response())
+    self.clear_all_large_files_inner()
   }
 
   fn clear_all_large_files_inner(&self) -> CleanResult<ResponseModel> {
     let home = dirs::home_dir()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
-    let files: Vec<LargeFileModel> = scan_large_file_models(&home, 3, 50, None);
+    let (files, _, _) = scan_large_file_models(&home, 3, 50, None, None, None);
     let mut cleared_count = 0;
     for file in files {
       if fs::remove_file(file.path).is_ok() {

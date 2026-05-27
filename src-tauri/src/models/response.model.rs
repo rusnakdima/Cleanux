@@ -12,12 +12,30 @@ pub enum ResponseStatus {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(untagged)]
 pub enum DataValue {
   String(String),
   Number(f64),
   Bool(bool),
   Array(Vec<serde_json::Value>),
   Object(serde_json::Value),
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PaginatedData<T> {
+  pub data: Vec<T>,
+  pub has_more: bool,
+  pub total: usize,
+}
+
+impl<T: Serialize> PaginatedData<T> {
+  pub fn new(data: Vec<T>, has_more: bool, total: usize) -> Self {
+    Self {
+      data,
+      has_more,
+      total,
+    }
+  }
 }
 
 impl From<serde_json::Value> for DataValue {

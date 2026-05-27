@@ -181,7 +181,7 @@ impl ProfileService {
     }
 
     if profile.min_large_file_size > 0 {
-      if let Some(home) = dirs::home_dir() {
+      if let Some(_home) = dirs::home_dir() {
         results.push(format!(
           "Large file cleaning with threshold {} bytes",
           profile.min_large_file_size

@@ -5,8 +5,11 @@ use crate::services::cleaner_service::CleanerService;
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn getCacheFiles() -> Result<ResponseModel, ResponseModel> {
-  CleanerService.getCacheFiles()
+pub fn getCacheFiles(
+  limit: Option<usize>,
+  offset: Option<usize>,
+) -> Result<ResponseModel, ResponseModel> {
+  CleanerService.getCacheFiles(limit, offset)
 }
 
 #[tauri::command]
@@ -23,8 +26,11 @@ pub fn getSystemLogs() -> Result<ResponseModel, ResponseModel> {
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub fn getLargeFiles() -> Result<ResponseModel, ResponseModel> {
-  CleanerService.getLargeFiles()
+pub fn getLargeFiles(
+  limit: Option<usize>,
+  offset: Option<usize>,
+) -> Result<ResponseModel, ResponseModel> {
+  CleanerService.getLargeFiles(limit, offset)
 }
 
 #[tauri::command]

@@ -1,9 +1,10 @@
 /* imports */
-mod errors;
-mod helpers;
-mod models;
-mod routes;
-mod services;
+pub mod errors;
+pub mod helpers;
+pub mod models;
+pub mod routes;
+pub mod security;
+pub mod services;
 
 /* routes */
 use routes::{
@@ -37,6 +38,7 @@ use routes::{
     remove_empty_directories, scan_directory,
   },
   duplicates_route::find_duplicates,
+  health_history_route::{get_health_history, get_health_trends, save_health_snapshot},
   junk_cleaner_route::{
     clean_junk_category, get_junk_summary, scan_application_caches, scan_browser_caches,
     scan_log_rotations, scan_system_temp, scan_thumbnail_caches,
@@ -62,6 +64,7 @@ use routes::{
     get_package_summary, get_pacman_cache_size, get_partial_downloads, get_zypper_cache_size,
     pacman_clean, pacman_full_clean, zypper_clean,
   },
+  package_manager_route::{clean_package_cache, get_package_cache_info},
   power_route::{get_battery_info, get_power_profiles, get_thermal_info, set_power_profile},
   process_route::{getProcesses, killProcess, killSelectedProcesses},
   profile_route::{apply_profile, delete_profile, list_profiles, load_profile, save_profile},
@@ -77,6 +80,7 @@ use routes::{
     enableSelectedServices, enableService, getAllServices, openFile, startService,
     stopSelectedServices, stopService,
   },
+  temperature_route::{get_cpu_temperature, get_gpu_temperature, get_temperatures},
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -245,6 +249,14 @@ pub fn run() {
       clean_maven_cache,
       clean_gradle_cache,
       clean_all_dev_caches,
+      get_health_history,
+      get_health_trends,
+      save_health_snapshot,
+      get_temperatures,
+      get_cpu_temperature,
+      get_gpu_temperature,
+      clean_package_cache,
+      get_package_cache_info,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {

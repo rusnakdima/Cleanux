@@ -1,10 +1,9 @@
 /* helpers */
 use crate::helpers::{
-  collect_cache_file_models, data_empty_string, models_into_data_array, remove_paths_with_errors,
-  success_response,
+  collect_cache_file_models, data_empty_string, remove_paths_with_errors, success_response,
 };
 /* models */
-use crate::models::{CacheFileModel, ResponseModel};
+use crate::models::{PaginatedData, ResponseModel};
 /* errors */
 use crate::models::AppError;
 
@@ -12,20 +11,31 @@ use std::fs;
 
 pub struct CacheCleaningService;
 
-type CleanResult<T> = Result<T, AppError>;
+type CleanResult<T> = Result<T, ResponseModel>;
 
 #[allow(non_snake_case)]
 impl CacheCleaningService {
-  pub fn getCacheFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    self.get_cache_files_inner().map_err(|e| e.into_response())
+  pub fn getCacheFiles(
+    &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
+  ) -> Result<ResponseModel, ResponseModel> {
+    self.get_cache_files_inner(limit, offset)
   }
 
-  fn get_cache_files_inner(&self) -> CleanResult<ResponseModel> {
+  fn get_cache_files_inner(
+    &self,
+    limit: Option<usize>,
+    offset: Option<usize>,
+  ) -> CleanResult<ResponseModel> {
     let cache_dir = dirs::cache_dir()
       .ok_or_else(|| AppError::InvalidPath("Cache directory not found".to_string()))?;
-    let files: Vec<CacheFileModel> = collect_cache_file_models(cache_dir);
-    let data = models_into_data_array(files)?;
-    Ok(success_response("Cache files retrieved successfully", data))
+    let (files, has_more, total) = collect_cache_file_models(cache_dir, offset, limit);
+    let paginated = PaginatedData::new(files, has_more, total);
+    Ok(success_response(
+      "Cache files retrieved successfully",
+      serde_json::to_value(paginated).unwrap().into(),
+    ))
   }
 
   pub fn clearSelectedCacheFiles(
@@ -51,7 +61,7 @@ impl CacheCleaningService {
   }
 
   pub fn clearCache(&self) -> Result<ResponseModel, ResponseModel> {
-    self.clear_cache_inner().map_err(|e| e.into_response())
+    self.clear_cache_inner()
   }
 
   fn clear_cache_inner(&self) -> CleanResult<ResponseModel> {
@@ -66,7 +76,7 @@ impl CacheCleaningService {
             data_empty_string(),
           ))
         }
-        Err(e) => Err(AppError::Io(e)),
+        Err(e) => Err(AppError::Io(e).into()),
       }
     } else {
       Ok(success_response("No cache to clear", data_empty_string()))

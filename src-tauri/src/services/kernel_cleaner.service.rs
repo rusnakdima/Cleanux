@@ -130,7 +130,7 @@ impl KernelCleanerService {
 
   pub fn get_old_kernels(&self) -> Vec<KernelInfo> {
     let all_kernels = self.get_installed_kernels();
-    let current = self.get_current_kernel();
+    let _current = self.get_current_kernel();
 
     if all_kernels.len() <= 1 {
       return Vec::new();
@@ -241,7 +241,7 @@ impl KernelCleanerService {
     }
 
     if failed_items.is_empty() {
-      self.update_grub_internal();
+      let _ = self.update_grub_internal();
 
       Ok(ResponseModel {
         status: ResponseStatus::Success,

@@ -281,11 +281,11 @@ impl PackageDeepCleanService {
       .map(|s| s.to_string())
       .collect();
 
-    let mut freed: u64 = 0;
+    let mut _freed: u64 = 0;
     for pkg in &packages {
       let path = Path::new("/var/cache/pacman/pkg/").join(pkg);
       if let Ok(metadata) = fs::metadata(&path) {
-        freed += metadata.len();
+        _freed += metadata.len();
       }
       let _ = Self::run_command("rm", &["-f", &path.to_string_lossy()]);
     }

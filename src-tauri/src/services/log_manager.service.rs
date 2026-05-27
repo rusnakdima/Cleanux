@@ -572,7 +572,7 @@ impl LogManagerService {
             let modified: DateTime<Local> =
               meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
 
-            let filename = entry_path
+            let _filename = entry_path
               .file_name()
               .and_then(|n| n.to_str())
               .unwrap_or("")
