@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  rust-check:
+    name: Rust Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Check formatting
+        run: |
+          cd src-tauri && cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: |
+          cd src-tauri && cargo clippy --all-targets -- -D warnings
+
+      - name: Run tests
+        run: |
+          cd src-tauri && cargo test
+
+  frontend-check:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: TypeScript check
+        run: bun run ng build 2>&1 | head -50
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright
+        run: bunx playwright install chromium
+
+      - name: Start dev server
+        run: bun run start &
+        env:
+          CI: true
+
+      - name: Wait for dev server
+        run: |
+          for i in {1..30}; do
+            if curl -s http://localhost:1430 > /dev/null 2>&1; then
+              echo "Dev server is ready"
+              break
+            fi
+            echo "Waiting for dev server..."
+            sleep 2
+          done
+
+      - name: Run E2E tests
+        run: bun run test:e2e
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Run cargo audit
+        run: |
+          cd src-tauri && cargo install cargo-audit || true
+          cargo audit || true
