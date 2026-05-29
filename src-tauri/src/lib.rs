@@ -17,11 +17,6 @@ use routes::{
     get_recipes, save_recipe,
   },
   backup_route::{create_backup, delete_backup, get_backup_dir, list_backups, restore_backup},
-  cleaner_route::{
-    clearAllLargeFiles, clearAllLogs, clearCache, clearSelectedCacheFiles, clearSelectedLargeFiles,
-    clearSelectedLogFiles, clearSelectedTrashFiles, clearTrash, getCacheFiles, getLargeFiles,
-    getSystemLogs, getTrashFiles, previewFile,
-  },
   container_route::{
     docker_container_prune, docker_image_prune, docker_preview_prune, docker_system_prune,
     docker_volume_prune, get_container_summary, podman_image_prune, podman_system_prune,
@@ -86,6 +81,13 @@ use routes::{
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[allow(non_snake_case)]
 pub fn run() {
+  #[cfg(target_os = "linux")]
+  {
+    std::env::set_var("WEBKIT_DISABLE_COMPOSITING", "1");
+    std::env::set_var("WEBKIT_FORCE_SANDBOX", "0");
+    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+  }
+
   #[allow(unused_mut)]
   let mut builder = tauri::Builder::default();
 
@@ -99,25 +101,12 @@ pub fn run() {
     .plugin(tauri_plugin_opener::init())
     .invoke_handler(tauri::generate_handler![
       getSystemServices,
-      getCacheFiles,
-      getTrashFiles,
-      getSystemLogs,
-      getLargeFiles,
       getCacheSummary,
       getTrashSummary,
       getLogSummary,
       getLargeFilesSummary,
-      clearSelectedCacheFiles,
-      clearSelectedTrashFiles,
-      clearSelectedLogFiles,
-      clearSelectedLargeFiles,
-      clearAllLogs,
-      clearAllLargeFiles,
       stopSelectedServices,
-      clearTrash,
-      clearCache,
       stopService,
-      previewFile,
       getAllServices,
       enableService,
       startService,

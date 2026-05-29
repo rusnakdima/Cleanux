@@ -21,12 +21,12 @@ pub fn validate_path(path: &str) -> Result<PathBuf, String> {
   Ok(canonical)
 }
 
-pub fn is_allowed_path(path: &PathBuf, home_dir: &Path) -> bool {
+pub fn is_allowed_path(path: &Path, home_dir: &Path) -> bool {
   let trash_dir = home_dir.join(".local/share/Trash");
 
   let allowed_with_trash: Vec<PathBuf> = ALLOWED_DIRS
     .iter()
-    .map(|s| PathBuf::from(s))
+    .map(PathBuf::from)
     .chain(std::iter::once(trash_dir.clone()))
     .collect();
 

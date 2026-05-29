@@ -1,13 +1,13 @@
+/* helpers */
+use crate::helpers::validation_helper::{is_allowed_path, validate_path};
 /* models */
-use crate::models::{CacheFileModel, LargeFileModel, LogFileModel, TrashFileModel};
+use crate::models::{AppError, CacheFileModel, LargeFileModel, LogFileModel, TrashFileModel};
 /* sys lib */
 use chrono::{DateTime, Local};
 use rayon::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
-
-use crate::helpers::validation_helper::{is_allowed_path, validate_path};
 
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 
@@ -223,4 +223,68 @@ pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
     }
   }
   BulkRemoveOutcome { cleared, errors }
+}
+
+pub fn calculate_dir_size(path: &Path) -> Result<(u64, u64), AppError> {
+  let mut total_size = 0u64;
+  let mut file_count = 0u64;
+
+  if !path.exists() {
+    return Ok((0, 0));
+  }
+
+  for entry in fs::read_dir(path)? {
+    let entry = entry?;
+    let metadata = entry.metadata()?;
+    if entry.path().is_file() {
+      total_size += metadata.len();
+      file_count += 1;
+    } else if entry.path().is_dir() {
+      let (size, count) = calculate_dir_size(&entry.path())?;
+      total_size += size;
+      file_count += count;
+    }
+  }
+
+  Ok((total_size, file_count))
+}
+
+pub fn remove_dir_contents(path: &Path) -> Result<u64, AppError> {
+  if !path.exists() {
+    return Ok(0);
+  }
+
+  let mut count = 0u64;
+  for entry in fs::read_dir(path)? {
+    let entry = entry?;
+    let entry_path = entry.path();
+    if entry_path.is_dir() {
+      fs::remove_dir_all(&entry_path)?;
+      count += 1;
+    } else if entry_path.is_file() {
+      fs::remove_file(&entry_path)?;
+      count += 1;
+    }
+  }
+  Ok(count)
+}
+
+pub fn get_dir_size(path: &Path) -> u64 {
+  calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0)
+}
+
+pub fn format_size(bytes: u64) -> String {
+  const KB: u64 = 1024;
+  const MB: u64 = KB * 1024;
+  const GB: u64 = MB * 1024;
+
+  if bytes >= GB {
+    format!("{:.2} GB", bytes as f64 / GB as f64)
+  } else if bytes >= MB {
+    format!("{:.2} MB", bytes as f64 / MB as f64)
+  } else if bytes >= KB {
+    format!("{:.2} KB", bytes as f64 / KB as f64)
+  } else {
+    format!("{} B", bytes)
+  }
 }

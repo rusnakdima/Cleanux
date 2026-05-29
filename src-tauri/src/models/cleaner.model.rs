@@ -54,6 +54,7 @@ pub struct LogFileModel {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[allow(non_snake_case)]
 pub struct TrashFileModel {
   pub name: String,
   pub path: String,
@@ -62,6 +63,7 @@ pub struct TrashFileModel {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[allow(non_snake_case)]
 pub struct ScanSummaryModel {
   pub totalItems: usize,
   pub totalSize: u64,
