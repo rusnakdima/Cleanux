@@ -2,10 +2,7 @@
 use crate::helpers::ResponseBuilder;
 use crate::models::{DataValue, ResponseModel};
 /* services */
-use crate::services::log_manager_service::{
-  JournalInfo, LogFileInfo, LogManagerService, LogManagerSummary, LogrotateAnalysis,
-  LogrotateConfig, RotatedLogInfo, VarLogUsage,
-};
+use crate::services::log_manager_service::LogManagerService;
 
 #[tauri::command]
 #[allow(non_snake_case)]

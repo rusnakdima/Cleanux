@@ -103,9 +103,3 @@ pub fn clean_app_residue(path: String) -> Result<ResponseModel, ResponseModel> {
 pub fn clean_multiple_app_residues(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
   AppResidueService.clean_multiple(paths)
 }
-
-#[tauri::command]
-#[allow(non_snake_case)]
-pub fn clean_multiple_residues(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
-  AppResidueService.clean_multiple(paths)
-}

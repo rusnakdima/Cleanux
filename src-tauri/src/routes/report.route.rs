@@ -16,6 +16,7 @@ fn get_service() -> &'static crate::services::report_service::ReportService {
 
 #[tauri::command]
 #[allow(non_snake_case)]
+#[allow(clippy::too_many_arguments)]
 pub fn generate_cleaning_report(
   items_cleaned: i64,
   space_reclaimed: u64,

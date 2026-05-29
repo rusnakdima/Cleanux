@@ -6,9 +6,6 @@ pub mod automation_route;
 #[path = "backup.route.rs"]
 pub mod backup_route;
 
-#[path = "cleaner.route.rs"]
-pub mod cleaner_route;
-
 #[path = "dashboard.route.rs"]
 pub mod dashboard_route;
 
