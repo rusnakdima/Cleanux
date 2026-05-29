@@ -1,0 +1,142 @@
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="view-header">
+    <h1>Clean</h1>
+    <p>Free up disk space by removing unnecessary files</p>
+  </div>
+
+  @if (isScanning()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+      <span class="ml-3 text-[var(--text-muted)]">Scanning...</span>
+    </div>
+  } @else {
+    <div class="glass-surface matte-surface border-trace p-6 mb-6">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-4">
+        <div>
+          <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Total Cleanable</p>
+          <p class="text-3xl font-bold gradient-text">{{ formatSize(totalCleanableSize) }}</p>
+          <p class="text-sm text-[var(--text-secondary)]">{{ totalItemCount }} items</p>
+        </div>
+        <button
+          (click)="onCleanAll()"
+          [disabled]="isCleaning() || totalCleanableSize === 0"
+          class="clean-button"
+        >
+          @if (isCleaning()) {
+            <mat-icon class="icon-sm animate-spin">refresh</mat-icon>
+            Cleaning...
+          } @else {
+            <mat-icon class="icon-sm">cleanup</mat-icon>
+            Clean All
+          }
+        </button>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="totalCleanableSize > 0 ? 100 : 0"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      @for (category of categories; track category.id) {
+        <div
+          class="category-card matte-surface border-trace flex items-center gap-4"
+          [class.active]="activeCategory() === category.id"
+          (click)="activeCategory.set(category.id)"
+        >
+          <div
+            class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+            [class.bg-cyan-500/20]="category.color === 'cyan'"
+            [class.text-cyan-500]="category.color === 'cyan'"
+            [class.bg-error/20]="category.color === 'error'"
+            [class.text-error]="category.color === 'error'"
+            [class.bg-info/20]="category.color === 'info'"
+            [class.text-info]="category.color === 'info'"
+            [class.bg-warning/20]="category.color === 'warning'"
+            [class.text-warning]="category.color === 'warning'"
+          >
+            <mat-icon class="icon-xl">{{ category.icon }}</mat-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold">{{ category.label }}</h3>
+            <p class="text-xs text-[var(--text-muted)]">
+              {{ getCategoryCount(category.id) }} items
+            </p>
+          </div>
+          <div class="text-right">
+            <p
+              class="text-lg font-bold"
+              [class.text-cyan-500]="category.color === 'cyan'"
+              [class.text-error]="category.color === 'error'"
+              [class.text-info]="category.color === 'info'"
+              [class.text-warning]="category.color === 'warning'"
+            >
+              {{ formatSize(getCategorySize(category.id)) }}
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="glass-surface p-4 mt-6 flex items-center justify-between flex-wrap gap-4">
+      <div class="flex items-center gap-3">
+        <mat-icon class="text-[var(--text-muted)]">info</mat-icon>
+        <span class="text-sm text-[var(--text-secondary)]">
+          Select a category to clean specific items
+        </span>
+      </div>
+      <button
+        (click)="onCleanCategory(activeCategory())"
+        [disabled]="isCleaning() || getCategorySize(activeCategory()) === 0"
+        class="btn btn-danger"
+      >
+        <mat-icon class="icon-sm">delete</mat-icon>
+        Clean {{ activeCategory() }}
+      </button>
+    </div>
+
+    <div class="mt-6">
+      <h3 class="section-title mb-4">More Cleaning Options</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a routerLink="/downloads" class="category-card flex items-center gap-3 no-underline">
+          <div
+            class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-500 shrink-0"
+          >
+            <mat-icon class="icon-lg">download</mat-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold">Downloads</h3>
+            <p class="text-xs text-[var(--text-muted)]">Clean downloaded files</p>
+          </div>
+          <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+        </a>
+
+        <a routerLink="/recent" class="category-card flex items-center gap-3 no-underline">
+          <div
+            class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0"
+          >
+            <mat-icon class="icon-lg">history</mat-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold">Recent Files</h3>
+            <p class="text-xs text-[var(--text-muted)]">Clear file history</p>
+          </div>
+          <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+        </a>
+
+        <a routerLink="/clipboard" class="category-card flex items-center gap-3 no-underline">
+          <div
+            class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0"
+          >
+            <mat-icon class="icon-lg">content_paste</mat-icon>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm font-semibold">Clipboard</h3>
+            <p class="text-xs text-[var(--text-muted)]">Manage clipboard</p>
+          </div>
+          <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+        </a>
+      </div>
+    </div>
+  }
+</div>

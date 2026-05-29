@@ -1,0 +1,65 @@
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="view-header">
+    <h1>Files</h1>
+    <p>Manage and analyze disk space</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    @for (tool of fileTools; track tool.id) {
+      <a
+        [routerLink]="tool.route"
+        class="category-card matte-surface border-trace flex flex-col items-center justify-center p-6 text-center no-underline"
+      >
+        <div
+          class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+          [class.bg-cyan-500/20]="tool.color === 'cyan'"
+          [class.text-cyan-500]="tool.color === 'cyan'"
+          [class.bg-violet-500/20]="tool.color === 'violet'"
+          [class.text-violet-500]="tool.color === 'violet'"
+          [class.bg-emerald-500/20]="tool.color === 'emerald'"
+          [class.text-emerald-500]="tool.color === 'emerald'"
+        >
+          <mat-icon class="icon-xl">{{ tool.icon }}</mat-icon>
+        </div>
+        <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-1">{{ tool.label }}</h3>
+      </a>
+    }
+  </div>
+
+  <div class="glass-surface matte-surface border-trace p-6 mt-6">
+    <h3 class="section-title mb-4">Quick Stats</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-500"
+        >
+          <mat-icon class="icon-base">cached</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs text-[var(--text-muted)]">Cache</p>
+          <p class="text-lg font-bold">{{ formatSize(cacheSize()) }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-error/20 flex items-center justify-center text-error">
+          <mat-icon class="icon-base">delete_outline</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs text-[var(--text-muted)]">Trash</p>
+          <p class="text-lg font-bold">{{ formatSize(trashSize()) }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center text-warning"
+        >
+          <mat-icon class="icon-base">file_present</mat-icon>
+        </div>
+        <div>
+          <p class="text-xs text-[var(--text-muted)]">Large Files</p>
+          <p class="text-lg font-bold">{{ formatSize(largeFileSize()) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

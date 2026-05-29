@@ -1,0 +1,102 @@
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="view-header">
+    <h1>Downloads</h1>
+    <p>Clean up your Downloads folder</p>
+  </div>
+
+  <div class="glass-surface matte-surface border-trace p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Downloads Size</p>
+        <p class="text-2xl font-bold">{{ formatSize(downloadsSize()) }}</p>
+      </div>
+      <button (click)="scanDownloads()" [disabled]="isScanning()" class="btn btn-primary">
+        <mat-icon class="icon-sm" [class.animate-spin]="isScanning()">search</mat-icon>
+        {{ isScanning() ? "Scanning..." : "Scan" }}
+      </button>
+    </div>
+
+    <div class="flex gap-4 text-sm flex-wrap">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="age"
+          value="week"
+          [(ngModel)]="selectedAge"
+          class="accent-[var(--accent-primary)]"
+        />
+        <span>Older than 1 week</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="age"
+          value="month"
+          [(ngModel)]="selectedAge"
+          class="accent-[var(--accent-primary)]"
+        />
+        <span>Older than 1 month</span>
+      </label>
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name="age"
+          value="all"
+          [(ngModel)]="selectedAge"
+          class="accent-[var(--accent-primary)]"
+        />
+        <span>All files</span>
+      </label>
+    </div>
+  </div>
+
+  @if (isScanning()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+    </div>
+  } @else if (files().length > 0) {
+    <div class="glass-surface matte-surface border-trace overflow-hidden">
+      <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
+        <span class="text-sm text-[var(--text-secondary)]">{{ files().length }} files</span>
+        <button
+          (click)="cleanSelected()"
+          [disabled]="selectedFiles().size === 0"
+          class="btn btn-danger"
+        >
+          <mat-icon class="icon-sm">delete</mat-icon>
+          Clean Selected ({{ selectedFiles().size }})
+        </button>
+      </div>
+      <div class="max-h-96 overflow-y-auto">
+        @for (file of files(); track file.path) {
+          <div
+            class="flex items-center gap-3 p-4 border-b border-[var(--border-color-subtle)] hover:bg-[var(--bg-hover)] cursor-pointer"
+            (click)="toggleFile(file.path)"
+          >
+            <input
+              type="checkbox"
+              [checked]="selectedFiles().has(file.path)"
+              class="accent-[var(--accent-primary)] w-4 h-4"
+              (click)="$event.stopPropagation()"
+            />
+            <mat-icon class="icon-base text-[var(--text-muted)]">description</mat-icon>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate">{{ file.name }}</p>
+              <p class="text-xs text-[var(--text-muted)]">{{ file.path }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-mono">{{ formatSize(file.size) }}</p>
+              <p class="text-xs text-[var(--text-muted)]">{{ file.age }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="glass-surface matte-surface border-trace p-8 text-center">
+      <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">folder_open</mat-icon>
+      <p class="text-[var(--text-secondary)]">No files found in Downloads</p>
+      <p class="text-sm text-[var(--text-muted)] mt-1">Click Scan to search for cleanable files</p>
+    </div>
+  }
+</div>

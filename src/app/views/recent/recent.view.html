@@ -1,0 +1,75 @@
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="view-header">
+    <h1>Recent Files</h1>
+    <p>Clean recent file history</p>
+  </div>
+
+  <div class="glass-surface matte-surface border-trace p-6 mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Tracked Items</p>
+        <p class="text-2xl font-bold">{{ items().length }}</p>
+      </div>
+      <button (click)="clearAll()" [disabled]="items().length === 0" class="btn btn-danger">
+        <mat-icon class="icon-sm">delete_sweep</mat-icon>
+        Clear All History
+      </button>
+    </div>
+  </div>
+
+  <div class="glass-surface matte-surface border-trace overflow-hidden">
+    @if (items().length > 0) {
+      <div class="max-h-[60vh] overflow-y-auto">
+        @for (item of paginatedItems(); track item.id) {
+          <div
+            class="flex items-center gap-3 p-4 border-b border-[var(--border-color-subtle)] hover:bg-[var(--bg-hover)]"
+          >
+            <div class="w-10 h-10 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center">
+              <mat-icon class="icon-sm text-[var(--text-muted)]">description</mat-icon>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate">{{ item.name }}</p>
+              <div class="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <span class="badge badge-primary">{{ item.app }}</span>
+                <span>{{ item.path }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button (click)="removeItem(item.id)" class="btn btn-ghost btn-icon">
+                <mat-icon class="icon-sm">close</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+      <app-pagination
+        [totalItems]="items().length"
+        [currentPage]="currentPage()"
+        [pageSize]="pageSize()"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
+    } @else {
+      <div class="p-8 text-center">
+        <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">history</mat-icon>
+        <p class="text-[var(--text-secondary)]">No recent files tracked</p>
+        <p class="text-sm text-[var(--text-muted)] mt-1">Recent file activity will appear here</p>
+      </div>
+    }
+  </div>
+
+  <div class="glass-surface matte-surface border-trace p-5 mt-6">
+    <h3 class="section-title mb-4">Apps with Recent History</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      @for (app of apps; track app.id) {
+        <button
+          (click)="clearApp(app.id)"
+          class="category-card matte-surface border-trace flex flex-col items-center justify-center p-4 no-underline"
+        >
+          <mat-icon class="icon-lg text-[var(--text-muted)] mb-2">{{ app.icon }}</mat-icon>
+          <span class="text-xs">{{ app.name }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</div>
