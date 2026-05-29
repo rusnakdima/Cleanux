@@ -78,8 +78,15 @@ pub fn sanitize_path(path: &str) -> String {
   let mut result = path.to_string();
 
   result = result.replace('\0', "");
-  result = result.replace("..", "");
   result = result.trim().to_string();
+
+  loop {
+    let prev = result.clone();
+    result = result.replace("..", "");
+    if prev == result {
+      break;
+    }
+  }
 
   result
 }

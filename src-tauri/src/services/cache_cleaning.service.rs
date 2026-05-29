@@ -32,9 +32,11 @@ impl CacheCleaningService {
       .ok_or_else(|| AppError::InvalidPath("Cache directory not found".to_string()))?;
     let (files, has_more, total) = collect_cache_file_models(cache_dir, offset, limit);
     let paginated = PaginatedData::new(files, has_more, total);
+    let data = serde_json::to_value(paginated)
+      .map_err(|e| AppError::Unknown(format!("Failed to serialize cache data: {}", e)))?;
     Ok(success_response(
       "Cache files retrieved successfully",
-      serde_json::to_value(paginated).unwrap().into(),
+      crate::models::DataValue::Object(data),
     ))
   }
 

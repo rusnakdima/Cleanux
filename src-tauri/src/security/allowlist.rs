@@ -10,7 +10,6 @@ pub const ALLOWED_PATHS: &[&str] = &[
   "/tmp",
   "/var/cache",
   "/var/tmp",
-  "/var/log",
   "/snap",
   "/srv",
   "/opt",

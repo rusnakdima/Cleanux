@@ -53,6 +53,14 @@ fn log_privilege_operation(op: &PrivilegeOperation) {
 }
 
 pub fn pkexec_with_timeout(program: &str, args: &[&str]) -> Result<Output, AppError> {
+  let allowed_programs = ["rm", "chmod", "systemctl", "journalctl", "apt", "dpkg"];
+  if !allowed_programs.contains(&program) {
+    return Err(AppError::InvalidPath(format!(
+      "Program '{}' is not allowed to be executed via pkexec",
+      program
+    )));
+  }
+
   let mut cmd = Command::new("pkexec");
   cmd.arg(program);
   for arg in args {
@@ -68,7 +76,18 @@ pub fn pkexec_with_timeout(program: &str, args: &[&str]) -> Result<Output, AppEr
 }
 
 pub fn privileged_delete(paths: &[String]) -> Result<Output, AppError> {
+  use crate::security::allowlist::is_path_allowed;
+  use std::path::PathBuf;
+
   for path in paths {
+    let path_buf = PathBuf::from(path);
+    if !is_path_allowed(&path_buf) {
+      return Err(AppError::PathOutsideAllowed(format!(
+        "Path '{}' is not in allowed directories for deletion",
+        path
+      )));
+    }
+
     let op = PrivilegeOperation::new("DELETE", path);
     log_privilege_operation(&op);
   }

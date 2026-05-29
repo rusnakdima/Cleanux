@@ -33,9 +33,11 @@ impl LargeFileCleaningService {
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     let (files, has_more, total) = scan_large_file_models(&home, 3, 50, Some(200), offset, limit);
     let paginated = PaginatedData::new(files, has_more, total);
+    let data = serde_json::to_value(paginated)
+      .map_err(|e| AppError::Unknown(format!("Failed to serialize large files data: {}", e)))?;
     Ok(success_response(
       "Large files retrieved successfully",
-      serde_json::to_value(paginated).unwrap().into(),
+      crate::models::DataValue::Object(data),
     ))
   }
 

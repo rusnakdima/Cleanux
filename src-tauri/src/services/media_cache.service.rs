@@ -33,16 +33,6 @@ type MediaResult<T> = Result<T, AppError>;
 
 #[allow(non_snake_case)]
 impl MediaCacheService {
-  pub fn get_steam_cache_size(&self) -> u64 {
-    let steam_home = dirs::home_dir()
-      .map(|h| h.join(".steam/steam/steamapps/shader"))
-      .unwrap_or_default();
-    let local_share = dirs::home_dir()
-      .map(|h| h.join(".local/share/Steam"))
-      .unwrap_or_default();
-    get_dir_size(&steam_home) + get_dir_size(&local_share)
-  }
-
   pub fn get_steam_info(&self) -> SteamInfo {
     let steam_root = dirs::home_dir()
       .map(|h| h.join(".steam/steam"))

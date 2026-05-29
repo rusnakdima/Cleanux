@@ -8,12 +8,17 @@ use std::path::PathBuf;
 use std::thread;
 use std::time::Duration;
 
-fn generate_uuid() -> String {
+fn get_timestamp_u64() -> u64 {
   use std::time::{SystemTime, UNIX_EPOCH};
-  let now = SystemTime::now()
+  SystemTime::now()
     .duration_since(UNIX_EPOCH)
-    .unwrap()
-    .as_nanos();
+    .map_err(|_| AppError::Unknown("Time went backwards".to_string()))
+    .unwrap_or_default()
+    .as_secs()
+}
+
+fn generate_uuid() -> String {
+  let now = get_timestamp_u64();
   let random = rand_simple();
   format!("{:x}-{:x}", now, random)
 }
@@ -180,6 +185,14 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
       Err(e) => Err(AppError::message(format!("Failed to run profile: {}", e))),
     },
     ActionStep::ExecuteCommand { command } => {
+      let allowed_commands = ["sync", "shutdown", "reboot", "systemctl", "service"];
+      let is_allowed = allowed_commands.iter().any(|c| command.starts_with(c));
+      if !is_allowed {
+        return Err(AppError::InvalidPath(format!(
+          "Command '{}' is not in the allowed list",
+          command
+        )));
+      }
       use std::process::Command;
       let output = Command::new("sh")
         .arg("-c")
@@ -235,10 +248,9 @@ impl AutomationService {
     let actions = get_predefined_quick_actions();
     let json = serde_json::to_value(&actions)
       .map_err(|e| AppError::message(format!("Failed to serialize actions: {}", e)))?;
-    Ok(success_response(
-      "Quick actions retrieved",
-      serde_json::from_value(json).unwrap(),
-    ))
+    let data = serde_json::from_value(json)
+      .map_err(|e| AppError::message(format!("Failed to deserialize actions: {}", e)))?;
+    Ok(success_response("Quick actions retrieved", data))
   }
 
   pub fn execute_action(action_id: String) -> Result<ResponseModel, ResponseModel> {
@@ -293,10 +305,9 @@ impl AutomationService {
       .map_err(|e| AppError::message(format!("Failed to parse recipes: {}", e)))?;
     let json = serde_json::to_value(&recipes)
       .map_err(|e| AppError::message(format!("Failed to serialize recipes: {}", e)))?;
-    Ok(success_response(
-      "Recipes retrieved",
-      serde_json::from_value(json).unwrap(),
-    ))
+    let data = serde_json::from_value(json)
+      .map_err(|e| AppError::message(format!("Failed to deserialize recipes: {}", e)))?;
+    Ok(success_response("Recipes retrieved", data))
   }
 
   pub fn save_recipe(recipe: AutomationRecipe) -> Result<ResponseModel, ResponseModel> {
@@ -411,12 +422,11 @@ impl AutomationService {
   }
 
   fn get_execution_history_inner() -> Result<ResponseModel, AppError> {
-    let history = get_execution_history().unwrap_or_default();
+    let history = get_execution_history()?;
     let json = serde_json::to_value(&history)
       .map_err(|e| AppError::message(format!("Failed to serialize history: {}", e)))?;
-    Ok(success_response(
-      "History retrieved",
-      serde_json::from_value(json).unwrap(),
-    ))
+    let data = serde_json::from_value(json)
+      .map_err(|e| AppError::message(format!("Failed to deserialize history: {}", e)))?;
+    Ok(success_response("History retrieved", data))
   }
 }

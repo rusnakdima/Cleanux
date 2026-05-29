@@ -343,6 +343,17 @@ impl RepairService {
   }
 
   pub fn remove_orphaned_package(path: &str) -> Result<ResponseModel, ResponseModel> {
+    let is_valid_package_name = path
+      .chars()
+      .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '+');
+    if !is_valid_package_name || path.is_empty() {
+      return Err(ResponseModel {
+        status: ResponseStatus::Error,
+        message: format!("Invalid package name format: {}", path),
+        data: DataValue::Bool(false),
+      });
+    }
+
     let output = Command::new("dpkg").args(["--purge", path]).output();
 
     match output {

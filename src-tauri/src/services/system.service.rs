@@ -90,16 +90,20 @@ impl SystemService {
       .map_err(|e| e.into_response())
   }
 
-  fn open_file_inner(&self, path: &str, command: Option<String>) -> ServiceResult<ResponseModel> {
-    let mut cmd = if let Some(custom_cmd) = command {
-      let mut c = std::process::Command::new(custom_cmd);
-      c.arg(path);
-      c
-    } else {
-      let mut c = std::process::Command::new("xdg-open");
-      c.arg(path);
-      c
-    };
+  fn open_file_inner(&self, path: &str, _command: Option<String>) -> ServiceResult<ResponseModel> {
+    use crate::security::allowlist::is_path_allowed;
+    use std::path::PathBuf;
+
+    let path_buf = PathBuf::from(path);
+    if !is_path_allowed(&path_buf) {
+      return Err(AppError::PathOutsideAllowed(format!(
+        "Path '{}' is not in allowed directories",
+        path
+      )));
+    }
+
+    let mut cmd = std::process::Command::new("xdg-open");
+    cmd.arg(path);
 
     match cmd.spawn() {
       Ok(_) => Ok(ResponseModel {
