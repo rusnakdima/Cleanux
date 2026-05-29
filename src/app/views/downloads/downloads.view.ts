@@ -2,6 +2,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { formatSize } from '@shared/utils/format.util';
 
 /* materials */
 import { MatIconModule } from '@angular/material/icon';
@@ -22,19 +23,12 @@ interface DownloadFile {
   templateUrl: './downloads.view.html',
 })
 export class DownloadsView {
+  formatSize = formatSize;
   isScanning = signal(false);
   downloadsSize = signal(0);
   files = signal<DownloadFile[]>([]);
   selectedFiles = signal<Set<string>>(new Set());
   selectedAge = 'week';
-
-  formatSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  }
 
   async scanDownloads() {
     this.isScanning.set(true);

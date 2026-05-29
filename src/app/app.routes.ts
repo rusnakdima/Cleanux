@@ -2,12 +2,8 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
-  {
-    path: 'home',
-    loadComponent: () => import('@views/dashboard/dashboard.view').then((m) => m.DashboardView),
-  },
   {
     path: 'dashboard',
     loadComponent: () => import('@views/dashboard/dashboard.view').then((m) => m.DashboardView),
@@ -79,10 +75,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('@views/log-manager/log-manager.view').then((m) => m.LogManagerView),
   },
-  {
-    path: 'power-view',
-    loadComponent: () => import('@views/power/power.view').then((m) => m.PowerView),
-  },
+
   {
     path: 'kernel-cleaner',
     loadComponent: () =>
@@ -148,5 +141,5 @@ export const routes: Routes = [
     loadComponent: () => import('@views/clipboard/clipboard.view').then((m) => m.ClipboardView),
   },
 
-  { path: '**', redirectTo: 'home' },
+  { path: '**', redirectTo: 'dashboard' },
 ];

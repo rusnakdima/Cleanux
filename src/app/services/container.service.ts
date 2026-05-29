@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { formatSize } from '@shared/utils/format.util';
 
 export interface ContainerSummary {
   docker_installed: boolean;
@@ -57,6 +56,4 @@ export class ContainerService {
   async podmanImagePrune(all: boolean): Promise<string> {
     return this.api.invoke<string>('podman_image_prune', { all });
   }
-
-  formatSize = formatSize;
 }

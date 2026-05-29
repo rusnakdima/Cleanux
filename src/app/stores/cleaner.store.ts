@@ -12,8 +12,6 @@ import {
 import { PackageCacheInfo } from '@models/package-manager.model';
 import { CleanerTabId } from '@models/cleaner.model';
 
-export type { CleanerTabId };
-
 @Injectable()
 export class CleanerStore {
   private api = inject(TauriApiService);
