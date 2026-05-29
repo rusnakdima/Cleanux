@@ -12,13 +12,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FileService } from '@services/file.service';
 import { CleanerViewStore } from '@services/cleaner-view.store';
 import { LogAnalyzerService } from '@services/log-analyzer.service';
+import { NotificationService } from '@services/notification.service';
 
 /* components */
 import { DataTableComponent } from '@components/data-table/data-table.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
-import { SearchComponent } from '@components/search/search.component';
-import { HeaderComponent } from '@components/header/header.component';
 
 /* models */
 import { TableColumn, TableOptions } from '@models/data-table.model';
@@ -48,16 +47,14 @@ export type PackageManagerRow = {
     MatTooltipModule,
     DataTableComponent,
     FilePreviewComponent,
-    SearchComponent,
-    HeaderComponent,
   ],
   templateUrl: './cleaner.view.html',
-  styleUrls: ['./cleaner.view.css'],
 })
 export class CleanerView implements OnInit {
   readonly store = inject(CleanerViewStore);
   private fileService = inject(FileService);
   private logAnalyzerService = inject(LogAnalyzerService);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
@@ -120,10 +117,13 @@ export class CleanerView implements OnInit {
     if (!confirmed) return;
     try {
       const result = await this.logAnalyzerService.cleanOldLogs(days);
-      alert(result);
+      this.notification.success(result);
       await this.loadLogSummary();
     } catch (error: unknown) {
-      alert('Failed to clean logs: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error(
+        'Failed to clean logs: ' + (error instanceof Error ? error.message : String(error)),
+        error
+      );
     }
   }
 
@@ -165,6 +165,8 @@ export class CleanerView implements OnInit {
       showSelectedActions: true,
       selectedActionText: 'Clear Selected',
       showPreviewButton: true,
+      showSearch: true,
+      searchPlaceholder: 'Search...',
     };
   }
 
@@ -177,6 +179,8 @@ export class CleanerView implements OnInit {
       showSelectedActions: false,
       showPreviewButton: false,
       showRowActions: true,
+      showSearch: true,
+      searchPlaceholder: 'Search...',
     };
   }
 
@@ -224,7 +228,10 @@ export class CleanerView implements OnInit {
     try {
       await this.fileService.openFile(event.path, event.command);
     } catch (error: unknown) {
-      alert('Failed to open file: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error(
+        'Failed to open file: ' + (error instanceof Error ? error.message : String(error)),
+        error
+      );
     }
   }
 }

@@ -1,14 +1,10 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <div
-    class="bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-4 mb-6"
-  >
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="bg-error/10 border border-error/30 rounded-lg p-4 mb-6">
     <div class="flex items-center gap-3">
-      <mat-icon class="icon-error" fontIcon="warning"/>
+      <mat-icon class="text-error" fontIcon="warning" />
       <div>
-        <h3 class="font-bold text-red-800 dark:text-red-300">
-          DANGER: Kernel removal can break your system
-        </h3>
-        <p class="text-sm text-red-700 dark:text-red-400 mt-1">
+        <h3 class="font-bold text-error">DANGER: Kernel removal can break your system</h3>
+        <p class="text-sm text-[var(--text-secondary)] mt-1">
           Only remove kernels you are certain you don't need. The current running kernel can NEVER
           be deleted.
         </p>
@@ -17,34 +13,32 @@
   </div>
 
   @if (bootSpaceInfo()) {
-    <div class="glass-card p-6">
-      <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-        Boot Partition Space
-      </h3>
+    <div class="glass-card matte-surface border-trace p-6">
+      <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4">Boot Partition Space</h3>
       <div class="flex items-center gap-4">
         <div class="flex-1">
           <mat-progress-bar mode="determinate" [value]="getBootUsagePercent()"> </mat-progress-bar>
         </div>
-        <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
+        <span class="text-sm font-medium text-[var(--text-secondary)]">
           {{ getBootUsagePercent() }}% used
         </span>
       </div>
       <div class="grid grid-cols-3 gap-4 mt-4 text-sm">
         <div>
-          <span class="text-slate-500 dark:text-slate-400">Total:</span>
-          <span class="ml-2 font-medium text-slate-900 dark:text-white">{{
+          <span class="text-[var(--text-muted)]">Total:</span>
+          <span class="ml-2 font-medium text-[var(--text-primary)]">{{
             formatSize(bootSpaceInfo()!.total)
           }}</span>
         </div>
         <div>
-          <span class="text-slate-500 dark:text-slate-400">Used:</span>
-          <span class="ml-2 font-medium text-slate-900 dark:text-white">{{
+          <span class="text-[var(--text-muted)]">Used:</span>
+          <span class="ml-2 font-medium text-[var(--text-primary)]">{{
             formatSize(bootSpaceInfo()!.used)
           }}</span>
         </div>
         <div>
-          <span class="text-slate-500 dark:text-slate-400">Available:</span>
-          <span class="ml-2 font-medium text-slate-900 dark:text-white">{{
+          <span class="text-[var(--text-muted)]">Available:</span>
+          <span class="ml-2 font-medium text-[var(--text-primary)]">{{
             formatSize(bootSpaceInfo()!.available)
           }}</span>
         </div>
@@ -52,41 +46,31 @@
     </div>
   }
 
-  <div class="glass-card p-6">
+  <div class="glass-card matte-surface border-trace p-6">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Current Kernel</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Running kernel - CANNOT be removed
-        </p>
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">Current Kernel</h3>
+        <p class="text-sm text-[var(--text-muted)] mt-1">Running kernel - CANNOT be removed</p>
       </div>
     </div>
-    <div
-      class="bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg p-4"
-    >
+    <div class="bg-success/10 border border-success/30 rounded-lg p-4">
       <div class="flex items-center gap-3">
-        <mat-icon class="icon-success" fontIcon="check_circle"/>
-        <span class="font-mono font-bold text-green-800 dark:text-green-300">{{
-          currentKernel()
-        }}</span>
+        <mat-icon class="text-success" fontIcon="check_circle" />
+        <span class="font-mono font-bold text-success">{{ currentKernel() }}</span>
       </div>
     </div>
   </div>
 
-  <div class="glass-card p-6">
+  <div class="glass-card matte-surface border-trace p-6">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">All Installed Kernels</h3>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <h3 class="text-lg font-semibold text-[var(--text-primary)]">All Installed Kernels</h3>
+        <p class="text-sm text-[var(--text-muted)] mt-1">
           {{ allKernels().length }} kernel(s) installed
         </p>
       </div>
-      <button
-        (click)="loadData()"
-        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        matTooltip="Refresh"
-      >
-        <mat-icon fontIcon="refresh"/>
+      <button (click)="loadData()" class="btn btn-ghost" matTooltip="Refresh">
+        <mat-icon fontIcon="refresh" />
       </button>
     </div>
 
@@ -95,87 +79,89 @@
         <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
       </div>
     } @else {
-      <div class="space-y-2">
-        @for (kernel of allKernels(); track kernel.version) {
-          <div
-            class="p-4 rounded-lg border transition-colors"
-            [class.bg-slate-50 dark:bg-slate-800]="kernel.is_current"
-            [class.border-green-300 dark:border-green-700]="kernel.is_current"
-            [class.bg-white dark:bg-slate-900]="!kernel.is_current"
-            [class.border-slate-200 dark:border-slate-700]="!kernel.is_current"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                @if (!kernel.is_current) {
-                  <mat-checkbox
-                    [checked]="selectedKernels().has(kernel.version)"
-                    (change)="toggleKernelSelection(kernel.version)"
-                  >
-                  </mat-checkbox>
-                }
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-mono font-medium text-slate-900 dark:text-white">{{
-                      kernel.version
-                    }}</span>
-                    @if (kernel.is_current) {
-                      <span class="px-2 py-0.5 text-xs bg-green-500 text-white rounded"
-                        >CURRENT</span
-                      >
-                    }
+      <div class="max-h-[calc(100vh-500px)] overflow-auto">
+        <div class="space-y-2">
+          @for (kernel of paginatedAllKernels(); track kernel.version) {
+            <div
+              class="p-4 rounded-lg border transition-colors"
+              [class.bg-slate-50 dark:bg-slate-800]="kernel.is_current"
+              [class.border-green-300 dark:border-green-700]="kernel.is_current"
+              [class.bg-white dark:bg-slate-900]="!kernel.is_current"
+              [class.border-[var(--border-color)]]]="!kernel.is_current"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  @if (!kernel.is_current) {
+                    <mat-checkbox
+                      [checked]="selectedKernels().has(kernel.version)"
+                      (change)="toggleKernelSelection(kernel.version)"
+                    >
+                    </mat-checkbox>
+                  }
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono font-medium text-[var(--text-primary)]">{{
+                        kernel.version
+                      }}</span>
+                      @if (kernel.is_current) {
+                        <span class="px-2 py-0.5 text-xs bg-success text-white rounded"
+                          >CURRENT</span
+                        >
+                      }
+                    </div>
+                    <span class="text-xs text-[var(--text-muted)]">{{ kernel.path }}</span>
                   </div>
-                  <span class="text-xs text-slate-500 dark:text-slate-400">{{ kernel.path }}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                  <span class="text-sm text-[var(--text-secondary)]">{{
+                    formatSize(kernel.size)
+                  }}</span>
                 </div>
               </div>
-              <div class="flex items-center gap-4">
-                <span class="text-sm text-slate-600 dark:text-slate-400">{{
-                  formatSize(kernel.size)
-                }}</span>
-              </div>
             </div>
-          </div>
-        }
+          }
+        </div>
       </div>
+      <app-pagination
+        [totalItems]="allKernels().length"
+        [currentPage]="kernelsPage()"
+        [pageSize]="kernelsPageSize()"
+        (pageChange)="onKernelsPageChange($event)"
+        (pageSizeChange)="onKernelsPageSizeChange($event)"
+      />
     }
   </div>
 
   @if (oldKernels().length > 0) {
-    <div class="glass-card p-6">
+    <div class="glass-card matte-surface border-trace p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-            Removable Old Kernels
-          </h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <h3 class="text-lg font-semibold text-[var(--text-primary)]">Removable Old Kernels</h3>
+          <p class="text-sm text-[var(--text-muted)] mt-1">
             {{ oldKernels().length }} old kernel(s) - {{ formatSize(getOldKernelsSize()) }} can be
             freed
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <button
-            (click)="toggleAllOldKernels()"
-            class="px-3 py-1.5 text-sm bg-slate-200 dark:bg-slate-700 rounded hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
-          >
+          <button (click)="toggleAllOldKernels()" class="btn btn-secondary">
             {{ selectedKernels().size === oldKernels().length ? "Deselect All" : "Select All" }}
           </button>
           <button
             (click)="removeSelectedKernels()"
             [disabled]="selectedKernels().size === 0 || loading()"
-            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Safe Remove ({{ selectedKernels().size }})
           </button>
         </div>
       </div>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+      <p class="text-xs text-[var(--text-muted)] mb-4">
         Safety: At least 2 kernels (current + latest fallback) are always preserved.
       </p>
 
       @if (selectedKernels().size > 0) {
-        <div
-          class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-3 mb-4"
-        >
-          <span class="text-sm text-yellow-800 dark:text-yellow-300">
+        <div class="bg-warning/10 border border-warning/30 rounded p-3 mb-4">
+          <span class="text-sm text-warning">
             Selected: {{ formatSize(getSelectedSize()) }} to be freed
           </span>
         </div>
@@ -184,44 +170,51 @@
   }
 
   @if (oldInitramfs().length > 0) {
-    <div class="glass-card p-6">
+    <div class="glass-card matte-surface border-trace p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Old Initramfs Files</h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <h3 class="text-lg font-semibold text-[var(--text-primary)]">Old Initramfs Files</h3>
+          <p class="text-sm text-[var(--text-muted)] mt-1">
             {{ oldInitramfs().length }} orphaned initramfs file(s)
           </p>
         </div>
         <button
           (click)="cleanSelectedInitramfs()"
           [disabled]="selectedInitramfs().size === 0 || loading()"
-          class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Clean Selected ({{ selectedInitramfs().size }})
         </button>
       </div>
 
-      <div class="space-y-2">
-        @for (initramfs of oldInitramfs(); track initramfs.path) {
-          <div
-            class="p-3 rounded-lg border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 flex items-center justify-between"
-          >
-            <div class="flex items-center gap-3">
-              <mat-checkbox
-                [checked]="selectedInitramfs().has(initramfs.version)"
-                (change)="toggleInitramfsSelection(initramfs.version)"
-              >
-              </mat-checkbox>
-              <span class="font-mono text-sm text-slate-700 dark:text-slate-300">{{
-                initramfs.version
-              }}</span>
+      <div class="max-h-[calc(100vh-500px)] overflow-auto">
+        <div class="space-y-2">
+          @for (initramfs of paginatedOldInitramfs(); track initramfs.path) {
+            <div
+              class="p-3 rounded-lg border bg-[var(--bg-elevated)] border-[var(--border-color)] flex items-center justify-between"
+            >
+              <div class="flex items-center gap-3">
+                <mat-checkbox
+                  [checked]="selectedInitramfs().has(initramfs.version)"
+                  (change)="toggleInitramfsSelection(initramfs.version)"
+                >
+                </mat-checkbox>
+                <span class="font-mono text-sm text-[var(--text-secondary)]">{{
+                  initramfs.version
+                }}</span>
+              </div>
+              <span class="text-sm text-[var(--text-muted)]">{{ formatSize(initramfs.size) }}</span>
             </div>
-            <span class="text-sm text-slate-500 dark:text-slate-400">{{
-              formatSize(initramfs.size)
-            }}</span>
-          </div>
-        }
+          }
+        </div>
       </div>
+      <app-pagination
+        [totalItems]="oldInitramfs().length"
+        [currentPage]="initramfsPage()"
+        [pageSize]="initramfsPageSize()"
+        (pageChange)="onInitramfsPageChange($event)"
+        (pageSizeChange)="onInitramfsPageSizeChange($event)"
+      />
     </div>
   }
 
@@ -229,15 +222,15 @@
     <div class="glass-card p-6 border-2 border-yellow-400 dark:border-yellow-600">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <mat-icon class="icon-warning" fontIcon="info"/>
-          <span class="text-yellow-800 dark:text-yellow-300 font-medium">
+          <mat-icon class="text-warning" fontIcon="info" />
+          <span class="text-warning font-medium">
             GRUB configuration needs to be updated after kernel removal
           </span>
         </div>
         <button
           (click)="updateGrub()"
           [disabled]="loading()"
-          class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50"
+          class="btn btn-secondary disabled:opacity-50"
         >
           Update GRUB Now
         </button>
@@ -247,9 +240,9 @@
 
   @if (actionResult()) {
     <div
-      class="glass-card p-4"
+      class="glass-card matte-surface border-trace p-4"
       [class.bg-green-50 dark:bg-green-900/20]="!actionResult()!.startsWith('Failed')"
-      [class.border-green-300 dark:border-green-700]="!actionResult()!.startsWith('Failed')"
+      [class.border-green-300 dark:bg-green-700]="!actionResult()!.startsWith('Failed')"
       [class.bg-red-50 dark:bg-red-900/20]="actionResult()!.startsWith('Failed')"
       [class.border-red-300 dark:border-red-700]="actionResult()!.startsWith('Failed')"
     >

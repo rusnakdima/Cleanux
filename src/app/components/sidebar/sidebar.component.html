@@ -1,103 +1,131 @@
-<aside 
-  class="sidebar"
-  [class.sidebar-open]="isOpen()"
-  [class.sidebar-collapsed]="isCollapsed()">
-  
-  <!-- Logo Section -->
-  <header class="sidebar-header">
-    <a routerLink="/dashboard" class="logo-link" (click)="onClose()">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+<aside
+  class="fixed md:sticky top-0 left-0 h-screen z-50 bg-[#18181b] border-r border-zinc-800 flex flex-col transition-transform duration-300 shrink-0"
+  [class.w-64]="!isCollapsed()"
+  [class.w-20]="isCollapsed()"
+  [class.-translate-x-full]="!isOpen()"
+  [class.translate-x-0]="isOpen()"
+  [class.md:translate-x-0]="true"
+>
+  <!-- Brand Logo -->
+  <div class="p-6 border-b border-zinc-850 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div
+        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg"
+      >
+        <mat-icon class="text-zinc-950 text-xl font-bold">cleaning_services</mat-icon>
       </div>
-      <span class="logo-text">CleanUX</span>
-    </a>
-  </header>
-
-  <!-- Quick Stats Card -->
-  <div class="quick-stats" [class.collapsed]="isCollapsed()">
-    <div class="stat-item">
-      <span class="stat-value">{{ healthScore() }}</span>
-      <span class="stat-label">Health</span>
+      @if (!isCollapsed()) {
+        <div>
+          <span class="font-bold text-sm tracking-wide gradient-text">TuxClean Pro</span>
+          <p class="text-[10px] text-[var(--text-muted)] font-mono">Optimizer Daemon</p>
+        </div>
+      }
     </div>
-    <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-value">{{ formatSize(totalJunk()) }}</span>
-      <span class="stat-label">Junk</span>
-    </div>
+    @if (!isCollapsed()) {
+      <button
+        (click)="onClose()"
+        class="md:hidden text-[var(--text-secondary)] hover:text-white p-1"
+      >
+        <mat-icon class="text-base">close</mat-icon>
+      </button>
+    }
   </div>
 
   <!-- Navigation -->
-  <nav class="sidebar-nav">
-    <!-- Main Section -->
-    <div class="nav-section">
-      <span class="nav-section-title">Main</span>
-      @for (item of mainNavItems; track item.route) {
-        <a 
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
-          (click)="onClose()"
-          class="nav-item"
-          [matTooltip]="isCollapsed() ? item.label : ''"
-          matTooltipPosition="right">
-          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
-          <span class="nav-label">{{ item.label }}</span>
-        </a>
-      }
-    </div>
+  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <span
+      class="px-3 text-[9px] font-bold tracking-wider text-[var(--text-muted)] uppercase block mb-3"
+      >System Overview</span
+    >
 
-    <!-- Tools Section -->
-    <div class="nav-section">
-      <span class="nav-section-title">Tools</span>
-      @for (item of toolsNavItems; track item.route) {
-        <a 
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          (click)="onClose()"
-          class="nav-item"
-          [matTooltip]="isCollapsed() ? item.label : ''"
-          matTooltipPosition="right">
-          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
-          <span class="nav-label">{{ item.label }}</span>
-          @if (item.badge) {
-            <span class="nav-badge">{{ item.badge }}</span>
-          }
-        </a>
+    <a
+      [routerLink]="'/dashboard'"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-item flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+      [matTooltip]="isCollapsed() ? 'Dashboard' : ''"
+      matTooltipPosition="right"
+    >
+      <mat-icon class="text-base shrink-0">dashboard</mat-icon>
+      @if (!isCollapsed()) {
+        <span>Dashboard</span>
       }
-    </div>
+    </a>
+
+    <span
+      class="px-3 pt-6 text-[9px] font-bold tracking-wider text-[var(--text-muted)] uppercase block mb-3"
+      >Cleaning Modules</span
+    >
+
+    <a
+      [routerLink]="'/system'"
+      routerLinkActive="active"
+      class="nav-item flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+      [matTooltip]="isCollapsed() ? 'System Clean' : ''"
+      matTooltipPosition="right"
+    >
+      <mat-icon class="text-base shrink-0">terminal</mat-icon>
+      @if (!isCollapsed()) {
+        <span>System Clean</span>
+      }
+    </a>
+
+    <a
+      [routerLink]="'/cleaner'"
+      routerLinkActive="active"
+      class="nav-item flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+      [matTooltip]="isCollapsed() ? 'User Space' : ''"
+      matTooltipPosition="right"
+    >
+      <mat-icon class="text-base shrink-0">folder_open</mat-icon>
+      @if (!isCollapsed()) {
+        <span>User Space</span>
+      }
+    </a>
+
+    <span
+      class="px-3 pt-6 text-[9px] font-bold tracking-wider text-[var(--text-muted)] uppercase block mb-3"
+      >Live Utilities</span
+    >
+
+    <a
+      [routerLink]="'/processes'"
+      routerLinkActive="active"
+      class="nav-item flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+      [matTooltip]="isCollapsed() ? 'Live Optimizer' : ''"
+      matTooltipPosition="right"
+    >
+      <mat-icon class="text-base shrink-0">memory</mat-icon>
+      @if (!isCollapsed()) {
+        <span>Live Optimizer</span>
+      }
+    </a>
+
+    <a
+      [routerLink]="'/automation'"
+      routerLinkActive="active"
+      class="nav-item flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors"
+      [matTooltip]="isCollapsed() ? 'Autopilot' : ''"
+      matTooltipPosition="right"
+    >
+      <mat-icon class="text-base shrink-0">schedule</mat-icon>
+      @if (!isCollapsed()) {
+        <span>Autopilot</span>
+      }
+    </a>
   </nav>
 
-  <!-- Footer -->
-  <div class="sidebar-footer">
-    <!-- Settings Link -->
-    @for (item of footerNavItems; track item.route) {
-      <a 
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        (click)="onClose()"
-        class="nav-item"
-        [matTooltip]="isCollapsed() ? item.label : ''"
-        matTooltipPosition="right">
-        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
-        <span class="nav-label">{{ item.label }}</span>
-      </a>
-    }
-    
-    <!-- Divider -->
-    <div class="nav-divider"></div>
-    
-    <!-- Theme Toggle -->
-    <button
-      class="nav-item theme-toggle"
-      (click)="onToggleDarkMode()"
-      [matTooltip]="isCollapsed() ? (isDarkMode() ? 'Light Mode' : 'Dark Mode') : ''"
-      matTooltipPosition="right"
-      [attr.aria-label]="isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
-    >
-      <mat-icon class="nav-icon" aria-hidden="true">{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-      <span class="nav-label">{{ isDarkMode() ? 'Light Mode' : 'Dark Mode' }}</span>
-    </button>
+  <!-- Disk Usage Progress (Bottom) -->
+  <div class="p-4 border-t border-zinc-850 bg-zinc-950/20">
+    <div class="flex items-center justify-between text-xs mb-2 text-[var(--text-secondary)]">
+      <span>Disk Usage</span>
+      <span class="font-mono text-[var(--text-primary)]">{{ diskUsageDisplay() }}</span>
+    </div>
+    <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+      <div
+        class="bg-gradient-to-r from-teal-500 to-emerald-400 h-full transition-all duration-500"
+        [style.width.%]="diskUsagePercent()"
+      ></div>
+    </div>
   </div>
 </aside>

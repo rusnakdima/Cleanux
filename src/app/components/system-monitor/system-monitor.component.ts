@@ -1,5 +1,12 @@
 /* sys lib */
-import { Component, OnInit, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -11,7 +18,6 @@ import { MonitorStore } from '@stores/monitor.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule],
   templateUrl: './system-monitor.component.html',
-  styleUrls: ['./system-monitor.component.css'],
 })
 export class SystemMonitorComponent implements OnInit, OnDestroy {
   protected store = inject(MonitorStore);
@@ -20,8 +26,7 @@ export class SystemMonitorComponent implements OnInit, OnDestroy {
     this.store.startMonitoring();
   }
 
-  ngOnDestroy() {
-  }
+  ngOnDestroy() {}
 
   formatBytes(bytes: number): string {
     return this.store.formatBytes(bytes);

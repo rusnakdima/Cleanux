@@ -1,73 +1,107 @@
-<div class="monitor-container">
-  <div class="monitor-header">
-    <h3 class="monitor-title">
-      <mat-icon class="monitor-icon">monitor_heart</mat-icon>
-      System Monitor
+<div class="space-y-4 font-mono">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-bold text-xs text-slate-200 uppercase tracking-widest flex items-center gap-2">
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-clean-500 animate-ping"></span>
+      <span>System Resource Telemetry</span>
     </h3>
-    <div class="status-badge" [class.active]="store.isMonitoring()">
-      <span class="status-dot"></span>
-      {{ store.isMonitoring() ? "Live" : "Paused" }}
+    <div class="flex items-center gap-2 bg-slate-950/60 px-2 py-1 rounded border border-slate-800">
+      <span
+        class="w-1.5 h-1.5 rounded-full bg-emerald-500"
+        [class.animate-pulse]="store.isMonitoring()"
+      ></span>
+      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{{
+        store.isMonitoring() ? "Live Stream" : "Telemetry Paused"
+      }}</span>
     </div>
   </div>
 
-  <div class="stats-grid">
+  <div class="space-y-5">
     <!-- CPU Gauge -->
-    <div class="stat-card cpu-card">
-      <div class="stat-header">
-        <mat-icon class="stat-icon cpu-icon">memory</mat-icon>
-        <span class="stat-label">CPU</span>
-        <span class="stat-value" [style.color]="getCpuColor(store.systemStats().cpuUsage)">
+    <div class="space-y-2">
+      <div class="flex justify-between items-end">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-6 h-6 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center"
+          >
+            <mat-icon class="icon-xs">memory</mat-icon>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Processor Load</span>
+        </div>
+        <span
+          class="text-xs font-black text-white"
+          [style.color]="getCpuColor(store.systemStats().cpuUsage)"
+        >
           {{ store.systemStats().cpuUsage | number: "1.0-1" }}%
         </span>
       </div>
-      <div class="progress-bar-container">
-        <div class="progress-bar cpu-bar" [style.width.%]="store.systemStats().cpuUsage"></div>
+      <div
+        class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/80"
+      >
+        <div
+          class="h-full transition-all duration-300 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+          [style.width.%]="store.systemStats().cpuUsage"
+        ></div>
       </div>
-      <canvas class="mini-chart" #cpuCanvas height="40"></canvas>
     </div>
 
-    <!-- Memory Bar -->
-    <div class="stat-card memory-card">
-      <div class="stat-header">
-        <mat-icon class="stat-icon memory-icon">storage</mat-icon>
-        <span class="stat-label">RAM</span>
-        <span class="stat-value" [style.color]="getUsageColor(store.systemStats().memoryUsagePercent)">
-          {{ store.systemStats().memoryUsagePercent | number: "1.0-1" }}%
-        </span>
+    <!-- RAM Gauge -->
+    <div class="space-y-2">
+      <div class="flex justify-between items-end">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-6 h-6 rounded bg-cyber-cyan/10 text-cyber-cyan flex items-center justify-center"
+          >
+            <mat-icon class="icon-xs">storage</mat-icon>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Workstation RAM</span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-black text-white block"
+            >{{ store.systemStats().memoryUsagePercent | number: "1.0-1" }}%</span
+          >
+          <span class="text-[9px] text-slate-500 block"
+            >{{ store.memoryUsedFormatted() }} / {{ store.memoryTotalFormatted() }}</span
+          >
+        </div>
       </div>
-      <div class="progress-bar-container">
+      <div
+        class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/80"
+      >
         <div
-          class="progress-bar memory-bar"
+          class="h-full transition-all duration-300 bg-cyber-cyan shadow-[0_0_10px_rgba(6,182,212,0.5)]"
           [style.width.%]="store.systemStats().memoryUsagePercent"
-          [style.backgroundColor]="getUsageColor(store.systemStats().memoryUsagePercent)"
         ></div>
       </div>
-      <div class="stat-details">
-        <span>{{ store.memoryUsedFormatted() }} / {{ store.memoryTotalFormatted() }}</span>
-      </div>
-      <canvas class="mini-chart" #memoryCanvas height="40"></canvas>
     </div>
 
-    <!-- Disk Bar -->
-    <div class="stat-card disk-card">
-      <div class="stat-header">
-        <mat-icon class="stat-icon disk-icon">disc_full</mat-icon>
-        <span class="stat-label">Disk</span>
-        <span class="stat-value" [style.color]="getUsageColor(store.systemStats().diskUsage)">
-          {{ store.systemStats().diskUsage | number: "1.0-1" }}%
-        </span>
+    <!-- Disk Gauge -->
+    <div class="space-y-2">
+      <div class="flex justify-between items-end">
+        <div class="flex items-center gap-2">
+          <div
+            class="w-6 h-6 rounded bg-cyber-amber/10 text-cyber-amber flex items-center justify-center"
+          >
+            <mat-icon class="icon-xs">disc_full</mat-icon>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase">Disk Partition</span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-black text-white block"
+            >{{ store.systemStats().diskUsage | number: "1.0-1" }}%</span
+          >
+          <span class="text-[9px] text-slate-500 block"
+            >{{ store.diskUsedFormatted() }} / {{ store.diskTotalFormatted() }}</span
+          >
+        </div>
       </div>
-      <div class="progress-bar-container">
+      <div
+        class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/80"
+      >
         <div
-          class="progress-bar disk-bar"
+          class="h-full transition-all duration-300 bg-cyber-amber shadow-[0_0_10px_rgba(245,158,11,0.5)]"
           [style.width.%]="store.systemStats().diskUsage"
-          [style.backgroundColor]="getUsageColor(store.systemStats().diskUsage)"
         ></div>
       </div>
-      <div class="stat-details">
-        <span>{{ store.diskUsedFormatted() }} / {{ store.diskTotalFormatted() }}</span>
-      </div>
-      <canvas class="mini-chart" #diskCanvas height="40"></canvas>
     </div>
   </div>
 </div>

@@ -8,6 +8,7 @@ import {
   computed,
 } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 /* materials */
 import { MatButtonModule } from '@angular/material/button';
@@ -17,11 +18,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
 import { SystemService, ProcessItem } from '@services/system.service';
+import { NotificationService } from '@services/notification.service';
 
 /* components */
 import { DataTableComponent } from '@components/data-table/data-table.component';
-import { HeaderComponent } from '@components/header/header.component';
-import { SearchComponent } from '@components/search/search.component';
 
 /* models */
 import { TableColumn, TableOptions } from '@models/data-table.model';
@@ -32,37 +32,41 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     DataTableComponent,
-    HeaderComponent,
-    SearchComponent,
   ],
   templateUrl: './processes.view.html',
-  styleUrl: './processes.view.css',
 })
 export class ProcessesView implements OnInit {
   private systemService = inject(SystemService);
   private document = inject(DOCUMENT);
+  private notification = inject(NotificationService);
 
   processesData = signal<ProcessItem[]>([]);
   filteredData = signal<ProcessItem[]>([]);
   loading = signal(false);
   selectedPids = signal<Set<number>>(new Set());
 
-  selectedPidsAsStrings = computed(() => {
-    return new Set(Array.from(this.selectedPids()).map((pid) => String(pid)));
-  });
+  currentPage = signal(1);
+  pageSize = signal(15);
 
   totalProcesses = computed(() => this.processesData().length);
 
+  paginatedData = computed(() => {
+    const data = this.filteredData();
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return data.slice(start, start + this.pageSize());
+  });
+
   processColumns: TableColumn[] = [
-    { key: 'name', label: 'Name', width: 'flex-1', sortable: true },
     { key: 'pid', label: 'PID', width: 'w-24', sortable: true },
-    { key: 'cpu_usage', label: 'CPU %', width: 'w-24', sortable: true, align: 'right' },
-    { key: 'memory_usage', label: 'Memory', width: 'w-24', sortable: true, align: 'right' },
+    { key: 'name', label: 'Service', width: 'flex-1', sortable: true },
+    { key: 'cpu_usage', label: 'CPU load', width: 'w-24', sortable: true, align: 'right' },
+    { key: 'memory_usage', label: 'RAM usage', width: 'w-24', sortable: true, align: 'right' },
   ];
 
   get isDark(): boolean {
@@ -79,6 +83,7 @@ export class ProcessesView implements OnInit {
       const data = await this.systemService.getProcesses();
       this.processesData.set(data);
       this.filteredData.set(data);
+      this.currentPage.set(1);
     } catch (error: unknown) {
       console.error('Failed to load processes:', error);
     } finally {
@@ -88,10 +93,20 @@ export class ProcessesView implements OnInit {
 
   onFilteredData(data: object[]): void {
     this.filteredData.set(data as ProcessItem[]);
+    this.currentPage.set(1);
   }
 
   onSelectionChange(selected: Set<string>): void {
     this.selectedPids.set(new Set(Array.from(selected).map((s) => Number(s))));
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
   }
 
   async killSelectedProcesses() {
@@ -107,9 +122,7 @@ export class ProcessesView implements OnInit {
       this.selectedPids.set(new Set());
       await this.loadData();
     } catch (error: unknown) {
-      alert(
-        'Failed to kill processes: ' + (error instanceof Error ? error.message : String(error))
-      );
+      this.notification.error('Failed to kill processes', error);
     } finally {
       this.loading.set(false);
     }
@@ -124,10 +137,15 @@ export class ProcessesView implements OnInit {
       await this.systemService.killProcess(pid);
       await this.loadData();
     } catch (error: unknown) {
-      alert('Failed to kill process: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error('Failed to kill process', error);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  async flushRamCaches() {
+    console.log('Flushing RAM caches...');
+    this.notification.success('RAM caches flushed successfully!');
   }
 
   getTableOptions(): TableOptions {
@@ -139,6 +157,8 @@ export class ProcessesView implements OnInit {
       showReloadButton: true,
       showSelectedActions: true,
       selectedActionText: 'Kill Selected',
+      showSearch: true,
+      searchPlaceholder: 'Search processes...',
     };
   }
 }

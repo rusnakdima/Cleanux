@@ -5,15 +5,18 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { FileService, CacheFileItem, TrashFileItem, LogFileItem } from '@services/file.service';
 import { BackupService } from '@services/backup.service';
 import { PackageManagerService } from '@services/package-manager.service';
+import { NotificationService } from '@services/notification.service';
 import { PackageCacheInfo } from '@models/package-manager.model';
+import { CleanerTabId } from '@models/cleaner.model';
 
-export type CleanerTabId = 'cache' | 'trash' | 'logs' | 'packages';
+export type { CleanerTabId };
 
 @Injectable()
 export class CleanerViewStore {
   private fileService = inject(FileService);
   private backupService = inject(BackupService);
   private packageManagerService = inject(PackageManagerService);
+  private notification = inject(NotificationService);
 
   readonly cacheData = signal<CacheFileItem[]>([]);
   readonly filteredCacheData = signal<CacheFileItem[]>([]);
@@ -41,6 +44,27 @@ export class CleanerViewStore {
     this.packageCacheData().reduce((sum, pkg) => sum + pkg.size, 0)
   );
   readonly totalJunk = computed(() => this.cacheSize() + this.trashSize() + this.logSize());
+
+  readonly cacheCount = computed(() => this.cacheData().length);
+  readonly trashCount = computed(() => this.trashData().length);
+  readonly logCount = computed(() => this.logData().length);
+
+  getItemCount(): number {
+    const tab = this.activeTab();
+    if (tab === 'cache') return this.filteredCacheData().length;
+    if (tab === 'trash') return this.filteredTrashData().length;
+    if (tab === 'logs') return this.filteredLogData().length;
+    if (tab === 'packages') return this.packageCacheData().length;
+    return 0;
+  }
+
+  getSelectedCount(): number {
+    const tab = this.activeTab();
+    if (tab === 'cache') return this.selectedCacheFiles().size;
+    if (tab === 'trash') return this.selectedTrashFiles().size;
+    if (tab === 'logs') return this.selectedLogFiles().size;
+    return 0;
+  }
 
   setActiveTab(tab: CleanerTabId): void {
     this.activeTab.set(tab);
@@ -88,8 +112,8 @@ export class CleanerViewStore {
     try {
       const offset = this.cacheData().length;
       const result = await this.fileService.getCacheFiles(50, offset);
-      this.cacheData.update(current => [...current, ...result.data]);
-      this.filteredCacheData.update(current => [...current, ...result.data]);
+      this.cacheData.update((current) => [...current, ...result.data]);
+      this.filteredCacheData.update((current) => [...current, ...result.data]);
       this.cacheHasMore.set(result.has_more);
       this.cacheTotal.set(result.total);
     } catch (error: unknown) {
@@ -174,10 +198,15 @@ export class CleanerViewStore {
       }
       await this.forceReloadActiveTab();
       if (backupCreated) {
-        alert(`Successfully cleared ${filesToClear.length} ${tab} item(s). Backup created.`);
+        this.notification.success(
+          `Successfully cleared ${filesToClear.length} ${tab} item(s). Backup created.`
+        );
       }
     } catch (error: unknown) {
-      alert('Failed to clear files: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error(
+        'Failed to clear files: ' + (error instanceof Error ? error.message : String(error)),
+        error
+      );
     } finally {
       this.loading.set(false);
     }
@@ -192,8 +221,10 @@ export class CleanerViewStore {
       await this.packageManagerService.cleanPackageCache(manager);
       await this.forceReloadActiveTab();
     } catch (error: unknown) {
-      alert(
-        'Failed to clean package cache: ' + (error instanceof Error ? error.message : String(error))
+      this.notification.error(
+        'Failed to clean package cache: ' +
+          (error instanceof Error ? error.message : String(error)),
+        error
       );
     } finally {
       this.loading.set(false);
@@ -208,11 +239,12 @@ export class CleanerViewStore {
     try {
       const results = await this.packageManagerService.cleanAllPackageCaches();
       await this.forceReloadActiveTab();
-      alert(results.join('\n'));
+      this.notification.success(results.join('\n'));
     } catch (error: unknown) {
-      alert(
+      this.notification.error(
         'Failed to clean package caches: ' +
-          (error instanceof Error ? error.message : String(error))
+          (error instanceof Error ? error.message : String(error)),
+        error
       );
     } finally {
       this.loading.set(false);

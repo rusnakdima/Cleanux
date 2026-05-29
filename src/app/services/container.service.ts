@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
+import { formatSize } from '@shared/utils/format.util';
 
 export interface ContainerSummary {
   docker_installed: boolean;
@@ -57,10 +58,5 @@ export class ContainerService {
     return this.api.invoke<string>('podman_image_prune', { all });
   }
 
-  formatSize(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + units[i];
-  }
+  formatSize = formatSize;
 }

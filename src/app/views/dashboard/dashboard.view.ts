@@ -13,24 +13,32 @@ import { CommonModule } from '@angular/common';
 /* materials */
 import { MatIconModule } from '@angular/material/icon';
 
+/* router */
+import { RouterLink } from '@angular/router';
+
 /* services */
 import { FileService, ScanSummary } from '@services/file.service';
 import { ApiService } from '@services/api.service';
 import { SystemService } from '@services/system.service';
 import { HealthHistoryService } from '@services/health-history.service';
 import { MonitorStore } from '@stores/monitor.store';
-import { SystemMonitorComponent } from '@components/system-monitor/system-monitor.component';
-import {
-  WidgetContainerComponent,
-  WidgetConfig,
-} from '@components/widget-container/widget-container.component';
-import { TemperatureWidgetComponent } from '@components/temperature-widget/temperature-widget.component';
-import { SpinnerComponent } from '@components/ui/spinner/spinner.component';
 import { formatSize } from '@shared/utils/format.util';
 
 /* types */
-import type { QuickAction } from '@components/widgets/widget-quick-actions/widget-quick-actions.component';
-import type { ActivityItem } from '@components/widgets/widget-recent-activity/widget-recent-activity.component';
+interface QuickAction {
+  id: string;
+  label: string;
+  icon: string;
+  action: string;
+}
+
+interface ActivityItem {
+  id: string;
+  type: string;
+  description: string;
+  timestamp: string;
+  size?: number;
+}
 
 interface ScanProgress {
   phase: string;
@@ -39,30 +47,14 @@ interface ScanProgress {
   current_path: string;
 }
 
-interface WidgetState {
-  id: string;
-  title: string;
-  icon: string;
-  enabled: boolean;
-  order: number;
-}
-
 const WIDGET_STORAGE_KEY = 'cleanux_widget_layout';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    SystemMonitorComponent,
-    WidgetContainerComponent,
-    TemperatureWidgetComponent,
-    SpinnerComponent,
-  ],
+  imports: [CommonModule, MatIconModule, RouterLink],
   templateUrl: './dashboard.view.html',
-  styleUrls: ['./dashboard.view.css'],
 })
 export class DashboardView implements OnInit, OnDestroy {
   private fileService = inject(FileService);
@@ -95,14 +87,6 @@ export class DashboardView implements OnInit, OnDestroy {
     change_percent: 0,
   });
 
-  enabledWidgets = signal<WidgetState[]>([
-    { id: 'system-monitor', title: 'System Monitor', icon: 'monitor', enabled: true, order: 0 },
-    { id: 'health-score', title: 'Health Score', icon: 'favorite', enabled: true, order: 1 },
-    { id: 'quick-actions', title: 'Quick Actions', icon: 'flash_on', enabled: true, order: 2 },
-    { id: 'disk-usage', title: 'Disk Usage', icon: 'storage', enabled: true, order: 3 },
-    { id: 'recent-activity', title: 'Recent Activity', icon: 'history', enabled: true, order: 4 },
-  ]);
-
   showWidgetSettings = signal(false);
   recentActivities = signal<ActivityItem[]>([]);
 
@@ -134,7 +118,6 @@ export class DashboardView implements OnInit, OnDestroy {
   });
 
   ngOnInit() {
-    this.loadWidgetLayout();
     this.calculateJunkSize();
     this.loadHealthHistory();
     this.loadRecentActivities();
@@ -153,50 +136,6 @@ export class DashboardView implements OnInit, OnDestroy {
       this.unlisten();
       this.unlisten = null;
     }
-  }
-
-  loadWidgetLayout() {
-    try {
-      const stored = localStorage.getItem(WIDGET_STORAGE_KEY);
-      if (stored) {
-        const layout = JSON.parse(stored) as WidgetState[];
-        this.enabledWidgets.set(layout);
-      }
-    } catch (e) {
-      console.error('Failed to load widget layout:', e);
-    }
-  }
-
-  saveWidgetLayout(widgets: WidgetState[]) {
-    try {
-      localStorage.setItem(WIDGET_STORAGE_KEY, JSON.stringify(widgets));
-    } catch (e) {
-      console.error('Failed to save widget layout:', e);
-    }
-  }
-
-  onWidgetVisibilityChange(event: { id: string; enabled: boolean }) {
-    const widgets = this.enabledWidgets().map((w) =>
-      w.id === event.id ? { ...w, enabled: event.enabled } : w
-    );
-    this.enabledWidgets.set(widgets);
-    this.saveWidgetLayout(widgets);
-  }
-
-  onWidgetOrderChange(widgets: WidgetConfig[]) {
-    const updatedWidgets = widgets.map((w, index) => ({
-      id: w.id,
-      title: w.title,
-      icon: w.icon,
-      enabled: this.enabledWidgets().find((ew) => ew.id === w.id)?.enabled ?? true,
-      order: index,
-    }));
-    this.enabledWidgets.set(updatedWidgets);
-    this.saveWidgetLayout(updatedWidgets);
-  }
-
-  toggleWidgetSettings() {
-    this.showWidgetSettings.update((v) => !v);
   }
 
   loadRecentActivities() {

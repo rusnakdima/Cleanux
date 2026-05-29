@@ -5,8 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DevCacheService, DevCacheItem, DevCacheSummary } from '@services/dev-cache.service';
+import { NotificationService } from '@services/notification.service';
 import { formatSize } from '@shared/utils/format.util';
-import { HeaderComponent } from '@components/header/header.component';
 
 interface DevToolCard {
   name: string;
@@ -26,12 +26,12 @@ interface DevToolCard {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    HeaderComponent,
   ],
   templateUrl: './dev-cleaner.view.html',
 })
 export class DevCleanerView implements OnInit {
   private devCacheService = inject(DevCacheService);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
@@ -113,10 +113,10 @@ export class DevCleanerView implements OnInit {
         default:
           return;
       }
-      alert(result);
+      this.notification.success(result);
       await this.loadSummary();
     } catch (error) {
-      alert('Failed to clean cache: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.cleanError('clean cache', error);
     } finally {
       this.cleaning.set(false);
     }
@@ -129,10 +129,10 @@ export class DevCleanerView implements OnInit {
     this.cleaning.set(true);
     try {
       const result = await this.devCacheService.cleanAllDevCaches();
-      alert(result);
+      this.notification.success(result);
       await this.loadSummary();
     } catch (error) {
-      alert('Failed to clean caches: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.cleanError('clean caches', error);
     } finally {
       this.cleaning.set(false);
     }

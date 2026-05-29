@@ -1,5 +1,13 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, inject, OnInit, input, output, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  input,
+  output,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /* materials */
@@ -12,7 +20,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 /* services */
 import { ThemeService } from '@services/theme.service';
 import { MonitorStore } from '@stores/monitor.store';
-import { formatSize } from '@shared/utils/format.util';
 
 interface NavItem {
   label: string;
@@ -28,13 +35,10 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule, MatTooltipModule, RouterLink, RouterLinkActive],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent implements OnInit {
   private themeService = inject(ThemeService);
   protected monitorStore = inject(MonitorStore);
-
-  formatSize = formatSize;
 
   isOpen = input(false);
   isCollapsed = input(false);
@@ -44,27 +48,19 @@ export class SidebarComponent implements OnInit {
   healthScore = computed(() => this.monitorStore.healthScore());
   totalJunk = computed(() => this.monitorStore.totalJunkSize());
 
-  mainNavItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Cleaner', icon: 'cleaning_services', route: '/cleaner' },
-    { label: 'System', icon: 'memory', route: '/system' },
-    { label: 'Battery & Power', icon: 'battery_charging_full', route: '/power' },
-  ];
+  diskUsagePercent = computed(() => {
+    const stats = this.monitorStore.systemStats();
+    const used = stats.diskUsed || 0;
+    const total = stats.diskTotal || 512;
+    return Math.min((used / total) * 100, 100);
+  });
 
-  toolsNavItems: NavItem[] = [
-    { label: 'Large Files', icon: 'file_copy', route: '/large-files', badge: 'New', badgeClass: 'badge-info' },
-    { label: 'Duplicate Finder', icon: 'content_copy', route: '/duplicate-finder' },
-    { label: 'Kernel & Boot', icon: 'settings_input_component', route: '/kernel-cleaner' },
-    { label: 'Log Manager', icon: 'description', route: '/log-manager' },
-    { label: 'Startup', icon: 'rocket_launch', route: '/startup' },
-    { label: 'Memory', icon: 'memory', route: '/memory-optimizer' },
-  ];
-
-  footerNavItems: NavItem[] = [
-    { label: 'Automation', icon: 'bolt', route: '/automation' },
-    { label: 'Reports', icon: 'analytics', route: '/reports' },
-    { label: 'Settings', icon: 'settings', route: '/settings' },
-  ];
+  diskUsageDisplay = computed(() => {
+    const stats = this.monitorStore.systemStats();
+    const used = stats.diskUsed || 0;
+    const total = stats.diskTotal || 512;
+    return `${(used / (1024 * 1024 * 1024)).toFixed(1)}G / ${total}G`;
+  });
 
   ngOnInit() {
     this.themeService.applyTheme(this.themeService.currentTheme());

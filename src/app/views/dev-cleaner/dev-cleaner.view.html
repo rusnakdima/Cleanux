@@ -1,4 +1,4 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+<div class="view-layout max-w-4xl mx-auto">
   @if (loading()) {
     <div class="flex items-center justify-center h-64">
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
@@ -6,37 +6,41 @@
   } @else {
     <div class="mb-4 flex items-center justify-between">
       <div>
-        <p class="text-lg text-gray-600">
+        <p class="text-lg text-[var(--text-secondary)]">
           Total cache size: <span class="font-semibold">{{ getTotalSize() }}</span>
         </p>
       </div>
       <button mat-raised-button color="primary" (click)="cleanAll()" [disabled]="cleaning()">
-        <mat-icon fontIcon="delete_sweep"/>
+        <mat-icon fontIcon="delete_sweep" />
         Clean All
       </button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       @for (tool of devTools(); track trackByName($index, tool)) {
-        <div class="bg-white rounded-lg shadow p-4 border border-gray-200">
+        <div class="glass-card matte-surface border-trace p-4">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <mat-icon class="icon-info" [fontIcon]="tool.icon"/>
+              <div class="w-12 h-12 rounded-lg bg-info/10 flex items-center justify-center">
+                <mat-icon class="text-info" [fontIcon]="tool.icon" />
               </div>
               <div>
                 <h3 class="font-semibold text-lg">{{ tool.displayName }}</h3>
-                <p class="text-sm text-gray-500">{{ tool.item?.description || "Cache" }}</p>
+                <p class="text-sm text-[var(--text-muted)]">
+                  {{ tool.item?.description || "Cache" }}
+                </p>
               </div>
             </div>
           </div>
 
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-2xl font-bold text-gray-900">{{ getToolSize(tool.item) }}</p>
+              <p class="text-2xl font-bold text-[var(--text-primary)]">
+                {{ getToolSize(tool.item) }}
+              </p>
               @if (tool.item?.cache_path) {
                 <p
-                  class="text-xs text-gray-400 truncate max-w-[180px]"
+                  class="text-xs text-[var(--text-muted)] truncate max-w-[180px]"
                   [matTooltip]="tool.item?.cache_path"
                 >
                   {{ tool.item?.cache_path }}
@@ -49,7 +53,7 @@
               (click)="cleanTool(tool.name)"
               [disabled]="cleaning()"
             >
-              <mat-icon fontIcon="cleaning_services"/>
+              <mat-icon fontIcon="cleaning_services" />
               Clean
             </button>
           </div>

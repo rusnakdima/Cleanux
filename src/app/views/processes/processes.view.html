@@ -1,56 +1,48 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-        <mat-icon class="icon-info icon-3xl" fontIcon="list"/>
-      </div>
-      <div>
-        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          Total Processes
-        </p>
-        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ totalProcesses() }}</p>
-      </div>
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-[var(--text-primary)]">Processes</h1>
+      <p class="text-sm text-[var(--text-muted)] mt-1">View and manage running processes</p>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="loadData()" class="btn btn-secondary">
+        <mat-icon class="icon-sm">refresh</mat-icon>
+        Refresh
+      </button>
+      <button (click)="flushRamCaches()" class="btn btn-secondary">
+        <mat-icon class="icon-sm">memory</mat-icon>
+        Flush RAM
+      </button>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="glass-card flex flex-col h-[calc(100vh-280px)] overflow-hidden">
-    <div
-      class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800"
-    >
-      <div class="flex items-center gap-4">
-        <app-search
-          [data]="processesData()"
-          [searchFields]="['name', 'pid']"
-          (filteredData)="onFilteredData($event)"
-        />
-        <button
-          (click)="loadData()"
-          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          matTooltip="Refresh"
-        >
-          <mat-icon fontIcon="refresh"/>
-        </button>
-      </div>
-      <div class="flex gap-2">
-        <button
-          (click)="killSelectedProcesses()"
-          [disabled]="selectedPids().size === 0"
-          class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-        >
-          <mat-icon class="icon-sm" fontIcon="cancel"/>
-          Kill Selected
-        </button>
-      </div>
+  <div class="glass-card matte-surface border-trace">
+    <div class="glass-card-header">
+      <span class="text-sm font-medium text-[var(--text-secondary)]">
+        Total: {{ totalProcesses() }} processes
+      </span>
+      <button
+        (click)="killSelectedProcesses()"
+        [disabled]="selectedPids().size === 0"
+        class="btn btn-danger"
+      >
+        <mat-icon class="icon-sm">stop</mat-icon>
+        Kill Selected
+      </button>
     </div>
-    <div class="flex-1 p-6 overflow-hidden">
+
+    <div class="glass-card-body">
       <app-data-table
         [columns]="processColumns"
-        [data]="filteredData()"
+        [data]="processesData()"
         [loading]="loading()"
         [options]="getTableOptions()"
-        [selectedKeys]="selectedPidsAsStrings()"
+        [currentPage]="currentPage()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 15, 25, 50, 100]"
+        [showPageSizeSelector]="true"
+        (pageChange)="onPageChange($event)"
+        (newPageSize)="onPageSizeChange($event)"
         (selectionChange)="onSelectionChange($event)"
       />
     </div>

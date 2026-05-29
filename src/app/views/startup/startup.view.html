@@ -1,113 +1,109 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
-        <mat-icon class="icon-info icon-3xl" fontIcon="apps"/>
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon">
+        <mat-icon class="text-info">apps</mat-icon>
       </div>
-      <div>
-        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          Total Items
-        </p>
-        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ totalItems() }}</p>
+      <div class="stat-content">
+        <span class="stat-label">Total Items</span>
+        <span class="stat-value">{{ totalItems() }}</span>
       </div>
     </div>
 
-    <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
-        <mat-icon class="icon-success icon-3xl" fontIcon="check_circle"/>
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #22c55e, #10b981)">
+        <mat-icon class="text-white">check_circle</mat-icon>
       </div>
-      <div>
-        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          Enabled
-        </p>
-        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ enabledItems() }}</p>
+      <div class="stat-content">
+        <span class="stat-label">Enabled</span>
+        <span class="stat-value">{{ enabledItems() }}</span>
       </div>
     </div>
 
-    <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center">
-        <mat-icon class="icon-error icon-3xl" fontIcon="cancel"/>
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626)">
+        <mat-icon class="text-white">cancel</mat-icon>
       </div>
-      <div>
-        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          Disabled
-        </p>
-        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ disabledItems() }}</p>
+      <div class="stat-content">
+        <span class="stat-label">Disabled</span>
+        <span class="stat-value">{{ disabledItems() }}</span>
       </div>
     </div>
   </div>
 
-  <div class="glass-card flex flex-col h-[calc(100vh-280px)] overflow-hidden">
-    <div
-      class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800"
-    >
-      <div class="flex items-center gap-4">
+  <div class="glass-card matte-surface border-trace">
+    <div class="glass-card-header">
+      <div class="flex items-center gap-4 flex-1">
         <app-search
           [data]="startupData()"
           [searchFields]="['name', 'command']"
           (filteredData)="onFilteredData($event)"
         />
-        <button
-          (click)="loadData()"
-          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          matTooltip="Refresh"
-        >
-          <mat-icon class="icon-primary" fontIcon="refresh"/>
+        <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+          <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
         </button>
       </div>
     </div>
-
-    <div class="flex-1 p-6 overflow-auto">
+    <div class="glass-card-body">
       @if (loading()) {
-        <div class="flex items-center justify-center h-full">
+        <div class="flex items-center justify-center h-64">
           <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
         </div>
       } @else if (filteredData().length === 0) {
-        <div class="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
-          <mat-icon class="icon-4xl mb-4" fontIcon="rocket_launch"/>
+        <div class="flex flex-col items-center justify-center h-64 text-[var(--text-muted)]">
+          <mat-icon class="icon-4xl mb-4">rocket_launch</mat-icon>
           <p class="text-lg font-medium">No startup items found</p>
         </div>
       } @else {
-        <div class="space-y-2">
-          @for (item of filteredData(); track item.path) {
-            <div
-              class="glass-card p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-            >
-              <div class="flex items-center gap-4 flex-1 min-w-0">
-                <div class="flex flex-col min-w-0">
-                  <span class="font-medium text-slate-900 dark:text-white truncate">{{
-                    item.name
-                  }}</span>
-                  <span
-                    class="text-xs text-slate-500 dark:text-slate-400 truncate"
-                    [matTooltip]="item.command"
-                    >{{ item.command }}</span
-                  >
-                  <span
-                    class="text-xs text-slate-400 dark:text-slate-500 truncate"
-                    [matTooltip]="item.path"
-                    >{{ item.path }}</span
-                  >
+        <div class="overflow-auto max-h-[calc(100vh-400px)]">
+          <div class="space-y-2">
+            @for (item of paginatedFilteredData(); track item.path) {
+              <div
+                class="p-4 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors"
+              >
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                  <div class="flex flex-col min-w-0">
+                    <span class="font-semibold text-[var(--text-primary)] truncate">{{
+                      item.name
+                    }}</span>
+                    <span
+                      class="text-xs text-[var(--text-muted)] truncate"
+                      [matTooltip]="item.command"
+                      >{{ item.command }}</span
+                    >
+                    <span
+                      class="text-xs text-[var(--text-muted)] opacity-70 truncate"
+                      [matTooltip]="item.path"
+                      >{{ item.path }}</span
+                    >
+                  </div>
                 </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <mat-icon
-                  class="text-lg cursor-pointer transition-colors"
-                  [class.text-emerald-500]="item.enabled"
-                  [class.dark:text-emerald-500]="item.enabled"
-                  [class.text-slate-400]="!item.enabled"
-                  [class.dark:text-slate-500]="!item.enabled"
+                <button
+                  class="btn btn-ghost p-2"
                   [matTooltip]="
                     item.enabled ? 'Enabled - click to disable' : 'Disabled - click to enable'
                   "
                   (click)="toggleItem(item)"
                 >
-                  {{ item.enabled ? "toggle_on" : "toggle_off" }}
-                </mat-icon>
+                  <mat-icon
+                    class="text-xl"
+                    [class.text-success]="item.enabled"
+                    [class.text-[var(--text-muted)]]]="!item.enabled"
+                  >
+                    {{ item.enabled ? "toggle_on" : "toggle_off" }}
+                  </mat-icon>
+                </button>
               </div>
-            </div>
-          }
+            }
+          </div>
         </div>
+        <app-pagination
+          [totalItems]="filteredData().length"
+          [currentPage]="currentPage()"
+          [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        />
       }
     </div>
   </div>

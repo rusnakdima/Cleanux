@@ -17,9 +17,8 @@ import {
   PackageManagerSummary,
   OrphanedPackage,
 } from '@services/package-deep-clean.service';
+import { NotificationService } from '@services/notification.service';
 
-/* components */
-import { HeaderComponent } from '@components/header/header.component';
 import { formatSize } from '@shared/utils/format.util';
 
 @Component({
@@ -35,12 +34,12 @@ import { formatSize } from '@shared/utils/format.util';
     MatInputModule,
     MatFormFieldModule,
     MatTooltipModule,
-    HeaderComponent,
   ],
   templateUrl: './package-deep-clean.view.html',
 })
 export class PackageDeepCleanView implements OnInit {
   private service = inject(PackageDeepCleanService);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
@@ -110,10 +109,10 @@ export class PackageDeepCleanView implements OnInit {
   async aptClean() {
     try {
       const result = await this.service.aptClean();
-      alert(result.message);
+      this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      alert('Failed to clean APT cache');
+      this.notification.cleanError('clean APT cache', error);
     }
   }
 
@@ -122,20 +121,20 @@ export class PackageDeepCleanView implements OnInit {
     if (!confirmed) return;
     try {
       const result = await this.service.aptAutoremove();
-      alert(result);
+      this.notification.success(result);
       await this.loadData();
     } catch (error) {
-      alert('Failed to run apt autoremove');
+      this.notification.cleanError('run apt autoremove', error);
     }
   }
 
   async aptAutoclean() {
     try {
       const result = await this.service.aptAutoclean();
-      alert(result.message);
+      this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      alert('Failed to run apt autoclean');
+      this.notification.cleanError('run apt autoclean', error);
     }
   }
 
@@ -146,27 +145,27 @@ export class PackageDeepCleanView implements OnInit {
       await this.service.removeOrphanedPackage(pkg.name);
       await this.loadData();
     } catch (error) {
-      alert('Failed to remove orphaned package');
+      this.notification.cleanError('remove orphaned package', error);
     }
   }
 
   async dnfCleanAll() {
     try {
       const result = await this.service.dnfCleanAll();
-      alert(result.message);
+      this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      alert('Failed to clean DNF cache');
+      this.notification.cleanError('clean DNF cache', error);
     }
   }
 
   async pacmanClean() {
     try {
       const result = await this.service.pacmanClean(this.pacmanKeepRecent());
-      alert(result.message);
+      this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      alert('Failed to clean pacman cache');
+      this.notification.cleanError('clean pacman cache', error);
     }
   }
 
@@ -183,20 +182,20 @@ export class PackageDeepCleanView implements OnInit {
 
     try {
       const result = await this.service.pacmanFullClean();
-      alert(result.message);
+      this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      alert('Failed to run pacman full clean');
+      this.notification.cleanError('run pacman full clean', error);
     }
   }
 
   async zypperClean() {
     try {
       const result = await this.service.zypperClean();
-      alert(result.message);
+      this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      alert('Failed to clean zypper cache');
+      this.notification.cleanError('clean zypper cache', error);
     }
   }
 
@@ -205,10 +204,12 @@ export class PackageDeepCleanView implements OnInit {
     if (!confirmed) return;
     try {
       const result = await this.service.deepCleanAll();
-      alert(`Deep clean completed. Total space freed: ${this.formatSize(result.totalSpaceFreed)}`);
+      this.notification.success(
+        `Deep clean completed. Total space freed: ${this.formatSize(result.totalSpaceFreed)}`
+      );
       await this.loadData();
     } catch (error) {
-      alert('Failed to run deep clean');
+      this.notification.cleanError('run deep clean', error);
     }
   }
 }

@@ -31,12 +31,6 @@ export interface FilePreviewResult {
   imageUrl?: string;
 }
 
-export interface PaginatedResult<T> {
-  data: T[];
-  has_more: boolean;
-  total: number;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -57,11 +51,11 @@ export class FileService {
     }
   }
 
-  async getCacheFiles(limit?: number, offset?: number): Promise<PaginatedResult<CacheFileItem>> {
+  async getCacheFiles(limit?: number, offset?: number): Promise<PaginatedData<CacheFileItem>> {
     const cacheKey = this.getCacheKey('getCacheFiles', { limit, offset });
 
     if (this.inFlightRequests.has(cacheKey)) {
-      return this.inFlightRequests.get(cacheKey) as Promise<PaginatedResult<CacheFileItem>>;
+      return this.inFlightRequests.get(cacheKey) as Promise<PaginatedData<CacheFileItem>>;
     }
 
     this.cancelPreviousRequest();
@@ -90,18 +84,24 @@ export class FileService {
   }
 
   async getTrashFiles(limit?: number, offset?: number): Promise<TrashFileItem[]> {
-    return await this.api.invoke<TrashFileItem[]>('getTrashFiles', { limit: limit ?? null, offset: offset ?? null });
+    return await this.api.invoke<TrashFileItem[]>('getTrashFiles', {
+      limit: limit ?? null,
+      offset: offset ?? null,
+    });
   }
 
   async getSystemLogs(limit?: number, offset?: number): Promise<LogFileItem[]> {
-    return await this.api.invoke<LogFileItem[]>('getSystemLogs', { limit: limit ?? null, offset: offset ?? null });
+    return await this.api.invoke<LogFileItem[]>('getSystemLogs', {
+      limit: limit ?? null,
+      offset: offset ?? null,
+    });
   }
 
-  async getLargeFiles(limit?: number, offset?: number): Promise<PaginatedResult<LargeFileItem>> {
+  async getLargeFiles(limit?: number, offset?: number): Promise<PaginatedData<LargeFileItem>> {
     const cacheKey = this.getCacheKey('getLargeFiles', { limit, offset });
 
     if (this.inFlightRequests.has(cacheKey)) {
-      return this.inFlightRequests.get(cacheKey) as Promise<PaginatedResult<LargeFileItem>>;
+      return this.inFlightRequests.get(cacheKey) as Promise<PaginatedData<LargeFileItem>>;
     }
 
     this.cancelPreviousRequest();

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
+import { NotificationService } from '@services/notification.service';
+import { ChangeDetectionStrategy, Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,8 +12,8 @@ import {
   OrphanedConfig,
   AppResidueSummary,
 } from '@services/app-residue.service';
-import { HeaderComponent } from '@components/header/header.component';
 import { formatSize } from '@shared/utils/format.util';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
 
@@ -27,12 +28,13 @@ type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatTabsModule,
-    HeaderComponent,
+    PaginationComponent,
   ],
   templateUrl: './app-residue-cleaner.view.html',
 })
 export class AppResidueCleanerView {
   private residueService = inject(AppResidueService);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
@@ -55,10 +57,75 @@ export class AppResidueCleanerView {
 
   summary = signal<AppResidueSummary | null>(null);
 
+  configsPage = signal(1);
+  configsPageSize = signal(15);
+  dataPage = signal(1);
+  dataPageSize = signal(15);
+  cachesPage = signal(1);
+  cachesPageSize = signal(15);
+  orphanedPage = signal(1);
+  orphanedPageSize = signal(15);
+
   configsCount = () => this.configsData().length;
   dataCount = () => this.dataData().length;
   cachesCount = () => this.cachesData().length;
   orphanedCount = () => this.orphanedData().length;
+
+  paginatedConfigs = computed(() => {
+    const start = (this.configsPage() - 1) * this.configsPageSize();
+    return this.configsData().slice(start, start + this.configsPageSize());
+  });
+
+  paginatedData = computed(() => {
+    const start = (this.dataPage() - 1) * this.dataPageSize();
+    return this.dataData().slice(start, start + this.dataPageSize());
+  });
+
+  paginatedCaches = computed(() => {
+    const start = (this.cachesPage() - 1) * this.cachesPageSize();
+    return this.cachesData().slice(start, start + this.cachesPageSize());
+  });
+
+  paginatedOrphaned = computed(() => {
+    const start = (this.orphanedPage() - 1) * this.orphanedPageSize();
+    return this.orphanedData().slice(start, start + this.orphanedPageSize());
+  });
+
+  onConfigsPageChange(page: number) {
+    this.configsPage.set(page);
+  }
+
+  onConfigsPageSizeChange(size: number) {
+    this.configsPageSize.set(size);
+    this.configsPage.set(1);
+  }
+
+  onDataPageChange(page: number) {
+    this.dataPage.set(page);
+  }
+
+  onDataPageSizeChange(size: number) {
+    this.dataPageSize.set(size);
+    this.dataPage.set(1);
+  }
+
+  onCachesPageChange(page: number) {
+    this.cachesPage.set(page);
+  }
+
+  onCachesPageSizeChange(size: number) {
+    this.cachesPageSize.set(size);
+    this.cachesPage.set(1);
+  }
+
+  onOrphanedPageChange(page: number) {
+    this.orphanedPage.set(page);
+  }
+
+  onOrphanedPageSizeChange(size: number) {
+    this.orphanedPageSize.set(size);
+    this.orphanedPage.set(1);
+  }
 
   getSelectedSize(items: AppResidue[]): number {
     return items
@@ -157,7 +224,7 @@ export class AppResidueCleanerView {
       case 'caches':
         return this.cachesData();
     }
-    return [];
+    return null as any;
   }
 
   getSelectedCount(): number {
@@ -260,13 +327,14 @@ export class AppResidueCleanerView {
     this.loading.set(true);
     try {
       const result = await this.residueService.cleanMultipleResidues(paths);
-      alert(
+      this.notification.success(
         `Cleaned ${result.removed} items${result.failed.length > 0 ? `, ${result.failed.length} failed` : ''}`
       );
       await this.refreshCurrentTab();
     } catch (error) {
-      alert(
-        'Failed to clean residues: ' + (error instanceof Error ? error.message : String(error))
+      this.notification.error(
+        'Failed to clean residues: ' + (error instanceof Error ? error.message : String(error)),
+        error
       );
     } finally {
       this.loading.set(false);

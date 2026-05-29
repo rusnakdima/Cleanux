@@ -1,68 +1,90 @@
 /* sys lib */
-import { Component, signal, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
 /* components */
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
-import { TopHeaderComponent } from '@components/top-header/top-header.component';
+import { BottomNavComponent } from '@components/bottom-nav/bottom-nav.component';
+import { HeaderBarComponent } from '@components/header-bar/header-bar.component';
+
+interface RouteInfo {
+  title: string;
+  breadcrumb: string;
+  parent: string;
+  showBack: boolean;
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterOutlet, SidebarComponent, TopHeaderComponent],
+  imports: [CommonModule, RouterOutlet, BottomNavComponent, HeaderBarComponent],
   templateUrl: './app.html',
-  styleUrls: ['./app.css'],
 })
-export class App implements OnInit {
-  isMobileMenuOpen = signal(false);
-  isCollapsed = signal(false);
-  pageTitle = signal('Dashboard');
-  pageBreadcrumb = signal('Home');
-
-  toggleMobileMenu() {
-    this.isMobileMenuOpen.update((v) => !v);
-  }
-
-  closeMobileMenu() {
-    this.isMobileMenuOpen.set(false);
-  }
-
-  toggleSidebar() {
-    this.isCollapsed.update((v) => !v);
-  }
+export class App {
+  pageTitle = signal('Home');
+  pageBreadcrumb = signal('');
+  showBackButton = signal(false);
 
   private router = inject(Router);
 
-  private routeTitles: Record<string, { title: string; breadcrumb: string }> = {
-    'dashboard': { title: 'Dashboard', breadcrumb: 'Home' },
-    'cleaner': { title: 'Cleaner', breadcrumb: 'System Tools' },
-    'system': { title: 'System Information', breadcrumb: 'Hardware' },
-    'large-files': { title: 'Large Files', breadcrumb: 'System Tools' },
-    'duplicate-finder': { title: 'Duplicate Finder', breadcrumb: 'System Tools' },
-    'settings': { title: 'Settings', breadcrumb: 'Preferences' },
-    'startup': { title: 'Startup Programs', breadcrumb: 'System' },
-    'backup': { title: 'Backup & Restore', breadcrumb: 'Tools' },
-    'profiles': { title: 'Profiles', breadcrumb: 'Settings' },
-    'system-repair': { title: 'System Repair', breadcrumb: 'System Tools' },
-    'memory-optimizer': { title: 'Memory Optimizer', breadcrumb: 'Performance' },
-    'automation': { title: 'Automation', breadcrumb: 'Settings' },
-    'log-manager': { title: 'Log Manager', breadcrumb: 'System Tools' },
-    'power': { title: 'Battery & Power', breadcrumb: 'Hardware' },
-    'kernel-cleaner': { title: 'Kernel & Boot', breadcrumb: 'System Tools' },
-    'reports': { title: 'Reports', breadcrumb: 'Analytics' },
-    'processes': { title: 'Processes', breadcrumb: 'System' },
-    'media-cleaner': { title: 'Media Cleaner', breadcrumb: 'System Tools' },
-    'container-cleaner': { title: 'Container Cleaner', breadcrumb: 'System Tools' },
-    'dev-cleaner': { title: 'Dev Cleaner', breadcrumb: 'System Tools' },
-    'package-deep-clean': { title: 'Package Deep Clean', breadcrumb: 'System Tools' },
-    'app-residue-cleaner': { title: 'App Residue Cleaner', breadcrumb: 'System Tools' },
-    'advanced-cleaner': { title: 'Advanced Cleaner', breadcrumb: 'System Tools' },
+  private mainTabs = ['home', 'files', 'clean', 'power', 'settings'];
+
+  private routeInfo: Record<string, RouteInfo> = {
+    home: { title: 'Home', breadcrumb: '', parent: '', showBack: false },
+    files: { title: 'Files', breadcrumb: '', parent: '', showBack: false },
+    clean: { title: 'Clean', breadcrumb: '', parent: '', showBack: false },
+    power: { title: 'Power', breadcrumb: '', parent: '', showBack: false },
+    settings: { title: 'Settings', breadcrumb: '', parent: '', showBack: false },
+    dashboard: { title: 'Home', breadcrumb: '', parent: '', showBack: false },
+    cleaner: { title: 'Quick Clean', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    'large-files': { title: 'Large Files', breadcrumb: 'Files', parent: 'files', showBack: true },
+    'duplicate-finder': {
+      title: 'Duplicates',
+      breadcrumb: 'Files',
+      parent: 'files',
+      showBack: true,
+    },
+    'disk-usage': { title: 'Disk Usage', breadcrumb: 'Files', parent: 'files', showBack: true },
+    downloads: { title: 'Downloads', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    recent: { title: 'Recent Files', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    clipboard: { title: 'Clipboard', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    system: { title: 'System', breadcrumb: 'Home', parent: 'home', showBack: true },
+    startup: { title: 'Startup', breadcrumb: 'Power', parent: 'power', showBack: true },
+    backup: { title: 'Backup', breadcrumb: 'Settings', parent: 'settings', showBack: true },
+    profiles: { title: 'Profiles', breadcrumb: 'Settings', parent: 'settings', showBack: true },
+    'system-repair': { title: 'Repair', breadcrumb: 'Home', parent: 'home', showBack: true },
+    'memory-optimizer': { title: 'Memory', breadcrumb: 'Power', parent: 'power', showBack: true },
+    automation: { title: 'Automation', breadcrumb: 'Power', parent: 'power', showBack: true },
+    'log-manager': { title: 'Logs', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    'kernel-cleaner': { title: 'Kernel', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    reports: { title: 'Reports', breadcrumb: 'Home', parent: 'home', showBack: true },
+    processes: { title: 'Processes', breadcrumb: 'Power', parent: 'power', showBack: true },
+    'media-cleaner': { title: 'Media', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    'container-cleaner': {
+      title: 'Containers',
+      breadcrumb: 'Clean',
+      parent: 'clean',
+      showBack: true,
+    },
+    'dev-cleaner': { title: 'Dev Cache', breadcrumb: 'Clean', parent: 'clean', showBack: true },
+    'package-deep-clean': {
+      title: 'Packages',
+      breadcrumb: 'Clean',
+      parent: 'clean',
+      showBack: true,
+    },
+    'app-residue-cleaner': {
+      title: 'Residue',
+      breadcrumb: 'Clean',
+      parent: 'clean',
+      showBack: true,
+    },
+    'advanced-cleaner': { title: 'Advanced', breadcrumb: 'Clean', parent: 'clean', showBack: true },
   };
 
-  ngOnInit() {
+  constructor() {
     this.updateRouteInfo(this.router.url);
 
     this.router.events
@@ -72,11 +94,29 @@ export class App implements OnInit {
       });
   }
 
+  onBack() {
+    const currentPath = this.router.url.split('/').pop()?.split('?')[0] || 'home';
+    const info = this.routeInfo[currentPath];
+    if (info && info.parent) {
+      this.router.navigate(['/' + info.parent]);
+    } else {
+      this.router.navigate(['/home']);
+    }
+  }
+
   private updateRouteInfo(url: string) {
-    const path = url.split('/').pop()?.split('?')[0] || 'dashboard';
-    const info = this.routeTitles[path] || { title: this.formatTitle(path), breadcrumb: 'Page' };
-    this.pageTitle.set(info.title);
-    this.pageBreadcrumb.set(info.breadcrumb);
+    const path = url.split('/').pop()?.split('?')[0] || 'home';
+    const info = this.routeInfo[path];
+
+    if (info) {
+      this.pageTitle.set(info.title);
+      this.pageBreadcrumb.set(info.breadcrumb);
+      this.showBackButton.set(info.showBack);
+    } else {
+      this.pageTitle.set(this.formatTitle(path));
+      this.pageBreadcrumb.set('');
+      this.showBackButton.set(false);
+    }
   }
 
   private formatTitle(path: string): string {

@@ -15,7 +15,6 @@ export interface WidgetConfig {
   standalone: true,
   imports: [CommonModule, MatIconModule],
   templateUrl: './widget-container.component.html',
-  styleUrls: ['./widget-container.component.css'],
 })
 export class WidgetContainerComponent {
   widgets = input<WidgetConfig[]>([]);

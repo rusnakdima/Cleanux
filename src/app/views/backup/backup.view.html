@@ -1,16 +1,13 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <div class="flex items-center justify-between">
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
     <div>
-      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Backup Management</h2>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">
+      <h2 class="text-xl font-bold text-[var(--text-primary)]">Backup Management</h2>
+      <p class="text-sm text-[var(--text-muted)] mt-1">
         Create and restore backups before cleaning operations
       </p>
     </div>
-    <button
-      (click)="loadBackups()"
-      class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-    >
-      <mat-icon fontIcon="refresh"/>
+    <button (click)="loadBackups()" class="btn btn-primary">
+      <mat-icon class="icon-sm">refresh</mat-icon>
       Refresh
     </button>
   </div>
@@ -20,81 +17,35 @@
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
     </div>
   } @else if (backups().length === 0) {
-    <div class="glass-card p-12 text-center">
-      <mat-icon class="icon-4xl icon-muted" fontIcon="backup"/>
-      <h3 class="text-xl font-semibold text-slate-700 dark:text-slate-300 mt-4">
-        No Backups Found
-      </h3>
-      <p class="text-slate-500 dark:text-slate-400 mt-2">
+    <div class="glass-surface matte-surface border-trace p-12 text-center">
+      <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">backup</mat-icon>
+      <h3 class="text-lg font-semibold text-[var(--text-secondary)]">No Backups Found</h3>
+      <p class="text-sm text-[var(--text-muted)] mt-2">
         Backups created before cleaning operations will appear here
       </p>
     </div>
   } @else {
-<div class="glass-card overflow-hidden">
-      <table class="table-grid">
-        <thead class="table-header">
-          <tr>
-            <th class="table-header-cell">
-              Name
-            </th>
-            <th class="table-header-cell text-right">
-              Size
-            </th>
-            <th class="table-header-cell text-right">
-              Date
-            </th>
-            <th class="table-header-cell text-right">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="table-body divide-y divide-black/5 dark:divide-white/5">
-          @for (backup of backups(); track backup.path) {
-            <tr class="table-row hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-              <td class="table-cell">
-                <div class="flex items-center gap-3">
-                  <div class="icon-container icon-container-sm icon-container-accent">
-                    <mat-icon class="icon-sm" fontIcon="archive"/>
-                  </div>
-                  <span class="font-medium">{{ backup.name }}</span>
-                </div>
-              </td>
-              <td class="table-cell text-right text-slate-600 dark:text-slate-400">
-                {{ formatSize(backup.size) }}
-              </td>
-              <td class="table-cell text-right text-slate-600 dark:text-slate-400">
-                {{ formatDate(backup.modified) }}
-              </td>
-              <td class="table-cell text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    (click)="restoreBackup(backup)"
-                    [disabled]="isRestoring(backup.path)"
-                    class="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 transition-colors disabled:opacity-50"
-                    matTooltip="Restore"
-                  >
-                    @if (isRestoring(backup.path)) {
-                      <mat-progress-spinner
-                        mode="indeterminate"
-                        diameter="20"
-                      ></mat-progress-spinner>
-                    } @else {
-                      <mat-icon fontIcon="restore"/>
-                    }
-                  </button>
-                  <button
-                    (click)="deleteBackup(backup)"
-                    class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors"
-                    matTooltip="Delete"
-                  >
-                    <mat-icon fontIcon="delete"/>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="glass-card matte-surface border-trace">
+      <div class="glass-card-header">
+        <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
+          {{ backups().length }} backup(s)
+        </h3>
+      </div>
+      <div class="glass-card-body px-4 pb-4">
+        <app-data-table
+          [columns]="columns"
+          [data]="backups()"
+          [loading]="loading()"
+          [options]="getTableOptions()"
+          [currentPage]="currentPage()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="[10, 15, 25, 50, 100]"
+          [showPageSizeSelector]="true"
+          (pageChange)="onPageChange($event)"
+          (newPageSize)="onPageSizeChange($event)"
+          (rowAction)="onRestore($event)"
+        />
+      </div>
     </div>
   }
 </div>

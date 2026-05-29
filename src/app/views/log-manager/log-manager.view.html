@@ -4,30 +4,29 @@
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
     </div>
   } @else {
-    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="glass-card p-4">
+      <div class="matte-surface border-trace p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">Journal Size</div>
         <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
           {{ summary()?.journal_size_human || "0 B" }}
         </div>
       </div>
 
-      <div class="glass-card p-4">
+      <div class="matte-surface border-trace p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">Rotated Logs</div>
         <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
           {{ formatSize(rotatedLogsSize()) }}
         </div>
       </div>
 
-      <div class="glass-card p-4">
+      <div class="matte-surface border-trace p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">/var/log Total</div>
         <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
           {{ varLogUsage()?.total_human || "0 B" }}
         </div>
       </div>
 
-      <div class="glass-card p-4">
+      <div class="matte-surface border-trace p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">Logrotate Configs</div>
         <div class="text-2xl font-bold text-green-600 dark:text-green-400">
           {{ logrotateAnalysis()?.total_configs || 0 }}
@@ -35,9 +34,7 @@
       </div>
     </div>
 
-    <!-- Tabs -->
-    <mat-tab-group class="glass-card" [(selectedIndex)]="activeTab">
-      <!-- Journal Tab -->
+    <mat-tab-group class="glass-card matte-surface border-trace" [(selectedIndex)]="activeTab">
       <mat-tab label="Journal">
         <div class="p-6 space-y-6">
           @if (journalInfo()) {
@@ -123,7 +120,6 @@
         </div>
       </mat-tab>
 
-      <!-- Rotated Logs Tab -->
       <mat-tab label="Rotated Logs">
         <div class="p-6 space-y-6">
           <div class="flex justify-between items-center">
@@ -148,36 +144,27 @@
           </div>
 
           @if (rotatedLogs().length > 0) {
-            <div class="overflow-x-auto">
-              <table class="table-grid">
-                <thead class="table-header">
-                  <tr class="text-left text-sm text-slate-500">
-                    <th class="table-header-cell pb-3">Path</th>
-                    <th class="table-header-cell pb-3">Size</th>
-                    <th class="table-header-cell pb-3">Modified</th>
-                  </tr>
-                </thead>
-                <tbody class="table-body">
-                  @for (log of rotatedLogs(); track log.path) {
-                    <tr class="table-row border-b dark:border-slate-800">
-                      <td class="table-cell py-3 font-mono">{{ log.path }}</td>
-                      <td class="table-cell py-3">{{ log.size_human }}</td>
-                      <td class="table-cell py-3 text-slate-500">{{ log.modified }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+            <app-data-table
+              [columns]="rotatedLogsColumns"
+              [data]="rotatedLogs()"
+              [loading]="loading()"
+              [options]="getRotatedLogsTableOptions()"
+              [currentPage]="currentPage()"
+              [pageSize]="pageSize()"
+              [pageSizeOptions]="[10, 15, 25, 50, 100]"
+              [showPageSizeSelector]="true"
+              (pageChange)="onPageChange($event)"
+              (newPageSize)="onPageSizeChange($event)"
+            />
           } @else {
             <div class="text-center py-8">
-              <mat-icon class="icon-4xl icon-muted" fontIcon="folder_open"/>
+              <mat-icon class="icon-4xl text-[var(--text-muted)]" fontIcon="folder_open" />
               <p class="text-slate-500 mt-2">No rotated logs found</p>
             </div>
           }
         </div>
       </mat-tab>
 
-      <!-- Logrotate Tab -->
       <mat-tab label="Logrotate">
         <div class="p-6 space-y-6">
           @if (logrotateAnalysis()) {
@@ -222,53 +209,62 @@
 
             <div class="space-y-4">
               <h3 class="text-lg font-semibold">Logrotate Configurations</h3>
-              @for (config of logrotateAnalysis()!.configs; track config.path) {
-                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4">
-                  <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                      <div class="font-mono text-sm mb-2">{{ config.path }}</div>
-                      <div class="flex flex-wrap gap-2">
-                        <span
-                          class="px-2 py-1 text-xs rounded-full {{
-                            getLogrotateBgColor(config.enabled)
-                          }} {{ getLogrotateStatusColor(config.enabled) }}"
-                        >
-                          {{ config.enabled ? "Enabled" : "Disabled" }}
-                        </span>
-                        @if (config.schedule) {
+              <div class="overflow-auto max-h-[calc(100vh-500px)]">
+                @for (config of paginatedConfigs(); track config.path) {
+                  <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4">
+                    <div class="flex items-start justify-between">
+                      <div class="flex-1">
+                        <div class="font-mono text-sm mb-2">{{ config.path }}</div>
+                        <div class="flex flex-wrap gap-2">
                           <span
-                            class="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                            class="px-2 py-1 text-xs rounded-full {{
+                              getLogrotateBgColor(config.enabled)
+                            }} {{ getLogrotateStatusColor(config.enabled) }}"
                           >
-                            {{ config.schedule }}
+                            {{ config.enabled ? "Enabled" : "Disabled" }}
                           </span>
+                          @if (config.schedule) {
+                            <span
+                              class="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                            >
+                              {{ config.schedule }}
+                            </span>
+                          }
+                          @if (config.compress) {
+                            <span
+                              class="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                            >
+                              Compressed
+                            </span>
+                          }
+                          @if (config.rotate_count !== null) {
+                            <span
+                              class="px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                            >
+                              {{ config.rotate_count }} rotations
+                            </span>
+                          }
+                        </div>
+                      </div>
+                      <div class="text-right text-sm text-slate-500 space-y-1">
+                        @if (config.max_size) {
+                          <div>Max size: {{ config.max_size }}</div>
                         }
-                        @if (config.compress) {
-                          <span
-                            class="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                          >
-                            Compressed
-                          </span>
-                        }
-                        @if (config.rotate_count !== null) {
-                          <span
-                            class="px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                          >
-                            {{ config.rotate_count }} rotations
-                          </span>
+                        @if (config.max_age) {
+                          <div>Max age: {{ config.max_age }}</div>
                         }
                       </div>
                     </div>
-                    <div class="text-right text-sm text-slate-500 space-y-1">
-                      @if (config.max_size) {
-                        <div>Max size: {{ config.max_size }}</div>
-                      }
-                      @if (config.max_age) {
-                        <div>Max age: {{ config.max_age }}</div>
-                      }
-                    </div>
                   </div>
-                </div>
-              }
+                }
+              </div>
+              <app-pagination
+                [totalItems]="logrotateAnalysis()!.configs.length"
+                [currentPage]="currentPage()"
+                [pageSize]="pageSize()"
+                (pageChange)="onPageChange($event)"
+                (pageSizeChange)="onPageSizeChange($event)"
+              />
             </div>
           } @else {
             <div class="text-center py-8 text-slate-500">Logrotate analysis not available</div>
@@ -277,23 +273,31 @@
       </mat-tab>
     </mat-tab-group>
 
-    <!-- /var/log Usage -->
-    <div class="glass-card p-6">
+    <div class="matte-surface border-trace p-6">
       <h3 class="text-lg font-semibold mb-4">Largest Log Files in /var/log</h3>
       @if (largestLogs().length > 0) {
-        <div class="space-y-2">
-          @for (log of largestLogs(); track log.path) {
-            <div
-              class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50"
-            >
-              <div class="flex-1 min-w-0">
-                <div class="text-sm font-mono truncate">{{ log.path }}</div>
-                <div class="text-xs text-slate-500">{{ log.modified }}</div>
+        <div class="overflow-auto max-h-[calc(100vh-400px)]">
+          <div class="space-y-2">
+            @for (log of paginatedLargestLogs(); track log.path) {
+              <div
+                class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              >
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-mono truncate">{{ log.path }}</div>
+                  <div class="text-xs text-slate-500">{{ log.modified }}</div>
+                </div>
+                <div class="text-sm font-medium ml-4">{{ log.size_human }}</div>
               </div>
-              <div class="text-sm font-medium ml-4">{{ log.size_human }}</div>
-            </div>
-          }
+            }
+          </div>
         </div>
+        <app-pagination
+          [totalItems]="largestLogs().length"
+          [currentPage]="currentPage()"
+          [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        />
       } @else {
         <div class="text-center py-8 text-slate-500">No log files found</div>
       }

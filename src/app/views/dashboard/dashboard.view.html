@@ -1,284 +1,190 @@
-<div class="dashboard-container">
-  <!-- Header Section -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-3xl font-bold tracking-tight">System Dashboard</h1>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">
-        Overview of your computer's health and junk files.
-      </p>
-    </div>
-    <div class="status-indicator">
-      <div
-        class="status-dot animate-pulse"
-        [class.bg-emerald-500]="systemStatus() === 'Healthy'"
-        [class.dark:bg-emerald-500]="systemStatus() === 'Healthy'"
-        [class.bg-amber-500]="systemStatus() === 'Needs Attention'"
-        [class.dark:bg-amber-500]="systemStatus() === 'Needs Attention'"
-        [class.bg-rose-500]="systemStatus() === 'Critical'"
-        [class.dark:bg-rose-500]="systemStatus() === 'Critical'"
-      ></div>
-      <span class="text-sm font-bold tracking-wide uppercase text-slate-700 dark:text-slate-200">{{
-        systemStatus()
-      }}</span>
-    </div>
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="view-header">
+    <h1>Home</h1>
+    <p>System overview and quick actions</p>
   </div>
 
-  <!-- System Monitor Widget -->
-  <div class="mb-8">
-    <app-system-monitor></app-system-monitor>
-  </div>
-
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-    <!-- Health Score -->
-    <div class="dashboard-card">
-      <span class="card-label">System Health</span>
-      <div class="chart-container">
-        <svg class="w-full h-full -rotate-90">
-          <circle
-            cx="56"
-            cy="56"
-            r="48"
-            stroke="currentColor"
-            stroke-width="12"
-            fill="transparent"
-            class="chart-bg-circle"
-          />
-          <circle
-            cx="56"
-            cy="56"
-            r="48"
-            stroke="currentColor"
-            stroke-width="12"
-            fill="transparent"
-            [attr.stroke-dasharray]="301.6"
-            [attr.stroke-dashoffset]="301.6 - (301.6 * healthScore()) / 100"
-            class="transition-all duration-1000 ease-out"
-            [class.text-emerald-500]="healthScore() >= 80"
-            [class.dark:text-emerald-500]="healthScore() >= 80"
-            [class.text-amber-500]="healthScore() >= 50 && healthScore() < 80"
-            [class.dark:text-amber-500]="healthScore() >= 50 && healthScore() < 80"
-            [class.text-rose-500]="healthScore() < 50"
-            [class.dark:text-rose-500]="healthScore() < 50"
-          />
-        </svg>
-        <span class="chart-value">{{ healthScore() }}%</span>
+  <div class="hero-card border-trace mb-6">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <span class="text-xs font-semibold text-[var(--accent-primary)] uppercase tracking-widest"
+          >System Health</span
+        >
+        <div class="flex items-baseline gap-2 mt-1">
+          <span class="text-4xl font-bold">{{ healthScore() }}</span>
+          <span class="text-lg text-[var(--text-muted)]">/ 100</span>
+        </div>
+        <p class="text-sm text-[var(--text-secondary)] mt-1">{{ getHealthMessage() }}</p>
       </div>
-    </div>
 
-    <!-- Junk Found -->
-    <div class="dashboard-card delay-100">
-      <span class="card-label">Storage Cleanup</span>
-      <div class="junk-value-container">
-        <span class="junk-value-large">{{ formatSize(totalJunkSize()).split(" ")[0] }}</span>
-        <span class="junk-value-unit">{{ formatSize(totalJunkSize()).split(" ")[1] }}</span>
-      </div>
-      <mat-icon class="icon-accent icon-3xl" fontIcon="auto_delete"/>
-    </div>
-
-    <!-- Health Trend -->
-    <div class="dashboard-card delay-200">
-      <span class="card-label">Health Trend</span>
-      <div class="flex items-center justify-center h-full">
-        @if (healthTrend().trend === "improving") {
-          <div class="text-center">
-            <mat-icon class="icon-success icon-4xl" fontIcon="trending_up"/>
-            <span class="text-emerald-500 dark:text-emerald-400 font-bold block mt-2">Improving</span>
-            <span class="text-sm text-slate-500 dark:text-slate-400"
-              >+{{ healthTrend().change_percent | number: "1.1-1" }}%</span
-            >
-          </div>
-        } @else if (healthTrend().trend === "declining") {
-          <div class="text-center">
-            <mat-icon class="icon-error icon-4xl" fontIcon="trending_down"/>
-            <span class="text-rose-500 dark:text-rose-400 font-bold block mt-2">Declining</span>
-            <span class="text-sm text-slate-500 dark:text-slate-400"
-              >{{ healthTrend().change_percent | number: "1.1-1" }}%</span
-            >
-          </div>
-        } @else if (healthTrend().trend === "stable") {
-          <div class="text-center">
-            <mat-icon class="icon-warning icon-4xl" fontIcon="trending_flat"/>
-            <span class="text-amber-500 dark:text-amber-400 font-bold block mt-2">Stable</span>
-            <span class="text-sm text-slate-500 dark:text-slate-400"
-              >{{ healthTrend().change_percent | number: "1.1-1" }}%</span
-            >
-          </div>
-        } @else {
-          <div class="text-center">
-            <mat-icon class="icon-muted icon-4xl" fontIcon="hourglass_empty"/>
-            <span class="text-slate-400 dark:text-slate-500 font-bold block mt-2">Insufficient Data</span>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Recommendation -->
-    <div class="dashboard-card delay-200 text-center">
-      <span class="card-label">Recommendation</span>
-      <p class="font-semibold text-slate-600 dark:text-slate-400">
-        @if (systemStatus() === "Healthy") {
-          Everything is looking great!
-        } @else if (systemStatus() === "Needs Attention") {
-          Clean up to optimize performance.
-        } @else {
-          System performance is impacted.
-        }
-      </p>
-      @if (totalJunkSize() > 0 && !isScanning() && !isCleaning()) {
-        <button (click)="cleanAll()" class="clean-btn">
-          <mat-icon class="icon-lg" fontIcon="cleaning_services"/>
-          Deep Clean
+      <div class="flex items-center gap-3">
+        <button (click)="startScan()" [disabled]="isScanning()" class="btn btn-secondary">
+          <mat-icon class="icon-sm" [class.animate-spin]="isScanning()">search</mat-icon>
+          {{ isScanning() ? "Scanning..." : "Scan" }}
         </button>
-      } @else if (isCleaning()) {
-        <div class="flex items-center gap-3 text-accent dark:text-accent font-bold animate-pulse">
-          <mat-icon class="animate-spin" fontIcon="sync"/>
-          Cleaning...
+        <a routerLink="/clean" class="clean-button">
+          <mat-icon class="icon-sm">cleanup</mat-icon>
+          Clean Now
+        </a>
+      </div>
+    </div>
+
+    @if (isScanning() && scanProgress() > 0) {
+      <div class="mt-4">
+        <div class="flex justify-between text-xs mb-1">
+          <span>Scanning...</span>
+          <span>{{ scanProgress().toFixed(0) }}%</span>
         </div>
-      }
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="scanProgress()"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon">
+        <mat-icon class="icon-base">cached</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Cache</span>
+        <span class="stat-value">{{ formatSize(cacheSize()) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626)">
+        <mat-icon class="icon-base">delete_outline</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Trash</span>
+        <span class="stat-value">{{ formatSize(trashSize()) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">
+        <mat-icon class="icon-base">description</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Logs</span>
+        <span class="stat-value">{{ formatSize(logSize()) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c)">
+        <mat-icon class="icon-base">file_present</mat-icon>
+      </div>
+      <div class="stat-content">
+        <span class="stat-label">Large Files</span>
+        <span class="stat-value">{{ formatSize(largeFileSize()) }}</span>
+      </div>
     </div>
   </div>
 
-  <!-- Health History Chart -->
-  @if (healthHistory().length > 0) {
-    <div class="dashboard-card mt-8">
-      <div class="flex items-center justify-between mb-4">
-        <span class="card-label">Health History</span>
-        <div class="flex gap-2">
-          <button
-            (click)="setHealthHistoryDays(7)"
-            class="px-3 py-1 rounded text-sm font-medium transition-colors"
-            [class.bg-accent]="healthHistoryDays() === 7"
-            [class.text-white]="healthHistoryDays() === 7"
-            [class.bg-slate-200]="healthHistoryDays() !== 7"
-            [class.dark:bg-slate-700]="healthHistoryDays() !== 7"
-          >
-            7 Days
-          </button>
-          <button
-            (click)="setHealthHistoryDays(30)"
-            class="px-3 py-1 rounded text-sm font-medium transition-colors"
-            [class.bg-accent]="healthHistoryDays() === 30"
-            [class.text-white]="healthHistoryDays() === 30"
-            [class.bg-slate-200]="healthHistoryDays() !== 30"
-            [class.dark:bg-slate-700]="healthHistoryDays() !== 30"
-          >
-            30 Days
-          </button>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+    <div class="glass-surface matte-surface border-trace p-5">
+      <h3 class="section-title mb-4">Quick Actions</h3>
+      <div class="grid grid-cols-2 gap-3">
+        <button
+          (click)="handleQuickAction('clean-cache')"
+          [disabled]="cacheSize() === 0"
+          class="btn btn-secondary justify-start"
+        >
+          <mat-icon class="icon-sm text-cyan-500">cached</mat-icon>
+          Clear Cache
+        </button>
+        <button
+          (click)="handleQuickAction('clean-trash')"
+          [disabled]="trashSize() === 0"
+          class="btn btn-secondary justify-start"
+        >
+          <mat-icon class="icon-sm text-error">delete_outline</mat-icon>
+          Empty Trash
+        </button>
+        <button
+          (click)="handleQuickAction('clean-logs')"
+          [disabled]="logSize() === 0"
+          class="btn btn-secondary justify-start"
+        >
+          <mat-icon class="icon-sm text-info">description</mat-icon>
+          Clear Logs
+        </button>
+        <a routerLink="/large-files" class="btn btn-secondary justify-start no-underline">
+          <mat-icon class="icon-sm text-warning">file_present</mat-icon>
+          Find Large Files
+        </a>
+      </div>
+    </div>
+
+    <div class="glass-surface matte-surface border-trace p-5">
+      <h3 class="section-title mb-4">System Stats</h3>
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-[var(--text-secondary)]">CPU Load</span>
+            <span class="font-mono">{{ monitorStore.systemStats().cpuUsage.toFixed(1) }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="monitorStore.systemStats().cpuUsage"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-[var(--text-secondary)]">Memory</span>
+            <span class="font-mono"
+              >{{ monitorStore.systemStats().memoryUsagePercent.toFixed(1) }}%</span
+            >
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="monitorStore.systemStats().memoryUsagePercent"
+            ></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-[var(--text-secondary)]">Disk</span>
+            <span class="font-mono">{{ monitorStore.systemStats().diskUsage.toFixed(1) }}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="monitorStore.systemStats().diskUsage"></div>
+          </div>
         </div>
       </div>
-      <div class="h-40 relative">
-        <svg viewBox="0 0 300 120" class="w-full h-full">
-          <line
-            x1="10"
-            y1="110"
-            x2="290"
-            y2="110"
-            stroke="currentColor"
-            class="text-slate-300 dark:text-slate-700"
-            stroke-width="1"
-          />
-          <line
-            x1="10"
-            y1="55"
-            x2="290"
-            y2="55"
-            stroke="currentColor"
-            class="text-slate-300 dark:text-slate-700"
-            stroke-width="1"
-            stroke-dasharray="4"
-          />
-          <line
-            x1="10"
-            y1="10"
-            x2="290"
-            y2="10"
-            stroke="currentColor"
-            class="text-slate-300 dark:text-slate-700"
-            stroke-width="1"
-          />
-          <text x="5" y="112" font-size="8" fill="currentColor" class="text-slate-400 dark:text-slate-500">0%</text>
-          <text x="5" y="57" font-size="8" fill="currentColor" class="text-slate-400 dark:text-slate-500">50%</text>
-          <text x="5" y="12" font-size="8" fill="currentColor" class="text-slate-400 dark:text-slate-500">100%</text>
-          @if (healthHistory().length > 0) {
-            <path
-              [attr.d]="getChartPath()"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              class="text-accent dark:text-accent"
-            />
-            @for (point of healthHistory(); track point.timestamp; let i = $index) {
-              <circle
-                [attr.cx]="10 + (i / (healthHistory().length - 1)) * 280"
-                [attr.cy]="10 + (100 - point.health_score) * 1"
-                r="3"
-                fill="currentColor"
-                class="text-accent dark:text-accent"
-              />
+    </div>
+  </div>
+
+  @if (recentActivities().length > 0) {
+    <div class="glass-surface matte-surface border-trace p-5">
+      <h3 class="section-title mb-4">Recent Activity</h3>
+      <div class="space-y-2">
+        @for (activity of recentActivities(); track activity.id) {
+          <div class="flex items-center gap-3 text-sm">
+            <div class="w-8 h-8 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center">
+              <mat-icon class="icon-xs text-[var(--text-muted)]">
+                {{
+                  activity.type === "clean"
+                    ? "cleanup"
+                    : activity.type === "scan"
+                      ? "search"
+                      : "info"
+                }}
+              </mat-icon>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[var(--text-primary)] truncate">{{ activity.description }}</p>
+              <p class="text-xs text-[var(--text-muted)]">{{ activity.timestamp }}</p>
+            </div>
+            @if (activity.size && activity.size > 0) {
+              <span class="badge badge-primary">{{ formatSize(activity.size) }}</span>
             }
-          }
-        </svg>
+          </div>
+        }
       </div>
     </div>
   }
-
-  <!-- Main Scan Action -->
-  <div class="scan-section min-h-[400px]">
-    <div class="relative flex items-center justify-center p-10">
-      <!-- Outer Progress Circle -->
-      <div class="absolute w-[290px] h-[290px] pointer-events-none">
-        <svg class="w-full h-full -rotate-90" viewBox="0 0 256 256">
-          <!-- Subtle track -->
-          <circle
-            cx="128"
-            cy="128"
-            r="122"
-            stroke="currentColor"
-            stroke-width="2"
-            fill="transparent"
-            class="text-slate-200 dark:text-slate-800/30"
-          />
-
-          @if (isScanning()) {
-            <!-- Progress indicator -->
-            <circle
-              cx="128"
-              cy="128"
-              r="122"
-              stroke="currentColor"
-              stroke-width="6"
-              fill="transparent"
-              stroke-linecap="round"
-              [attr.stroke-dasharray]="766.5"
-              [attr.stroke-dashoffset]="766.5 - (766.5 * scanProgress()) / 100"
-              class="text-accent dark:text-accent transition-all duration-300 scan-progress-ring"
-            />
-          }
-        </svg>
-      </div>
-
-      <!-- Scan Button -->
-      <button
-        (click)="startScan()"
-        [disabled]="isScanning() || isCleaning()"
-        class="scan-btn z-10"
-        [class.scan-btn-scanning]="isScanning()"
-      >
-        <div class="flex flex-col items-center justify-center p-4">
-          <mat-icon class="scan-icon m-0!" [class.animate-bounce]="isScanning()">
-            {{ isScanning() ? "searching" : "speed" }}
-          </mat-icon>
-          <span class="scan-text mt-4">
-            {{ isScanning() ? "Scanning..." : "Start Scan" }}
-          </span>
-          @if (isScanning()) {
-            <span class="scan-percentage mt-1 font-black"
-              >{{ scanProgress() | number: "1.0-0" }}%</span
-            >
-          }
-        </div>
-      </button>
-    </div>
-  </div>
 </div>

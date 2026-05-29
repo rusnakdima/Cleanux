@@ -17,12 +17,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
 import { FileService, LargeFileItem } from '@services/file.service';
+import { NotificationService } from '@services/notification.service';
 
 /* components */
 import { DataTableComponent } from '@components/data-table/data-table.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
-import { HeaderComponent } from '@components/header/header.component';
 import { SearchComponent } from '@components/search/search.component';
 
 /* models */
@@ -41,13 +41,13 @@ import { formatSize } from '@shared/utils/format.util';
     MatTooltipModule,
     DataTableComponent,
     FilePreviewComponent,
-    HeaderComponent,
     SearchComponent,
   ],
   templateUrl: './large-files.view.html',
 })
 export class LargeFilesView implements OnInit {
   private fileService = inject(FileService);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
@@ -100,8 +100,8 @@ export class LargeFilesView implements OnInit {
     try {
       const offset = this.largeFiles().length;
       const result = await this.fileService.getLargeFiles(50, offset);
-      this.largeFiles.update(current => [...current, ...result.data]);
-      this.filteredFiles.update(current => [...current, ...result.data]);
+      this.largeFiles.update((current) => [...current, ...result.data]);
+      this.filteredFiles.update((current) => [...current, ...result.data]);
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
     } catch (error) {
@@ -130,7 +130,7 @@ export class LargeFilesView implements OnInit {
       this.selectedFiles.set(new Set());
       await this.loadData();
     } catch (error) {
-      alert('Failed to clear files: ' + error);
+      this.notification.error('Failed to clear files', error);
     } finally {
       this.loading.set(false);
     }
@@ -146,6 +146,8 @@ export class LargeFilesView implements OnInit {
       showSelectedActions: true,
       selectedActionText: 'Delete Selected',
       showPreviewButton: true,
+      showSearch: true,
+      searchPlaceholder: 'Search large files...',
     };
   }
 
@@ -186,7 +188,7 @@ export class LargeFilesView implements OnInit {
     try {
       await this.fileService.openFile(event.path, event.command);
     } catch (error: unknown) {
-      alert('Failed to open file: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error('Failed to open file', error);
     }
   }
 }

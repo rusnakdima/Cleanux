@@ -1,20 +1,19 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <!-- Memory Usage Gauge -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="glass-card p-6">
-      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-        <mat-icon class="icon-memory" fontIcon="memory"/>
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="glass-surface matte-surface border-trace p-6">
+      <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+        <mat-icon class="text-[var(--accent-primary)] icon-sm">memory</mat-icon>
         Memory Usage
       </h3>
-      <div class="relative w-48 h-48 mx-auto">
+      <div class="relative w-40 h-40 mx-auto">
         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
           <circle
             cx="50"
             cy="50"
             r="40"
             stroke="currentColor"
-            class="text-slate-200 dark:text-slate-700"
-            strokeWidth="8"
+            class="text-[var(--bg-elevated)]"
+            stroke-width="8"
             fill="none"
           />
           <circle
@@ -22,62 +21,67 @@
             cy="50"
             r="40"
             stroke="currentColor"
-            strokeWidth="8"
+            stroke-width="8"
             fill="none"
-            [class]="
-              memoryUsagePercent > 80
-                ? 'text-red-500 dark:text-red-400'
-                : memoryUsagePercent > 60
-                  ? 'text-yellow-500 dark:text-yellow-400'
-                  : 'text-green-500 dark:text-green-400'
-            "
+            [class.text-error]="memoryUsagePercent > 80"
+            [class.text-warning]="memoryUsagePercent > 60 && memoryUsagePercent <= 80"
+            [class.text-success]="memoryUsagePercent <= 60"
             [attr.stroke-dasharray]="251.2"
             [attr.stroke-dashoffset]="251.2 * (1 - memoryUsagePercent / 100)"
             class="transition-all duration-500 ease-out"
           />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="text-3xl font-bold">{{ memoryUsagePercent | number: "1.0-0" }}%</span>
-          <span class="text-xs text-slate-500 dark:text-slate-400">Used</span>
+          <span class="text-3xl font-bold text-[var(--text-primary)]"
+            >{{ memoryUsagePercent | number: "1.0-0" }}%</span
+          >
+          <span class="text-xs text-[var(--text-muted)]">Used</span>
         </div>
       </div>
       @if (memoryInfo()) {
         <div class="mt-4 space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Total</span>
-            <span class="font-medium">{{ formatBytes(memoryInfo()!.total) }}</span>
+            <span class="text-[var(--text-muted)]">Total</span>
+            <span class="font-medium text-[var(--text-primary)]">{{
+              formatBytes(memoryInfo()!.total)
+            }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Used</span>
-            <span class="font-medium">{{ formatBytes(memoryInfo()!.used) }}</span>
+            <span class="text-[var(--text-muted)]">Used</span>
+            <span class="font-medium text-[var(--text-primary)]">{{
+              formatBytes(memoryInfo()!.used)
+            }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Available</span>
-            <span class="font-medium">{{ formatBytes(memoryInfo()!.available) }}</span>
+            <span class="text-[var(--text-muted)]">Available</span>
+            <span class="font-medium text-[var(--text-primary)]">{{
+              formatBytes(memoryInfo()!.available)
+            }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Cached</span>
-            <span class="font-medium">{{ formatBytes(memoryInfo()!.cached) }}</span>
+            <span class="text-[var(--text-muted)]">Cached</span>
+            <span class="font-medium text-[var(--text-primary)]">{{
+              formatBytes(memoryInfo()!.cached)
+            }}</span>
           </div>
         </div>
       }
     </div>
 
-    <!-- Swap Usage -->
-    <div class="glass-card p-6">
-      <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-        <mat-icon class="icon-memory" fontIcon="swap_vert"/>
+    <div class="glass-surface matte-surface border-trace p-6">
+      <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+        <mat-icon class="text-[var(--accent-primary)] icon-sm">swap_vert</mat-icon>
         Swap Usage
       </h3>
-      <div class="relative w-48 h-48 mx-auto">
+      <div class="relative w-40 h-40 mx-auto">
         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
           <circle
             cx="50"
             cy="50"
             r="40"
             stroke="currentColor"
-            class="text-slate-200 dark:text-slate-700"
-            strokeWidth="8"
+            class="text-[var(--bg-elevated)]"
+            stroke-width="8"
             fill="none"
           />
           <circle
@@ -85,102 +89,77 @@
             cy="50"
             r="40"
             stroke="currentColor"
-            strokeWidth="8"
+            stroke-width="8"
             fill="none"
-            [class]="swapUsagePercent > 50 ? 'text-orange-500 dark:text-orange-400' : 'text-blue-500 dark:text-blue-400'"
+            [class.text-warning]="swapUsagePercent > 50"
+            [class.text-info]="swapUsagePercent <= 50"
             [attr.stroke-dasharray]="251.2"
             [attr.stroke-dashoffset]="251.2 * (1 - swapUsagePercent / 100)"
             class="transition-all duration-500 ease-out"
           />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="text-3xl font-bold">{{ swapUsagePercent | number: "1.0-0" }}%</span>
-          <span class="text-xs text-slate-500 dark:text-slate-400">Used</span>
+          <span class="text-3xl font-bold text-[var(--text-primary)]"
+            >{{ swapUsagePercent | number: "1.0-0" }}%</span
+          >
+          <span class="text-xs text-[var(--text-muted)]">Used</span>
         </div>
       </div>
       @if (swapInfo()) {
         <div class="mt-4 space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Total</span>
-            <span class="font-medium">{{ formatBytes(swapInfo()!.total) }}</span>
+            <span class="text-[var(--text-muted)]">Total</span>
+            <span class="font-medium text-[var(--text-primary)]">{{
+              formatBytes(swapInfo()!.total)
+            }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Used</span>
-            <span class="font-medium">{{ formatBytes(swapInfo()!.used) }}</span>
+            <span class="text-[var(--text-muted)]">Used</span>
+            <span class="font-medium text-[var(--text-primary)]">{{
+              formatBytes(swapInfo()!.used)
+            }}</span>
           </div>
         </div>
       }
     </div>
   </div>
 
-  <!-- Optimize Button -->
-  <div class="flex justify-end">
-    <button
-      (click)="optimizeMemory()"
-      [disabled]="optimizing()"
-      class="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg"
-    >
+  <div class="flex justify-end mb-6">
+    <button (click)="optimizeMemory()" [disabled]="optimizing()" class="btn btn-primary">
       @if (optimizing()) {
-        <mat-spinner diameter="20"></mat-spinner>
+        <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
         Optimizing...
       } @else {
-        <mat-icon class="icon-memory" fontIcon="memory"/>
+        <mat-icon class="icon-sm">memory</mat-icon>
         Optimize Memory
       }
     </button>
   </div>
 
-  <!-- Process Table -->
-  <div class="glass-card flex flex-col h-[calc(100vh-480px)] overflow-hidden">
-    <div
-      class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800"
-    >
-      <h3 class="text-lg font-semibold flex items-center gap-2">
-        <mat-icon class="icon-primary" fontIcon="list"/>
+  <div class="glass-card matte-surface border-trace">
+    <div class="glass-card-header">
+      <h3 class="text-sm font-semibold flex items-center gap-2 text-[var(--text-primary)]">
+        <mat-icon class="text-[var(--accent-primary)] icon-sm">list</mat-icon>
         Processes by Memory
       </h3>
-      <button
-        (click)="loadData()"
-        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        matTooltip="Refresh"
-      >
-        <mat-icon class="icon-primary" fontIcon="refresh"/>
+      <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+        <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
       </button>
     </div>
-    <div class="flex-1 overflow-auto">
-      <table class="table-grid">
-        <thead class="table-header sticky top-0">
-          <tr>
-            @for (col of processColumns; track col.key) {
-              <th
-                [class]="col.width + ' table-header-cell cursor-pointer' + (col.align === 'right' ? ' text-right' : '')"
-                (click)="onSort(col.key)"
-              >
-                <div class="flex items-center gap-1" [class.justify-end]="col.align === 'right'">
-                  {{ col.label }}
-                  @if (sortColumn() === col.key) {
-                    <mat-icon class="icon-sm">{{
-                      sortDirection() === "asc" ? "arrow_upward" : "arrow_downward"
-                    }}</mat-icon>
-                  }
-                </div>
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody class="table-body divide-y divide-slate-100 dark:divide-slate-800">
-          @for (proc of processes(); track trackByPid($index, proc)) {
-            <tr class="table-row hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-              <td class="table-cell">
-                <span class="font-medium truncate">{{ proc.name }}</span>
-              </td>
-              <td class="table-cell text-slate-500 dark:text-slate-400">{{ proc.pid }}</td>
-              <td class="table-cell text-right font-mono">{{ proc.memory_mb | number: "1.1-1" }}</td>
-              <td class="table-cell text-right">{{ proc.cpu_percent | number: "1.1-1" }}%</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+
+    <div class="max-h-[calc(100vh-280px)] overflow-auto px-4 min-h-0">
+      <app-data-table
+        [columns]="processColumns"
+        [data]="paginatedProcesses()"
+        [loading]="loading()"
+        [options]="getTableOptions()"
+        [currentPage]="currentPage()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 15, 25, 50, 100]"
+        [showPageSizeSelector]="true"
+        (pageChange)="onPageChange($event)"
+        (newPageSize)="onPageSizeChange($event)"
+      />
     </div>
   </div>
 </div>

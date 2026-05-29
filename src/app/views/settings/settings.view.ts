@@ -15,6 +15,7 @@ import { environment } from '@env/environment';
 import { AboutService } from '@services/about.service';
 import { SchedulerService } from '@services/scheduler.service';
 import { ThemeService, ThemeMode } from '@services/theme.service';
+import { NotificationService } from '@services/notification.service';
 
 /* models */
 import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
@@ -26,10 +27,10 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule, FormsModule],
   templateUrl: './settings.view.html',
-  styleUrls: ['./settings.view.css'],
 })
 export class SettingsView {
   themeService = inject(ThemeService);
+  private notification = inject(NotificationService);
 
   constructor(
     private aboutService: AboutService,
@@ -90,9 +91,9 @@ export class SettingsView {
     this.isSaving.set(true);
     try {
       await this.schedulerService.saveScheduleConfig(this.scheduleConfig());
-      alert('Schedule saved successfully');
+      this.notification.success('Schedule saved successfully');
     } catch (e) {
-      alert('Failed to save schedule');
+      this.notification.error('Failed to save schedule', e);
     } finally {
       this.isSaving.set(false);
     }
@@ -102,10 +103,10 @@ export class SettingsView {
     this.isRunning.set(true);
     try {
       await this.schedulerService.runCleaningNow(this.scheduleConfig().cleaning_type);
-      alert('Cleaning completed');
+      this.notification.success('Cleaning completed');
       this.loadSchedule();
     } catch (e) {
-      alert('Failed to run cleaning');
+      this.notification.error('Failed to run cleaning', e);
     } finally {
       this.isRunning.set(false);
     }
@@ -175,9 +176,9 @@ export class SettingsView {
             if (this.matchVersion(ver)) {
               this.isUpdateAvailable.set(true);
               this.lastVersion.set(ver);
-              alert(`A new version ${ver} is available!`);
+              this.notification.alert(`A new version ${ver} is available!`);
             } else {
-              alert('You have the latest version!');
+              this.notification.alert('You have the latest version!');
             }
             this.isChecking.set(false);
           }, 1000);
@@ -187,7 +188,7 @@ export class SettingsView {
       },
       error: () => {
         this.isChecking.set(false);
-        alert('Failed to check for updates');
+        this.notification.error('Failed to check for updates', new Error('Update check failed'));
       },
     });
   }

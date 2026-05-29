@@ -1,19 +1,35 @@
 /* sys lib */
 import { Routes } from '@angular/router';
-import { authGuard } from '@guards/auth.guard';
-import { dashboardDataResolver } from '@resolvers/dashboard.resolver';
-import { profilesResolver } from '@resolvers/profile.resolver';
-import { automationResolver } from '@resolvers/automation.resolver';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+
+  {
+    path: 'home',
+    loadComponent: () => import('@views/dashboard/dashboard.view').then((m) => m.DashboardView),
+  },
   {
     path: 'dashboard',
     loadComponent: () => import('@views/dashboard/dashboard.view').then((m) => m.DashboardView),
-    resolve: {
-      data: dashboardDataResolver,
-    },
   },
+
+  {
+    path: 'files',
+    loadComponent: () => import('@views/files/files.view').then((m) => m.FilesView),
+  },
+  {
+    path: 'clean',
+    loadComponent: () => import('@views/clean/clean.view').then((m) => m.CleanView),
+  },
+  {
+    path: 'power',
+    loadComponent: () => import('@views/power/power.view').then((m) => m.PowerView),
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('@views/settings/settings.view').then((m) => m.SettingsView),
+  },
+
   {
     path: 'cleaner',
     loadComponent: () => import('@views/cleaner/cleaner.view').then((m) => m.CleanerView),
@@ -33,10 +49,6 @@ export const routes: Routes = [
       import('@views/duplicate-finder/duplicate-finder.view').then((m) => m.DuplicateFinderView),
   },
   {
-    path: 'settings',
-    loadComponent: () => import('@views/settings/settings.view').then((m) => m.SettingsView),
-  },
-  {
     path: 'startup',
     loadComponent: () => import('@views/startup/startup.view').then((m) => m.StartupView),
   },
@@ -47,9 +59,6 @@ export const routes: Routes = [
   {
     path: 'profiles',
     loadComponent: () => import('@views/profiles/profiles.view').then((m) => m.ProfilesView),
-    resolve: {
-      profiles: profilesResolver,
-    },
   },
   {
     path: 'system-repair',
@@ -64,9 +73,6 @@ export const routes: Routes = [
   {
     path: 'automation',
     loadComponent: () => import('@views/automation/automation.view').then((m) => m.AutomationView),
-    resolve: {
-      automationData: automationResolver,
-    },
   },
   {
     path: 'log-manager',
@@ -74,7 +80,7 @@ export const routes: Routes = [
       import('@views/log-manager/log-manager.view').then((m) => m.LogManagerView),
   },
   {
-    path: 'power',
+    path: 'power-view',
     loadComponent: () => import('@views/power/power.view').then((m) => m.PowerView),
   },
   {
@@ -102,12 +108,15 @@ export const routes: Routes = [
   },
   {
     path: 'dev-cleaner',
-    loadComponent: () => import('@views/dev-cleaner/dev-cleaner.view').then((m) => m.DevCleanerView),
+    loadComponent: () =>
+      import('@views/dev-cleaner/dev-cleaner.view').then((m) => m.DevCleanerView),
   },
   {
     path: 'package-deep-clean',
     loadComponent: () =>
-      import('@views/package-deep-clean/package-deep-clean.view').then((m) => m.PackageDeepCleanView),
+      import('@views/package-deep-clean/package-deep-clean.view').then(
+        (m) => m.PackageDeepCleanView
+      ),
   },
   {
     path: 'app-residue-cleaner',
@@ -125,4 +134,19 @@ export const routes: Routes = [
     path: 'disk-usage',
     loadComponent: () => import('@views/disk-usage/disk-usage.view').then((m) => m.DiskUsageView),
   },
+
+  {
+    path: 'downloads',
+    loadComponent: () => import('@views/downloads/downloads.view').then((m) => m.DownloadsView),
+  },
+  {
+    path: 'recent',
+    loadComponent: () => import('@views/recent/recent.view').then((m) => m.RecentView),
+  },
+  {
+    path: 'clipboard',
+    loadComponent: () => import('@views/clipboard/clipboard.view').then((m) => m.ClipboardView),
+  },
+
+  { path: '**', redirectTo: 'home' },
 ];

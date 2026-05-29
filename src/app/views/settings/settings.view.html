@@ -1,38 +1,22 @@
-<div class="p-8 space-y-8 animate-in fade-in duration-500">
-  <!-- Header Section -->
-  <div class="mb-10">
-    <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Settings</h1>
-    <p class="text-slate-500 dark:text-slate-400 mt-2 font-medium">
-      Configure application behavior and view system information.
-    </p>
-  </div>
-
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-    <!-- Appearance Settings -->
-    <div class="space-y-6">
-      <h2
-        class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
-      >
-        <mat-icon class="icon-accent" fontIcon="palette"/>
-        Appearance
-      </h2>
-
-      <div class="glass-card p-8 space-y-8">
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="glass-card matte-surface border-trace">
+      <div class="glass-card-header">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <mat-icon class="text-[var(--accent-primary)] icon-sm">palette</mat-icon>
+          Appearance
+        </h3>
+      </div>
+      <div class="glass-card-body space-y-6">
         <div class="space-y-3">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-            Theme Mode
-          </label>
+          <label class="block text-sm font-semibold text-[var(--text-muted)]">Theme Mode</label>
           <div class="flex gap-2">
             @for (mode of themeModes; track mode) {
               <button
                 (click)="setThemeMode(mode)"
-                [class.bg-indigo-600]="themeService.currentTheme().mode === mode"
-                [class.text-white]="themeService.currentTheme().mode === mode"
-                [class.bg-slate-100]="themeService.currentTheme().mode !== mode"
-                [class.dark:bg-slate-800]="themeService.currentTheme().mode !== mode"
-                [class.text-slate-700]="themeService.currentTheme().mode !== mode"
-                [class.dark:text-slate-300]="themeService.currentTheme().mode !== mode"
-                class="flex-1 py-2.5 px-4 rounded-xl font-bold text-sm transition-all duration-200 capitalize"
+                class="btn flex-1 capitalize"
+                [class.btn-primary]="themeService.currentTheme().mode === mode"
+                [class.btn-secondary]="themeService.currentTheme().mode !== mode"
               >
                 {{ mode }}
               </button>
@@ -41,22 +25,20 @@
         </div>
 
         <div class="space-y-3">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-            Accent Color
-          </label>
+          <label class="block text-sm font-semibold text-[var(--text-muted)]">Accent Color</label>
           <div class="flex flex-wrap gap-3">
             @for (color of themeService.accentColors(); track color) {
               <button
                 (click)="setAccentColor(color)"
+                class="w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
                 [style.background]="color"
                 [class.ring-2]="themeService.currentTheme().accentColor === color"
                 [class.ring-offset-2]="themeService.currentTheme().accentColor === color"
-                [class.ring-indigo-500]="themeService.currentTheme().accentColor === color"
-                class="w-10 h-10 rounded-xl transition-all duration-200 hover:scale-110"
-                [style.color]="color"
+                [class.ring-offset-[var(--bg-surface)]]="true"
+                [class.ring-white]="themeService.currentTheme().accentColor === color"
               >
                 @if (themeService.currentTheme().accentColor === color) {
-                  <mat-icon class="icon-white icon-lg" fontIcon="check"/>
+                  <mat-icon class="text-white icon-sm">check</mat-icon>
                 }
               </button>
             }
@@ -65,12 +47,12 @@
 
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Glassmorphism Opacity
-            </label>
-            <span class="text-sm font-mono text-indigo-600 dark:text-indigo-400">
-              {{ (themeService.currentTheme().glassOpacity * 100).toFixed(0) }}%
-            </span>
+            <label class="block text-sm font-semibold text-[var(--text-muted)]"
+              >UI Transparency</label
+            >
+            <span class="text-sm font-mono font-bold text-[var(--accent-primary)]"
+              >{{ (themeService.currentTheme().glassOpacity * 100).toFixed(0) }}%</span
+            >
           </div>
           <input
             type="range"
@@ -79,244 +61,129 @@
             min="0"
             max="100"
             step="5"
-            class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-slate-200 dark:bg-slate-700 accent-indigo-600"
+            class="w-full h-2 bg-[var(--bg-elevated)] rounded-lg appearance-none cursor-pointer"
           />
         </div>
       </div>
     </div>
 
-    <!-- Scanning Settings -->
-    <div class="space-y-6">
-      <h2
-        class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
-      >
-        <mat-icon class="icon-accent" fontIcon="search"/>
-        Scanning & Cleaning
-      </h2>
-
-      <div class="glass-card p-8 space-y-8">
-        <div class="flex items-center justify-between">
-          <div class="space-y-1">
-            <h3 class="font-bold text-slate-800 dark:text-slate-100">Deep Scan</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              Scan additional system directories and hidden caches.
-            </p>
-          </div>
-          <button
-            (click)="toggleDeepScan()"
-            [class.bg-indigo-600]="deepScan()"
-            [class.bg-slate-200]="!deepScan()"
-            [class.dark:bg-slate-700]="!deepScan()"
-            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
-          >
-            <span
-              [class.translate-x-5]="deepScan()"
-              [class.translate-x-0]="!deepScan()"
-              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
-            ></span>
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between">
-          <div class="space-y-1">
-            <h3 class="font-bold text-slate-800 dark:text-slate-100">Auto-clean</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              Automatically clean system junk when it exceeds 1GB.
-            </p>
-          </div>
-          <button
-            (click)="toggleAutoClean()"
-            [class.bg-indigo-600]="autoClean()"
-            [class.bg-slate-200]="!autoClean()"
-            [class.dark:bg-slate-700]="!autoClean()"
-            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
-          >
-            <span
-              [class.translate-x-5]="autoClean()"
-              [class.translate-x-0]="!autoClean()"
-              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
-            ></span>
-          </button>
-        </div>
+    <div class="glass-card matte-surface border-trace">
+      <div class="glass-card-header">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <mat-icon class="text-[var(--accent-primary)] icon-sm">schedule</mat-icon>
+          Maintenance Schedule
+        </h3>
       </div>
-    </div>
-
-    <!-- Scheduled Cleaning -->
-    <div class="space-y-6">
-      <h2
-        class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
-      >
-        <mat-icon class="icon-accent" fontIcon="schedule"/>
-        Scheduled Cleaning
-      </h2>
-
-      <div class="glass-card p-8 space-y-6">
-        <div class="flex items-center justify-between">
-          <div class="space-y-1">
-            <h3 class="font-bold text-slate-800 dark:text-slate-100">Enable Schedule</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-              Automatically run cleaning on a schedule.
-            </p>
+      <div class="glass-card-body space-y-4">
+        <div class="p-4 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-[var(--text-primary)] block">Automated Scheduler</span>
+            <p class="text-xs text-[var(--text-muted)]">Run cleaning on defined intervals</p>
           </div>
           <button
             (click)="toggleSchedule()"
-            [class.bg-indigo-600]="scheduleConfig().enabled"
-            [class.bg-slate-200]="!scheduleConfig().enabled"
-            [class.dark:bg-slate-700]="!scheduleConfig().enabled"
-            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+            [class.bg-[var(--accent-primary)]]="scheduleConfig().enabled"
+            [class.bg-[var(--bg-hover)]]]="!scheduleConfig().enabled"
           >
             <span
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
               [class.translate-x-5]="scheduleConfig().enabled"
               [class.translate-x-0]="!scheduleConfig().enabled"
-              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
             ></span>
           </button>
         </div>
 
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-            Interval
-          </label>
-          <select
-            [(ngModel)]="scheduleConfig().interval_hours"
-            (change)="onIntervalChange()"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          >
-            <option [value]="24">Daily</option>
-            <option [value]="168">Weekly</option>
-            <option [value]="720">Monthly</option>
-          </select>
-        </div>
-
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
-            Cleaning Type
-          </label>
-          <select
-            [(ngModel)]="scheduleConfig().cleaning_type"
-            (change)="onCleaningTypeChange()"
-            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-          >
-            <option value="all">All</option>
-            <option value="cache">Cache</option>
-            <option value="trash">Trash</option>
-            <option value="logs">Logs</option>
-            <option value="largefiles">Large Files</option>
-          </select>
-        </div>
-
-        @if (scheduleConfig().last_run || scheduleConfig().next_run) {
-          <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
-            @if (scheduleConfig().last_run) {
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-slate-500 dark:text-slate-400">Last Run</span>
-                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{
-                  formatDateTime(scheduleConfig().last_run)
-                }}</span>
-              </div>
-            }
-            @if (scheduleConfig().next_run) {
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-slate-500 dark:text-slate-400">Next Run</span>
-                <span class="text-sm font-medium text-indigo-600 dark:text-indigo-400">{{
-                  formatDateTime(scheduleConfig().next_run)
-                }}</span>
-              </div>
-            }
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-[var(--text-muted)] block">Interval</label>
+            <select
+              [(ngModel)]="scheduleConfig().interval_hours"
+              (change)="onIntervalChange()"
+              class="input"
+            >
+              <option [value]="24">Daily</option>
+              <option [value]="168">Weekly</option>
+              <option [value]="720">Monthly</option>
+            </select>
           </div>
-        }
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-[var(--text-muted)] block"
+              >Cleaning Type</label
+            >
+            <select
+              [(ngModel)]="scheduleConfig().cleaning_type"
+              (change)="onCleaningTypeChange()"
+              class="input"
+            >
+              <option value="all">Full Clean</option>
+              <option value="cache">Cache Only</option>
+              <option value="trash">Trash Only</option>
+              <option value="logs">Logs Only</option>
+            </select>
+          </div>
+        </div>
 
-        <div class="pt-4 flex gap-3">
-          <button
-            (click)="saveSchedule()"
-            [disabled]="isSaving()"
-            class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 shadow-sm disabled:cursor-not-allowed"
-          >
-            @if (isSaving()) {
-              <mat-icon class="animate-spin" fontIcon="sync"/>
-              Saving...
-            } @else {
-              <mat-icon class="icon-lg" fontIcon="save"/>
-              Save Schedule
-            }
+        <div class="flex gap-3 pt-2">
+          <button (click)="saveSchedule()" [disabled]="isSaving()" class="btn btn-secondary flex-1">
+            <mat-icon class="icon-xs" [class.animate-spin]="isSaving()">{{
+              isSaving() ? "sync" : "save"
+            }}</mat-icon>
+            <span>Save</span>
           </button>
-          <button
-            (click)="runNow()"
-            [disabled]="isRunning()"
-            class="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-2 active:scale-95 shadow-sm disabled:cursor-not-allowed"
-          >
-            @if (isRunning()) {
-              <mat-icon class="animate-spin" fontIcon="sync"/>
-              Running...
-            } @else {
-              <mat-icon class="icon-lg" fontIcon="play_arrow"/>
-              Run Now
-            }
+          <button (click)="runNow()" [disabled]="isRunning()" class="btn btn-primary flex-1">
+            <mat-icon class="icon-xs" [class.animate-spin]="isRunning()">{{
+              isRunning() ? "sync" : "play_arrow"
+            }}</mat-icon>
+            <span>Run Now</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- App Information -->
-    <div class="space-y-6">
-      <h2
-        class="text-lg font-bold flex items-center gap-3 uppercase tracking-widest text-slate-400"
-      >
-        <mat-icon class="icon-accent" fontIcon="info"/>
-        Application Info
-      </h2>
+    <div class="glass-card lg:col-span-2">
+      <div class="glass-card-header">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <mat-icon class="text-[var(--accent-primary)] icon-sm">info</mat-icon>
+          About
+        </h3>
+        <button (click)="checkUpdate()" [disabled]="isChecking()" class="btn btn-secondary">
+          <mat-icon class="icon-xs" [class.animate-spin]="isChecking()">{{
+            isChecking() ? "sync" : "update"
+          }}</mat-icon>
+          <span>Check for Updates</span>
+        </button>
+      </div>
+      <div class="glass-card-body">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
+            <span class="text-xs text-[var(--text-muted)] block mb-1">Version</span>
+            <span class="text-lg font-bold text-[var(--text-primary)]">{{ version }}</span>
+          </div>
+          <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
+            <span class="text-xs text-[var(--text-muted)] block mb-1">Release Date</span>
+            <span class="text-lg font-bold text-[var(--text-secondary)]">{{ dateVersion() }}</span>
+          </div>
+          <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
+            <span class="text-xs text-[var(--text-muted)] block mb-1">Last Check</span>
+            <span class="text-lg font-bold text-[var(--text-secondary)]">{{ dateCheck() }}</span>
+          </div>
+          <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
+            <span class="text-xs text-[var(--text-muted)] block mb-1">Status</span>
+            <span class="text-lg font-bold text-[var(--accent-primary)]">Production</span>
+          </div>
+        </div>
 
-      <div class="glass-card p-8 space-y-6">
-        <div
-          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
-        >
-          <span class="text-slate-500 dark:text-slate-400 font-medium">Version</span>
-          <span class="font-mono font-black text-indigo-600 dark:text-indigo-400">{{
-            version
-          }}</span>
-        </div>
-        <div
-          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
-        >
-          <span class="text-slate-500 dark:text-slate-400 font-medium">Released</span>
-          <span class="font-semibold text-slate-700 dark:text-slate-200">{{ dateVersion() }}</span>
-        </div>
-        <div
-          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
-        >
-          <span class="text-slate-500 dark:text-slate-400 font-medium">Last Checked</span>
-          <span class="font-semibold text-slate-700 dark:text-slate-200">{{ dateCheck() }}</span>
-        </div>
-        <div
-          class="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-800"
-        >
-          <span class="text-slate-500 dark:text-slate-400 font-medium">Platform</span>
-          <span class="font-semibold text-slate-700 dark:text-slate-200">Linux (Tauri)</span>
-        </div>
-        <div class="pt-6">
-          <button
-            (click)="checkUpdate()"
-            [disabled]="isChecking()"
-class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white rounded-xl font-bold transition-all duration-200 flex items-center justify-center gap-3 active:scale-95 shadow-sm disabled:cursor-not-allowed"
-          >
-            @if (isChecking()) {
-              <mat-icon class="animate-spin" fontIcon="sync"/>
-              Checking...
-            } @else {
-              <mat-icon class="icon-lg" fontIcon="update"/>
-              Check for Updates
-            }
-          </button>
-        </div>
         @if (isUpdateAvailable()) {
           <div
-            class="p-4 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 rounded-xl"
+            class="mt-4 p-4 rounded-lg bg-success/10 border border-success/30 flex items-center gap-3"
           >
-            <div class="flex items-center gap-3">
-              <mat-icon class="icon-success" fontIcon="check_circle"/>
-              <span class="font-medium text-emerald-700 dark:text-emerald-300">
-                New version {{ lastVersion() }} is available!
-              </span>
+            <mat-icon class="text-success">check_circle</mat-icon>
+            <div>
+              <span class="font-semibold text-[var(--text-primary)] block"
+                >Update Available: {{ lastVersion() }}</span
+              >
+              <span class="text-xs text-success">A new version is available for download.</span>
             </div>
           </div>
         }

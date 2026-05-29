@@ -6,6 +6,7 @@ import {
   signal,
   inject,
   DOCUMENT,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -19,16 +20,27 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 /* services */
 import { DuplicateService } from '@services/duplicate.service';
 import { FileService } from '@services/file.service';
+import { NotificationService } from '@services/notification.service';
 
 /* components */
+import { DataTableComponent } from '@components/data-table/data-table.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
-import { HeaderComponent } from '@components/header/header.component';
-import { SearchComponent } from '@components/search/search.component';
 
 /* models */
-import { DuplicateGroup } from '@models/duplicate.model';
+import { TableColumn, TableOptions } from '@models/data-table.model';
+import { DuplicateGroup, DuplicateFile } from '@models/duplicate.model';
 import { formatSize } from '@shared/utils/format.util';
+
+interface FlattenedFile {
+  name: string;
+  path: string;
+  size: number;
+  hash: string;
+  file_size: number;
+  wasted_space: number;
+  isOriginal: boolean;
+}
 
 @Component({
   selector: 'app-duplicate-finder-view',
@@ -41,9 +53,8 @@ import { formatSize } from '@shared/utils/format.util';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    DataTableComponent,
     FilePreviewComponent,
-    HeaderComponent,
-    SearchComponent,
   ],
   templateUrl: './duplicate-finder.view.html',
 })
@@ -51,22 +62,72 @@ export class DuplicateFinderView implements OnInit {
   private duplicateService = inject(DuplicateService);
   private fileService = inject(FileService);
   private document = inject(DOCUMENT);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
   duplicateGroups = signal<DuplicateGroup[]>([]);
-  filteredGroups = signal<DuplicateGroup[]>([]);
   loading = signal(false);
-  selectedFiles = signal<Set<string>>(new Set());
   scanningPath = signal('');
   extensionFilter = signal('');
-  showExtensionInput = signal(false);
 
   previewData = signal<FilePreviewData | null>(null);
   isLoadingPreview = signal(false);
+  selectedFiles = signal<Set<string>>(new Set());
 
   totalWastedSpace = signal(0);
   totalDuplicates = signal(0);
+
+  columns: TableColumn[] = [
+    { key: 'path', label: 'Path', sortable: true, resizable: true, minWidth: '200px' },
+    { key: 'name', label: 'Name', sortable: true, resizable: true, minWidth: '150px' },
+    {
+      key: 'size',
+      label: 'Size',
+      align: 'right',
+      sortable: true,
+      resizable: true,
+      format: 'size',
+      minWidth: '100px',
+    },
+    { key: 'hash', label: 'Hash', sortable: true, resizable: true, minWidth: '120px' },
+  ];
+
+  tableOptions: TableOptions = {
+    showHeader: true,
+    showCheckbox: true,
+    checkboxKey: 'path',
+    hoverable: true,
+    showReloadButton: false,
+    showSelectedActions: false,
+    showPreviewButton: true,
+    showSearch: true,
+    searchPlaceholder: 'Search files...',
+    virtualScroll: true,
+    rowHeight: 48,
+  };
+
+  flattenedFiles = computed(() => {
+    const files: FlattenedFile[] = [];
+    for (const group of this.duplicateGroups()) {
+      for (let i = 0; i < group.files.length; i++) {
+        files.push({
+          name: group.files[i].name,
+          path: group.files[i].path,
+          size: group.file_size,
+          hash: group.hash,
+          file_size: group.file_size,
+          wasted_space: group.wasted_space,
+          isOriginal: i === 0,
+        });
+      }
+    }
+    return files;
+  });
+
+  totalFiles = computed(() => {
+    return this.flattenedFiles().length;
+  });
 
   get isDark(): boolean {
     return this.document.body.classList.contains('dark');
@@ -88,26 +149,22 @@ export class DuplicateFinderView implements OnInit {
         this.extensionFilter() || undefined
       );
       this.duplicateGroups.set(result.groups);
-      this.filteredGroups.set(result.groups);
       this.totalWastedSpace.set(result.totalWastedSpace);
       this.totalDuplicates.set(result.totalDuplicates);
     } catch (error) {
       console.error('Failed to scan for duplicates:', error);
-      alert('Failed to scan: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error('Failed to scan', error);
     } finally {
       this.loading.set(false);
     }
   }
 
-  onFilteredData(groups: object[]): void {
-    this.filteredGroups.set(groups as DuplicateGroup[]);
+  onSelectionChange(keys: Set<string>): void {
+    this.selectedFiles.set(keys);
   }
 
-  toggleExtensionInput(): void {
-    this.showExtensionInput.set(!this.showExtensionInput());
-    if (!this.showExtensionInput()) {
-      this.extensionFilter.set('');
-    }
+  onRowDoubleClick(file: FlattenedFile): void {
+    this.onPreview(file);
   }
 
   async deleteSelectedFiles() {
@@ -129,13 +186,13 @@ export class DuplicateFinderView implements OnInit {
       this.selectedFiles.set(new Set());
       await this.scanForDuplicates();
     } catch (error) {
-      alert('Failed to delete files: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error('Failed to delete files', error);
     } finally {
       this.loading.set(false);
     }
   }
 
-  async onPreview(file: { path: string; name: string }): Promise<void> {
+  async onPreview(file: DuplicateFile): Promise<void> {
     this.isLoadingPreview.set(true);
     this.previewData.set({ name: file.name, path: file.path, type: 'unknown' });
 
@@ -169,19 +226,7 @@ export class DuplicateFinderView implements OnInit {
     try {
       await this.fileService.openFile(event.path, event.command);
     } catch (error: unknown) {
-      alert('Failed to open file: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error('Failed to open file', error);
     }
-  }
-
-  toggleFileSelection(path: string): void {
-    this.selectedFiles.update((set) => {
-      const newSet = new Set(set);
-      if (newSet.has(path)) {
-        newSet.delete(path);
-      } else {
-        newSet.add(path);
-      }
-      return newSet;
-    });
   }
 }

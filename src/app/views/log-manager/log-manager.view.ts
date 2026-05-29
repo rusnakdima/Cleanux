@@ -15,7 +15,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { HeaderComponent } from '@components/header/header.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   LogManagerService,
   JournalInfo,
@@ -26,7 +26,11 @@ import {
   LogFileInfo,
   VarLogUsage,
 } from '@services/log-manager.service';
+import { NotificationService } from '@services/notification.service';
 import { formatSize } from '@shared/utils/format.util';
+import { DataTableComponent } from '@components/data-table/data-table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
+import { TableColumn, TableOptions } from '@models/data-table.model';
 
 type TabType = 'journal' | 'rotated' | 'logrotate';
 
@@ -44,12 +48,15 @@ type TabType = 'journal' | 'rotated' | 'logrotate';
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,
-    HeaderComponent,
+    MatTooltipModule,
+    DataTableComponent,
+    PaginationComponent,
   ],
   templateUrl: './log-manager.view.html',
 })
 export class LogManagerView implements OnInit {
   private logManagerService = inject(LogManagerService);
+  private notification = inject(NotificationService);
 
   loading = signal(false);
   activeTab = signal<TabType>('journal');
@@ -66,7 +73,53 @@ export class LogManagerView implements OnInit {
   vacuumDays = signal(30);
   cleanRotatedDays = signal(30);
 
+  currentPage = signal(1);
+  pageSize = signal(15);
+
   formatSize = formatSize;
+
+  rotatedLogsColumns: TableColumn[] = [
+    { key: 'path', label: 'Path', width: 'flex-1', sortable: true },
+    { key: 'size_human', label: 'Size', width: 'w-32', sortable: true, align: 'right' },
+    { key: 'modified', label: 'Modified', width: 'w-48', sortable: true },
+  ];
+
+  getRotatedLogsTableOptions(): TableOptions {
+    return {
+      showHeader: true,
+      showCheckbox: false,
+      hoverable: true,
+      showReloadButton: true,
+      showSelectedActions: false,
+      showPreviewButton: false,
+      showSearch: true,
+      searchPlaceholder: 'Search rotated logs...',
+    };
+  }
+
+  paginatedRotatedLogs = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.rotatedLogs().slice(start, start + this.pageSize());
+  });
+
+  paginatedConfigs = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.logrotateAnalysis()?.configs.slice(start, start + this.pageSize()) ?? [];
+  });
+
+  paginatedLargestLogs = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.largestLogs().slice(start, start + this.pageSize());
+  });
+
+  onPageChange(page: number) {
+    this.currentPage.set(page);
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
+  }
 
   ngOnInit() {
     this.loadData();
@@ -108,7 +161,7 @@ export class LogManagerView implements OnInit {
       await this.loadData();
     } catch (error) {
       console.error('Failed to vacuum journal:', error);
-      alert('Failed to vacuum journal');
+      this.notification.error('Failed to vacuum journal', error);
     } finally {
       this.loading.set(false);
     }
@@ -122,7 +175,7 @@ export class LogManagerView implements OnInit {
       await this.loadData();
     } catch (error) {
       console.error('Failed to vacuum journal:', error);
-      alert('Failed to vacuum journal');
+      this.notification.error('Failed to vacuum journal', error);
     } finally {
       this.loading.set(false);
     }
@@ -136,7 +189,7 @@ export class LogManagerView implements OnInit {
       await this.loadData();
     } catch (error) {
       console.error('Failed to clean rotated logs:', error);
-      alert('Failed to clean rotated logs');
+      this.notification.error('Failed to clean rotated logs', error);
     } finally {
       this.loading.set(false);
     }

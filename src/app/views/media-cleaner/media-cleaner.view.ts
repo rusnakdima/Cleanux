@@ -11,23 +11,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 
 /* services */
-import { MediaCacheService } from '@services/media-cache.service';
-
-/* components */
-import { HeaderComponent } from '@components/header/header.component';
+import { MediaCacheService, MediaCacheSummary } from '@services/media-cache.service';
+import { NotificationService } from '@services/notification.service';
 
 /* models */
 import { formatSize } from '@shared/utils/format.util';
-
-interface MediaCacheSummary {
-  steamShaderSize: number;
-  steamDownloadSize: number;
-  steamGameCount: number;
-  spotifyCacheSize: number;
-  vlcCacheSize: number;
-  thumbnailCacheSize: number;
-  iconCacheSize: number;
-}
 
 @Component({
   selector: 'app-media-cleaner-view',
@@ -41,12 +29,12 @@ interface MediaCacheSummary {
     MatTooltipModule,
     MatCardModule,
     MatTabsModule,
-    HeaderComponent,
   ],
   templateUrl: './media-cleaner.view.html',
 })
 export class MediaCleanerView implements OnInit {
   private mediaCacheService = inject(MediaCacheService);
+  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
@@ -85,9 +73,7 @@ export class MediaCleanerView implements OnInit {
       await this.mediaCacheService.cleanSteamShaderCache();
       await this.loadSummary();
     } catch (error) {
-      alert(
-        `Failed to clean Steam shader cache: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.notification.cleanError('clean Steam shader cache', error);
     } finally {
       this.cleaning.set(null);
     }
@@ -100,9 +86,7 @@ export class MediaCleanerView implements OnInit {
       await this.mediaCacheService.cleanSteamDownloadCache();
       await this.loadSummary();
     } catch (error) {
-      alert(
-        `Failed to clean Steam download cache: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.notification.cleanError('clean Steam download cache', error);
     } finally {
       this.cleaning.set(null);
     }
@@ -115,9 +99,7 @@ export class MediaCleanerView implements OnInit {
       await this.mediaCacheService.cleanSpotifyCache();
       await this.loadSummary();
     } catch (error) {
-      alert(
-        `Failed to clean Spotify cache: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.notification.cleanError('clean Spotify cache', error);
     } finally {
       this.cleaning.set(null);
     }
@@ -130,7 +112,7 @@ export class MediaCleanerView implements OnInit {
       await this.mediaCacheService.cleanVlcCache();
       await this.loadSummary();
     } catch (error) {
-      alert(`Failed to clean VLC cache: ${error instanceof Error ? error.message : String(error)}`);
+      this.notification.cleanError('clean VLC cache', error);
     } finally {
       this.cleaning.set(null);
     }
@@ -143,9 +125,7 @@ export class MediaCleanerView implements OnInit {
       await this.mediaCacheService.cleanThumbnailCache();
       await this.loadSummary();
     } catch (error) {
-      alert(
-        `Failed to clean thumbnail cache: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.notification.cleanError('clean thumbnail cache', error);
     } finally {
       this.cleaning.set(null);
     }
@@ -158,9 +138,7 @@ export class MediaCleanerView implements OnInit {
       await this.mediaCacheService.cleanIconCache();
       await this.loadSummary();
     } catch (error) {
-      alert(
-        `Failed to clean icon cache: ${error instanceof Error ? error.message : String(error)}`
-      );
+      this.notification.cleanError('clean icon cache', error);
     } finally {
       this.cleaning.set(null);
     }

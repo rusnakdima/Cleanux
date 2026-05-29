@@ -3,18 +3,23 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ApiService } from '@services/api.service';
+import { DataTableComponent } from '@components/data-table/data-table.component';
+import { TableColumn, TableOptions } from '@models/data-table.model';
 
 export interface EmptyDirectory {
   path: string;
   depth: number;
   parent: string | null;
+}
+
+export interface FlattenedDir extends EmptyDirectory {
+  name: string;
 }
 
 @Component({
@@ -25,29 +30,52 @@ export interface EmptyDirectory {
     FormsModule,
     MatIconModule,
     MatButtonModule,
-    MatCheckboxModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDialogModule,
     MatInputModule,
     MatFormFieldModule,
+    DataTableComponent,
   ],
   templateUrl: './empty-dir-cleaner.component.html',
-  styleUrl: './empty-dir-cleaner.component.css',
 })
 export class EmptyDirCleanerComponent {
   @Input() rootPath = '';
   @Output() close = new EventEmitter<void>();
 
-  emptyDirs = signal<EmptyDirectory[]>([]);
+  emptyDirs = signal<FlattenedDir[]>([]);
   selectedPaths = signal<Set<string>>(new Set());
   loading = signal(false);
   scanning = signal(false);
   error = signal<string | null>(null);
   confirmDialogOpen = signal(false);
 
-  allSelected = signal(false);
-  indeterminate = signal(false);
+  columns: TableColumn[] = [
+    { key: 'name', label: 'Name', sortable: true, resizable: true, minWidth: '150px' },
+    { key: 'path', label: 'Path', sortable: true, resizable: true, minWidth: '300px' },
+    {
+      key: 'depth',
+      label: 'Depth',
+      align: 'right',
+      sortable: true,
+      resizable: true,
+      minWidth: '80px',
+    },
+  ];
+
+  tableOptions: TableOptions = {
+    showHeader: true,
+    showCheckbox: true,
+    checkboxKey: 'path',
+    hoverable: true,
+    showReloadButton: false,
+    showSelectedActions: false,
+    showPreviewButton: false,
+    showSearch: true,
+    searchPlaceholder: 'Search directories...',
+    virtualScroll: true,
+    rowHeight: 48,
+  };
 
   constructor(
     private api: ApiService,
@@ -68,7 +96,11 @@ export class EmptyDirCleanerComponent {
       const dirs = await this.api.invoke<EmptyDirectory[]>('find_empty_directories', {
         path: this.rootPath,
       });
-      this.emptyDirs.set(dirs);
+      const flattened: FlattenedDir[] = dirs.map((d) => ({
+        ...d,
+        name: this.getDirName(d.path),
+      }));
+      this.emptyDirs.set(flattened);
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Failed to scan directory');
     } finally {
@@ -90,7 +122,11 @@ export class EmptyDirCleanerComponent {
       const dirs = await this.api.invoke<EmptyDirectory[]>('find_nested_empty_directories', {
         path: this.rootPath,
       });
-      this.emptyDirs.set(dirs);
+      const flattened: FlattenedDir[] = dirs.map((d) => ({
+        ...d,
+        name: this.getDirName(d.path),
+      }));
+      this.emptyDirs.set(flattened);
     } catch (e) {
       this.error.set(
         e instanceof Error ? e.message : 'Failed to scan for nested empty directories'
@@ -100,45 +136,8 @@ export class EmptyDirCleanerComponent {
     }
   }
 
-  toggleSelectAll(checked: boolean): void {
-    if (checked) {
-      const allKeys = new Set(this.emptyDirs().map((d) => d.path));
-      this.selectedPaths.set(allKeys);
-    } else {
-      this.selectedPaths.set(new Set());
-    }
-    this.updateSelectionState();
-  }
-
-  toggleSelectItem(path: string, checked: boolean): void {
-    const current = new Set(this.selectedPaths());
-    if (checked) {
-      current.add(path);
-    } else {
-      current.delete(path);
-    }
-    this.selectedPaths.set(current);
-    this.updateSelectionState();
-  }
-
-  updateSelectionState(): void {
-    const total = this.emptyDirs().length;
-    const selected = this.selectedPaths().size;
-
-    if (selected === 0) {
-      this.allSelected.set(false);
-      this.indeterminate.set(false);
-    } else if (selected === total) {
-      this.allSelected.set(true);
-      this.indeterminate.set(false);
-    } else {
-      this.allSelected.set(false);
-      this.indeterminate.set(true);
-    }
-  }
-
-  isSelected(path: string): boolean {
-    return this.selectedPaths().has(path);
+  onSelectionChange(keys: Set<string>): void {
+    this.selectedPaths.set(keys);
   }
 
   get selectedCount(): number {

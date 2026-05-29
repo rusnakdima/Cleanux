@@ -78,10 +78,11 @@ export class ThemeService {
     const g = parseInt(accentColor.slice(3, 5), 16);
     const b = parseInt(accentColor.slice(5, 7), 16);
 
-    root.style.setProperty('--accent-color', accentColor);
+    root.style.setProperty('--accent', accentColor);
     root.style.setProperty('--accent-500', accentColor);
     root.style.setProperty('--accent-light', `rgba(${r}, ${g}, ${b}, 0.1)`);
     root.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
+    root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
     root.style.setProperty('--glass-opacity', config.glassOpacity.toString());
 
     root.style.setProperty('--icon-cpu', accentColor);

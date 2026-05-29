@@ -1,4 +1,4 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+<div class="view-layout max-w-4xl mx-auto">
   @if (loading()) {
     <div class="flex justify-center items-center py-20">
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
@@ -7,10 +7,12 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (category of junkCategories; track category.key) {
         @let summary = getCategorySummary(category.key);
-        <mat-card class="bg-gray-800 border border-gray-700">
-          <mat-card-header class="pb-4">
+        <div class="glass-card matte-surface border-trace">
+          <div class="glass-card-header pb-4">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center">
+              <div
+                class="w-10 h-10 rounded-lg bg-[var(--accent-primary)]/20 flex items-center justify-center"
+              >
                 <span class="text-xl">{{
                   getCategoryIcon(category.key) === "globe"
                     ? "🌐"
@@ -24,59 +26,70 @@
                 }}</span>
               </div>
               <div>
-                <mat-card-title class="text-white text-lg">{{ category.label }}</mat-card-title>
-                <mat-card-subtitle class="text-gray-400 text-sm">
+                <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                  {{ category.label }}
+                </h3>
+                <p class="text-sm text-[var(--text-secondary)]">
                   {{ summary?.description || "No data" }}
-                </mat-card-subtitle>
+                </p>
               </div>
             </div>
-          </mat-card-header>
+          </div>
 
-          <mat-card-content>
+          <div class="glass-card-body">
             <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="bg-gray-700/50 rounded-lg p-3">
-                <div class="text-gray-400 text-xs uppercase tracking-wide">Total Size</div>
-                <div class="text-white text-xl font-semibold">
+              <div class="stat-card matte-surface border-trace p-3">
+                <div class="text-xs text-[var(--text-secondary)] uppercase tracking-wide">
+                  Total Size
+                </div>
+                <div class="text-xl font-semibold text-[var(--text-primary)]">
                   {{ formatSize(summary?.totalSize || 0) }}
                 </div>
               </div>
-              <div class="bg-gray-700/50 rounded-lg p-3">
-                <div class="text-gray-400 text-xs uppercase tracking-wide">Files</div>
-                <div class="text-white text-xl font-semibold">
+              <div class="stat-card matte-surface border-trace p-3">
+                <div class="text-xs text-[var(--text-secondary)] uppercase tracking-wide">
+                  Files
+                </div>
+                <div class="text-xl font-semibold text-[var(--text-primary)]">
                   {{ summary?.fileCount || 0 }}
                 </div>
               </div>
             </div>
 
-            <div class="text-gray-400 text-xs mb-3">
+            <div class="text-xs text-[var(--text-secondary)] mb-3">
               Last cleaned: {{ formatLastCleaned(category.key) }}
             </div>
 
-            <mat-expansion-panel class="bg-gray-700/30">
+            <mat-expansion-panel class="bg-[var(--bg-elevated)]">
               <mat-expansion-panel-header>
-                <mat-panel-title class="text-gray-300 text-sm">
+                <mat-panel-title class="text-[var(--text-secondary)] text-sm">
                   View Items ({{ summary?.items?.length || 0 }})
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
               <div class="max-h-64 overflow-y-auto">
                 @for (item of summary?.items || []; track item.path) {
-                  <div class="py-2 px-3 border-b border-gray-600/30 last:border-0">
-                    <div class="text-gray-300 text-sm truncate" [matTooltip]="item.path">
+                  <div class="py-2 px-3 border-b border-[var(--border-color)] last:border-0">
+                    <div
+                      class="text-[var(--text-secondary)] text-sm truncate"
+                      [matTooltip]="item.path"
+                    >
                       {{ item.path }}
                     </div>
-                    <div class="text-gray-500 text-xs mt-1">
+                    <div class="text-xs text-[var(--text-muted)] mt-1">
                       {{ formatSize(item.size) }} · {{ item.fileCount }} files
                     </div>
                   </div>
                 } @empty {
-                  <div class="py-4 text-center text-gray-500 text-sm">No items found</div>
+                  <div class="py-4 text-center text-[var(--text-secondary)] text-sm">
+                    No items found
+                  </div>
                 }
               </div>
             </mat-expansion-panel>
-          </mat-card-content>
+          </div>
 
-          <mat-card-actions class="flex gap-2 p-4 pt-0">
+          <div class="flex gap-2 p-4 pt-0">
             <button
               mat-button
               color="primary"
@@ -99,8 +112,8 @@
             >
               Clean
             </button>
-          </mat-card-actions>
-        </mat-card>
+          </div>
+        </div>
       }
     </div>
 

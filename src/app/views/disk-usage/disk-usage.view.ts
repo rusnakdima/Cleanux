@@ -7,7 +7,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { HeaderComponent } from '@components/header/header.component';
 import { ApiService } from '@services/api.service';
 import { formatSize } from '@shared/utils/format.util';
 
@@ -35,7 +34,6 @@ interface ScanResult {
     MatTooltipModule,
     MatInputModule,
     MatFormFieldModule,
-    HeaderComponent,
   ],
   templateUrl: './disk-usage.view.html',
 })

@@ -8,10 +8,16 @@ import {
   signal,
   OnChanges,
   SimpleChanges,
+  ElementRef,
+  NgZone,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 /* materials */
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,7 +28,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PaginationComponent } from '../pagination/pagination.component';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { TableColumn, TableOptions, TableAction, RowActionEvent } from '@models/data-table.model';
 import { formatSize } from '@shared/utils/format.util';
 
 @Component({
@@ -31,11 +37,14 @@ import { formatSize } from '@shared/utils/format.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    ScrollingModule,
     MatCheckboxModule,
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    FormsModule,
+    ReactiveFormsModule,
     PaginationComponent,
   ],
   templateUrl: './data-table.component.html',
@@ -65,7 +74,8 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
   @Output() newPageSize = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
   @Output() preview = new EventEmitter<T>();
-  @Output() rowAction = new EventEmitter<{ action: string; item: T }>();
+  @Output() rowAction = new EventEmitter<RowActionEvent<T>>();
+  @Output() searchChange = new EventEmitter<string>();
 
   _selectedKeys = new Set<string>();
 
@@ -74,15 +84,38 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   sortKey = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc'>('asc');
+  searchQuery = signal<string>('');
 
   lastSelectedIndex = signal<number | null>(null);
 
+  private destroy$ = new Subject<void>();
+  searchControl = new FormControl('');
+
   formatSize = formatSize;
+
+  columnWidths = signal<Record<string, string>>({});
+  resizingColumn = signal<string | null>(null);
+  resizeStartX = signal<number>(0);
+  resizeStartWidth = signal<number>(0);
+
+  private resizeColumnKey = signal<string | null>(null);
+
+  readonly VIRTUAL_SCROLL_THRESHOLD = 100;
+  readonly DEFAULT_ROW_HEIGHT = 48;
+
+  get rowHeight(): number {
+    return this.options.rowHeight ?? this.DEFAULT_ROW_HEIGHT;
+  }
+
+  get useVirtualScroll(): boolean {
+    return (this.options.virtualScroll ?? false) && this.totalItems > this.VIRTUAL_SCROLL_THRESHOLD;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentPage']) {
       this.p = this.currentPage;
     }
+
     if (changes['data'] && !changes['data'].firstChange) {
       const currLength = changes['data'].currentValue?.length ?? 0;
       const prevLength = changes['data'].previousValue?.length ?? 0;
@@ -91,43 +124,169 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
         this.p = 1;
       }
     }
+
+    if (changes['data'] && changes['data'].currentValue) {
+      this._originalData = [...changes['data'].currentValue];
+      this.initColumnWidths();
+      this.onSearch();
+    }
+
+    if (
+      changes['searchQuery'] &&
+      changes['searchQuery'].currentValue !== undefined &&
+      changes['searchQuery'].currentValue !== null
+    ) {
+      this.searchQuery.set(changes['searchQuery'].currentValue);
+      this.searchControl.setValue(changes['searchQuery'].currentValue);
+    }
   }
 
   private rowRecord(item: T): Record<string, unknown> {
     return item as unknown as Record<string, unknown>;
   }
 
+  private _originalData: T[] = [];
+  private _filteredData: T[] = [];
+
+  ngOnInit(): void {
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((value) => {
+        const query = value ?? '';
+        this.searchQuery.set(query);
+        this.onSearch();
+        this.searchChange.emit(query);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private initColumnWidths(): void {
+    const widths: Record<string, string> = {};
+    for (const col of this.columns) {
+      if (col.width) {
+        widths[col.key] = col.width;
+      }
+    }
+    this.columnWidths.set(widths);
+  }
+
+  getColumnWidth(key: string): string {
+    return this.columnWidths()[key] ?? 'flex-1';
+  }
+
+  onResizeStart(event: MouseEvent, column: TableColumn): void {
+    if (!column.resizable) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.resizingColumn.set(column.key);
+    this.resizeStartX.set(event.clientX);
+
+    const currentWidth = this.columnWidths()[column.key] || this.getColumnWidth(column.key);
+    const numericWidth = this.parseWidth(currentWidth);
+    this.resizeStartWidth.set(numericWidth);
+
+    this.resizeColumnKey.set(column.key);
+
+    document.addEventListener('mousemove', this.onResizeMove.bind(this));
+    document.addEventListener('mouseup', this.onResizeEnd.bind(this));
+  }
+
+  private onResizeMove = (event: MouseEvent): void => {
+    const key = this.resizeColumnKey();
+    if (!key) return;
+
+    const delta = event.clientX - this.resizeStartX();
+    let newWidth = this.resizeStartWidth() + delta;
+
+    const column = this.columns.find((c) => c.key === key);
+    if (column) {
+      if (column.minWidth) {
+        const minWidth = this.parseWidth(column.minWidth);
+        newWidth = Math.max(newWidth, minWidth);
+      }
+      if (column.maxWidth) {
+        const maxWidth = this.parseWidth(column.maxWidth);
+        newWidth = Math.min(newWidth, maxWidth);
+      }
+    }
+
+    newWidth = Math.max(newWidth, 40);
+
+    const newWidthStr = `${newWidth}px`;
+    this.columnWidths.update((w) => ({ ...w, [key]: newWidthStr }));
+  };
+
+  private onResizeEnd = (): void => {
+    this.resizingColumn.set(null);
+    this.resizeColumnKey.set(null);
+    document.removeEventListener('mousemove', this.onResizeMove.bind(this));
+    document.removeEventListener('mouseup', this.onResizeEnd.bind(this));
+  };
+
+  private parseWidth(width: string): number {
+    if (width.endsWith('px')) {
+      return parseInt(width, 10);
+    }
+    if (width.endsWith('%')) {
+      return parseInt(width, 10);
+    }
+    if (width === 'flex-1' || width === 'auto') {
+      return 100;
+    }
+    return parseInt(width, 10) || 100;
+  }
+
   get paginatedData(): T[] {
-    let sortedData = [...this.data];
+    if (this.useVirtualScroll) {
+      return this.sortedFilteredData;
+    }
+
+    let sortedData = [...this._filteredData];
 
     if (this.sortKey()) {
       const key = this.sortKey()!;
       const direction = this.sortDirection();
-      sortedData.sort((a, b) => {
-        const aVal = this.cellValue(a, key);
-        const bVal = this.cellValue(b, key);
-
-        if (aVal === bVal) return 0;
-        if (aVal === null || aVal === undefined) return 1;
-        if (bVal === null || bVal === undefined) return -1;
-
-        let comparison: number;
-
-        if (typeof aVal === 'number' && typeof bVal === 'number') {
-          comparison = aVal - bVal;
-        } else if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-          comparison = aVal === bVal ? 0 : aVal ? -1 : 1;
-        } else {
-          comparison = String(aVal).localeCompare(String(bVal));
-        }
-
-        return direction === 'asc' ? comparison : -comparison;
-      });
+      sortedData = this.sortData(sortedData, key, direction);
     }
 
     const startIndex = (this.p - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     return sortedData.slice(startIndex, endIndex);
+  }
+
+  get sortedFilteredData(): T[] {
+    if (!this.sortKey()) {
+      return [...this._filteredData];
+    }
+    return this.sortData([...this._filteredData], this.sortKey()!, this.sortDirection());
+  }
+
+  private sortData(data: T[], key: string, direction: 'asc' | 'desc'): T[] {
+    return data.sort((a, b) => {
+      const aVal = this.cellValue(a, key);
+      const bVal = this.cellValue(b, key);
+
+      if (aVal === bVal) return 0;
+      if (aVal === null || aVal === undefined) return 1;
+      if (bVal === null || bVal === undefined) return -1;
+
+      let comparison: number;
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        comparison = aVal - bVal;
+      } else if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
+        comparison = aVal === bVal ? 0 : aVal ? -1 : 1;
+      } else {
+        comparison = String(aVal).localeCompare(String(bVal));
+      }
+
+      return direction === 'asc' ? comparison : -comparison;
+    });
   }
 
   cellValue(item: T, key: string): unknown {
@@ -140,7 +299,11 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
   }
 
   get totalItems(): number {
-    return this.data.length;
+    return this._filteredData.length;
+  }
+
+  get virtualItemSize(): number {
+    return this.rowHeight;
   }
 
   onPageChange(page: number): void {
@@ -223,26 +386,88 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     }[column.align || 'left'];
   }
 
+  onSearch(): void {
+    const query = this.searchQuery().toLowerCase().trim();
+
+    if (!query) {
+      this._filteredData = [...this._originalData];
+    } else {
+      const filtered = this._originalData.filter((item) => {
+        const rec = this.rowRecord(item);
+        return Object.values(rec).some((value) => {
+          if (typeof value === 'object' && value !== null) return false;
+          return String(value).toLowerCase().includes(query);
+        });
+      });
+      this._filteredData = filtered;
+    }
+
+    if (this.totalItems === 0) {
+      this.p = 1;
+    }
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+    this.searchControl.setValue('');
+    this.onSearch();
+    this.searchChange.emit('');
+  }
+
   formatCell(columnKey: string, item: T): string {
     const v = this.cellValue(item, columnKey);
     if (v === null || v === undefined) return '';
     return String(v);
   }
 
+  getCellClass(column: TableColumn, item: T): string {
+    if (!column.cellClass) return '';
+
+    if (typeof column.cellClass === 'function') {
+      return column.cellClass(item) || '';
+    }
+
+    return column.cellClass;
+  }
+
+  getFormattedValue(column: TableColumn, item: T): unknown {
+    const value = this.cellValue(item, column.key);
+    if (value === null || value === undefined) return '';
+    return value;
+  }
+
+  getSizeClass(item: T): string {
+    const size = this.sizeFromItem(item);
+    if (size >= 1073741824) return 'size-danger';
+    if (size >= 524288000) return 'size-warning';
+    return '';
+  }
+
+  getStatusClass(item: T): string {
+    const status = this.rowStatus(item).toLowerCase();
+    if (status === 'running' || status === 'active') return 'status-running';
+    if (status === 'stopped' || status === 'exited' || status === 'inactive' || status === 'dead')
+      return 'status-stopped';
+    return '';
+  }
+
   onRowClick(item: T, event?: MouseEvent): void {
     const key = String(this.rowRecord(item)[this.checkboxKey]);
-    const currentIndex = this.paginatedData.findIndex(
-      (d) => String(this.rowRecord(d)[this.checkboxKey]) === key
-    );
+    const currentIndex = this.useVirtualScroll
+      ? this.sortedFilteredData.findIndex(
+          (d) => String(this.rowRecord(d)[this.checkboxKey]) === key
+        )
+      : this.paginatedData.findIndex((d) => String(this.rowRecord(d)[this.checkboxKey]) === key);
     const lastIndex = this.lastSelectedIndex();
     const isCurrentlySelected = this._selectedKeys.has(key);
 
     if (event && event.shiftKey && lastIndex !== null) {
+      const data = this.useVirtualScroll ? this.sortedFilteredData : this.paginatedData;
       const start = Math.min(lastIndex, currentIndex);
       const end = Math.max(lastIndex, currentIndex);
 
       for (let i = start; i <= end; i++) {
-        const rangeKey = String(this.rowRecord(this.paginatedData[i])[this.checkboxKey]);
+        const rangeKey = String(this.rowRecord(data[i])[this.checkboxKey]);
         if (isCurrentlySelected) {
           this._selectedKeys.delete(rangeKey);
         } else {
@@ -314,6 +539,18 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     this.preview.emit(item);
   }
 
+  onRowAction(action: TableAction, item: T, event: MouseEvent): void {
+    event.stopPropagation();
+
+    if (action.confirmMessage) {
+      if (!confirm(action.confirmMessage)) {
+        return;
+      }
+    }
+
+    this.rowAction.emit({ action: action.id, item });
+  }
+
   get showPreviewButton(): boolean {
     return this.options.showPreviewButton ?? false;
   }
@@ -322,8 +559,25 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     return this.options.showRowActions ?? false;
   }
 
+  get hasRowActions(): boolean {
+    return this.rowActions.length > 0;
+  }
+
+  get rowActions(): TableAction[] {
+    for (const col of this.columns) {
+      if (col.actions && col.actions.length > 0) {
+        return col.actions;
+      }
+    }
+    return [];
+  }
+
   sizeFromItem(item: T): number {
     const s = this.rowRecord(item)['size'];
     return typeof s === 'number' ? s : 0;
+  }
+
+  trackByFn(index: number, item: T): number {
+    return index;
   }
 }

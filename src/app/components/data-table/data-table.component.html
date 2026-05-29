@@ -1,11 +1,32 @@
 <div class="flex flex-col h-full">
-  <div class="table-container">
-    <!-- Fixed Table Header -->
+  <div class="table-container flex flex-col flex-1 min-h-0">
+    @if (options.showSearch) {
+      <div
+        class="search-container py-3 px-4 border-b border-[var(--border-color)] bg-[var(--bg-surface)]"
+      >
+        <div class="search-input-wrapper">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="{{ options.searchPlaceholder ?? 'Search...' }}"
+            [formControl]="searchControl"
+          />
+          @if (searchControl.value) {
+            <button (click)="clearSearch()" class="search-clear-btn">
+              <mat-icon class="clear-icon">close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    }
     @if (options.showHeader && columns.length > 0) {
-      <div class="table-header">
+      <div
+        class="table-header sticky top-0 z-20 w-full bg-[var(--bg-surface)]/95 backdrop-blur-lg border-b border-[var(--border-color)] shrink-0"
+      >
         <div class="flex items-center px-4">
           @if (showCheckbox) {
-            <div class="checkbox-container">
+            <div class="checkbox-container w-10 shrink-0">
               <label class="custom-checkbox">
                 <input
                   type="checkbox"
@@ -20,38 +41,130 @@
             <div class="w-10 shrink-0"></div>
           }
           @for (column of columns; track column.key) {
-            <div
-              class="column-header {{ column.width || 'flex-1' }} {{ getAlignClass(column) }}"
-              [class.sortable]="column.sortable"
-              (click)="onSort(column)"
-            >
-              @if (column.sortable) {
-                <span class="flex items-center gap-1">
+            @if (!column.hidden) {
+              <div
+                class="column-header {{ getColumnWidth(column.key) }} {{ getAlignClass(column) }}"
+                [class.sortable]="column.sortable"
+                [class.resizable]="column.resizable"
+                [style.minWidth]="column.minWidth ?? '80px'"
+                [style.maxWidth]="column.maxWidth ?? '600px'"
+                (click)="onSort(column)"
+              >
+                @if (column.sortable) {
+                  <span class="flex items-center gap-1">
+                    {{ column.label }}
+                    <mat-icon class="sort-icon" [class.active]="isSortActive(column)">
+                      {{ getSortIcon(column) }}
+                    </mat-icon>
+                  </span>
+                } @else {
                   {{ column.label }}
-                  <mat-icon class="sort-icon" [class.active]="isSortActive(column)">
-                    {{ getSortIcon(column) }}
-                  </mat-icon>
-                </span>
-              } @else {
-                {{ column.label }}
-              }
-            </div>
+                }
+                @if (column.resizable) {
+                  <div class="resize-handle" (mousedown)="onResizeStart($event, column)"></div>
+                }
+              </div>
+            }
           }
-          @if (options.showRowActions) {
+          @if (options.showRowActions && hasRowActions) {
             <div class="w-24 shrink-0 text-right pr-4">Actions</div>
           }
         </div>
       </div>
     }
 
-    <!-- Scrollable Table Body -->
-    <div class="flex-1 overflow-auto">
+    <div class="flex-1 overflow-auto min-h-0">
       @if (loading) {
         <div
           class="flex items-center justify-center h-48 bg-white/50 dark:bg-slate-900/20 backdrop-blur-sm"
         >
           <mat-spinner diameter="48"></mat-spinner>
         </div>
+      } @else if (useVirtualScroll) {
+        <cdk-virtual-scroll-viewport [itemSize]="virtualItemSize" class="virtual-scroll-viewport">
+          <div
+            *cdkVirtualFor="let item of sortedFilteredData; trackBy: trackByFn"
+            class="table-row"
+            [class.table-row-hover]="options.hoverable !== false"
+            [class.table-row-selected]="isSelected(item)"
+            (click)="onRowClick(item, $event)"
+            (dblclick)="onRowDoubleClick(item)"
+          >
+            @if (showCheckbox) {
+              <div class="checkbox-container w-10 shrink-0">
+                <label class="custom-checkbox">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(item)"
+                    (change)="toggleSelectItem(item, $any($event.target).checked)"
+                    (click)="$event.stopPropagation()"
+                  />
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+            }
+            @if (showPreviewButton) {
+              <div class="preview-btn-container">
+                <button
+                  (click)="onPreview(item); $event.stopPropagation()"
+                  class="preview-btn"
+                  matTooltip="Preview file"
+                >
+                  <mat-icon fontIcon="visibility" />
+                </button>
+              </div>
+            }
+            @for (column of columns; track column.key) {
+              @if (!column.hidden) {
+                <div
+                  class="column-cell {{ getColumnWidth(column.key) }} {{ getAlignClass(column) }} {{
+                    getCellClass(column, item)
+                  }}"
+                >
+                  @switch (column.format) {
+                    @case ("size") {
+                      <span [class]="getSizeClass(item)">{{ formatSize(sizeFromItem(item)) }}</span>
+                    }
+                    @case ("status") {
+                      <span
+                        class="status-chip"
+                        [class.running]="rowStatus(item) === 'running'"
+                        [class.stopped]="rowStatus(item) !== 'running'"
+                      >
+                        {{ rowStatus(item) }}
+                      </span>
+                    }
+                    @case ("percentage") {
+                      <span>{{ formatCell(column.key, item) }}%</span>
+                    }
+                    @case ("date") {
+                      <span>{{ formatCell(column.key, item) }}</span>
+                    }
+                    @case ("bytes") {
+                      <span>{{ formatSize(sizeFromItem(item)) }}</span>
+                    }
+                    @default {
+                      <span>{{ formatCell(column.key, item) }}</span>
+                    }
+                  }
+                </div>
+              }
+            }
+            @if (options.showRowActions && hasRowActions) {
+              <div class="w-24 shrink-0 flex items-center justify-end gap-2 pr-4">
+                @for (action of rowActions; track action.id) {
+                  <button
+                    [class]="action.class ?? 'row-action-btn'"
+                    [matTooltip]="action.tooltip ?? action.label"
+                    (click)="onRowAction(action, item, $event)"
+                  >
+                    <mat-icon>{{ action.icon ?? "more_horiz" }}</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </cdk-virtual-scroll-viewport>
       } @else {
         <div class="table-body">
           @for (item of paginatedData; track $index) {
@@ -63,7 +176,7 @@
               (dblclick)="onRowDoubleClick(item)"
             >
               @if (showCheckbox) {
-                <div class="checkbox-container">
+                <div class="checkbox-container w-10 shrink-0">
                   <label class="custom-checkbox">
                     <input
                       type="checkbox"
@@ -82,57 +195,73 @@
                     class="preview-btn"
                     matTooltip="Preview file"
                   >
-                    <mat-icon fontIcon="visibility"/>
+                    <mat-icon fontIcon="visibility" />
                   </button>
                 </div>
               }
               @for (column of columns; track column.key) {
-                <div class="column-cell {{ column.width || 'flex-1' }} {{ getAlignClass(column) }}">
-                  @switch (column.key) {
-                    @case ("status") {
-                      <span
-                        class="status-chip"
-                        [class.running]="rowStatus(item) === 'running'"
-                        [class.stopped]="rowStatus(item) !== 'running'"
-                      >
-                        {{ rowStatus(item) }}
-                      </span>
-                    }
-                    @case ("size") {
-                      <span>{{ formatSize(sizeFromItem(item)) }}</span>
-                    }
-                    @default {
-                      <span>{{ formatCell(column.key, item) }}</span>
-                    }
-                  }
-                </div>
-              }
-              @if (options.showRowActions) {
-                <div class="w-24 shrink-0 flex items-center justify-end gap-2 pr-4">
-                  <button
-                    class="p-1.5 rounded-md bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-400 transition-colors"
-                    matTooltip="Clean"
-                    (click)="rowAction.emit({ action: 'clean', item }); $event.stopPropagation()"
+                @if (!column.hidden) {
+                  <div
+                    class="column-cell {{ getColumnWidth(column.key) }} {{
+                      getAlignClass(column)
+                    }} {{ getCellClass(column, item) }}"
                   >
-                    <mat-icon class="icon-sm">delete</mat-icon>
-                  </button>
+                    @switch (column.format) {
+                      @case ("size") {
+                        <span [class]="getSizeClass(item)">{{
+                          formatSize(sizeFromItem(item))
+                        }}</span>
+                      }
+                      @case ("status") {
+                        <span
+                          class="status-chip"
+                          [class.running]="rowStatus(item) === 'running'"
+                          [class.stopped]="rowStatus(item) !== 'running'"
+                        >
+                          {{ rowStatus(item) }}
+                        </span>
+                      }
+                      @case ("percentage") {
+                        <span>{{ formatCell(column.key, item) }}%</span>
+                      }
+                      @case ("date") {
+                        <span>{{ formatCell(column.key, item) }}</span>
+                      }
+                      @case ("bytes") {
+                        <span>{{ formatSize(sizeFromItem(item)) }}</span>
+                      }
+                      @default {
+                        <span>{{ formatCell(column.key, item) }}</span>
+                      }
+                    }
+                  </div>
+                }
+              }
+              @if (options.showRowActions && hasRowActions) {
+                <div class="w-24 shrink-0 flex items-center justify-end gap-2 pr-4">
+                  @for (action of rowActions; track action.id) {
+                    <button
+                      [class]="action.class ?? 'row-action-btn'"
+                      [matTooltip]="action.tooltip ?? action.label"
+                      (click)="onRowAction(action, item, $event)"
+                    >
+                      <mat-icon>{{ action.icon ?? "more_horiz" }}</mat-icon>
+                    </button>
+                  }
                 </div>
               }
             </div>
           } @empty {
             <div class="no-data-msg">
               <mat-icon class="w-15! h-15! text-5xl! mt-4 opacity-20 block mx-auto">inbox</mat-icon>
-              No items found to display
+              {{ options.emptyMessage ?? "No items found to display" }}
             </div>
           }
         </div>
       }
     </div>
 
-    <!-- Pagination controls -->
-    <div
-      class="table-footer border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/30"
-    >
+    @if (!useVirtualScroll) {
       <app-pagination
         [currentPage]="p"
         [pageSize]="pageSize"
@@ -141,8 +270,7 @@
         [showPageSizeSelector]="showPageSizeSelector"
         (pageChange)="onPageChange($event)"
         (pageSizeChange)="onPageSizeChange($event)"
-      >
-      </app-pagination>
-    </div>
+      />
+    }
   </div>
 </div>

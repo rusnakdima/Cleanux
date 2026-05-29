@@ -12,9 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 
 /* services */
 import { JunkCleanerService } from '@services/junk-cleaner.service';
-
-/* components */
-import { HeaderComponent } from '@components/header/header.component';
+import { NotificationService } from '@services/notification.service';
 
 /* models */
 import {
@@ -37,11 +35,11 @@ import { formatSize } from '@shared/utils/format.util';
     MatTooltipModule,
     MatExpansionModule,
     MatCardModule,
-    HeaderComponent,
   ],
   templateUrl: './advanced-cleaner.view.html',
 })
 export class AdvancedCleanerView implements OnInit {
+  private notification = inject(NotificationService);
   private junkCleanerService = inject(JunkCleanerService);
 
   formatSize = formatSize;
@@ -124,8 +122,9 @@ export class AdvancedCleanerView implements OnInit {
       this.saveLastCleaned(category);
       await this.loadJunkSummary();
     } catch (error) {
-      alert(
-        `Failed to clean ${categoryLabel}: ${error instanceof Error ? error.message : String(error)}`
+      this.notification.error(
+        `Failed to clean ${categoryLabel}`,
+        error instanceof Error ? error.message : String(error)
       );
     } finally {
       this.loading.set(false);

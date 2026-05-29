@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RepairService, RepairItem } from '@services/repair.service';
-import { HeaderComponent } from '@components/header/header.component';
+import { NotificationService } from '@services/notification.service';
 
 type RepairTab = 'symlinks' | 'packages' | 'cache' | 'permissions';
 
@@ -21,12 +21,12 @@ type RepairTab = 'symlinks' | 'packages' | 'cache' | 'permissions';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatTabsModule,
-    HeaderComponent,
   ],
   templateUrl: './system-repair.view.html',
 })
 export class SystemRepairView {
   private repairService = inject(RepairService);
+  private notification = inject(NotificationService);
 
   activeTab = signal<RepairTab>('symlinks');
   loading = signal(false);
@@ -107,9 +107,7 @@ export class SystemRepairView {
       await this.repairService.removeBrokenSymlink(item.path);
       await this.loadSymlinks();
     } catch (error: unknown) {
-      alert(
-        'Failed to remove symlink: ' + (error instanceof Error ? error.message : String(error))
-      );
+      this.notification.error('Failed to remove symlink', error);
     }
   }
 
@@ -135,7 +133,7 @@ export class SystemRepairView {
       await this.repairService.removeOrphanedPackage(item.path);
       await this.loadPackages();
     } catch (error: unknown) {
-      alert('Failed to purge package: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error('Failed to purge package', error);
     }
   }
 

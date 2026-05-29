@@ -1,6 +1,8 @@
-<div class="pagination-container">
+<div
+  class="flex items-center justify-between gap-4 px-4 pt-3 pb-[22px] mb-2 w-full border-t border-[var(--border-color)] bg-[var(--bg-surface)]/80 backdrop-blur-lg"
+>
   <div class="flex items-center gap-4">
-    <div class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+    <div class="text-sm font-medium text-[var(--text-secondary)] whitespace-nowrap">
       Showing {{ (p() - 1) * pageSize() + 1 }}-{{
         p() * pageSize() > totalItems() ? totalItems() : p() * pageSize()
       }}
@@ -11,7 +13,7 @@
       <select
         [value]="pageSize()"
         (change)="onPageSizeChange($any($event.target).value)"
-        class="pagination-select"
+        class="h-8 px-2 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/50 cursor-pointer"
       >
         @for (size of pageSizeOptions(); track size) {
           <option [value]="size">{{ size }} per page</option>
@@ -21,38 +23,42 @@
   </div>
 
   @if (totalPages() > 0) {
-    <div class="flex items-center gap-1.5">
+    <div class="flex items-center gap-1">
       <button
         mat-icon-button
         (click)="goToPage(1)"
         [disabled]="p() === 1"
-        class="pagination-nav-btn"
+        class="!w-6 !h-6 !min-w-6 !rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="First page"
       >
-        <mat-icon class="pagination-icon">first_page</mat-icon>
+        <mat-icon class="text-xl">first_page</mat-icon>
       </button>
 
       <button
         mat-icon-button
         (click)="previousPage()"
         [disabled]="p() === 1"
-        class="pagination-nav-btn"
+        class="!w-6 !h-6 !min-w-6 !rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="Previous page"
       >
-        <mat-icon class="pagination-icon">chevron_left</mat-icon>
+        <mat-icon class="text-xl">chevron_left</mat-icon>
       </button>
 
       <div class="flex items-center gap-1 mx-1">
         @for (page of pages(); track $index) {
           @if (page === "...") {
-            <span class="pagination-ellipsis">...</span>
+            <span class="w-6 h-6 flex items-center justify-center text-[var(--text-muted)]"
+              >...</span
+            >
           } @else {
             <button
               (click)="goToPage(page)"
-              class="pagination-page-btn transition-all duration-200"
-              [class.pagination-page-btn-active]="p() === page"
+              class="w-6 h-6 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
+              [class.bg-[var(--accent-primary)]]="p() === page"
+              [class.text-white]="p() === page"
+              [class.text-[var(--text-secondary)]]="p() !== page"
+              [class.hover:bg-[var(--bg-hover)]]="p() !== page"
               [attr.aria-current]="p() === page ? 'page' : null"
-              [attr.aria-label]="'Page ' + page"
             >
               {{ page }}
             </button>
@@ -64,20 +70,20 @@
         mat-icon-button
         (click)="nextPage()"
         [disabled]="p() === totalPages()"
-        class="pagination-nav-btn"
+        class="!w-6 !h-6 !min-w-6 !rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="Next page"
       >
-        <mat-icon class="pagination-icon">chevron_right</mat-icon>
+        <mat-icon class="text-xl">chevron_right</mat-icon>
       </button>
 
       <button
         mat-icon-button
         (click)="goToPage(totalPages())"
         [disabled]="p() === totalPages()"
-        class="pagination-nav-btn"
+        class="!w-6 !h-6 !min-w-6 !rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="Last page"
       >
-        <mat-icon class="pagination-icon">last_page</mat-icon>
+        <mat-icon class="text-xl">last_page</mat-icon>
       </button>
     </div>
   }

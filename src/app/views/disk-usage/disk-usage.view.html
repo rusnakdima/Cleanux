@@ -1,88 +1,93 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <div class="glass-card p-6">
-    <div class="flex items-center gap-4">
-      <mat-form-field class="flex-1" appearance="outline">
-        <mat-label>Directory Path</mat-label>
-        <input matInput [(ngModel)]="rootPath" placeholder="Enter directory path to scan" />
-      </mat-form-field>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="scanDirectory()"
-        [disabled]="loading() || !rootPath()"
-        class="scan-button"
-      >
-        @if (loading()) {
-          <mat-spinner diameter="20"></mat-spinner>
-        } @else {
-          <mat-icon class="icon-primary" fontIcon="search"/>
-          Scan
-        }
-      </button>
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="glass-card matte-surface border-trace mb-6">
+    <div class="glass-card-header">
+      <div class="flex items-center gap-4 flex-1">
+        <input
+          type="text"
+          [(ngModel)]="rootPath"
+          placeholder="Enter directory path to scan"
+          class="input flex-1"
+        />
+        <button
+          (click)="scanDirectory()"
+          [disabled]="loading() || !rootPath()"
+          class="btn btn-primary"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <mat-icon class="icon-sm">search</mat-icon>
+            Scan
+          }
+        </button>
+      </div>
     </div>
   </div>
 
   @if (directoryTree()) {
-    <div class="glass-card p-6">
-      <div class="flex items-center gap-2 mb-6 flex-wrap">
-        @for (crumb of breadcrumbs(); track crumb.path; let i = $index) {
-          @if (i > 0) {
-            <mat-icon class="icon-muted" fontIcon="chevron_right"/>
+    <div class="glass-card matte-surface border-trace">
+      <div class="glass-card-header">
+        <div class="flex items-center gap-2 flex-wrap">
+          @for (crumb of breadcrumbs(); track crumb.path; let i = $index) {
+            @if (i > 0) {
+              <mat-icon class="icon-sm text-[var(--text-muted)]">chevron_right</mat-icon>
+            }
+            <button
+              (click)="navigateToBreadcrumb(i)"
+              class="text-sm"
+              [class.font-bold]="i === breadcrumbs().length - 1"
+              [class.text-[var(--accent-primary)]]]="i === breadcrumbs().length - 1"
+              [class.text-[var(--text-secondary)]]]="i !== breadcrumbs().length - 1"
+            >
+              {{ crumb.name }}
+            </button>
           }
-          <button
-            (click)="navigateToBreadcrumb(i)"
-            [class.font-bold]="i === breadcrumbs().length - 1"
-            class="text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
-          >
-            {{ crumb.name }}
-          </button>
-        }
-      </div>
-
-      <div class="mb-4 text-sm text-slate-500 dark:text-slate-400">Path: {{ currentPath() }}</div>
-
-      @if (currentNode(); as node) {
-        <div class="mb-4 flex items-center gap-2">
-          <span class="text-slate-500 dark:text-slate-400">Total Size:</span>
-          <span class="font-bold text-lg">{{ formatSize(node.size) }}</span>
         </div>
-      }
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        @for (item of treemapData(); track item.node.path) {
-          <div
-            class="treemap-item bg-gradient-to-br {{
-              getDepthColor(item.depth)
-            }} rounded-lg p-4 cursor-pointer hover:scale-105 transition-transform"
-            [class.has-children]="item.node.children.length > 0"
-            (click)="item.node.children.length > 0 && navigateToNode(item.node)"
-          >
-            <div class="flex flex-col h-full">
-              <div class="text-white font-medium text-sm truncate" [matTooltip]="item.node.name">
-                {{ item.node.name }}
-              </div>
-              <div class="text-white/80 text-xs mt-1">
-                {{ formatSize(item.node.size) }}
-              </div>
-              <div class="text-white/60 text-xs mt-auto pt-2">
-                {{ item.percentage | number: "1.1-1" }}%
-              </div>
-              @if (item.node.children.length > 0) {
-                <div class="text-white/50 text-xs mt-1 flex items-center gap-1">
-                  <mat-icon class="icon-xs" fontIcon="folder_open"/>
-                  {{ item.node.children.length }} items
-                </div>
-              }
-            </div>
+      </div>
+      <div class="glass-card-body">
+        @if (currentNode(); as node) {
+          <div class="mb-4 flex items-center gap-2">
+            <span class="text-sm text-[var(--text-muted)]">Total Size:</span>
+            <span class="font-bold text-lg text-[var(--text-primary)]">{{
+              formatSize(node.size)
+            }}</span>
           </div>
         }
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          @for (item of treemapData(); track item.node.path) {
+            <div
+              class="category-card matte-surface border-trace p-4"
+              [class.opacity-60]="item.node.children.length === 0"
+              (click)="item.node.children.length > 0 && navigateToNode(item.node)"
+            >
+              <div class="flex flex-col h-full">
+                <div class="font-semibold text-sm truncate mb-1" [matTooltip]="item.node.name">
+                  {{ item.node.name }}
+                </div>
+                <div class="text-sm text-[var(--text-secondary)]">
+                  {{ formatSize(item.node.size) }}
+                </div>
+                <div class="text-xs text-[var(--text-muted)] mt-auto pt-2">
+                  {{ item.percentage | number: "1.1-1" }}%
+                </div>
+                @if (item.node.children.length > 0) {
+                  <div class="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-1">
+                    <mat-icon class="icon-xs">folder_open</mat-icon>
+                    {{ item.node.children.length }} items
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
       </div>
     </div>
   }
 
   @if (loading()) {
     <div class="flex items-center justify-center h-64">
-      <mat-spinner diameter="48"></mat-spinner>
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
     </div>
   }
 </div>

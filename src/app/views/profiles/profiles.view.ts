@@ -5,25 +5,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProfileService } from '@services/profile.service';
+import { NotificationService } from '@services/notification.service';
 import { CleaningProfile, createEmptyProfile } from '@models/profile.model';
-import { HeaderComponent } from '@components/header/header.component';
 
 @Component({
   selector: 'app-profiles',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    HeaderComponent,
-  ],
+  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
   templateUrl: './profiles.view.html',
-  styleUrl: './profiles.view.css',
 })
 export class ProfilesView implements OnInit {
   private profileService = inject(ProfileService);
+  private notification = inject(NotificationService);
 
   profiles = signal<CleaningProfile[]>([]);
   isLoading = signal(false);
@@ -67,7 +60,7 @@ export class ProfilesView implements OnInit {
   async saveProfile() {
     const profile = this.editingProfile();
     if (!profile || !profile.name.trim()) {
-      alert('Profile name is required');
+      this.notification.alert('Profile name is required');
       return;
     }
 
@@ -76,9 +69,9 @@ export class ProfilesView implements OnInit {
       await this.profileService.saveProfile(profile);
       await this.loadProfiles();
       this.cancelEdit();
-      alert('Profile saved successfully');
+      this.notification.success('Profile saved successfully');
     } catch (e) {
-      alert('Failed to save profile');
+      this.notification.error('Failed to save profile', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -95,7 +88,7 @@ export class ProfilesView implements OnInit {
         this.selectedProfile.set(null);
       }
     } catch (e) {
-      alert('Failed to delete profile');
+      this.notification.error('Failed to delete profile', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -107,9 +100,9 @@ export class ProfilesView implements OnInit {
     this.isLoading.set(true);
     try {
       const result = await this.profileService.applyProfile(profile.name);
-      alert(`Profile applied: ${result}`);
+      this.notification.success(`Profile applied: ${result}`);
     } catch (e) {
-      alert('Failed to apply profile');
+      this.notification.error('Failed to apply profile', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -130,9 +123,9 @@ export class ProfilesView implements OnInit {
       profile.name = `${profile.name} (imported)`;
       await this.profileService.saveProfile(profile);
       await this.loadProfiles();
-      alert('Profile imported successfully');
+      this.notification.success('Profile imported successfully');
     } catch (e) {
-      alert('Failed to import profile');
+      this.notification.error('Failed to import profile', e);
     } finally {
       this.isLoading.set(false);
       input.value = '';

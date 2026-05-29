@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,12 +16,13 @@ import {
   ExecutionHistoryEntry,
 } from '@services/automation.service';
 import { ProfileService } from '@services/profile.service';
-import { HeaderComponent } from '@components/header/header.component';
 import { CleaningProfile } from '@models/profile.model';
+import { NotificationService } from '@services/notification.service';
 
 @Component({
   selector: 'app-automation',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -32,14 +33,13 @@ import { CleaningProfile } from '@models/profile.model';
     MatSlideToggleModule,
     MatSelectModule,
     MatDialogModule,
-    HeaderComponent,
   ],
   templateUrl: './automation.view.html',
-  styleUrl: './automation.view.css',
 })
 export class AutomationView implements OnInit {
   private automationService = inject(AutomationService);
   private profileService = inject(ProfileService);
+  private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
 
   quickActions = signal<QuickAction[]>([]);
@@ -92,9 +92,9 @@ export class AutomationView implements OnInit {
     try {
       await this.automationService.executeAction(action.id);
       await this.loadData();
-      alert(`"${action.name}" executed successfully`);
+      this.notification.success(`"${action.name}" executed successfully`);
     } catch (e) {
-      alert('Failed to execute action: ' + (e instanceof Error ? e.message : String(e)));
+      this.notification.error('Failed to execute action', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -106,9 +106,9 @@ export class AutomationView implements OnInit {
     try {
       await this.automationService.executeRecipe(recipe.id);
       await this.loadData();
-      alert(`Recipe "${recipe.name}" executed successfully`);
+      this.notification.success(`Recipe "${recipe.name}" executed successfully`);
     } catch (e) {
-      alert('Failed to execute recipe: ' + (e instanceof Error ? e.message : String(e)));
+      this.notification.error('Failed to execute recipe', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -120,7 +120,7 @@ export class AutomationView implements OnInit {
       await this.automationService.saveRecipe(updated);
       await this.loadData();
     } catch (e) {
-      alert('Failed to update recipe');
+      this.notification.error('Failed to update recipe', e);
     }
   }
 
@@ -131,7 +131,7 @@ export class AutomationView implements OnInit {
       await this.automationService.deleteRecipe(recipe.id);
       await this.loadData();
     } catch (e) {
-      alert('Failed to delete recipe');
+      this.notification.error('Failed to delete recipe', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -198,11 +198,11 @@ export class AutomationView implements OnInit {
   async saveRecipe() {
     const name = this.newRecipeName();
     if (!name.trim()) {
-      alert('Recipe name is required');
+      this.notification.alert('Recipe name is required');
       return;
     }
     if (this.newRecipeSteps().length === 0) {
-      alert('At least one step is required');
+      this.notification.alert('At least one step is required');
       return;
     }
 
@@ -219,9 +219,9 @@ export class AutomationView implements OnInit {
       await this.automationService.saveRecipe(recipe);
       await this.loadData();
       this.closeRecipeBuilder();
-      alert('Recipe saved successfully');
+      this.notification.success('Recipe saved successfully');
     } catch (e) {
-      alert('Failed to save recipe');
+      this.notification.error('Failed to save recipe', e);
     } finally {
       this.isLoading.set(false);
     }

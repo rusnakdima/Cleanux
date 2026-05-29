@@ -1,4 +1,3 @@
-/* sys lib */
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,24 +7,31 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-/* materials */
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { HeaderComponent } from '@components/header/header.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
-/* services */
 import { ReportService } from '@services/report.service';
 
-/* models */
 import { CleaningReport, SnapshotComparison } from '@models/report.model';
 import { formatSize } from '@shared/utils/format.util';
+import { DataTableComponent } from '@components/data-table/data-table.component';
+import { TableColumn, TableOptions } from '@models/data-table.model';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, HeaderComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    DataTableComponent,
+  ],
   templateUrl: './reports.view.html',
 })
 export class ReportsView implements OnInit {
@@ -41,6 +47,9 @@ export class ReportsView implements OnInit {
   showComparison = signal(false);
   comparingReportIds = signal<{ before?: number; after?: number }>({});
   exportHtml = signal<string | null>(null);
+
+  currentPage = signal(1);
+  pageSize = signal(15);
 
   reportsWithChart = computed(() => {
     const data = this.reports();
@@ -72,6 +81,35 @@ export class ReportsView implements OnInit {
 
     return `M ${points.join(' L ')}`;
   });
+
+  columns: TableColumn[] = [
+    { key: 'date', label: 'Date', width: 'flex-1', sortable: true },
+    { key: 'items_cleaned', label: 'Items', width: 'w-24', sortable: true, align: 'center' },
+    { key: 'space_reclaimed', label: 'Reclaimed', width: 'w-32', sortable: true, align: 'center' },
+    { key: 'duration', label: 'Duration', width: 'w-24', sortable: true, align: 'center' },
+  ];
+
+  getTableOptions(): TableOptions {
+    return {
+      showHeader: true,
+      showCheckbox: false,
+      hoverable: true,
+      showReloadButton: true,
+      showSelectedActions: false,
+      showPreviewButton: false,
+      showSearch: true,
+      searchPlaceholder: 'Search reports...',
+    };
+  }
+
+  onPageChange(page: number) {
+    this.currentPage.set(page);
+  }
+
+  onPageSizeChange(size: number) {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
+  }
 
   ngOnInit() {
     this.loadReports();
@@ -161,6 +199,14 @@ export class ReportsView implements OnInit {
     });
   }
 
+  formatReportDate(report: CleaningReport): string {
+    return this.formatDate(report.date);
+  }
+
+  formatReportSpace(report: CleaningReport): string {
+    return this.formatSize(report.space_reclaimed);
+  }
+
   getChartPathForReport(reportId: number): string {
     const data = this.reportsWithChart();
     if (data.length < 2) return '';
@@ -186,5 +232,11 @@ export class ReportsView implements OnInit {
     const y = padding + chartHeight - (spaceChange / maxSpace) * chartHeight;
 
     return `M ${x},${chartHeight + padding} L ${x},${y}`;
+  }
+
+  onReportAction(event: { action: string; item: CleaningReport }): void {
+    if (event.action === 'export') {
+      this.exportHtmlReport(event.item.id!);
+    }
   }
 }

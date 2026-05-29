@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal,
+  inject,
+  OnInit,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,7 +13,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { HeaderComponent } from '@components/header/header.component';
 import {
   KernelCleanerService,
   KernelInfo,
@@ -14,6 +20,7 @@ import {
   BootSpaceInfo,
 } from '@services/kernel-cleaner.service';
 import { formatSize } from '@shared/utils/format.util';
+import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({
   selector: 'app-kernel-cleaner-view',
@@ -27,7 +34,7 @@ import { formatSize } from '@shared/utils/format.util';
     MatTooltipModule,
     MatCheckboxModule,
     MatProgressBarModule,
-    HeaderComponent,
+    PaginationComponent,
   ],
   templateUrl: './kernel-cleaner.view.html',
 })
@@ -46,6 +53,39 @@ export class KernelCleanerView implements OnInit {
   bootSpaceInfo = signal<BootSpaceInfo | null>(null);
   showGrubUpdateNotice = signal(false);
   actionResult = signal<string | null>(null);
+
+  kernelsPage = signal(1);
+  kernelsPageSize = signal(15);
+  initramfsPage = signal(1);
+  initramfsPageSize = signal(15);
+
+  paginatedAllKernels = computed(() => {
+    const start = (this.kernelsPage() - 1) * this.kernelsPageSize();
+    return this.allKernels().slice(start, start + this.kernelsPageSize());
+  });
+
+  paginatedOldInitramfs = computed(() => {
+    const start = (this.initramfsPage() - 1) * this.initramfsPageSize();
+    return this.oldInitramfs().slice(start, start + this.initramfsPageSize());
+  });
+
+  onKernelsPageChange(page: number) {
+    this.kernelsPage.set(page);
+  }
+
+  onKernelsPageSizeChange(size: number) {
+    this.kernelsPageSize.set(size);
+    this.kernelsPage.set(1);
+  }
+
+  onInitramfsPageChange(page: number) {
+    this.initramfsPage.set(page);
+  }
+
+  onInitramfsPageSizeChange(size: number) {
+    this.initramfsPageSize.set(size);
+    this.initramfsPage.set(1);
+  }
 
   async ngOnInit() {
     await this.loadData();

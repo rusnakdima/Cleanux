@@ -1,25 +1,19 @@
-<div class="app-container">
-  @if (isMobileMenuOpen()) {
-    <div class="mobile-overlay" (click)="closeMobileMenu()"></div>
-  }
+<div
+  class="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] font-sans flex flex-col overflow-x-hidden antialiased"
+>
+  <app-header-bar
+    [title]="pageTitle()"
+    [breadcrumb]="pageBreadcrumb()"
+    [showBack]="showBackButton()"
+    (backClick)="onBack()"
+  >
+  </app-header-bar>
 
-  <app-sidebar 
-    [isOpen]="isMobileMenuOpen()" 
-    [isCollapsed]="isCollapsed()"
-    (close)="closeMobileMenu()">
-  </app-sidebar>
-
-  <main class="main-content" [class.sidebar-collapsed]="isCollapsed()">
-    <app-top-header
-      [title]="pageTitle()"
-      [breadcrumb]="pageBreadcrumb()"
-      [isCollapsed]="isCollapsed()"
-      (mobileMenuToggle)="toggleMobileMenu()"
-      (sidebarToggle)="toggleSidebar()">
-    </app-top-header>
-
-    <div class="page-content">
+  <div class="flex-1 flex flex-col min-h-0 relative pt-14">
+    <div class="flex-1 min-h-0 overflow-y-auto">
       <router-outlet></router-outlet>
     </div>
-  </main>
+  </div>
+
+  <app-bottom-nav></app-bottom-nav>
 </div>

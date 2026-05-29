@@ -1,21 +1,17 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+<div class="view-layout max-w-4xl mx-auto">
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center gap-4">
-      <button
-        (click)="loadSummary()"
-        class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        matTooltip="Refresh"
-      >
-        <mat-icon fontIcon="refresh"/>
+      <button (click)="loadSummary()" class="btn btn-ghost" matTooltip="Refresh">
+        <mat-icon fontIcon="refresh" />
       </button>
-      <span class="text-sm text-slate-500"
+      <span class="text-sm text-[var(--text-secondary)]"
         >Clean Docker and Podman containers, images, and volumes</span
       >
     </div>
     @if (summary()) {
       <button
         (click)="cleanAllDockerContainers()"
-        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        class="btn btn-danger"
         [disabled]="loading() || summary()!.docker_containers_count === 0"
       >
         Clean All Docker Containers ({{ summary()!.docker_containers_count }})
@@ -33,34 +29,32 @@
         <div class="pt-4">
           @if (summary()?.docker_installed) {
             <div class="grid grid-cols-3 gap-4 mb-6">
-              <div class="glass-card p-4">
-                <div class="text-sm text-slate-500 mb-1">Images Size</div>
-                <div class="text-2xl font-bold text-slate-900 dark:text-white">
+              <div class="stat-card matte-surface border-trace p-4">
+                <div class="text-sm text-[var(--text-secondary)] mb-1">Images Size</div>
+                <div class="text-2xl font-bold text-[var(--text-primary)]">
                   {{ formatSize(summary()!.docker_images_size) }}
                 </div>
               </div>
-              <div class="glass-card p-4">
-                <div class="text-sm text-slate-500 mb-1">Containers</div>
-                <div class="text-2xl font-bold text-slate-900 dark:text-white">
+              <div class="stat-card matte-surface border-trace p-4">
+                <div class="text-sm text-[var(--text-secondary)] mb-1">Containers</div>
+                <div class="text-2xl font-bold text-[var(--text-primary)]">
                   {{ summary()!.docker_containers_count }}
                 </div>
               </div>
-              <div class="glass-card p-4">
-                <div class="text-sm text-slate-500 mb-1">Volumes Size</div>
-                <div class="text-2xl font-bold text-slate-900 dark:text-white">
+              <div class="stat-card matte-surface border-trace p-4">
+                <div class="text-sm text-[var(--text-secondary)] mb-1">Volumes Size</div>
+                <div class="text-2xl font-bold text-[var(--text-primary)]">
                   {{ formatSize(summary()!.docker_volumes_size) }}
                 </div>
               </div>
             </div>
 
             <div class="space-y-4">
-              <div class="glass-card p-6">
+              <div class="glass-card matte-surface border-trace p-6">
                 <div class="flex items-center justify-between mb-4">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                      System Prune
-                    </h3>
-                    <p class="text-sm text-slate-500">
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">System Prune</h3>
+                    <p class="text-sm text-[var(--text-secondary)]">
                       Remove all stopped containers, unused networks, and dangling images
                     </p>
                   </div>
@@ -69,21 +63,21 @@
                   <button
                     (click)="previewDockerPrune(false)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    class="btn btn-primary disabled:opacity-50"
                   >
                     Preview
                   </button>
                   <button
                     (click)="dockerSystemPrune(false)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    class="btn btn-primary disabled:opacity-50"
                   >
                     Prune
                   </button>
                   <button
                     (click)="dockerSystemPrune(true)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                    class="btn btn-danger"
                     matTooltip="Warning: Removes ALL unused images"
                   >
                     Prune All (-a)
@@ -91,27 +85,27 @@
                 </div>
               </div>
 
-              <div class="glass-card p-6">
+              <div class="glass-card matte-surface border-trace p-6">
                 <div class="flex items-center justify-between mb-4">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                      Image Prune
-                    </h3>
-                    <p class="text-sm text-slate-500">Remove dangling images to free up space</p>
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">Image Prune</h3>
+                    <p class="text-sm text-[var(--text-secondary)]">
+                      Remove dangling images to free up space
+                    </p>
                   </div>
                 </div>
                 <div class="flex gap-4">
                   <button
                     (click)="dockerImagePrune(false)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    class="btn btn-primary disabled:opacity-50"
                   >
                     Prune Images
                   </button>
                   <button
                     (click)="dockerImagePrune(true)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                    class="btn btn-danger"
                     matTooltip="Warning: Removes ALL unused images"
                   >
                     Prune All (-a)
@@ -119,38 +113,38 @@
                 </div>
               </div>
 
-              <div class="glass-card p-6">
+              <div class="glass-card matte-surface border-trace p-6">
                 <div class="flex items-center justify-between">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">
                       Container Prune
                     </h3>
-                    <p class="text-sm text-slate-500">Remove all stopped containers</p>
+                    <p class="text-sm text-[var(--text-secondary)]">
+                      Remove all stopped containers
+                    </p>
                   </div>
                   <button
                     (click)="dockerContainerPrune()"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    class="btn btn-primary disabled:opacity-50"
                   >
                     Prune Containers
                   </button>
                 </div>
               </div>
 
-              <div class="glass-card p-6">
+              <div class="glass-card matte-surface border-trace p-6">
                 <div class="flex items-center justify-between">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                      Volume Prune
-                    </h3>
-                    <p class="text-sm text-slate-500">
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">Volume Prune</h3>
+                    <p class="text-sm text-[var(--text-secondary)]">
                       Remove all unused volumes (data will be lost!)
                     </p>
                   </div>
                   <button
                     (click)="dockerVolumePrune()"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                    class="btn btn-danger disabled:opacity-50"
                   >
                     Prune Volumes
                   </button>
@@ -158,27 +152,25 @@
               </div>
 
               @if (dockerPreview()) {
-                <div class="glass-card p-6 bg-blue-50 dark:bg-blue-900/20">
-                  <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                    Preview (Dry Run)
-                  </h3>
-                  <pre class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{
+                <div class="glass-card p-6 bg-info/10">
+                  <h3 class="text-lg font-semibold text-info mb-2">Preview (Dry Run)</h3>
+                  <pre class="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{{
                     dockerPreview()
                   }}</pre>
                 </div>
               }
 
               @if (dockerResult()) {
-                <div class="glass-card p-6">
-                  <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Result</h3>
-                  <pre class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{
+                <div class="glass-card matte-surface border-trace p-6">
+                  <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Result</h3>
+                  <pre class="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{{
                     dockerResult()
                   }}</pre>
                 </div>
               }
             </div>
           } @else {
-            <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+            <div class="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
               <mat-icon class="icon-4xl mb-4">info</mat-icon>
               <p class="text-lg font-medium">Docker is not installed</p>
               <p class="text-sm mt-2">Install Docker to manage containers</p>
@@ -191,28 +183,26 @@
         <div class="pt-4">
           @if (summary()?.podman_installed) {
             <div class="grid grid-cols-2 gap-4 mb-6">
-              <div class="glass-card p-4">
-                <div class="text-sm text-slate-500 mb-1">Images Size</div>
-                <div class="text-2xl font-bold text-slate-900 dark:text-white">
+              <div class="stat-card matte-surface border-trace p-4">
+                <div class="text-sm text-[var(--text-secondary)] mb-1">Images Size</div>
+                <div class="text-2xl font-bold text-[var(--text-primary)]">
                   {{ formatSize(summary()!.podman_images_size) }}
                 </div>
               </div>
-              <div class="glass-card p-4">
-                <div class="text-sm text-slate-500 mb-1">Containers</div>
-                <div class="text-2xl font-bold text-slate-900 dark:text-white">
+              <div class="stat-card matte-surface border-trace p-4">
+                <div class="text-sm text-[var(--text-secondary)] mb-1">Containers</div>
+                <div class="text-2xl font-bold text-[var(--text-primary)]">
                   {{ summary()!.podman_containers_count }}
                 </div>
               </div>
             </div>
 
             <div class="space-y-4">
-              <div class="glass-card p-6">
+              <div class="glass-card matte-surface border-trace p-6">
                 <div class="flex items-center justify-between mb-4">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                      System Prune
-                    </h3>
-                    <p class="text-sm text-slate-500">
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">System Prune</h3>
+                    <p class="text-sm text-[var(--text-secondary)]">
                       Remove all stopped containers, unused networks, and dangling images
                     </p>
                   </div>
@@ -221,14 +211,14 @@
                   <button
                     (click)="podmanSystemPrune(false)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    class="btn btn-primary disabled:opacity-50"
                   >
                     Prune
                   </button>
                   <button
                     (click)="podmanSystemPrune(true)"
                     [disabled]="loading()"
-                    class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                    class="btn btn-danger"
                     matTooltip="Warning: Removes ALL unused images"
                   >
                     Prune All (-a)
@@ -236,26 +226,26 @@
                 </div>
               </div>
 
-              <div class="glass-card p-6">
+              <div class="glass-card matte-surface border-trace p-6">
                 <div class="flex items-center justify-between">
                   <div>
-                    <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                      Image Prune
-                    </h3>
-                    <p class="text-sm text-slate-500">Remove dangling images to free up space</p>
+                    <h3 class="text-lg font-semibold text-[var(--text-primary)]">Image Prune</h3>
+                    <p class="text-sm text-[var(--text-secondary)]">
+                      Remove dangling images to free up space
+                    </p>
                   </div>
                   <div class="flex gap-4">
                     <button
                       (click)="podmanImagePrune(false)"
                       [disabled]="loading()"
-                      class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                      class="btn btn-primary disabled:opacity-50"
                     >
                       Prune Images
                     </button>
                     <button
                       (click)="podmanImagePrune(true)"
                       [disabled]="loading()"
-                      class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                      class="btn btn-danger"
                       matTooltip="Warning: Removes ALL unused images"
                     >
                       Prune All (-a)
@@ -265,27 +255,25 @@
               </div>
 
               @if (podmanPreview()) {
-                <div class="glass-card p-6 bg-blue-50 dark:bg-blue-900/20">
-                  <h3 class="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                    Preview (Dry Run)
-                  </h3>
-                  <pre class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{
+                <div class="glass-card p-6 bg-info/10">
+                  <h3 class="text-lg font-semibold text-info mb-2">Preview (Dry Run)</h3>
+                  <pre class="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{{
                     podmanPreview()
                   }}</pre>
                 </div>
               }
 
               @if (podmanResult()) {
-                <div class="glass-card p-6">
-                  <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Result</h3>
-                  <pre class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{{
+                <div class="glass-card matte-surface border-trace p-6">
+                  <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-2">Result</h3>
+                  <pre class="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">{{
                     podmanResult()
                   }}</pre>
                 </div>
               }
             </div>
           } @else {
-            <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+            <div class="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
               <mat-icon class="icon-4xl mb-4">info</mat-icon>
               <p class="text-lg font-medium">Podman is not installed</p>
               <p class="text-sm mt-2">Install Podman to manage containers</p>

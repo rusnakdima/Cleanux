@@ -1,25 +1,18 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
+<div class="view-layout max-w-4xl mx-auto">
   <mat-tab-group (selectedIndexChange)="onTabChange($event)" class="repair-tabs">
     <mat-tab label="Symlinks">
       <div class="pt-4">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
-            <button
-              (click)="loadSymlinks()"
-              class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              matTooltip="Refresh"
-            >
-              <mat-icon fontIcon="refresh"/>
+            <button (click)="loadSymlinks()" class="btn btn-ghost" matTooltip="Refresh">
+              <mat-icon fontIcon="refresh" />
             </button>
-            <span class="text-sm text-slate-500">{{ symlinkCount() }} broken symlinks found</span>
+            <span class="text-sm text-[var(--text-muted)]"
+              >{{ symlinkCount() }} broken symlinks found</span
+            >
           </div>
           @if (symlinksData().length > 0) {
-            <button
-              (click)="fixAllSymlinks()"
-              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Fix All
-            </button>
+            <button (click)="fixAllSymlinks()" class="btn btn-danger">Fix All</button>
           }
         </div>
 
@@ -28,39 +21,37 @@
             <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
           </div>
         } @else if (symlinksData().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="icon-4xl mb-4" fontIcon="link_off"/>
+          <div class="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
+            <mat-icon class="icon-4xl mb-4" fontIcon="link_off" />
             <p class="text-lg font-medium">No broken symlinks found</p>
           </div>
         } @else {
           <div class="space-y-2">
             @for (item of symlinksData(); track item.path) {
               <div
-                class="glass-card p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                class="glass-card p-4 flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon [class]="getSeverityColor(item.severity)" [fontIcon]="getSeverityIcon(item.severity)"></mat-icon>
+                  <mat-icon
+                    [class]="getSeverityColor(item.severity)"
+                    [fontIcon]="getSeverityIcon(item.severity)"
+                  ></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
-                      class="font-medium text-slate-900 dark:text-white truncate"
+                      class="font-medium text-[var(--text-primary)] truncate"
                       [matTooltip]="item.path"
                       >{{ item.path }}</span
                     >
                     @if (item.description) {
                       <span
-                        class="text-xs text-slate-500 dark:text-slate-400 truncate"
+                        class="text-xs text-[var(--text-muted)] truncate"
                         [matTooltip]="item.description"
                         >{{ item.description }}</span
                       >
                     }
                   </div>
                 </div>
-                <button
-                  (click)="fixSymlink(item)"
-                  class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                  Fix
-                </button>
+                <button (click)="fixSymlink(item)" class="btn btn-primary">Fix</button>
               </div>
             }
           </div>
@@ -72,24 +63,15 @@
       <div class="pt-4">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
-            <button
-              (click)="loadPackages()"
-              class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              matTooltip="Refresh"
-            >
-              <mat-icon fontIcon="refresh"/>
+            <button (click)="loadPackages()" class="btn btn-ghost" matTooltip="Refresh">
+              <mat-icon fontIcon="refresh" />
             </button>
-            <span class="text-sm text-slate-500"
+            <span class="text-sm text-[var(--text-muted)]"
               >{{ packagesCount() }} orphaned packages found</span
             >
           </div>
           @if (packagesData().length > 0) {
-            <button
-              (click)="fixAllPackages()"
-              class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Fix All
-            </button>
+            <button (click)="fixAllPackages()" class="btn btn-danger">Fix All</button>
           }
         </div>
 
@@ -98,39 +80,37 @@
             <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
           </div>
         } @else if (packagesData().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-            <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2"/>
+          <div class="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
+            <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2" />
             <p class="text-lg font-medium">No orphaned packages found</p>
           </div>
         } @else {
           <div class="space-y-2">
             @for (item of packagesData(); track item.path) {
               <div
-                class="glass-card p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                class="glass-card p-4 flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <mat-icon [class]="getSeverityColor(item.severity)" [fontIcon]="getSeverityIcon(item.severity)"></mat-icon>
+                  <mat-icon
+                    [class]="getSeverityColor(item.severity)"
+                    [fontIcon]="getSeverityIcon(item.severity)"
+                  ></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
-                      class="font-medium text-slate-900 dark:text-white truncate"
+                      class="font-medium text-[var(--text-primary)] truncate"
                       [matTooltip]="item.path"
                       >{{ item.path }}</span
                     >
                     @if (item.description) {
                       <span
-                        class="text-xs text-slate-500 dark:text-slate-400 truncate"
+                        class="text-xs text-[var(--text-muted)] truncate"
                         [matTooltip]="item.description"
                         >{{ item.description }}</span
                       >
                     }
                   </div>
                 </div>
-                <button
-                  (click)="fixPackage(item)"
-                  class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                  Purge
-                </button>
+                <button (click)="fixPackage(item)" class="btn btn-primary">Purge</button>
               </div>
             }
           </div>
@@ -143,38 +123,42 @@
         <div class="glass-card p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Font Cache</h3>
-              <p class="text-sm text-slate-500">Clean cached font data in ~/.cache/fontconfig</p>
+              <h3 class="text-lg font-semibold text-[var(--text-primary)]">Font Cache</h3>
+              <p class="text-sm text-[var(--text-muted)]">
+                Clean cached font data in ~/.cache/fontconfig
+              </p>
             </div>
             <button
               (click)="cleanFontCache()"
               [disabled]="loading()"
-              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+              class="btn btn-primary disabled:opacity-50"
             >
               Clean Font Cache
             </button>
           </div>
           @if (fontCacheResult()) {
-            <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">{{ fontCacheResult() }}</p>
+            <p class="mt-4 text-sm text-[var(--text-secondary)]">{{ fontCacheResult() }}</p>
           }
         </div>
 
         <div class="glass-card p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Icon Cache</h3>
-              <p class="text-sm text-slate-500">Clean cached icon data in ~/.cache/icon-cache</p>
+              <h3 class="text-lg font-semibold text-[var(--text-primary)]">Icon Cache</h3>
+              <p class="text-sm text-[var(--text-muted)]">
+                Clean cached icon data in ~/.cache/icon-cache
+              </p>
             </div>
             <button
               (click)="cleanIconCache()"
               [disabled]="loading()"
-              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+              class="btn btn-primary disabled:opacity-50"
             >
               Clean Icon Cache
             </button>
           </div>
           @if (iconCacheResult()) {
-            <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">{{ iconCacheResult() }}</p>
+            <p class="mt-4 text-sm text-[var(--text-secondary)]">{{ iconCacheResult() }}</p>
           }
         </div>
       </div>
@@ -185,23 +169,21 @@
         <div class="glass-card p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                Repair Permissions
-              </h3>
-              <p class="text-sm text-slate-500">
+              <h3 class="text-lg font-semibold text-[var(--text-primary)]">Repair Permissions</h3>
+              <p class="text-sm text-[var(--text-muted)]">
                 Fix common permission issues in config directories
               </p>
             </div>
             <button
               (click)="repairPermissions()"
               [disabled]="loading()"
-              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+              class="btn btn-primary disabled:opacity-50"
             >
               Repair Permissions
             </button>
           </div>
           @if (permissionsResult()) {
-            <p class="mt-4 text-sm text-slate-600 dark:text-slate-400">{{ permissionsResult() }}</p>
+            <p class="mt-4 text-sm text-[var(--text-secondary)]">{{ permissionsResult() }}</p>
           }
         </div>
       </div>

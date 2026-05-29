@@ -6,8 +6,11 @@ import {
   OnDestroy,
   signal,
   inject,
+  NgZone,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 /* materials */
 import { MatButtonModule } from '@angular/material/button';
@@ -24,7 +27,11 @@ import {
 } from '@services/memory-optimizer.service';
 
 /* components */
-import { HeaderComponent } from '@components/header/header.component';
+import { DataTableComponent } from '@components/data-table/data-table.component';
+import { PaginationComponent } from '@components/pagination/pagination.component';
+
+/* models */
+import { TableColumn, TableOptions } from '@models/data-table.model';
 
 @Component({
   selector: 'app-memory-optimizer-view',
@@ -32,17 +39,18 @@ import { HeaderComponent } from '@components/header/header.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    HeaderComponent,
+    DataTableComponent,
   ],
   templateUrl: './memory-optimizer.view.html',
-  styleUrl: './memory-optimizer.view.css',
 })
 export class MemoryOptimizerView implements OnInit, OnDestroy {
   private memoryService = inject(MemoryOptimizerService);
+  private ngZone = inject(NgZone);
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
 
   memoryInfo = signal<MemoryInfo | null>(null);
@@ -53,9 +61,22 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
   sortColumn = signal<string>('memory_mb');
   sortDirection = signal<'asc' | 'desc'>('desc');
 
+  currentPage = signal(1);
+  pageSize = signal(15);
+
+  paginatedProcesses = computed(() => {
+    const data = this.processes();
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return data.slice(start, start + this.pageSize());
+  });
+
   ngOnInit() {
     this.loadData();
-    this.refreshInterval = setInterval(() => this.loadData(), 3000);
+    this.ngZone.runOutsideAngular(() => {
+      this.refreshInterval = setInterval(() => {
+        this.ngZone.run(() => this.loadData());
+      }, 3000);
+    });
   }
 
   ngOnDestroy() {
@@ -83,23 +104,35 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
     const col = this.sortColumn();
     const dir = this.sortDirection();
     return [...processes].sort((a, b) => {
-      const aVal = (a as any)[col];
-      const bVal = (b as any)[col];
-      if (typeof aVal === 'string') {
-        return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      const aVal = (a as any)[col] ?? '';
+      const bVal = (b as any)[col] ?? '';
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return dir === 'asc' ? aVal - bVal : bVal - aVal;
+      } else {
+        const aStr = String(aVal).toLowerCase();
+        const bStr = String(bVal).toLowerCase();
+        return dir === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
       }
-      return dir === 'asc' ? aVal - bVal : bVal - aVal;
     });
   }
 
   onSort(column: string) {
     if (this.sortColumn() === column) {
-      this.sortDirection.set(this.sortDirection() === 'asc' ? 'desc' : 'asc');
+      this.sortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
       this.sortColumn.set(column);
       this.sortDirection.set('desc');
     }
     this.processes.set(this.sortProcesses(this.processes()));
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
+    this.currentPage.set(1);
   }
 
   async optimizeMemory() {
@@ -134,7 +167,7 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
     return (swap.used / swap.total) * 100;
   }
 
-  processColumns = [
+  processColumns: TableColumn[] = [
     { key: 'name', label: 'Name', width: 'flex-1', sortable: true },
     { key: 'pid', label: 'PID', width: 'w-24', sortable: true },
     { key: 'memory_mb', label: 'Memory (MB)', width: 'w-32', sortable: true, align: 'right' },
@@ -143,5 +176,18 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
 
   trackByPid(index: number, proc: ProcessMemory): number {
     return proc.pid;
+  }
+
+  getTableOptions(): TableOptions {
+    return {
+      showHeader: true,
+      showCheckbox: false,
+      hoverable: true,
+      showReloadButton: true,
+      showSelectedActions: false,
+      showPreviewButton: false,
+      showSearch: true,
+      searchPlaceholder: 'Search processes...',
+    };
   }
 }

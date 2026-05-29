@@ -1,61 +1,48 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <!-- Summary Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-        <mat-icon class="icon-accent icon-3xl" fontIcon="file_copy"/>
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon">
+        <mat-icon class="text-[var(--accent-primary)]">file_copy</mat-icon>
       </div>
-      <div>
-        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          Large Files Found
-        </p>
-        <p class="text-4xl font-black text-slate-900 dark:text-white">{{ largeFiles().length }}</p>
+      <div class="stat-content">
+        <span class="stat-label">Large Files Found</span>
+        <span class="stat-value">{{ largeFiles().length }}</span>
       </div>
     </div>
 
-    <div class="glass-card p-8 flex items-center gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-pink-500/10 flex items-center justify-center">
-        <mat-icon class="icon-error icon-3xl" fontIcon="storage"/>
+    <div class="stat-card matte-surface border-trace">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c)">
+        <mat-icon class="text-white">storage</mat-icon>
       </div>
-      <div>
-        <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-          Total Space
-        </p>
-        <p class="text-4xl font-black text-slate-900 dark:text-white">
-          {{ formatSize(totalSize()) }}
-        </p>
+      <div class="stat-content">
+        <span class="stat-label">Total Space</span>
+        <span class="stat-value">{{ formatSize(totalSize()) }}</span>
       </div>
     </div>
   </div>
 
-  <div class="glass-card flex flex-col h-[calc(100vh-280px)] overflow-hidden">
-    <div
-      class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800"
-    >
-      <div class="flex items-center gap-4">
+  <div class="glass-card matte-surface border-trace">
+    <div class="glass-card-header">
+      <div class="flex items-center gap-4 flex-1">
         <app-search
           [data]="largeFiles()"
           [searchFields]="['name', 'path']"
           (filteredData)="onFilteredData($event)"
         />
-        <button
-          (click)="loadData()"
-          class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          matTooltip="Refresh"
-        >
-          <mat-icon fontIcon="refresh"/>
+        <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+          <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
         </button>
       </div>
       <button
         (click)="clearSelectedFiles()"
         [disabled]="selectedFiles().size === 0"
-        class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+        class="btn btn-danger"
       >
-        <mat-icon class="icon-sm" fontIcon="delete"/>
+        <mat-icon class="icon-sm">delete</mat-icon>
         Delete Selected
       </button>
     </div>
-    <div class="flex-1 p-6 overflow-hidden">
+    <div class="glass-card-body">
       <app-data-table
         [columns]="columns"
         [data]="filteredFiles()"

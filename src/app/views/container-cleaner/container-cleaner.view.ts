@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { HeaderComponent } from '@components/header/header.component';
 import { ContainerService, ContainerSummary } from '@services/container.service';
 import { formatSize } from '@shared/utils/format.util';
 
@@ -22,7 +21,6 @@ type ContainerTab = 'docker' | 'podman';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatTabsModule,
-    HeaderComponent,
   ],
   templateUrl: './container-cleaner.view.html',
 })

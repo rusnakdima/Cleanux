@@ -17,10 +17,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
 import { SystemService, SystemServiceItem } from '@services/system.service';
+import { NotificationService } from '@services/notification.service';
 
 /* components */
 import { DataTableComponent } from '@components/data-table/data-table.component';
-import { HeaderComponent } from '@components/header/header.component';
 import { SearchComponent } from '@components/search/search.component';
 
 /* models */
@@ -37,7 +37,6 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
     MatProgressSpinnerModule,
     MatTooltipModule,
     DataTableComponent,
-    HeaderComponent,
     SearchComponent,
   ],
   templateUrl: './system.view.html',
@@ -45,6 +44,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
 export class SystemView implements OnInit {
   private systemService = inject(SystemService);
   private document = inject(DOCUMENT);
+  private notification = inject(NotificationService);
 
   servicesData = signal<SystemServiceItem[]>([]);
   filteredData = signal<SystemServiceItem[]>([]);
@@ -99,7 +99,10 @@ export class SystemView implements OnInit {
       this.selectedServices.set(new Set());
       await this.loadData();
     } catch (error: unknown) {
-      alert('Failed to stop services: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error(
+        'Failed to stop services: ' + (error instanceof Error ? error.message : String(error)),
+        error
+      );
     } finally {
       this.loading.set(false);
     }
@@ -118,8 +121,9 @@ export class SystemView implements OnInit {
       this.selectedServices.set(new Set());
       await this.loadData();
     } catch (error: unknown) {
-      alert(
-        'Failed to start services: ' + (error instanceof Error ? error.message : String(error))
+      this.notification.error(
+        'Failed to start services: ' + (error instanceof Error ? error.message : String(error)),
+        error
       );
     } finally {
       this.loading.set(false);
@@ -135,7 +139,10 @@ export class SystemView implements OnInit {
       await this.systemService.startService(service);
       await this.loadData();
     } catch (error: unknown) {
-      alert('Failed to start service: ' + (error instanceof Error ? error.message : String(error)));
+      this.notification.error(
+        'Failed to start service: ' + (error instanceof Error ? error.message : String(error)),
+        error
+      );
     } finally {
       this.loading.set(false);
     }
@@ -150,6 +157,8 @@ export class SystemView implements OnInit {
       showReloadButton: true,
       showSelectedActions: true,
       selectedActionText: 'Stop Selected',
+      showSearch: true,
+      searchPlaceholder: 'Search services...',
     };
   }
 
@@ -162,6 +171,8 @@ export class SystemView implements OnInit {
       showReloadButton: true,
       showSelectedActions: true,
       selectedActionText: 'Start Selected',
+      showSearch: true,
+      searchPlaceholder: 'Search services...',
     };
   }
 }

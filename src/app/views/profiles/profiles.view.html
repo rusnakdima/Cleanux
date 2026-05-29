@@ -1,8 +1,8 @@
-<div class="p-6 space-y-6 max-w-7xl mx-auto flex-1 overflow-auto">
-  <div class="flex items-center justify-between">
+<div class="view-layout max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
     <div>
-      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Cleaning Profiles</h2>
-      <p class="text-slate-500 dark:text-slate-400 mt-1">Save and manage cleaning configurations</p>
+      <h2 class="text-xl font-bold text-[var(--text-primary)]">Cleaning Profiles</h2>
+      <p class="text-sm text-[var(--text-muted)] mt-1">Save and manage cleaning configurations</p>
     </div>
     <div class="flex items-center gap-2">
       <input
@@ -12,18 +12,12 @@
         #fileInput
         class="hidden"
       />
-      <button
-        (click)="fileInput.click()"
-        class="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-      >
-        <mat-icon fontIcon="upload"/>
+      <button (click)="fileInput.click()" class="btn btn-secondary">
+        <mat-icon class="icon-sm">upload</mat-icon>
         Import
       </button>
-      <button
-        (click)="newProfile()"
-        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-      >
-        <mat-icon fontIcon="add"/>
+      <button (click)="newProfile()" class="btn btn-primary">
+        <mat-icon class="icon-sm">add</mat-icon>
         New Profile
       </button>
     </div>
@@ -34,60 +28,56 @@
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
     </div>
   } @else if (isEditing()) {
-    <div class="glass-card p-6">
-      <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-6">
+    <div class="glass-surface matte-surface border-trace p-6">
+      <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-6">
         {{ selectedProfile() ? "Edit Profile" : "Create New Profile" }}
       </h3>
       <div class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-              >Name</label
-            >
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-[var(--text-muted)]">Name</label>
             <input
               type="text"
               [ngModel]="editingProfile()?.name"
               (ngModelChange)="editingProfile.update((p) => (p ? { ...p, name: $event } : p))"
-              class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              class="input"
               placeholder="My Cleaning Profile"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
-              >Description</label
-            >
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-[var(--text-muted)]">Description</label>
             <input
               type="text"
               [ngModel]="editingProfile()?.description"
               (ngModelChange)="
                 editingProfile.update((p) => (p ? { ...p, description: $event } : p))
               "
-              class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+              class="input"
               placeholder="Optional description"
             />
           </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-[var(--text-muted)]"
             >Custom Paths (one per line)</label
           >
           <textarea
             [ngModel]="editingProfile()?.paths?.join('\n')"
             (ngModelChange)="onPathsChange($event)"
-            class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white h-24"
+            class="input min-h-[100px]"
             placeholder="/home/user/Downloads&#10;/home/user/Temp"
           ></textarea>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1"
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-[var(--text-muted)]"
             >Exclude Patterns (one per line)</label
           >
           <textarea
             [ngModel]="editingProfile()?.exclude_patterns?.join('\n')"
             (ngModelChange)="onExcludePatternsChange($event)"
-            class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white h-24"
+            class="input min-h-[100px]"
             placeholder="*.log&#10;node_modules&#10;.cache"
           ></textarea>
         </div>
@@ -100,9 +90,9 @@
               (ngModelChange)="
                 editingProfile.update((p) => (p ? { ...p, clean_cache: $event } : p))
               "
-              class="w-4 h-4 rounded border-slate-300"
+              class="accent-[var(--accent-primary)]"
             />
-            <span class="text-slate-700 dark:text-slate-300">Clean Cache</span>
+            <span class="text-sm text-[var(--text-secondary)]">Clean Cache</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <input
@@ -111,25 +101,25 @@
               (ngModelChange)="
                 editingProfile.update((p) => (p ? { ...p, clean_trash: $event } : p))
               "
-              class="w-4 h-4 rounded border-slate-300"
+              class="accent-[var(--accent-primary)]"
             />
-            <span class="text-slate-700 dark:text-slate-300">Clean Trash</span>
+            <span class="text-sm text-[var(--text-secondary)]">Clean Trash</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               [ngModel]="editingProfile()?.clean_logs"
               (ngModelChange)="editingProfile.update((p) => (p ? { ...p, clean_logs: $event } : p))"
-              class="w-4 h-4 rounded border-slate-300"
+              class="accent-[var(--accent-primary)]"
             />
-            <span class="text-slate-700 dark:text-slate-300">Clean Logs</span>
+            <span class="text-sm text-[var(--text-secondary)]">Clean Logs</span>
           </label>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-            Min Large File Size (bytes): {{ editingProfile()?.min_large_file_size | number }}
-          </label>
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-[var(--text-muted)]"
+            >Min Large File Size: {{ editingProfile()?.min_large_file_size | number }} bytes</label
+          >
           <input
             type="range"
             [ngModel]="editingProfile()?.min_large_file_size"
@@ -141,7 +131,7 @@
             step="10485760"
             class="w-full"
           />
-          <div class="flex justify-between text-xs text-slate-500">
+          <div class="flex justify-between text-xs text-[var(--text-muted)]">
             <span>0 B</span>
             <span>100 MB</span>
             <span>1 GB</span>
@@ -150,106 +140,71 @@
       </div>
 
       <div class="flex justify-end gap-3 mt-6">
-        <button
-          (click)="cancelEdit()"
-          class="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-white rounded-lg font-medium transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          (click)="saveProfile()"
-          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-        >
-          Save Profile
-        </button>
+        <button (click)="cancelEdit()" class="btn btn-secondary">Cancel</button>
+        <button (click)="saveProfile()" class="btn btn-primary">Save Profile</button>
       </div>
     </div>
   } @else if (profiles().length === 0) {
-    <div class="glass-card p-12 text-center">
-      <mat-icon class="icon-4xl icon-muted" fontIcon="folder_copy"/>
-      <h3 class="text-xl font-semibold text-slate-700 dark:text-slate-300 mt-4">
-        No Profiles Found
-      </h3>
-      <p class="text-slate-500 dark:text-slate-400 mt-2">
+    <div class="glass-surface matte-surface border-trace p-12 text-center">
+      <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">folder</mat-icon>
+      <h3 class="text-lg font-semibold text-[var(--text-secondary)]">No Profiles Found</h3>
+      <p class="text-sm text-[var(--text-muted)] mt-2">
         Create profiles to save your cleaning configurations
       </p>
     </div>
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       @for (profile of profiles(); track profile.name) {
-        <div class="glass-card p-4 hover:border-indigo-300 transition-colors">
+        <div class="glass-card matte-surface border-trace p-5">
           <div class="flex items-start justify-between mb-3">
             <div>
-              <h4 class="font-semibold text-slate-900 dark:text-white">{{ profile.name }}</h4>
+              <h4 class="font-semibold text-[var(--text-primary)]">{{ profile.name }}</h4>
               @if (profile.description) {
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                  {{ profile.description }}
-                </p>
+                <p class="text-sm text-[var(--text-muted)] mt-1">{{ profile.description }}</p>
               }
             </div>
             <div
-              class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+              class="w-10 h-10 rounded-lg bg-[var(--accent-primary)]/10 flex items-center justify-center"
             >
-              <mat-icon class="icon-accent" fontIcon="tune"/>
+              <mat-icon class="text-[var(--accent-primary)]">tune</mat-icon>
             </div>
           </div>
           <div class="flex flex-wrap gap-2 mb-3">
             @if (profile.clean_cache) {
-              <span
-                class="px-2 py-1 text-xs rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                >Cache</span
-              >
+              <span class="badge badge-primary">Cache</span>
             }
             @if (profile.clean_trash) {
-              <span
-                class="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                >Trash</span
-              >
+              <span class="badge badge-success">Trash</span>
             }
             @if (profile.clean_logs) {
-              <span
-                class="px-2 py-1 text-xs rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                >Logs</span
-              >
+              <span class="badge badge-warning">Logs</span>
             }
             @if (profile.min_large_file_size > 0) {
-              <span
-                class="px-2 py-1 text-xs rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                >Large Files</span
-              >
+              <span class="badge badge-primary">Large Files</span>
             }
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
-            {{ formatDate(profile.created_at) }}
-          </p>
+          <p class="text-xs text-[var(--text-muted)] mb-4">{{ formatDate(profile.created_at) }}</p>
           <div class="flex items-center gap-2">
-            <button
-              (click)="applyProfile(profile)"
-              class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-1"
-            >
-              <mat-icon class="icon-lg" fontIcon="play_arrow"/>
+            <button (click)="applyProfile(profile)" class="btn btn-primary flex-1">
+              <mat-icon class="icon-sm">play_arrow</mat-icon>
               Apply
             </button>
-            <button
-              (click)="editProfile(profile)"
-              class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors"
-              matTooltip="Edit"
-            >
-              <mat-icon fontIcon="edit"/>
+            <button (click)="editProfile(profile)" class="btn btn-ghost btn-icon" matTooltip="Edit">
+              <mat-icon class="text-[var(--text-secondary)]">edit</mat-icon>
             </button>
             <button
               (click)="exportProfile(profile)"
-              class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors"
+              class="btn btn-ghost btn-icon"
               matTooltip="Export"
             >
-              <mat-icon fontIcon="download"/>
+              <mat-icon class="text-[var(--text-secondary)]">download</mat-icon>
             </button>
             <button
               (click)="deleteProfile(profile)"
-              class="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 transition-colors"
+              class="btn btn-ghost btn-icon"
               matTooltip="Delete"
             >
-              <mat-icon fontIcon="delete"/>
+              <mat-icon class="text-error">delete</mat-icon>
             </button>
           </div>
         </div>
