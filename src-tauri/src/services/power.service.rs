@@ -54,7 +54,7 @@ impl BatteryCache {
 static BATTERY_CACHE: std::sync::OnceLock<BatteryCache> = std::sync::OnceLock::new();
 
 fn get_battery_cache() -> &'static BatteryCache {
-  BATTERY_CACHE.get_or_init(|| BatteryCache::new())
+  BATTERY_CACHE.get_or_init(BatteryCache::new)
 }
 
 pub struct PowerService;

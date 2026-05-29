@@ -41,7 +41,7 @@ impl DashboardService {
       if !output.status.success() {
         return Err(
           ResponseBuilder::new()
-            .error(&String::from_utf8_lossy(&output.stderr).to_string())
+            .error(String::from_utf8_lossy(&output.stderr).as_ref())
             .build(),
         );
       }

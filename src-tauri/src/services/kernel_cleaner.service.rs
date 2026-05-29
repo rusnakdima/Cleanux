@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use crate::helpers::get_dir_size;
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -31,10 +32,6 @@ pub struct KernelCleanerService;
 
 fn get_boot_path() -> PathBuf {
   PathBuf::from("/boot")
-}
-
-fn get_kernel_paths() -> Vec<PathBuf> {
-  vec![get_boot_path(), PathBuf::from("/lib/modules")]
 }
 
 impl KernelCleanerService {
@@ -105,27 +102,10 @@ impl KernelCleanerService {
 
     let modules_path = PathBuf::from("/lib/modules").join(version);
     if modules_path.exists() {
-      if let Ok(size) = Self::dir_size(&modules_path) {
-        total_size += size;
-      }
+      total_size += get_dir_size(&modules_path);
     }
 
     total_size
-  }
-
-  fn dir_size(path: &Path) -> Result<u64, std::io::Error> {
-    let mut total: u64 = 0;
-    for entry in walkdir::WalkDir::new(path)
-      .into_iter()
-      .filter_map(|e| e.ok())
-    {
-      if entry.file_type().is_file() {
-        if let Ok(meta) = entry.metadata() {
-          total += meta.len();
-        }
-      }
-    }
-    Ok(total)
   }
 
   pub fn get_old_kernels(&self) -> Vec<KernelInfo> {
@@ -377,40 +357,36 @@ impl KernelCleanerService {
   pub fn get_boot_space_info(&self) -> BootSpaceInfo {
     let boot_path = get_boot_path();
 
-    match fs::metadata(&boot_path) {
-      Ok(_meta) => {
-        let output = Command::new("df").args(["-B1", "/boot"]).output();
+    if let Ok(_meta) = fs::metadata(&boot_path) {
+      let output = Command::new("df").args(["-B1", "/boot"]).output();
 
-        match output {
-          Ok(out) if out.status.success() => {
-            let stdout = String::from_utf8_lossy(&out.stdout);
-            let lines: Vec<&str> = stdout.lines().collect();
+      if let Ok(out) = output {
+        if out.status.success() {
+          let stdout = String::from_utf8_lossy(&out.stdout);
+          let lines: Vec<&str> = stdout.lines().collect();
 
-            if lines.len() >= 2 {
-              let parts: Vec<&str> = lines[1].split_whitespace().collect();
-              if parts.len() >= 4 {
-                let total = parts[1].parse::<u64>().unwrap_or(0);
-                let used = parts[2].parse::<u64>().unwrap_or(0);
-                let available = parts[3].parse::<u64>().unwrap_or(0);
-                let usage_percent = if total > 0 {
-                  (used as f64 / total as f64) * 100.0
-                } else {
-                  0.0
-                };
+          if lines.len() >= 2 {
+            let parts: Vec<&str> = lines[1].split_whitespace().collect();
+            if parts.len() >= 4 {
+              let total = parts[1].parse::<u64>().unwrap_or(0);
+              let used = parts[2].parse::<u64>().unwrap_or(0);
+              let available = parts[3].parse::<u64>().unwrap_or(0);
+              let usage_percent = if total > 0 {
+                (used as f64 / total as f64) * 100.0
+              } else {
+                0.0
+              };
 
-                return BootSpaceInfo {
-                  total,
-                  used,
-                  available,
-                  usage_percent,
-                };
-              }
+              return BootSpaceInfo {
+                total,
+                used,
+                available,
+                usage_percent,
+              };
             }
           }
-          _ => {}
         }
       }
-      _ => {}
     }
 
     BootSpaceInfo {

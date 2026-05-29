@@ -1,9 +1,8 @@
 /* helpers */
-use crate::helpers::{data_string, success_response};
+use crate::helpers::{calculate_dir_size, data_string, remove_dir_contents, success_response};
 /* models */
 use crate::models::{AppError, ResponseModel};
 /* sys lib */
-use std::fs;
 use std::path::{Path, PathBuf};
 
 type DevCacheResult<T> = Result<T, AppError>;
@@ -60,36 +59,6 @@ impl DevCacheService {
     ))
   }
 
-  pub fn get_npm_cache_size(&self) -> u64 {
-    let home = dirs::home_dir().unwrap_or_default();
-    self.scan_npm_cache_inner(&home).size
-  }
-
-  pub fn get_pip_cache_size(&self) -> u64 {
-    let home = dirs::home_dir().unwrap_or_default();
-    self.scan_pip_cache_inner(&home).size
-  }
-
-  pub fn get_cargo_cache_size(&self) -> u64 {
-    let home = dirs::home_dir().unwrap_or_default();
-    self.scan_cargo_cache_inner(&home).size
-  }
-
-  pub fn get_go_cache_size(&self) -> u64 {
-    let home = dirs::home_dir().unwrap_or_default();
-    self.scan_go_cache_inner(&home).size
-  }
-
-  pub fn get_maven_cache_size(&self) -> u64 {
-    let home = dirs::home_dir().unwrap_or_default();
-    self.scan_maven_cache_inner(&home).size
-  }
-
-  pub fn get_gradle_cache_size(&self) -> u64 {
-    let home = dirs::home_dir().unwrap_or_default();
-    self.scan_gradle_cache_inner(&home).size
-  }
-
   fn scan_npm_cache_inner(&self, home: &Path) -> DevCacheItem {
     let paths = [home.join(".npm"), PathBuf::from("/tmp/npm-*")];
 
@@ -98,7 +67,7 @@ impl DevCacheService {
 
     for path in &paths {
       if path.exists() {
-        let (size, _) = Self::calculate_dir_size(path);
+        let (size, _) = calculate_dir_size(path).unwrap_or((0, 0));
         if size > 0 {
           total_size += size;
           if cache_path.is_empty() {
@@ -128,12 +97,12 @@ impl DevCacheService {
     let mut cache_path = String::new();
 
     if pip_cache_path.exists() {
-      let (size, _) = Self::calculate_dir_size(&pip_cache_path);
+      let (size, _) = calculate_dir_size(&pip_cache_path).unwrap_or((0, 0));
       total_size += size;
       cache_path = pip_cache_path.to_string_lossy().to_string();
     }
     if root_pip_cache.exists() && root_pip_cache != pip_cache_path {
-      let (size, _) = Self::calculate_dir_size(&root_pip_cache);
+      let (size, _) = calculate_dir_size(&root_pip_cache).unwrap_or((0, 0));
       total_size += size;
       if cache_path.is_empty() {
         cache_path = root_pip_cache.to_string_lossy().to_string();
@@ -160,12 +129,12 @@ impl DevCacheService {
     let mut cache_path = String::new();
 
     if registry.exists() {
-      let (size, _) = Self::calculate_dir_size(&registry);
+      let (size, _) = calculate_dir_size(&registry).unwrap_or((0, 0));
       total_size += size;
       cache_path = registry.to_string_lossy().to_string();
     }
     if git.exists() {
-      let (size, _) = Self::calculate_dir_size(&git);
+      let (size, _) = calculate_dir_size(&git).unwrap_or((0, 0));
       total_size += size;
       if cache_path.is_empty() {
         cache_path = git.to_string_lossy().to_string();
@@ -189,7 +158,7 @@ impl DevCacheService {
 
     let mut total_size = 0u64;
     let cache_path = if go_path.exists() {
-      let (size, _) = Self::calculate_dir_size(&go_path);
+      let (size, _) = calculate_dir_size(&go_path).unwrap_or((0, 0));
       total_size = size;
       go_path.to_string_lossy().to_string()
     } else {
@@ -209,7 +178,7 @@ impl DevCacheService {
 
     let mut total_size = 0u64;
     let cache_path = if maven_path.exists() {
-      let (size, _) = Self::calculate_dir_size(&maven_path);
+      let (size, _) = calculate_dir_size(&maven_path).unwrap_or((0, 0));
       total_size = size;
       maven_path.to_string_lossy().to_string()
     } else {
@@ -229,7 +198,7 @@ impl DevCacheService {
 
     let mut total_size = 0u64;
     let cache_path = if gradle_path.exists() {
-      let (size, _) = Self::calculate_dir_size(&gradle_path);
+      let (size, _) = calculate_dir_size(&gradle_path).unwrap_or((0, 0));
       total_size = size;
       gradle_path.to_string_lossy().to_string()
     } else {
@@ -260,7 +229,7 @@ impl DevCacheService {
       ));
     }
 
-    match Self::remove_dir_contents(&npm_path) {
+    match remove_dir_contents(&npm_path) {
       Ok(count) => Ok(success_response(
         format!("Cleaned npm cache ({} items)", count),
         data_string(count.to_string()),
@@ -288,7 +257,7 @@ impl DevCacheService {
       ));
     }
 
-    match Self::remove_dir_contents(&pip_path) {
+    match remove_dir_contents(&pip_path) {
       Ok(count) => Ok(success_response(
         format!("Cleaned pip cache ({} items)", count),
         data_string(count.to_string()),
@@ -316,14 +285,14 @@ impl DevCacheService {
     let mut errors: Vec<String> = Vec::new();
 
     if registry.exists() {
-      match Self::remove_dir_contents(&registry) {
-        Ok(count) => cleaned_count += count,
+      match remove_dir_contents(&registry) {
+        Ok(count) => cleaned_count += count as u32,
         Err(e) => errors.push(format!("registry: {}", e)),
       }
     }
     if git.exists() {
-      match Self::remove_dir_contents(&git) {
-        Ok(count) => cleaned_count += count,
+      match remove_dir_contents(&git) {
+        Ok(count) => cleaned_count += count as u32,
         Err(e) => errors.push(format!("git: {}", e)),
       }
     }
@@ -355,7 +324,7 @@ impl DevCacheService {
       return Ok(success_response("Go cache already clean", data_string("0")));
     }
 
-    match Self::remove_dir_contents(&go_path) {
+    match remove_dir_contents(&go_path) {
       Ok(count) => Ok(success_response(
         format!("Cleaned Go cache ({} items)", count),
         data_string(count.to_string()),
@@ -385,7 +354,7 @@ impl DevCacheService {
       ));
     }
 
-    match Self::remove_dir_contents(&maven_path) {
+    match remove_dir_contents(&maven_path) {
       Ok(count) => Ok(success_response(
         format!("Cleaned Maven cache ({} items)", count),
         data_string(count.to_string()),
@@ -415,7 +384,7 @@ impl DevCacheService {
       ));
     }
 
-    match Self::remove_dir_contents(&gradle_path) {
+    match remove_dir_contents(&gradle_path) {
       Ok(count) => Ok(success_response(
         format!("Cleaned Gradle cache ({} items)", count),
         data_string(count.to_string()),
@@ -505,50 +474,5 @@ impl DevCacheService {
     } else {
       None
     }
-  }
-
-  fn calculate_dir_size(path: &Path) -> (u64, u32) {
-    let mut total_size = 0u64;
-    let mut file_count = 0u32;
-
-    if let Ok(entries) = fs::read_dir(path) {
-      for entry in entries.flatten() {
-        if entry.path().is_file() {
-          if let Ok(metadata) = fs::metadata(&entry.path()) {
-            total_size += metadata.len();
-            file_count += 1;
-          }
-        } else if entry.path().is_dir() {
-          let (size, count) = Self::calculate_dir_size(&entry.path());
-          total_size += size;
-          file_count += count;
-        }
-      }
-    }
-
-    (total_size, file_count)
-  }
-
-  fn remove_dir_contents(path: &Path) -> Result<u32, String> {
-    let mut count = 0u32;
-
-    if let Ok(entries) = fs::read_dir(path) {
-      for entry in entries.flatten() {
-        let entry_path = entry.path();
-        if entry_path.is_dir() {
-          if let Err(e) = fs::remove_dir_all(&entry_path) {
-            return Err(e.to_string());
-          }
-          count += 1;
-        } else if entry_path.is_file() {
-          if let Err(e) = fs::remove_file(&entry_path) {
-            return Err(e.to_string());
-          }
-          count += 1;
-        }
-      }
-    }
-
-    Ok(count)
   }
 }

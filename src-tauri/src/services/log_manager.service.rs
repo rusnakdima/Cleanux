@@ -1,5 +1,5 @@
 /* helpers */
-use crate::helpers::{data_string, success_response};
+use crate::helpers::{data_string, format_size, get_dir_size, success_response};
 /* models */
 use crate::models::{AppError, ResponseModel};
 /* sys lib */
@@ -89,43 +89,12 @@ impl LogManagerService {
     if let Ok(entries) = fs::read_dir(journal_path) {
       for entry in entries.flatten() {
         if entry.path().is_dir() {
-          total_size += Self::dir_size(&entry.path());
+          total_size += get_dir_size(&entry.path());
         }
       }
     }
 
     Ok(total_size)
-  }
-
-  fn dir_size(path: &Path) -> u64 {
-    let mut total = 0u64;
-    if let Ok(entries) = fs::read_dir(path) {
-      for entry in entries.flatten() {
-        let entry_path = entry.path();
-        if entry_path.is_dir() {
-          total += Self::dir_size(&entry_path);
-        } else if entry_path.is_file() {
-          total += fs::metadata(&entry_path).map(|m| m.len()).unwrap_or(0);
-        }
-      }
-    }
-    total
-  }
-
-  fn format_size(bytes: u64) -> String {
-    const KB: u64 = 1024;
-    const MB: u64 = KB * 1024;
-    const GB: u64 = MB * 1024;
-
-    if bytes >= GB {
-      format!("{:.2} GB", bytes as f64 / GB as f64)
-    } else if bytes >= MB {
-      format!("{:.2} MB", bytes as f64 / MB as f64)
-    } else if bytes >= KB {
-      format!("{:.2} KB", bytes as f64 / KB as f64)
-    } else {
-      format!("{} B", bytes)
-    }
   }
 
   fn get_journal_oldest_entry() -> Option<String> {
@@ -199,7 +168,7 @@ impl LogManagerService {
     let size_bytes = Self::get_journal_size();
     JournalInfo {
       size_bytes,
-      size_human: Self::format_size(size_bytes),
+      size_human: format_size(size_bytes),
       oldest_entry: Self::get_journal_oldest_entry(),
       newest_entry: Self::get_journal_newest_entry(),
       is_active: Self::is_journal_active(),
@@ -271,14 +240,14 @@ impl LogManagerService {
   }
 
   fn get_rotated_logs_size_inner() -> Result<u64, AppError> {
-    let log_dirs = vec![
+    let log_dirs = [
       Path::new("/var/log"),
       Path::new("/var/log/apache2"),
       Path::new("/var/log/nginx"),
       Path::new("/var/log/apache"),
     ];
 
-    let patterns = vec![".gz", ".old", ".1", ".2", ".bz2", ".xz", ".lz4"];
+    let patterns = [".gz", ".old", ".1", ".2", ".bz2", ".xz", ".lz4"];
     let mut total_size = 0u64;
 
     for dir in log_dirs.iter() {
@@ -315,14 +284,14 @@ impl LogManagerService {
   }
 
   fn get_rotated_logs_inner() -> Result<Vec<RotatedLogInfo>, AppError> {
-    let log_dirs = vec![
+    let log_dirs = [
       Path::new("/var/log"),
       Path::new("/var/log/apache2"),
       Path::new("/var/log/nginx"),
       Path::new("/var/log/apache"),
     ];
 
-    let patterns = vec![".gz", ".old", ".1", ".2", ".bz2", ".xz", ".lz4"];
+    let patterns = [".gz", ".old", ".1", ".2", ".bz2", ".xz", ".lz4"];
     let mut logs = Vec::new();
 
     for dir in log_dirs.iter() {
@@ -333,9 +302,9 @@ impl LogManagerService {
             if path.is_file() {
               let is_rotated = path
                 .extension()
-                .and_then(|e| {
+                .map(|e| {
                   let ext = e.to_string_lossy().to_lowercase();
-                  Some(patterns.iter().any(|p| ext.contains(p)))
+                  patterns.iter().any(|p| ext.contains(p))
                 })
                 .unwrap_or(false);
 
@@ -355,7 +324,7 @@ impl LogManagerService {
                   logs.push(RotatedLogInfo {
                     path: path.to_string_lossy().to_string(),
                     size_bytes: meta.len(),
-                    size_human: Self::format_size(meta.len()),
+                    size_human: format_size(meta.len()),
                     modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
                     compression_ratio: None,
                   });
@@ -522,7 +491,7 @@ impl LogManagerService {
 
     Ok(VarLogUsage {
       total_bytes: total_size,
-      total_human: Self::format_size(total_size),
+      total_human: format_size(total_size),
       file_count,
       directory_count,
     })
@@ -587,7 +556,7 @@ impl LogManagerService {
             files.push(LogFileInfo {
               path: entry_path.to_string_lossy().to_string(),
               size_bytes: meta.len(),
-              size_human: Self::format_size(meta.len()),
+              size_human: format_size(meta.len()),
               modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
               file_type: if extension.is_empty() {
                 "log".to_string()
@@ -610,9 +579,9 @@ impl LogManagerService {
 
     LogManagerSummary {
       journal_size_bytes: journal_size,
-      journal_size_human: Self::format_size(journal_size),
+      journal_size_human: format_size(journal_size),
       rotated_logs_size_bytes: rotated_size,
-      rotated_logs_size_human: Self::format_size(rotated_size),
+      rotated_logs_size_human: format_size(rotated_size),
       var_log_size_bytes: var_log.total_bytes,
       var_log_size_human: var_log.total_human,
       logrotate_configs_count: analysis.total_configs,

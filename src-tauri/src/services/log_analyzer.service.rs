@@ -56,6 +56,7 @@ impl LogAnalysisCache {
     }
   }
 
+  #[allow(dead_code)]
   fn invalidate(&self, path: &Path) {
     if let Ok(mut guard) = self.data.lock() {
       guard.remove(path);
@@ -72,7 +73,7 @@ impl LogAnalysisCache {
 static LOG_CACHE: std::sync::OnceLock<LogAnalysisCache> = std::sync::OnceLock::new();
 
 fn get_log_cache() -> &'static LogAnalysisCache {
-  LOG_CACHE.get_or_init(|| LogAnalysisCache::new())
+  LOG_CACHE.get_or_init(LogAnalysisCache::new)
 }
 
 pub struct LogAnalyzerService;
@@ -422,11 +423,13 @@ impl LogAnalyzerService {
     }
   }
 
+  #[allow(dead_code)]
   fn get_log_severity(&self, path: &str) -> LogSeverity {
     let content = fs::read_to_string(path).unwrap_or_default();
     Self::determine_severity(&content)
   }
 
+  #[allow(dead_code)]
   fn count_log_entries(&self, path: &str, severity: &LogSeverity) -> u32 {
     let content = fs::read_to_string(path).unwrap_or_default();
     Self::count_entries_for_severity(&content, severity)

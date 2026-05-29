@@ -101,7 +101,7 @@ impl SchedulerService {
     }
     let json = serde_json::to_string_pretty(&config)
       .map_err(|e| AppError::message(format!("Failed to serialize schedule: {}", e)))?;
-    fs::write(&config_path, json)
+    fs::write(config_path, json)
       .map_err(|e| AppError::message(format!("Failed to write schedule: {}", e)))?;
     Self::setup_systemd_timer(&config)?;
     Ok(success_response(
@@ -153,14 +153,14 @@ impl SchedulerService {
     fs::write(&timer_path, timer_content)
       .map_err(|e| AppError::message(format!("Failed to write timer: {}", e)))?;
     let _ = Command::new("systemctl")
-      .args(&["--user", "daemon-reload"])
+      .args(["--user", "daemon-reload"])
       .output();
     if config.enabled {
       let _ = Command::new("systemctl")
-        .args(&["--user", "enable", "cleanux-cleaning.timer"])
+        .args(["--user", "enable", "cleanux-cleaning.timer"])
         .output();
       let _ = Command::new("systemctl")
-        .args(&["--user", "start", "cleanux-cleaning.timer"])
+        .args(["--user", "start", "cleanux-cleaning.timer"])
         .output();
     }
     Ok(())
@@ -171,34 +171,37 @@ impl SchedulerService {
     let user = std::env::var("USER").unwrap_or_else(|_| "user".to_string());
     let systemd_user_dir = format!("/home/{}/.config/systemd/user", user);
     let _ = Command::new("systemctl")
-      .args(&["--user", "stop", "cleanux-cleaning.timer"])
+      .args(["--user", "stop", "cleanux-cleaning.timer"])
       .output();
     let _ = Command::new("systemctl")
-      .args(&["--user", "disable", "cleanux-cleaning.timer"])
+      .args(["--user", "disable", "cleanux-cleaning.timer"])
       .output();
     let service_path = format!("{}/cleanux-cleaning.service", systemd_user_dir);
     let timer_path = format!("{}/cleanux-cleaning.timer", systemd_user_dir);
     let _ = fs::remove_file(service_path);
     let _ = fs::remove_file(timer_path);
     let _ = Command::new("systemctl")
-      .args(&["--user", "daemon-reload"])
+      .args(["--user", "daemon-reload"])
       .output();
     Ok(())
   }
 
   pub fn run_cleaning(cleaning_type: CleaningType) -> Result<ResponseModel, ResponseModel> {
-    use crate::services::cleaner_service::CleanerService;
-    let cleaner = CleanerService;
+    use crate::services::{
+      cache_cleaning_service::CacheCleaningService,
+      large_file_cleaning_service::LargeFileCleaningService,
+      log_cleaning_service::LogCleaningService, trash_cleaning_service::TrashCleaningService,
+    };
     match cleaning_type {
-      CleaningType::Cache => cleaner.clearCache(),
-      CleaningType::Trash => cleaner.clearTrash(),
-      CleaningType::Logs => cleaner.clearAllLogs(),
-      CleaningType::LargeFiles => cleaner.clearAllLargeFiles(),
+      CleaningType::Cache => CacheCleaningService.clearCache(),
+      CleaningType::Trash => TrashCleaningService.clearTrash(),
+      CleaningType::Logs => LogCleaningService.clearAllLogs(),
+      CleaningType::LargeFiles => LargeFileCleaningService.clearAllLargeFiles(),
       CleaningType::All => {
-        let _ = cleaner.clearCache();
-        let _ = cleaner.clearTrash();
-        let _ = cleaner.clearAllLogs();
-        cleaner.clearAllLargeFiles()
+        let _ = CacheCleaningService.clearCache();
+        let _ = TrashCleaningService.clearTrash();
+        let _ = LogCleaningService.clearAllLogs();
+        LargeFileCleaningService.clearAllLargeFiles()
       }
     }
   }

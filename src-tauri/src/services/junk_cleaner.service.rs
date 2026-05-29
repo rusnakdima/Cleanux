@@ -1,5 +1,5 @@
 /* helpers */
-use crate::helpers::{data_string, success_response};
+use crate::helpers::{calculate_dir_size, data_string, remove_dir_contents, success_response};
 /* models */
 use crate::models::{AppError, DataValue, ResponseModel};
 /* sys lib */
@@ -15,18 +15,6 @@ pub enum JunkCategory {
   Applications,
   System,
   Logs,
-}
-
-impl JunkCategory {
-  fn as_str(&self) -> &'static str {
-    match self {
-      JunkCategory::Browser => "browser",
-      JunkCategory::Thumbnails => "thumbnails",
-      JunkCategory::Applications => "applications",
-      JunkCategory::System => "system",
-      JunkCategory::Logs => "logs",
-    }
-  }
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -201,13 +189,13 @@ impl JunkCleanerService {
 
     for (path, name, category) in browser_paths {
       if path.exists() {
-        let (size, file_count) = Self::calculate_dir_size(&path);
+        let (size, file_count) = calculate_dir_size(&path).unwrap_or((0, 0));
         items.push(JunkItem {
           path: path.to_string_lossy().to_string(),
           size,
           category,
           description: format!("{} browser cache", name),
-          file_count,
+          file_count: file_count as u32,
         });
       }
     }
@@ -248,13 +236,13 @@ impl JunkCleanerService {
       return Ok(Vec::new());
     }
 
-    let (size, file_count) = Self::calculate_dir_size(&path);
+    let (size, file_count) = calculate_dir_size(&path).unwrap_or((0, 0));
     Ok(vec![JunkItem {
       path: path.to_string_lossy().to_string(),
       size,
       category: JunkCategory::Thumbnails,
       description: "Image thumbnail cache".to_string(),
-      file_count,
+      file_count: file_count as u32,
     }])
   }
 
@@ -308,26 +296,26 @@ impl JunkCleanerService {
 
     for (path, name, category) in app_cache_paths {
       if path.exists() {
-        let (size, file_count) = Self::calculate_dir_size(&path);
+        let (size, file_count) = calculate_dir_size(&path).unwrap_or((0, 0));
         items.push(JunkItem {
           path: path.to_string_lossy().to_string(),
           size,
           category,
           description: format!("{} application cache", name),
-          file_count,
+          file_count: file_count as u32,
         });
       }
     }
 
     let app_image_cache = home.join(".cache/appimage");
     if app_image_cache.exists() {
-      let (size, file_count) = Self::calculate_dir_size(&app_image_cache);
+      let (size, file_count) = calculate_dir_size(&app_image_cache).unwrap_or((0, 0));
       items.push(JunkItem {
         path: app_image_cache.to_string_lossy().to_string(),
         size,
         category: JunkCategory::Applications,
         description: "AppImage cache".to_string(),
-        file_count,
+        file_count: file_count as u32,
       });
     }
 
@@ -365,13 +353,13 @@ impl JunkCleanerService {
     for (path_str, description) in temp_paths {
       let path = Path::new(path_str);
       if path.exists() {
-        let (size, file_count) = Self::calculate_dir_size(path);
+        let (size, file_count) = calculate_dir_size(path).unwrap_or((0, 0));
         items.push(JunkItem {
           path: path_str.to_string(),
           size,
           category: JunkCategory::System,
           description: description.to_string(),
-          file_count,
+          file_count: file_count as u32,
         });
       }
     }
@@ -494,8 +482,8 @@ impl JunkCleanerService {
 
     for path in browser_paths {
       if path.exists() {
-        match Self::remove_dir_contents(&path) {
-          Ok(count) => cleaned_count += count,
+        match remove_dir_contents(&path) {
+          Ok(count) => cleaned_count += count as u32,
           Err(e) => errors.push(format!("{}: {}", path.display(), e)),
         }
       }
@@ -527,7 +515,7 @@ impl JunkCleanerService {
       ));
     }
 
-    match Self::remove_dir_contents(&path) {
+    match remove_dir_contents(&path) {
       Ok(count) => Ok(success_response(
         format!("Cleaned thumbnail cache ({} items)", count),
         data_string(count.to_string()),
@@ -555,9 +543,9 @@ impl JunkCleanerService {
 
     for (path, name) in paths {
       if path.exists() {
-        match Self::remove_dir_contents(&path) {
+        match remove_dir_contents(&path) {
           Ok(count) => {
-            cleaned_count += count;
+            cleaned_count += count as u32;
           }
           Err(e) => errors.push(format!("{}: {}", name, e)),
         }
@@ -586,8 +574,8 @@ impl JunkCleanerService {
     for path_str in temp_paths {
       let path = Path::new(path_str);
       if path.exists() {
-        match Self::remove_dir_contents(path) {
-          Ok(count) => cleaned_count += count,
+        match remove_dir_contents(path) {
+          Ok(count) => cleaned_count += count as u32,
           Err(e) => errors.push(format!("{}: {}", path_str, e)),
         }
       }
@@ -657,50 +645,5 @@ impl JunkCleanerService {
         errors.join("; ")
       )))
     }
-  }
-
-  fn calculate_dir_size(path: &Path) -> (u64, u32) {
-    let mut total_size = 0u64;
-    let mut file_count = 0u32;
-
-    if let Ok(entries) = fs::read_dir(path) {
-      for entry in entries.flatten() {
-        if entry.path().is_file() {
-          if let Ok(metadata) = fs::metadata(&entry.path()) {
-            total_size += metadata.len();
-            file_count += 1;
-          }
-        } else if entry.path().is_dir() {
-          let (size, count) = Self::calculate_dir_size(&entry.path());
-          total_size += size;
-          file_count += count;
-        }
-      }
-    }
-
-    (total_size, file_count)
-  }
-
-  fn remove_dir_contents(path: &Path) -> Result<u32, String> {
-    let mut count = 0u32;
-
-    if let Ok(entries) = fs::read_dir(path) {
-      for entry in entries.flatten() {
-        let entry_path = entry.path();
-        if entry_path.is_dir() {
-          if let Err(e) = fs::remove_dir_all(&entry_path) {
-            return Err(e.to_string());
-          }
-          count += 1;
-        } else if entry_path.is_file() {
-          if let Err(e) = fs::remove_file(&entry_path) {
-            return Err(e.to_string());
-          }
-          count += 1;
-        }
-      }
-    }
-
-    Ok(count)
   }
 }

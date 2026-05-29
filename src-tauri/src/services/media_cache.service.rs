@@ -1,12 +1,13 @@
 /* helpers */
-use crate::helpers::{data_empty_string, success_response};
+use crate::helpers::{
+  data_empty_string, format_size, get_dir_size, remove_dir_contents, success_response,
+};
 /* models */
 use crate::models::{DataValue, ResponseModel};
 /* errors */
 use crate::models::AppError;
 
 use std::fs;
-use std::path::PathBuf;
 
 pub struct MediaCacheService;
 
@@ -29,50 +30,6 @@ pub struct MediaCacheSummary {
 }
 
 type MediaResult<T> = Result<T, AppError>;
-
-fn get_dir_size(path: &PathBuf) -> u64 {
-  if !path.exists() {
-    return 0;
-  }
-  fs::read_dir(path)
-    .map(|entries| {
-      entries
-        .filter_map(|entry| entry.ok())
-        .map(|entry| {
-          let metadata = entry.metadata().ok();
-          (entry, metadata)
-        })
-        .filter_map(|(entry, metadata)| metadata.map(|m| (entry, m)))
-        .map(|(entry, metadata)| {
-          if metadata.is_dir() {
-            get_dir_size(&entry.path())
-          } else {
-            metadata.len()
-          }
-        })
-        .sum()
-    })
-    .unwrap_or(0)
-}
-
-fn remove_dir_contents(path: &PathBuf) -> MediaResult<u64> {
-  if !path.exists() {
-    return Ok(0);
-  }
-  let mut cleared: u64 = 0;
-  for entry in fs::read_dir(path)? {
-    let entry = entry?;
-    let metadata = entry.metadata()?;
-    if metadata.is_dir() {
-      cleared += get_dir_size(&entry.path());
-      fs::remove_dir_all(entry.path())?;
-    } else {
-      cleared += metadata.len();
-      fs::remove_file(entry.path())?;
-    }
-  }
-  Ok(cleared)
-}
 
 #[allow(non_snake_case)]
 impl MediaCacheService {
@@ -99,7 +56,7 @@ impl MediaCacheService {
             .filter(|e| {
               e.path()
                 .components()
-                .last()
+                .next_back()
                 .map(|c| {
                   let s = c.as_os_str().to_string_lossy();
                   s.starts_with("steamapps") || s.contains("appmanifest")
@@ -325,21 +282,5 @@ impl MediaCacheService {
           "iconCacheSize": self.get_icon_cache_size(),
       })),
     }
-  }
-}
-
-fn format_size(bytes: u64) -> String {
-  const KB: u64 = 1024;
-  const MB: u64 = KB * 1024;
-  const GB: u64 = MB * 1024;
-
-  if bytes >= GB {
-    format!("{:.2} GB", bytes as f64 / GB as f64)
-  } else if bytes >= MB {
-    format!("{:.2} MB", bytes as f64 / MB as f64)
-  } else if bytes >= KB {
-    format!("{:.2} KB", bytes as f64 / KB as f64)
-  } else {
-    format!("{} B", bytes)
   }
 }

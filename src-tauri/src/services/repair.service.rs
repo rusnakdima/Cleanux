@@ -267,25 +267,23 @@ impl RepairService {
       dirs::home_dir().map(|h| h.join(".cache")),
     ];
 
-    for opt_path in common_paths {
-      if let Some(path) = opt_path {
-        if path.exists() {
-          let perms_path = path.to_string_lossy().to_string();
-          let output = Command::new("pkexec")
-            .args(["chmod", "755", &perms_path])
-            .output();
+    for path in common_paths.into_iter().flatten() {
+      if path.exists() {
+        let perms_path = path.to_string_lossy().to_string();
+        let output = Command::new("pkexec")
+          .args(["chmod", "755", &perms_path])
+          .output();
 
-          match output {
-            Ok(result) => {
-              if result.status.success() {
-                repaired_count += 1;
-              } else {
-                failed.push(format!("{}: permission fix failed", perms_path));
-              }
+        match output {
+          Ok(result) => {
+            if result.status.success() {
+              repaired_count += 1;
+            } else {
+              failed.push(format!("{}: permission fix failed", perms_path));
             }
-            Err(e) => {
-              failed.push(format!("{}: {}", perms_path, e));
-            }
+          }
+          Err(e) => {
+            failed.push(format!("{}: {}", perms_path, e));
           }
         }
       }

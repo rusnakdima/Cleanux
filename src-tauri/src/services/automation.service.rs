@@ -1,7 +1,6 @@
 use crate::helpers::{data_string, success_response};
 use crate::models::AppError;
 use crate::models::ResponseModel;
-use crate::services::cleaner_service::CleanerService;
 use crate::services::profile_service::ProfileService;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -151,29 +150,31 @@ fn get_predefined_quick_actions() -> Vec<QuickAction> {
 }
 
 fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
+  use crate::services::{
+    cache_cleaning_service::CacheCleaningService,
+    large_file_cleaning_service::LargeFileCleaningService,
+    log_cleaning_service::LogCleaningService, trash_cleaning_service::TrashCleaningService,
+  };
   match step {
-    ActionStep::CleanCategory { category } => {
-      let cleaner = CleanerService;
-      match category.as_str() {
-        "cache" => {
-          let _ = cleaner.clearCache();
-          Ok("Cache cleared".to_string())
-        }
-        "trash" => {
-          let _ = cleaner.clearTrash();
-          Ok("Trash cleared".to_string())
-        }
-        "logs" => {
-          let _ = cleaner.clearAllLogs();
-          Ok("Logs cleared".to_string())
-        }
-        "largefiles" => {
-          let _ = cleaner.clearAllLargeFiles();
-          Ok("Large files cleared".to_string())
-        }
-        _ => Err(AppError::message(format!("Unknown category: {}", category))),
+    ActionStep::CleanCategory { category } => match category.as_str() {
+      "cache" => {
+        let _ = CacheCleaningService.clearCache();
+        Ok("Cache cleared".to_string())
       }
-    }
+      "trash" => {
+        let _ = TrashCleaningService.clearTrash();
+        Ok("Trash cleared".to_string())
+      }
+      "logs" => {
+        let _ = LogCleaningService.clearAllLogs();
+        Ok("Logs cleared".to_string())
+      }
+      "largefiles" => {
+        let _ = LargeFileCleaningService.clearAllLargeFiles();
+        Ok("Large files cleared".to_string())
+      }
+      _ => Err(AppError::message(format!("Unknown category: {}", category))),
+    },
     ActionStep::RunProfile { profile_name } => match ProfileService.apply_profile(profile_name) {
       Ok(result) => Ok(format!("Profile '{}' applied: {}", profile_name, result)),
       Err(e) => Err(AppError::message(format!("Failed to run profile: {}", e))),

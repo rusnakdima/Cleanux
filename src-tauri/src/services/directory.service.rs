@@ -34,7 +34,7 @@ impl DirectoryService {
     }
 
     let tree = Self::build_directory_tree(start_path, max_depth)?;
-    let size = Self::calculate_directory_size(&tree);
+    let size = tree.size;
 
     let result = serde_json::json!({
         "tree": tree,
@@ -136,10 +136,6 @@ impl DirectoryService {
     }
 
     Ok(node)
-  }
-
-  fn calculate_directory_size(node: &DirectoryNode) -> u64 {
-    node.size
   }
 
   pub fn find_empty_directories(path: &str) -> Result<ResponseModel, ResponseModel> {

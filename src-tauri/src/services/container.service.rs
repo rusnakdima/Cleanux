@@ -81,11 +81,7 @@ impl ContainerService {
       .ok()
       .and_then(|o| {
         let stdout = String::from_utf8_lossy(&o.stdout);
-        stdout
-          .trim()
-          .split_whitespace()
-          .nth(2)
-          .map(|s| s.to_string())
+        stdout.split_whitespace().nth(2).map(|s| s.to_string())
       })
   }
 
@@ -94,7 +90,7 @@ impl ContainerService {
       .ok()
       .and_then(|o| {
         let output = String::from_utf8_lossy(&o.stdout);
-        let size_str = output.trim().split_whitespace().next()?;
+        let size_str = output.split_whitespace().next()?;
         Self::parse_size_to_bytes(size_str)
       })
       .unwrap_or(0)
@@ -103,10 +99,9 @@ impl ContainerService {
   pub fn get_docker_containers_count(&self) -> usize {
     Self::run_command("docker", &["ps", "-aq"])
       .ok()
-      .and_then(|o| {
+      .map(|o| {
         let stdout = String::from_utf8_lossy(&o.stdout);
-        let count = stdout.lines().filter(|l| !l.is_empty()).count();
-        Some(count)
+        stdout.lines().filter(|l| !l.is_empty()).count()
       })
       .unwrap_or(0)
   }
@@ -114,13 +109,13 @@ impl ContainerService {
   pub fn get_docker_volumes_size(&self) -> u64 {
     Self::run_command("docker", &["system", "df", "-v", "--format", "{{.Size}}"])
       .ok()
-      .and_then(|o| {
+      .map(|o| {
         let output = String::from_utf8_lossy(&o.stdout);
         output
           .lines()
-          .filter(|l| !l.is_empty() && !l.contains("Total"))
-          .last()
-          .and_then(|l| Self::parse_size_to_bytes(l.trim()))
+          .rfind(|l| !l.is_empty() && !l.contains("Total"))
+          .map(|l| Self::parse_size_to_bytes(l.trim()).unwrap_or(0))
+          .unwrap_or(0)
       })
       .unwrap_or(0)
   }
@@ -277,24 +272,19 @@ impl ContainerService {
       .ok()
       .and_then(|o| {
         let stdout = String::from_utf8_lossy(&o.stdout);
-        stdout
-          .trim()
-          .split_whitespace()
-          .nth(2)
-          .map(|s| s.to_string())
+        stdout.split_whitespace().nth(2).map(|s| s.to_string())
       })
   }
 
   fn get_podman_images_size(&self) -> u64 {
     Self::run_command("podman", &["images", "--format", "{{.Size}}"])
       .ok()
-      .and_then(|o| {
+      .map(|o| {
         let output = String::from_utf8_lossy(&o.stdout);
-        let sizes: u64 = output
+        output
           .lines()
           .filter_map(|l| Self::parse_size_to_bytes(l.trim()))
-          .sum();
-        Some(sizes)
+          .sum()
       })
       .unwrap_or(0)
   }
@@ -302,10 +292,9 @@ impl ContainerService {
   fn get_podman_containers_count(&self) -> usize {
     Self::run_command("podman", &["ps", "-aq"])
       .ok()
-      .and_then(|o| {
+      .map(|o| {
         let stdout = String::from_utf8_lossy(&o.stdout);
-        let count = stdout.lines().filter(|l| !l.is_empty()).count();
-        Some(count)
+        stdout.lines().filter(|l| !l.is_empty()).count()
       })
       .unwrap_or(0)
   }

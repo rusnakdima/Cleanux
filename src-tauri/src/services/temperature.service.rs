@@ -54,7 +54,7 @@ impl TempCache {
 static TEMP_CACHE: std::sync::OnceLock<TempCache> = std::sync::OnceLock::new();
 
 fn get_temp_cache() -> &'static TempCache {
-  TEMP_CACHE.get_or_init(|| TempCache::new())
+  TEMP_CACHE.get_or_init(TempCache::new)
 }
 
 pub struct TemperatureService;

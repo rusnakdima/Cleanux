@@ -9,9 +9,6 @@ pub mod backup_service;
 #[path = "cache_cleaning.service.rs"]
 pub mod cache_cleaning_service;
 
-#[path = "cleaner.service.rs"]
-pub mod cleaner_service;
-
 #[path = "dashboard.service.rs"]
 pub mod dashboard_service;
 

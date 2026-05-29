@@ -3,8 +3,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use crate::helpers::get_dir_size;
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
-use walkdir::WalkDir;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct AppResidue {
@@ -82,7 +82,7 @@ impl AppResidueService {
         let stdout = String::from_utf8_lossy(&output.stdout);
         for line in stdout.lines() {
           let parts: Vec<&str> = line.split('\t').collect();
-          if parts.len() >= 1 {
+          if !parts.is_empty() {
             let name = parts[0].to_lowercase();
             installed.insert(name);
             if let Some(last) = parts.last() {
@@ -176,25 +176,11 @@ impl AppResidueService {
     installed
   }
 
-  fn calculate_dir_size(path: &Path) -> u64 {
-    if !path.exists() {
-      return 0;
-    }
-    WalkDir::new(path)
-      .into_iter()
-      .filter_map(|e| e.ok())
-      .filter(|e| e.file_type().is_file())
-      .filter_map(|e| e.metadata().ok())
-      .map(|m| m.len())
-      .sum()
-  }
-
   fn normalize_app_name(name: &str) -> String {
-    let normalized = name
+    name
       .to_lowercase()
       .replace(['.', '-', '_'], "-")
-      .replace(|c: char| !c.is_alphanumeric() && c != '-', "");
-    normalized
+      .replace(|c: char| !c.is_alphanumeric() && c != '-', "")
   }
 
   fn matches_installed_app(app_name: &str, installed_apps: &HashSet<String>) -> bool {
@@ -247,7 +233,7 @@ impl AppResidueService {
 
         let is_installed = Self::matches_installed_app(&app_name, &installed);
 
-        let size = Self::calculate_dir_size(&path);
+        let size = get_dir_size(&path);
         if size == 0 && path.is_dir() {
           continue;
         }
@@ -315,7 +301,7 @@ impl AppResidueService {
         let is_installed =
           config_names.contains(&normalized) || Self::matches_installed_app(&app_name, &installed);
 
-        let size = Self::calculate_dir_size(&path);
+        let size = get_dir_size(&path);
         if size == 0 && path.is_dir() {
           continue;
         }
@@ -365,7 +351,7 @@ impl AppResidueService {
 
         let is_installed = Self::matches_installed_app(&app_name, &installed);
 
-        let size = Self::calculate_dir_size(&path);
+        let size = get_dir_size(&path);
         if size == 0 && path.is_dir() {
           continue;
         }
@@ -465,7 +451,7 @@ impl AppResidueService {
             }
 
             let is_installed = Self::matches_installed_app(&app_name, &installed);
-            let size = Self::calculate_dir_size(&path);
+            let size = get_dir_size(&path);
 
             if size == 0 && path.is_dir() {
               continue;

@@ -28,7 +28,7 @@ impl ProfileService {
 
   fn get_profile_path(name: &str) -> ProfileResult<PathBuf> {
     let dir = Self::ensure_profiles_dir()?;
-    let safe_name = name.replace('/', "_").replace('\\', "_").replace("..", "_");
+    let safe_name = name.replace(['/', '\\'], "_").replace("..", "_");
     Ok(dir.join(format!("{}.json", safe_name)))
   }
 

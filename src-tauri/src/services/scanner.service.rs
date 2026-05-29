@@ -106,11 +106,7 @@ impl ScannerService {
       let mut hasher = Sha256::new();
       let mut buffer = [0u8; 8192];
 
-      loop {
-        let bytes_read = match reader.read(&mut buffer) {
-          Ok(b) => b,
-          Err(_) => break,
-        };
+      while let Ok(bytes_read) = reader.read(&mut buffer) {
         if bytes_read == 0 {
           break;
         }
@@ -121,7 +117,7 @@ impl ScannerService {
 
       hash_map
         .entry(hash)
-        .or_insert_with(Vec::new)
+        .or_default()
         .push((file_path.to_string_lossy().to_string(), file_size));
     }
 
