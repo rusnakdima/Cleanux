@@ -46,3 +46,5 @@ Thumbs.db
 
 # Tauri MCP Bridge
 /src-tauri/capabilities/mcp-bridge.json
+
+docs/
