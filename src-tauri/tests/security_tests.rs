@@ -1,4 +1,5 @@
 use cleanux_lib::security::privilege::{requires_confirmation, PrivilegeOperation};
+use cleanux_lib::security::sanitize_path;
 
 #[test]
 fn test_privilege_operation_new() {
@@ -27,4 +28,44 @@ fn test_requires_confirmation_safe_commands() {
   assert!(!requires_confirmation("ls"));
   assert!(!requires_confirmation("rm /tmp/test"));
   assert!(!requires_confirmation("cat /etc/passwd"));
+}
+
+#[test]
+fn test_sanitize_path_prevents_traversal_removal() {
+  let result = sanitize_path("/home/user/../etc/passwd");
+  assert!(
+    !result.contains(".."),
+    "path should not contain '..' sequences: {}",
+    result
+  );
+  assert!(
+    result.contains("/home"),
+    "path should still contain /home: {}",
+    result
+  );
+}
+
+#[test]
+fn test_sanitize_path_removes_null_bytes() {
+  let result = sanitize_path("/home/user\0/../etc");
+  assert!(!result.contains('\0'), "path should not contain null bytes");
+}
+
+#[test]
+fn test_sanitize_path_handles_consecutive_dots() {
+  let result = sanitize_path("/foo/....//....//bar");
+  assert!(
+    !result.contains(".."),
+    "path should not contain '..' sequences: {}",
+    result
+  );
+}
+
+#[test]
+fn test_sanitize_path_preserves_valid_paths() {
+  assert_eq!(
+    sanitize_path("/home/user/Documents"),
+    "/home/user/Documents"
+  );
+  assert_eq!(sanitize_path("/tmp/cleanux"), "/tmp/cleanux");
 }

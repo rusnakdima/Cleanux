@@ -1,8 +1,6 @@
 /* sys lib */
 use std::path::{Path, PathBuf};
 
-const ALLOWED_DIRS: &[&str] = &["/home", "/var/cache", "/tmp", "/snap"];
-
 pub fn validate_path(path: &str) -> Result<PathBuf, String> {
   let path_buf = PathBuf::from(path);
 
@@ -24,11 +22,13 @@ pub fn validate_path(path: &str) -> Result<PathBuf, String> {
 pub fn is_allowed_path(path: &Path, home_dir: &Path) -> bool {
   let trash_dir = home_dir.join(".local/share/Trash");
 
-  let allowed_with_trash: Vec<PathBuf> = ALLOWED_DIRS
-    .iter()
-    .map(PathBuf::from)
-    .chain(std::iter::once(trash_dir.clone()))
-    .collect();
+  let allowed_with_trash: Vec<PathBuf> = vec![
+    PathBuf::from("/home"),
+    PathBuf::from("/var/cache"),
+    PathBuf::from("/tmp"),
+    PathBuf::from("/snap"),
+    trash_dir,
+  ];
 
   for allowed in &allowed_with_trash {
     if let Ok(allowed_canonical) = allowed.canonicalize() {
