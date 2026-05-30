@@ -1,0 +1,143 @@
+<div class="data-list-container">
+  @if (showSearch) {
+    <div class="data-list-search">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="{{ options.searchPlaceholder ?? 'Search...' }}"
+          [formControl]="searchControl"
+        />
+        @if (searchControl.value) {
+          <button (click)="clearSearch()" class="search-clear-btn">
+            <mat-icon class="clear-icon">close</mat-icon>
+          </button>
+        }
+      </div>
+      @if (showReloadButton) {
+        <button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+          <mat-icon class="text-[var(--accent-icons)]">refresh</mat-icon>
+        </button>
+      }
+    </div>
+  }
+
+  @if (loading) {
+    <div class="data-list-loading">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else if (data.length === 0) {
+    <div class="data-list-empty">
+      <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">inbox</mat-icon>
+      <p class="text-[var(--text-secondary)]">{{ options.emptyMessage ?? 'No items found' }}</p>
+    </div>
+  } @else {
+    <div class="data-list-items">
+      @for (item of paginatedData; track trackByFn($index, item)) {
+        <div
+          class="data-list-item {{ getRowClass(item) }}"
+          [class.hoverable]="options.hoverable !== false"
+          [class.selected]="isSelected(item)"
+          (click)="onRowClick(item, $event)"
+          (dblclick)="onRowDoubleClick(item)"
+        >
+          @if (showCheckbox) {
+            <div class="item-checkbox">
+              <label class="custom-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(item)"
+                  (change)="toggleSelectItem(item, $any($event.target).checked)"
+                  (click)="$event.stopPropagation()"
+                />
+                <span class="checkmark"></span>
+              </label>
+            </div>
+          }
+
+          @if (hasRowActions && actionsPosition === 'right') {
+            <div class="item-icon">
+              <mat-icon class="mat-icon">{{ getItemIcon(item) }}</mat-icon>
+            </div>
+          }
+
+          <div class="item-content">
+            @if (primaryColumn) {
+              <div class="item-primary">
+                <span class="primary-text" [class.truncate]="primaryColumn.truncate !== false">
+                  {{ formatCell(primaryColumn.key, item) }}
+                </span>
+                @if (primaryColumn.badge) {
+                  <span class="badge" [class]="getBadgeClass(primaryColumn.badge, item)">
+                    {{ formatCell(primaryColumn.badge, item) }}
+                  </span>
+                }
+                @if (primaryColumn.format === 'size') {
+                  <span class="secondary-text size-value">
+                    {{ getFormattedValue(primaryColumn, item) }}
+                  </span>
+                }
+              </div>
+
+              @if (hasSecondaryContent) {
+                <div class="item-secondary">
+                  @if (getSecondaryValue(item)) {
+                    <span class="truncate">{{ getSecondaryValue(item) }}</span>
+                  }
+                  @if (getTimestamp(item)) {
+                    <span class="timestamp">{{ getTimestamp(item) }}</span>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          @if (showActions && actionsPosition === 'right' && hasRowActions) {
+            <div class="item-actions">
+              @for (action of rowActions; track action.id) {
+                @if (action.toggle) {
+                  <button
+                    [class]="getActionClass({ action: action.id, item }, item)"
+                    [class.text-success]="getActionToggleState(action.id, item)"
+                    [disabled]="isActionDisabled(action.id, item)"
+                    [matTooltip]="action.tooltip ?? action.label ?? ''"
+                    (click)="onRowAction({ action: action.id, item }); $event.stopPropagation()"
+                  >
+                    <mat-icon>{{ action.icon }}</mat-icon>
+                  </button>
+                } @else {
+                  <button
+                    [class]="getActionClass({ action: action.id, item }, item)"
+                    [disabled]="isActionDisabled(action.id, item)"
+                    [matTooltip]="action.tooltip ?? action.label ?? ''"
+                    (click)="onRowAction({ action: action.id, item }); $event.stopPropagation()"
+                  >
+                    <mat-icon>{{ action.icon }}</mat-icon>
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+      } @empty {
+        <div class="data-list-empty">
+          <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">inbox</mat-icon>
+          <p class="text-[var(--text-secondary)]">{{ options.emptyMessage ?? 'No items found' }}</p>
+        </div>
+      }
+    </div>
+
+    @if (showPagination) {
+      <app-pagination
+        [currentPage]="p"
+        [pageSize]="pageSize"
+        [totalItems]="totalItems"
+        [pageSizeOptions]="pageSizeOptions"
+        [showPageSizeSelector]="showPageSizeSelector"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
+    }
+  }
+</div>
