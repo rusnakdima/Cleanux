@@ -20,11 +20,10 @@ import { SystemService, SystemServiceItem } from '@services/system.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
-import { SearchComponent } from '@components/search/search.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 @Component({
   selector: 'app-system-view',
@@ -36,8 +35,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
-    SearchComponent,
+    DataListComponent,
   ],
   templateUrl: './system.view.html',
 })
@@ -47,7 +45,6 @@ export class SystemView implements OnInit {
   private notification = inject(NotificationService);
 
   servicesData = signal<SystemServiceItem[]>([]);
-  filteredData = signal<SystemServiceItem[]>([]);
   loading = signal(false);
   selectedServices = signal<Set<string>>(new Set());
 
@@ -55,11 +52,44 @@ export class SystemView implements OnInit {
   runningServices = computed(() => this.servicesData().filter((s) => s.isRunning).length);
   stoppedServices = computed(() => this.servicesData().filter((s) => !s.isRunning).length);
 
-  serviceColumns: TableColumn[] = [
-    { key: 'name', label: 'Name', width: 'flex-1', sortable: true },
-    { key: 'active', label: 'Active', width: 'w-32', sortable: true },
-    { key: 'status', label: 'Status', align: 'right', width: 'w-32', sortable: true },
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'settings',
+      badge: 'status',
+      badgeClass: (item: unknown) => {
+        const s = item as SystemServiceItem;
+        return s.isRunning ? 'badge-success' : 'badge-error';
+      },
+      secondaryKey: 'active',
+      actions: [
+        {
+          id: 'stop',
+          icon: 'stop',
+          tooltip: 'Stop service',
+          confirmMessage: 'Stop this service?',
+        },
+        {
+          id: 'start',
+          icon: 'play_arrow',
+          tooltip: 'Start service',
+          confirmMessage: 'Start this service?',
+        },
+      ],
+    },
   ];
+
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: true,
+    checkboxKey: 'name',
+    showActions: true,
+    actionsPosition: 'right',
+    showReloadButton: true,
+    searchPlaceholder: 'Search services...',
+    emptyMessage: 'No services found',
+  };
 
   get isDark(): boolean {
     return this.document.body.classList.contains('dark');
@@ -74,7 +104,6 @@ export class SystemView implements OnInit {
     try {
       const data = await this.systemService.getAllServices();
       this.servicesData.set(data);
-      this.filteredData.set(data);
     } catch (error: unknown) {
       console.error('Failed to load system services:', error);
     } finally {
@@ -82,8 +111,8 @@ export class SystemView implements OnInit {
     }
   }
 
-  onFilteredData(data: object[]): void {
-    this.filteredData.set(data as SystemServiceItem[]);
+  onSelectionChange(keys: Set<string>): void {
+    this.selectedServices.set(keys);
   }
 
   async stopSelectedServices() {
@@ -130,13 +159,13 @@ export class SystemView implements OnInit {
     }
   }
 
-  async startService(service: string) {
-    const confirmed = confirm(`Start ${service}?`);
+  async startService(name: string) {
+    const confirmed = confirm(`Start ${name}?`);
     if (!confirmed) return;
 
     try {
       this.loading.set(true);
-      await this.systemService.startService(service);
+      await this.systemService.startService(name);
       await this.loadData();
     } catch (error: unknown) {
       this.notification.error(
@@ -148,31 +177,11 @@ export class SystemView implements OnInit {
     }
   }
 
-  getTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: true,
-      checkboxKey: 'name',
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: true,
-      selectedActionText: 'Stop Selected',
-      showSearch: true,
-      searchPlaceholder: 'Search services...',
-    };
-  }
-
-  getStartTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: true,
-      checkboxKey: 'name',
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: true,
-      selectedActionText: 'Start Selected',
-      showSearch: true,
-      searchPlaceholder: 'Search services...',
-    };
+  onRowAction(event: { action: string; item: SystemServiceItem }): void {
+    if (event.action === 'stop') {
+      this.systemService.stopSelectedServices([event.item.name]).then(() => this.loadData());
+    } else if (event.action === 'start') {
+      this.startService(event.item.name);
+    }
   }
 }

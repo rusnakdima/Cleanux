@@ -14,11 +14,10 @@ import { BackupService, BackupItem } from '@services/backup.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 import { formatSize } from '@shared/utils/format.util';
 
 @Component({
@@ -31,7 +30,7 @@ import { formatSize } from '@shared/utils/format.util';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
   ],
   templateUrl: './backup.view.html',
 })
@@ -48,11 +47,39 @@ export class BackupView implements OnInit {
   currentPage = signal(1);
   pageSize = signal(15);
 
-  paginatedBackups = computed(() => {
-    const data = this.backups();
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return data.slice(start, start + this.pageSize());
-  });
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'backup',
+      secondaryKey: 'modified',
+      actions: [
+        {
+          id: 'restore',
+          icon: 'restore',
+          tooltip: 'Restore backup',
+          confirmMessage: 'Restore backup? Files will be extracted to original location.',
+        },
+        {
+          id: 'delete',
+          icon: 'delete',
+          tooltip: 'Delete backup',
+          class: 'action-btn text-error',
+          confirmMessage: 'Delete backup? This action cannot be undone.',
+        },
+      ],
+    },
+  ];
+
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: false,
+    showActions: true,
+    actionsPosition: 'right',
+    showReloadButton: true,
+    searchPlaceholder: 'Search backups...',
+    emptyMessage: 'No backups found',
+  };
 
   async ngOnInit() {
     await this.loadBackups();
@@ -81,11 +108,6 @@ export class BackupView implements OnInit {
   }
 
   async restoreBackup(backup: BackupItem) {
-    const confirmed = confirm(
-      `Restore backup "${backup.name}"?\n\nThis will extract files to their original location.`
-    );
-    if (!confirmed) return;
-
     this.restoringId.set(backup.path);
     try {
       await this.backupService.restoreBackup(backup.path, '/tmp/cleanux_restore');
@@ -98,19 +120,12 @@ export class BackupView implements OnInit {
   }
 
   async deleteBackup(backup: BackupItem) {
-    const confirmed = confirm(`Delete backup "${backup.name}"?\n\nThis action cannot be undone.`);
-    if (!confirmed) return;
-
     try {
       await this.backupService.deleteBackup(backup.path);
       await this.loadBackups();
     } catch (error) {
       this.notification.error('Failed to delete backup', error);
     }
-  }
-
-  isRestoring(path: string): boolean {
-    return this.restoringId() === path;
   }
 
   onPageChange(page: number): void {
@@ -122,38 +137,11 @@ export class BackupView implements OnInit {
     this.currentPage.set(1);
   }
 
-  columns: TableColumn[] = [
-    { key: 'name', label: 'Name', width: 'flex-1', sortable: true },
-    { key: 'size', label: 'Size', width: 'w-32', sortable: true, align: 'right' },
-    { key: 'modified', label: 'Date', width: 'w-48', sortable: true, align: 'right' },
-  ];
-
-  getTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: false,
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: false,
-      showPreviewButton: false,
-      showSearch: true,
-      searchPlaceholder: 'Search backups...',
-    };
-  }
-
-  onRestore(event: { action: string; item: BackupItem }): void {
+  onRowAction(event: { action: string; item: BackupItem }): void {
     if (event.action === 'restore') {
       this.restoreBackup(event.item);
-    }
-  }
-
-  onDelete(event: { action: string; item: BackupItem }): void {
-    if (event.action === 'delete') {
+    } else if (event.action === 'delete') {
       this.deleteBackup(event.item);
     }
-  }
-
-  trackByPath(index: number, backup: BackupItem): string {
-    return backup.path;
   }
 }

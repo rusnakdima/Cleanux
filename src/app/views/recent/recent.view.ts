@@ -1,10 +1,11 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-/* materials */
 import { MatIconModule } from '@angular/material/icon';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+
+import { DataListComponent } from '@components/data-list/data-list.component';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 interface RecentItem {
   id: string;
@@ -18,7 +19,7 @@ interface RecentItem {
   selector: 'app-recent-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, PaginationComponent],
+  imports: [CommonModule, MatIconModule, DataListComponent],
   templateUrl: './recent.view.html',
 })
 export class RecentView {
@@ -44,10 +45,31 @@ export class RecentView {
     { id: '4', name: 'notes.txt', app: 'VS Code', path: '~/Projects/', timestamp: '2 days ago' },
   ]);
 
-  paginatedItems = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.items().slice(start, start + this.pageSize());
-  });
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'description',
+      badge: 'app',
+      secondary: 'path',
+      timestamp: 'timestamp',
+      actions: [
+        {
+          id: 'remove',
+          icon: 'close',
+          tooltip: 'Remove',
+        },
+      ],
+    },
+  ];
+
+  options: ListOptions = {
+    showSearch: false,
+    showCheckbox: false,
+    showActions: true,
+    actionsPosition: 'right',
+    emptyMessage: 'No recent files tracked',
+  };
 
   apps = [
     { id: 'firefox', name: 'Firefox', icon: 'public' },
@@ -81,6 +103,12 @@ export class RecentView {
   clearAll() {
     if (confirm('Clear all recent file history? This cannot be undone.')) {
       this.items.set([]);
+    }
+  }
+
+  onRowAction(event: { action: string; item: RecentItem }) {
+    if (event.action === 'remove') {
+      this.removeItem(event.item.id);
     }
   }
 }

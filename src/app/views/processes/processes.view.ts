@@ -21,10 +21,10 @@ import { SystemService, ProcessItem } from '@services/system.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 @Component({
   selector: 'app-processes-view',
@@ -37,7 +37,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
   ],
   templateUrl: './processes.view.html',
 })
@@ -47,7 +47,6 @@ export class ProcessesView implements OnInit {
   private notification = inject(NotificationService);
 
   processesData = signal<ProcessItem[]>([]);
-  filteredData = signal<ProcessItem[]>([]);
   loading = signal(false);
   selectedPids = signal<Set<number>>(new Set());
 
@@ -56,18 +55,36 @@ export class ProcessesView implements OnInit {
 
   totalProcesses = computed(() => this.processesData().length);
 
-  paginatedData = computed(() => {
-    const data = this.filteredData();
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return data.slice(start, start + this.pageSize());
-  });
-
-  processColumns: TableColumn[] = [
-    { key: 'pid', label: 'PID', width: 'w-24', sortable: true },
-    { key: 'name', label: 'Service', width: 'flex-1', sortable: true },
-    { key: 'cpu_usage', label: 'CPU load', width: 'w-24', sortable: true, align: 'right' },
-    { key: 'memory_usage', label: 'RAM usage', width: 'w-24', sortable: true, align: 'right' },
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'memory',
+      badge: 'pid',
+      badgeClass: 'badge-primary',
+      secondaryKey: 'cpu_usage',
+      format: 'number',
+      actions: [
+        {
+          id: 'kill',
+          icon: 'stop',
+          tooltip: 'Kill process',
+          confirmMessage: 'Kill this process?',
+        },
+      ],
+    },
   ];
+
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: true,
+    checkboxKey: 'pid',
+    showActions: true,
+    actionsPosition: 'right',
+    showReloadButton: true,
+    searchPlaceholder: 'Search processes...',
+    emptyMessage: 'No processes found',
+  };
 
   get isDark(): boolean {
     return this.document.body.classList.contains('dark');
@@ -82,7 +99,6 @@ export class ProcessesView implements OnInit {
     try {
       const data = await this.systemService.getProcesses();
       this.processesData.set(data);
-      this.filteredData.set(data);
       this.currentPage.set(1);
     } catch (error: unknown) {
       console.error('Failed to load processes:', error);
@@ -91,13 +107,8 @@ export class ProcessesView implements OnInit {
     }
   }
 
-  onFilteredData(data: object[]): void {
-    this.filteredData.set(data as ProcessItem[]);
-    this.currentPage.set(1);
-  }
-
-  onSelectionChange(selected: Set<string>): void {
-    this.selectedPids.set(new Set(Array.from(selected).map((s) => Number(s))));
+  onSelectionChange(keys: Set<string>): void {
+    this.selectedPids.set(new Set(Array.from(keys).map((s) => Number(s))));
   }
 
   onPageChange(page: number): void {
@@ -128,37 +139,14 @@ export class ProcessesView implements OnInit {
     }
   }
 
-  async killProcess(pid: number) {
-    const confirmed = confirm(`Kill process ${pid}?`);
-    if (!confirmed) return;
-
-    try {
-      this.loading.set(true);
-      await this.systemService.killProcess(pid);
-      await this.loadData();
-    } catch (error: unknown) {
-      this.notification.error('Failed to kill process', error);
-    } finally {
-      this.loading.set(false);
+  onRowAction(event: { action: string; item: ProcessItem }): void {
+    if (event.action === 'kill') {
+      this.systemService.killProcess(event.item.pid).then(() => this.loadData());
     }
   }
 
   async flushRamCaches() {
     console.log('Flushing RAM caches...');
     this.notification.success('RAM caches flushed successfully!');
-  }
-
-  getTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: true,
-      checkboxKey: 'pid',
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: true,
-      selectedActionText: 'Kill Selected',
-      showSearch: true,
-      searchPlaceholder: 'Search processes...',
-    };
   }
 }

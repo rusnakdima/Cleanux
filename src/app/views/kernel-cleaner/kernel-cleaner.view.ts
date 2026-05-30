@@ -11,7 +11,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {
   KernelCleanerService,
@@ -20,7 +19,8 @@ import {
   BootSpaceInfo,
 } from '@services/kernel-cleaner.service';
 import { formatSize } from '@shared/utils/format.util';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 @Component({
   selector: 'app-kernel-cleaner-view',
@@ -32,9 +32,8 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatCheckboxModule,
     MatProgressBarModule,
-    PaginationComponent,
+    DataListComponent,
   ],
   templateUrl: './kernel-cleaner.view.html',
 })
@@ -59,15 +58,57 @@ export class KernelCleanerView implements OnInit {
   initramfsPage = signal(1);
   initramfsPageSize = signal(15);
 
-  paginatedAllKernels = computed(() => {
-    const start = (this.kernelsPage() - 1) * this.kernelsPageSize();
-    return this.allKernels().slice(start, start + this.kernelsPageSize());
-  });
+  kernelColumns: ListColumn[] = [
+    {
+      key: 'version',
+      primary: true,
+      icon: 'memory',
+      badge: 'version',
+      badgeClass: 'badge-primary',
+      secondaryKey: 'path',
+      sortable: true,
+    },
+    {
+      key: 'size',
+      format: 'size',
+      align: 'right',
+      sortable: true,
+    },
+  ];
 
-  paginatedOldInitramfs = computed(() => {
-    const start = (this.initramfsPage() - 1) * this.initramfsPageSize();
-    return this.oldInitramfs().slice(start, start + this.initramfsPageSize());
-  });
+  kernelOptions: ListOptions = {
+    showCheckbox: false,
+    hoverable: true,
+    showReloadButton: true,
+    showSearch: false,
+    rowClass: (item: unknown) => {
+      const kernel = item as KernelInfo;
+      return kernel.is_current ? 'bg-success/10 border-success/30' : 'border-[var(--border-color)]';
+    },
+  };
+
+  initramfsColumns: ListColumn[] = [
+    {
+      key: 'version',
+      primary: true,
+      icon: 'description',
+      sortable: true,
+    },
+    {
+      key: 'size',
+      format: 'size',
+      align: 'right',
+      sortable: true,
+    },
+  ];
+
+  initramfsOptions: ListOptions = {
+    showCheckbox: true,
+    checkboxKey: 'version',
+    hoverable: true,
+    showReloadButton: false,
+    showSearch: false,
+  };
 
   onKernelsPageChange(page: number) {
     this.kernelsPage.set(page);
@@ -234,12 +275,20 @@ export class KernelCleanerView implements OnInit {
       .reduce((sum, k) => sum + k.size, 0);
   }
 
-  isCurrentKernel(version: string): boolean {
-    return version === this.currentKernel();
-  }
-
   getBootUsagePercent(): number {
     const info = this.bootSpaceInfo();
     return info ? Math.round(info.usage_percent) : 0;
+  }
+
+  onKernelSelectionChange(keys: Set<string>): void {
+    this.selectedKernels.set(keys);
+  }
+
+  onInitramfsSelectionChange(keys: Set<string>): void {
+    this.selectedInitramfs.set(keys);
+  }
+
+  isCurrentKernel(version: string): boolean {
+    return version === this.currentKernel();
   }
 }

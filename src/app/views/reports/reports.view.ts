@@ -17,8 +17,8 @@ import { ReportService } from '@services/report.service';
 
 import { CleaningReport, SnapshotComparison } from '@models/report.model';
 import { formatSize } from '@shared/utils/format.util';
-import { DataTableComponent } from '@components/data-table/data-table.component';
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { DataListComponent } from '@components/data-list/data-list.component';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 @Component({
   selector: 'app-reports',
@@ -30,7 +30,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
   ],
   templateUrl: './reports.view.html',
 })
@@ -82,25 +82,33 @@ export class ReportsView implements OnInit {
     return `M ${points.join(' L ')}`;
   });
 
-  columns: TableColumn[] = [
-    { key: 'date', label: 'Date', width: 'flex-1', sortable: true },
-    { key: 'items_cleaned', label: 'Items', width: 'w-24', sortable: true, align: 'center' },
-    { key: 'space_reclaimed', label: 'Reclaimed', width: 'w-32', sortable: true, align: 'center' },
-    { key: 'duration', label: 'Duration', width: 'w-24', sortable: true, align: 'center' },
+  columns: ListColumn[] = [
+    {
+      key: 'date',
+      primary: true,
+      icon: 'description',
+      badge: 'space_reclaimed',
+      badgeClass: 'badge-info',
+      secondaryKey: 'duration',
+      actions: [
+        {
+          id: 'export',
+          icon: 'download',
+          tooltip: 'Export to HTML',
+        },
+      ],
+    },
   ];
 
-  getTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: false,
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: false,
-      showPreviewButton: false,
-      showSearch: true,
-      searchPlaceholder: 'Search reports...',
-    };
-  }
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: false,
+    showActions: true,
+    actionsPosition: 'right',
+    showReloadButton: true,
+    searchPlaceholder: 'Search reports...',
+    emptyMessage: 'No reports found',
+  };
 
   onPageChange(page: number) {
     this.currentPage.set(page);
@@ -234,7 +242,7 @@ export class ReportsView implements OnInit {
     return `M ${x},${chartHeight + padding} L ${x},${y}`;
   }
 
-  onReportAction(event: { action: string; item: CleaningReport }): void {
+  onRowAction(event: { action: string; item: CleaningReport }): void {
     if (event.action === 'export') {
       this.exportHtmlReport(event.item.id!);
     }

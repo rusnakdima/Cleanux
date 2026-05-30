@@ -4,9 +4,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { formatSize } from '@shared/utils/format.util';
 
-/* materials */
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+import { DataListComponent } from '@components/data-list/data-list.component';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 interface DownloadFile {
   path: string;
@@ -19,7 +21,7 @@ interface DownloadFile {
   selector: 'app-downloads-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule, DataListComponent],
   templateUrl: './downloads.view.html',
 })
 export class DownloadsView {
@@ -29,6 +31,30 @@ export class DownloadsView {
   files = signal<DownloadFile[]>([]);
   selectedFiles = signal<Set<string>>(new Set());
   selectedAge = 'week';
+
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'description',
+      secondary: 'path',
+      badge: 'sizeDisplay',
+      timestamp: 'age',
+      format: 'number',
+    },
+  ];
+
+  options: ListOptions = {
+    showSearch: false,
+    showCheckbox: true,
+    checkboxKey: 'path',
+    showActions: false,
+    emptyMessage: 'No files found in Downloads',
+  };
+
+  get sizeDisplay(): string {
+    return '';
+  }
 
   async scanDownloads() {
     this.isScanning.set(true);
@@ -62,14 +88,8 @@ export class DownloadsView {
     this.isScanning.set(false);
   }
 
-  toggleFile(path: string) {
-    const selected = new Set(this.selectedFiles());
-    if (selected.has(path)) {
-      selected.delete(path);
-    } else {
-      selected.add(path);
-    }
-    this.selectedFiles.set(selected);
+  onSelectionChange(keys: Set<string>) {
+    this.selectedFiles.set(keys);
   }
 
   cleanSelected() {

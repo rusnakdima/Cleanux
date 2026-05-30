@@ -66,9 +66,9 @@
         >
           <div class="flex items-center gap-4 mb-3">
             <div
-              class="w-12 h-12 rounded-xl bg-[var(--accent-primary)]/10 flex items-center justify-center"
+              class="w-12 h-12 rounded-xl bg-[var(--accent-icons)]/10 flex items-center justify-center"
             >
-              <mat-icon class="text-[var(--accent-primary)] icon-lg">{{
+              <mat-icon class="text-[var(--accent-icons)] icon-lg">{{
                 getActionIcon(action)
               }}</mat-icon>
             </div>
@@ -85,7 +85,7 @@
               class="btn btn-ghost btn-icon"
               (click)="$event.stopPropagation(); executeQuickAction(action)"
             >
-              <mat-icon class="text-[var(--accent-primary)]">play_arrow</mat-icon>
+              <mat-icon class="text-[var(--accent-icons)]">play_arrow</mat-icon>
             </button>
           </div>
         </div>

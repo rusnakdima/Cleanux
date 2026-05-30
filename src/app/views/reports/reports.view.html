@@ -10,7 +10,7 @@
     <div class="glass-card matte-surface border-trace mb-6">
       <div class="glass-card-header">
         <h3 class="text-sm font-semibold flex items-center gap-2">
-          <mat-icon class="text-[var(--accent-primary)] icon-sm">timeline</mat-icon>
+          <mat-icon class="text-[var(--accent-icons)] icon-sm">timeline</mat-icon>
           Space Reclaimed Over Time
         </h3>
       </div>
@@ -59,7 +59,7 @@
               fill="none"
               stroke="currentColor"
               stroke-width="2"
-              class="text-[var(--accent-primary)]"
+              class="text-[var(--accent-icons)]"
             />
             @for (report of reportsWithChart(); track report.id; let i = $index) {
               <circle
@@ -72,7 +72,7 @@
                 "
                 r="4"
                 fill="currentColor"
-                class="text-[var(--accent-primary)] cursor-pointer"
+                class="text-[var(--accent-icons)] cursor-pointer"
                 (click)="selectReport(report)"
               />
             }
@@ -85,11 +85,11 @@
   <div class="glass-card matte-surface border-trace">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-[var(--accent-primary)] icon-sm">history</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)] icon-sm">history</mat-icon>
         Cleaning History
       </h3>
       <button (click)="loadReports()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-        <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)]">refresh</mat-icon>
       </button>
     </div>
     <div class="glass-card-body">
@@ -104,17 +104,18 @@
           <p class="text-sm">Run a cleaning session to generate your first report</p>
         </div>
       } @else {
-        <app-data-table
+        <app-data-list
           [columns]="columns"
           [data]="reports()"
+          [options]="options"
           [loading]="loading()"
-          [options]="getTableOptions()"
           [currentPage]="currentPage()"
           [pageSize]="pageSize()"
           [pageSizeOptions]="[10, 15, 25, 50, 100]"
           [showPageSizeSelector]="true"
           (pageChange)="onPageChange($event)"
           (newPageSize)="onPageSizeChange($event)"
+          (rowAction)="onRowAction($event)"
         />
       }
     </div>

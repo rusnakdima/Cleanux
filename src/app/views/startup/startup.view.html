@@ -32,79 +32,19 @@
   </div>
 
   <div class="glass-card matte-surface border-trace">
-    <div class="glass-card-header">
-      <div class="flex items-center gap-4 flex-1">
-        <app-search
-          [data]="startupData()"
-          [searchFields]="['name', 'command']"
-          (filteredData)="onFilteredData($event)"
-        />
-        <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-          <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
-        </button>
-      </div>
-    </div>
     <div class="glass-card-body">
-      @if (loading()) {
-        <div class="flex items-center justify-center h-64">
-          <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-        </div>
-      } @else if (filteredData().length === 0) {
-        <div class="flex flex-col items-center justify-center h-64 text-[var(--text-muted)]">
-          <mat-icon class="icon-4xl mb-4">rocket_launch</mat-icon>
-          <p class="text-lg font-medium">No startup items found</p>
-        </div>
-      } @else {
-        <div class="overflow-auto max-h-[calc(100vh-400px)]">
-          <div class="space-y-2">
-            @for (item of paginatedFilteredData(); track item.path) {
-              <div
-                class="p-4 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors"
-              >
-                <div class="flex items-center gap-4 flex-1 min-w-0">
-                  <div class="flex flex-col min-w-0">
-                    <span class="font-semibold text-[var(--text-primary)] truncate">{{
-                      item.name
-                    }}</span>
-                    <span
-                      class="text-xs text-[var(--text-muted)] truncate"
-                      [matTooltip]="item.command"
-                      >{{ item.command }}</span
-                    >
-                    <span
-                      class="text-xs text-[var(--text-muted)] opacity-70 truncate"
-                      [matTooltip]="item.path"
-                      >{{ item.path }}</span
-                    >
-                  </div>
-                </div>
-                <button
-                  class="btn btn-ghost p-2"
-                  [matTooltip]="
-                    item.enabled ? 'Enabled - click to disable' : 'Disabled - click to enable'
-                  "
-                  (click)="toggleItem(item)"
-                >
-                  <mat-icon
-                    class="text-xl"
-                    [class.text-success]="item.enabled"
-                    [class.text-[var(--text-muted)]]]="!item.enabled"
-                  >
-                    {{ item.enabled ? "toggle_on" : "toggle_off" }}
-                  </mat-icon>
-                </button>
-              </div>
-            }
-          </div>
-        </div>
-        <app-pagination
-          [totalItems]="filteredData().length"
-          [currentPage]="currentPage()"
-          [pageSize]="pageSize()"
-          (pageChange)="onPageChange($event)"
-          (pageSizeChange)="onPageSizeChange($event)"
-        />
-      }
+      <app-data-list
+        [columns]="columns"
+        [data]="startupData()"
+        [options]="options"
+        [loading]="loading()"
+        [pageSize]="pageSize()"
+        [currentPage]="currentPage()"
+        (pageChange)="onPageChange($event)"
+        (newPageSize)="onPageSizeChange($event)"
+        (rowAction)="onRowAction($event)"
+        (reload)="onReload()"
+      />
     </div>
   </div>
 </div>

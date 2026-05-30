@@ -17,44 +17,18 @@
     </div>
   </div>
 
-  <div class="max-h-[60vh] overflow-y-auto">
-    <div class="space-y-3">
-      @for (item of paginatedItems(); track item.id) {
-        <div class="glass-surface matte-surface border-trace p-4 flex items-start gap-3">
-          <div
-            class="w-10 h-10 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center shrink-0"
-          >
-            <mat-icon class="icon-sm text-[var(--text-muted)]">
-              {{ item.type === "text" ? "text_snippet" : item.type === "link" ? "link" : "image" }}
-            </mat-icon>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm break-all">{{ item.content }}</p>
-            <p class="text-xs text-[var(--text-muted)] mt-1">{{ item.timestamp }}</p>
-          </div>
-          <div class="flex items-center gap-1 shrink-0">
-            <button
-              (click)="togglePin(item.id)"
-              class="btn btn-ghost btn-icon"
-              [class.text-warning]="item.pinned"
-            >
-              <mat-icon class="icon-sm">push_pin</mat-icon>
-            </button>
-            <button (click)="removeItem(item.id)" class="btn btn-ghost btn-icon">
-              <mat-icon class="icon-sm">close</mat-icon>
-            </button>
-          </div>
-        </div>
-      }
-    </div>
+  <div class="glass-surface matte-surface border-trace overflow-hidden">
+    <app-data-list
+      [columns]="columns"
+      [data]="items()"
+      [options]="options"
+      [pageSize]="pageSize()"
+      [currentPage]="currentPage()"
+      (pageChange)="onPageChange($event)"
+      (newPageSize)="onPageSizeChange($event)"
+      (rowAction)="onRowAction($event)"
+    />
   </div>
-  <app-pagination
-    [totalItems]="items().length"
-    [currentPage]="currentPage()"
-    [pageSize]="pageSize()"
-    (pageChange)="onPageChange($event)"
-    (pageSizeChange)="onPageSizeChange($event)"
-  />
 
   @if (items().length === 0) {
     <div class="glass-surface matte-surface border-trace p-8 text-center">
@@ -71,7 +45,7 @@
       <input
         type="checkbox"
         [(ngModel)]="historyEnabled"
-        class="accent-[var(--accent-primary)] w-5 h-5"
+        class="accent-[var(--accent-icons)] w-5 h-5"
       />
     </label>
   </div>

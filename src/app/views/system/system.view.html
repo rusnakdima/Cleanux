@@ -35,16 +35,6 @@
 
   <div class="glass-card matte-surface border-trace flex flex-col min-h-[400px]">
     <div class="glass-card-header">
-      <div class="flex items-center gap-4">
-        <app-search
-          [data]="servicesData()"
-          [searchFields]="['name']"
-          (filteredData)="onFilteredData($event)"
-        />
-        <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-          <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
-        </button>
-      </div>
       <div class="flex gap-2">
         <button
           (click)="stopSelectedServices()"
@@ -65,13 +55,14 @@
       </div>
     </div>
     <div class="glass-card-body flex-1 overflow-hidden">
-      <app-data-table
-        [columns]="serviceColumns"
-        [data]="filteredData()"
+      <app-data-list
+        [columns]="columns"
+        [data]="servicesData()"
+        [options]="options"
         [loading]="loading()"
-        [options]="getTableOptions()"
         [selectedKeys]="selectedServices()"
-        (selectionChange)="selectedServices.set($event)"
+        (selectionChange)="onSelectionChange($event)"
+        (rowAction)="onRowAction($event)"
       />
     </div>
   </div>

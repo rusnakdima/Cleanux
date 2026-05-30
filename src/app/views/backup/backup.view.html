@@ -31,19 +31,17 @@
           {{ backups().length }} backup(s)
         </h3>
       </div>
-      <div class="glass-card-body px-4 pb-4">
-        <app-data-table
+      <div class="glass-card-body">
+        <app-data-list
           [columns]="columns"
           [data]="backups()"
+          [options]="options"
           [loading]="loading()"
-          [options]="getTableOptions()"
-          [currentPage]="currentPage()"
           [pageSize]="pageSize()"
-          [pageSizeOptions]="[10, 15, 25, 50, 100]"
-          [showPageSizeSelector]="true"
+          [currentPage]="currentPage()"
           (pageChange)="onPageChange($event)"
           (newPageSize)="onPageSizeChange($event)"
-          (rowAction)="onRestore($event)"
+          (rowAction)="onRowAction($event)"
         />
       </div>
     </div>

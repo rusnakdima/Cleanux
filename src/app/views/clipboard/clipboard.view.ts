@@ -1,11 +1,12 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-/* materials */
 import { MatIconModule } from '@angular/material/icon';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+
+import { DataListComponent } from '@components/data-list/data-list.component';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 interface ClipboardItem {
   id: string;
@@ -19,7 +20,7 @@ interface ClipboardItem {
   selector: 'app-clipboard-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, MatIconModule, PaginationComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, DataListComponent],
   templateUrl: './clipboard.view.html',
 })
 export class ClipboardView {
@@ -49,13 +50,39 @@ export class ClipboardView {
     },
   ]);
 
+  columns: ListColumn[] = [
+    {
+      key: 'content',
+      primary: true,
+      iconKey: 'type',
+      secondary: 'timestamp',
+      actions: [
+        {
+          id: 'pin',
+          icon: 'push_pin',
+          tooltip: 'Toggle pin',
+          toggle: true,
+          toggleState: (item: unknown) => (item as ClipboardItem).pinned,
+        },
+        {
+          id: 'remove',
+          icon: 'close',
+          tooltip: 'Remove',
+        },
+      ],
+    },
+  ];
+
+  options: ListOptions = {
+    showSearch: false,
+    showCheckbox: false,
+    showActions: true,
+    actionsPosition: 'right',
+    emptyMessage: 'Clipboard is empty',
+  };
+
   currentPage = signal(1);
   pageSize = signal(15);
-
-  paginatedItems = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.items().slice(start, start + this.pageSize());
-  });
 
   onPageChange(page: number) {
     this.currentPage.set(page);
@@ -76,5 +103,13 @@ export class ClipboardView {
 
   clearUnpinned() {
     this.items.update((items) => items.filter((i) => i.pinned));
+  }
+
+  onRowAction(event: { action: string; item: ClipboardItem }) {
+    if (event.action === 'pin') {
+      this.togglePin(event.item.id);
+    } else if (event.action === 'remove') {
+      this.removeItem(event.item.id);
+    }
   }
 }

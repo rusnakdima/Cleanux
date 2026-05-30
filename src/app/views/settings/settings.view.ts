@@ -14,7 +14,7 @@ import { environment } from '@env/environment';
 /* services */
 import { AboutService } from '@services/about.service';
 import { SchedulerService } from '@services/scheduler.service';
-import { ThemeService, ThemeMode } from '@services/theme.service';
+import { ThemeService, ThemeMode, AccentCategory } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
 
 /* models */
@@ -40,6 +40,13 @@ export class SettingsView {
   }
 
   themeModes: ThemeMode[] = ['dark', 'light', 'system'];
+  accentCategories: { key: AccentCategory; label: string }[] = [
+    { key: 'general', label: 'General' },
+    { key: 'buttons', label: 'Buttons' },
+    { key: 'navigation', label: 'Navigation' },
+    { key: 'borders', label: 'Borders & Focus' },
+    { key: 'icons', label: 'Icons & Progress' },
+  ];
 
   deepScan = signal(false);
   autoClean = signal(false);
@@ -157,6 +164,14 @@ export class SettingsView {
 
   setAccentColor(color: string) {
     this.themeService.setAccentColor(color);
+  }
+
+  setAccentForCategory(category: AccentCategory, color: string) {
+    this.themeService.setAccentForCategory(category, color);
+  }
+
+  resetAllAccents() {
+    this.themeService.resetAllAccents();
   }
 
   setGlassOpacity(opacity: number) {

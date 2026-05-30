@@ -55,14 +55,13 @@
           </div>
         </div>
 
-        <app-data-table
+        <app-data-list
           [columns]="columns"
           [data]="flattenedFiles()"
+          [options]="options"
           [loading]="loading()"
-          [options]="tableOptions"
           [selectedKeys]="selectedFiles()"
           (selectionChange)="onSelectionChange($event)"
-          (preview)="onPreview($event)"
           (rowDoubleClick)="onRowDoubleClick($event)"
         />
       </div>

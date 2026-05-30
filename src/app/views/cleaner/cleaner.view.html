@@ -107,39 +107,33 @@
         } @else {
           <div class="max-h-96 overflow-y-auto">
             @if (store.activeTab() === "cache") {
-              <app-data-table
+              <app-data-list
                 [columns]="cacheColumns"
                 [data]="store.filteredCacheData()"
-                [loading]="store.loading()"
-                [options]="getTableOptions('cache')"
+                [options]="getCacheOptions()"
                 [selectedKeys]="store.selectedCacheFiles()"
                 (selectionChange)="store.selectedCacheFiles.set($event)"
-                (preview)="onPreview($event)"
               />
             } @else if (store.activeTab() === "trash") {
-              <app-data-table
+              <app-data-list
                 [columns]="trashColumns"
                 [data]="store.filteredTrashData()"
-                [loading]="store.loading()"
-                [options]="getTableOptions('trash')"
+                [options]="getTrashOptions()"
                 [selectedKeys]="store.selectedTrashFiles()"
                 (selectionChange)="store.selectedTrashFiles.set($event)"
-                (preview)="onPreview($event)"
               />
             } @else if (store.activeTab() === "packages") {
-              <app-data-table
+              <app-data-list
                 [columns]="packageColumns"
                 [data]="store.packageCacheData()"
-                [loading]="store.loading()"
-                [options]="getPackageTableOptions()"
+                [options]="getPackageOptions()"
                 (rowAction)="onPackageAction($event)"
               />
             } @else if (store.activeTab() === "logs") {
-              <app-data-table
+              <app-data-list
                 [columns]="logColumns"
                 [data]="filteredLogEntries()"
-                [loading]="store.loading()"
-                [options]="getTableOptions('logs')"
+                [options]="getLogOptions()"
               />
             }
           </div>

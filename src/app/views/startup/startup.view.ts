@@ -14,8 +14,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { StartupService } from '@services/startup.service';
 import { NotificationService } from '@services/notification.service';
 import { StartupItem } from '@models/startup.model';
-import { SearchComponent } from '@components/search/search.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 @Component({
   selector: 'app-startup-view',
@@ -27,8 +27,7 @@ import { PaginationComponent } from '@components/pagination/pagination.component
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    SearchComponent,
-    PaginationComponent,
+    DataListComponent,
   ],
   templateUrl: './startup.view.html',
 })
@@ -37,7 +36,6 @@ export class StartupView implements OnInit {
   private notification = inject(NotificationService);
 
   startupData = signal<StartupItem[]>([]);
-  filteredData = signal<StartupItem[]>([]);
   loading = signal(false);
 
   currentPage = signal(1);
@@ -47,10 +45,33 @@ export class StartupView implements OnInit {
   enabledItems = computed(() => this.startupData().filter((s) => s.enabled).length);
   disabledItems = computed(() => this.startupData().filter((s) => !s.enabled).length);
 
-  paginatedFilteredData = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.filteredData().slice(start, start + this.pageSize());
-  });
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'apps',
+      secondary: 'command',
+      actions: [
+        {
+          id: 'toggle',
+          icon: 'toggle_off',
+          tooltip: 'Toggle enable/disable',
+          toggle: true,
+          toggleState: (item: unknown) => (item as StartupItem).enabled,
+        },
+      ],
+    },
+  ];
+
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: false,
+    showActions: true,
+    actionsPosition: 'right',
+    showReloadButton: true,
+    searchPlaceholder: 'Search startup items...',
+    emptyMessage: 'No startup items found',
+  };
 
   onPageChange(page: number) {
     this.currentPage.set(page);
@@ -71,17 +92,11 @@ export class StartupView implements OnInit {
     try {
       const data = await this.startupService.getStartupItems();
       this.startupData.set(data);
-      this.filteredData.set(data);
     } catch (error: unknown) {
       console.error('Failed to load startup items:', error);
     } finally {
       this.loading.set(false);
     }
-  }
-
-  onFilteredData(data: object[]): void {
-    this.filteredData.set(data as StartupItem[]);
-    this.currentPage.set(1);
   }
 
   async toggleItem(item: StartupItem) {
@@ -116,5 +131,15 @@ export class StartupView implements OnInit {
         this.loading.set(false);
       }
     }
+  }
+
+  onRowAction(event: { action: string; item: StartupItem }) {
+    if (event.action === 'toggle') {
+      this.toggleItem(event.item);
+    }
+  }
+
+  onReload() {
+    this.loadData();
   }
 }

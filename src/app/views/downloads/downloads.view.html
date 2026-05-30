@@ -23,7 +23,7 @@
           name="age"
           value="week"
           [(ngModel)]="selectedAge"
-          class="accent-[var(--accent-primary)]"
+          class="accent-[var(--accent-icons)]"
         />
         <span>Older than 1 week</span>
       </label>
@@ -33,7 +33,7 @@
           name="age"
           value="month"
           [(ngModel)]="selectedAge"
-          class="accent-[var(--accent-primary)]"
+          class="accent-[var(--accent-icons)]"
         />
         <span>Older than 1 month</span>
       </label>
@@ -43,7 +43,7 @@
           name="age"
           value="all"
           [(ngModel)]="selectedAge"
-          class="accent-[var(--accent-primary)]"
+          class="accent-[var(--accent-icons)]"
         />
         <span>All files</span>
       </label>
@@ -67,30 +67,13 @@
           Clean Selected ({{ selectedFiles().size }})
         </button>
       </div>
-      <div class="max-h-96 overflow-y-auto">
-        @for (file of files(); track file.path) {
-          <div
-            class="flex items-center gap-3 p-4 border-b border-[var(--border-color-subtle)] hover:bg-[var(--bg-hover)] cursor-pointer"
-            (click)="toggleFile(file.path)"
-          >
-            <input
-              type="checkbox"
-              [checked]="selectedFiles().has(file.path)"
-              class="accent-[var(--accent-primary)] w-4 h-4"
-              (click)="$event.stopPropagation()"
-            />
-            <mat-icon class="icon-base text-[var(--text-muted)]">description</mat-icon>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium truncate">{{ file.name }}</p>
-              <p class="text-xs text-[var(--text-muted)]">{{ file.path }}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-sm font-mono">{{ formatSize(file.size) }}</p>
-              <p class="text-xs text-[var(--text-muted)]">{{ file.age }}</p>
-            </div>
-          </div>
-        }
-      </div>
+      <app-data-list
+        [columns]="columns"
+        [data]="files()"
+        [options]="options"
+        [selectedKeys]="selectedFiles()"
+        (selectionChange)="onSelectionChange($event)"
+      />
     </div>
   } @else {
     <div class="glass-surface matte-surface border-trace p-8 text-center">

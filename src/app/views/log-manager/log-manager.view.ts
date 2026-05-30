@@ -28,9 +28,9 @@ import {
 } from '@services/log-manager.service';
 import { NotificationService } from '@services/notification.service';
 import { formatSize } from '@shared/utils/format.util';
-import { DataTableComponent } from '@components/data-table/data-table.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 type TabType = 'journal' | 'rotated' | 'logrotate';
 
@@ -49,7 +49,7 @@ type TabType = 'journal' | 'rotated' | 'logrotate';
     MatFormFieldModule,
     MatSelectModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
     PaginationComponent,
   ],
   templateUrl: './log-manager.view.html',
@@ -78,24 +78,24 @@ export class LogManagerView implements OnInit {
 
   formatSize = formatSize;
 
-  rotatedLogsColumns: TableColumn[] = [
-    { key: 'path', label: 'Path', width: 'flex-1', sortable: true },
-    { key: 'size_human', label: 'Size', width: 'w-32', sortable: true, align: 'right' },
-    { key: 'modified', label: 'Modified', width: 'w-48', sortable: true },
+  rotatedLogsColumns: ListColumn[] = [
+    {
+      key: 'path',
+      primary: true,
+      icon: 'description',
+      secondaryKey: 'modified',
+      actions: [],
+    },
   ];
 
-  getRotatedLogsTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: false,
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: false,
-      showPreviewButton: false,
-      showSearch: true,
-      searchPlaceholder: 'Search rotated logs...',
-    };
-  }
+  rotatedLogsOptions: ListOptions = {
+    showSearch: true,
+    showCheckbox: false,
+    showActions: false,
+    showReloadButton: true,
+    searchPlaceholder: 'Search rotated logs...',
+    emptyMessage: 'No rotated logs found',
+  };
 
   paginatedRotatedLogs = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize();

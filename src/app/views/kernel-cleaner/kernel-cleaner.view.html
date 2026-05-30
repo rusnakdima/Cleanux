@@ -79,55 +79,15 @@
         <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
       </div>
     } @else {
-      <div class="max-h-[calc(100vh-500px)] overflow-auto">
-        <div class="space-y-2">
-          @for (kernel of paginatedAllKernels(); track kernel.version) {
-            <div
-              class="p-4 rounded-lg border transition-colors"
-              [class.bg-slate-50 dark:bg-slate-800]="kernel.is_current"
-              [class.border-green-300 dark:border-green-700]="kernel.is_current"
-              [class.bg-white dark:bg-slate-900]="!kernel.is_current"
-              [class.border-[var(--border-color)]]]="!kernel.is_current"
-            >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  @if (!kernel.is_current) {
-                    <mat-checkbox
-                      [checked]="selectedKernels().has(kernel.version)"
-                      (change)="toggleKernelSelection(kernel.version)"
-                    >
-                    </mat-checkbox>
-                  }
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <span class="font-mono font-medium text-[var(--text-primary)]">{{
-                        kernel.version
-                      }}</span>
-                      @if (kernel.is_current) {
-                        <span class="px-2 py-0.5 text-xs bg-success text-white rounded"
-                          >CURRENT</span
-                        >
-                      }
-                    </div>
-                    <span class="text-xs text-[var(--text-muted)]">{{ kernel.path }}</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <span class="text-sm text-[var(--text-secondary)]">{{
-                    formatSize(kernel.size)
-                  }}</span>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-      <app-pagination
-        [totalItems]="allKernels().length"
+      <app-data-list
+        [columns]="kernelColumns"
+        [data]="allKernels()"
+        [options]="kernelOptions"
         [currentPage]="kernelsPage()"
         [pageSize]="kernelsPageSize()"
+        [showPageSizeSelector]="true"
         (pageChange)="onKernelsPageChange($event)"
-        (pageSizeChange)="onKernelsPageSizeChange($event)"
+        (newPageSize)="onKernelsPageSizeChange($event)"
       />
     }
   </div>
@@ -187,33 +147,17 @@
         </button>
       </div>
 
-      <div class="max-h-[calc(100vh-500px)] overflow-auto">
-        <div class="space-y-2">
-          @for (initramfs of paginatedOldInitramfs(); track initramfs.path) {
-            <div
-              class="p-3 rounded-lg border bg-[var(--bg-elevated)] border-[var(--border-color)] flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <mat-checkbox
-                  [checked]="selectedInitramfs().has(initramfs.version)"
-                  (change)="toggleInitramfsSelection(initramfs.version)"
-                >
-                </mat-checkbox>
-                <span class="font-mono text-sm text-[var(--text-secondary)]">{{
-                  initramfs.version
-                }}</span>
-              </div>
-              <span class="text-sm text-[var(--text-muted)]">{{ formatSize(initramfs.size) }}</span>
-            </div>
-          }
-        </div>
-      </div>
-      <app-pagination
-        [totalItems]="oldInitramfs().length"
+      <app-data-list
+        [columns]="initramfsColumns"
+        [data]="oldInitramfs()"
+        [options]="initramfsOptions"
+        [selectedKeys]="selectedInitramfs()"
         [currentPage]="initramfsPage()"
         [pageSize]="initramfsPageSize()"
+        [showPageSizeSelector]="true"
+        (selectionChange)="onInitramfsSelectionChange($event)"
         (pageChange)="onInitramfsPageChange($event)"
-        (pageSizeChange)="onInitramfsPageSizeChange($event)"
+        (newPageSize)="onInitramfsPageSizeChange($event)"
       />
     </div>
   }

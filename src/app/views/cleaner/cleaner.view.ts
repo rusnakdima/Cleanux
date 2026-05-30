@@ -15,12 +15,12 @@ import { LogAnalyzerService } from '@services/log-analyzer.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 import { CacheFileItem, LogFileItem, TrashFileItem } from '@services/file.service';
 import { LogSummary, LogCategorySummary } from '@models/log-analyzer.model';
 import { formatSize } from '@shared/utils/format.util';
@@ -45,7 +45,7 @@ export type PackageManagerRow = {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
     FilePreviewComponent,
   ],
   templateUrl: './cleaner.view.html',
@@ -65,29 +65,77 @@ export class CleanerView implements OnInit {
   selectedLogCategory = signal<string>('all');
   cleanDays = signal<number>(30);
 
-  cacheColumns: TableColumn[] = [
-    { key: 'path', label: 'Path', width: 'flex-1', sortable: true },
-    { key: 'size', label: 'Size', align: 'right', width: 'w-32', sortable: true },
+  cacheColumns: ListColumn[] = [
+    { key: 'path', primary: true, icon: 'cached', truncate: true, sortable: true },
+    { key: 'size', format: 'size', align: 'right', sortable: true },
   ];
 
-  trashColumns: TableColumn[] = [
-    { key: 'name', label: 'Name', width: 'w-64', sortable: true },
-    { key: 'path', label: 'Original Path', width: 'flex-1', sortable: true },
-    { key: 'size', label: 'Size', align: 'right', width: 'w-32', sortable: true },
+  trashColumns: ListColumn[] = [
+    { key: 'name', primary: true, icon: 'delete_outline', sortable: true },
+    { key: 'path', truncate: true, sortable: true },
+    { key: 'size', format: 'size', align: 'right', sortable: true },
   ];
 
-  logColumns: TableColumn[] = [
-    { key: 'path', label: 'Path', width: 'flex-1', sortable: true },
-    { key: 'size', label: 'Size', align: 'right', width: 'w-32', sortable: true },
-    { key: 'modified', label: 'Modified', width: 'w-48', sortable: true },
+  logColumns: ListColumn[] = [
+    { key: 'path', primary: true, icon: 'description', truncate: true, sortable: true },
+    { key: 'size', format: 'size', align: 'right', sortable: true },
   ];
 
-  packageColumns: TableColumn[] = [
-    { key: 'name', label: 'Package Manager', width: 'w-32', sortable: true },
-    { key: 'description', label: 'Description', width: 'flex-1', sortable: true },
-    { key: 'cachePath', label: 'Cache Path', width: 'flex-1', sortable: true },
-    { key: 'size', label: 'Size', align: 'right', width: 'w-32', sortable: true },
+  packageColumns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'package',
+      sortable: true,
+      actions: [{ id: 'clean', icon: 'delete', tooltip: 'Clean cache' }],
+    },
+    { key: 'description', truncate: true, sortable: true },
+    { key: 'cachePath', truncate: true, sortable: true },
+    { key: 'size', format: 'size', align: 'right', sortable: true },
   ];
+
+  getCacheOptions(): ListOptions {
+    return {
+      showCheckbox: true,
+      checkboxKey: 'path',
+      hoverable: true,
+      showReloadButton: true,
+      showSearch: true,
+      searchPlaceholder: 'Search...',
+    };
+  }
+
+  getTrashOptions(): ListOptions {
+    return {
+      showCheckbox: true,
+      checkboxKey: 'path',
+      hoverable: true,
+      showReloadButton: true,
+      showSearch: true,
+      searchPlaceholder: 'Search...',
+    };
+  }
+
+  getLogOptions(): ListOptions {
+    return {
+      showCheckbox: true,
+      checkboxKey: 'path',
+      hoverable: true,
+      showReloadButton: true,
+      showSearch: true,
+      searchPlaceholder: 'Search...',
+    };
+  }
+
+  getPackageOptions(): ListOptions {
+    return {
+      showCheckbox: false,
+      hoverable: true,
+      showReloadButton: true,
+      showSearch: true,
+      searchPlaceholder: 'Search...',
+    };
+  }
 
   async ngOnInit() {
     await this.store.loadActiveTabData();
@@ -153,35 +201,6 @@ export class CleanerView implements OnInit {
       default:
         return 'text-gray-500';
     }
-  }
-
-  getTableOptions(_tab: 'cache' | 'trash' | 'logs' | 'packages'): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: true,
-      checkboxKey: 'path',
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: true,
-      selectedActionText: 'Clear Selected',
-      showPreviewButton: true,
-      showSearch: true,
-      searchPlaceholder: 'Search...',
-    };
-  }
-
-  getPackageTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: false,
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: false,
-      showPreviewButton: false,
-      showRowActions: true,
-      showSearch: true,
-      searchPlaceholder: 'Search...',
-    };
   }
 
   onPackageAction(event: { action: string; item: PackageManagerRow }): void {

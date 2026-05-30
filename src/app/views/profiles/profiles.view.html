@@ -90,7 +90,7 @@
               (ngModelChange)="
                 editingProfile.update((p) => (p ? { ...p, clean_cache: $event } : p))
               "
-              class="accent-[var(--accent-primary)]"
+              class="accent-[var(--accent-buttons)]"
             />
             <span class="text-sm text-[var(--text-secondary)]">Clean Cache</span>
           </label>
@@ -101,7 +101,7 @@
               (ngModelChange)="
                 editingProfile.update((p) => (p ? { ...p, clean_trash: $event } : p))
               "
-              class="accent-[var(--accent-primary)]"
+              class="accent-[var(--accent-buttons)]"
             />
             <span class="text-sm text-[var(--text-secondary)]">Clean Trash</span>
           </label>
@@ -110,7 +110,7 @@
               type="checkbox"
               [ngModel]="editingProfile()?.clean_logs"
               (ngModelChange)="editingProfile.update((p) => (p ? { ...p, clean_logs: $event } : p))"
-              class="accent-[var(--accent-primary)]"
+              class="accent-[var(--accent-buttons)]"
             />
             <span class="text-sm text-[var(--text-secondary)]">Clean Logs</span>
           </label>
@@ -164,9 +164,9 @@
               }
             </div>
             <div
-              class="w-10 h-10 rounded-lg bg-[var(--accent-primary)]/10 flex items-center justify-center"
+              class="w-10 h-10 rounded-lg bg-[var(--accent-buttons)]/10 flex items-center justify-center"
             >
-              <mat-icon class="text-[var(--accent-primary)]">tune</mat-icon>
+              <mat-icon class="text-[var(--accent-icons)]">tune</mat-icon>
             </div>
           </div>
           <div class="flex flex-wrap gap-2 mb-3">

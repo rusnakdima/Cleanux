@@ -2,7 +2,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
     <div class="glass-surface matte-surface border-trace p-6">
       <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]">
-        <mat-icon class="text-[var(--accent-primary)] icon-sm">memory</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)] icon-sm">memory</mat-icon>
         Memory Usage
       </h3>
       <div class="relative w-40 h-40 mx-auto">
@@ -70,7 +70,7 @@
 
     <div class="glass-surface matte-surface border-trace p-6">
       <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]">
-        <mat-icon class="text-[var(--accent-primary)] icon-sm">swap_vert</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)] icon-sm">swap_vert</mat-icon>
         Swap Usage
       </h3>
       <div class="relative w-40 h-40 mx-auto">
@@ -139,20 +139,20 @@
   <div class="glass-card matte-surface border-trace">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2 text-[var(--text-primary)]">
-        <mat-icon class="text-[var(--accent-primary)] icon-sm">list</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)] icon-sm">list</mat-icon>
         Processes by Memory
       </h3>
       <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-        <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)]">refresh</mat-icon>
       </button>
     </div>
 
-    <div class="max-h-[calc(100vh-280px)] overflow-auto px-4 min-h-0">
-      <app-data-table
-        [columns]="processColumns"
-        [data]="paginatedProcesses()"
+    <div class="glass-card-body">
+      <app-data-list
+        [columns]="columns"
+        [data]="processes()"
+        [options]="options"
         [loading]="loading()"
-        [options]="getTableOptions()"
         [currentPage]="currentPage()"
         [pageSize]="pageSize()"
         [pageSizeOptions]="[10, 15, 25, 50, 100]"

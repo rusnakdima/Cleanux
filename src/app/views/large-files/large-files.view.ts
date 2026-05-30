@@ -20,13 +20,10 @@ import { FileService, LargeFileItem } from '@services/file.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
-import { SearchComponent } from '@components/search/search.component';
-
-/* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 import { formatSize } from '@shared/utils/format.util';
 
 @Component({
@@ -39,9 +36,8 @@ import { formatSize } from '@shared/utils/format.util';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
     FilePreviewComponent,
-    SearchComponent,
   ],
   templateUrl: './large-files.view.html',
 })
@@ -52,7 +48,6 @@ export class LargeFilesView implements OnInit {
   formatSize = formatSize;
 
   largeFiles = signal<LargeFileItem[]>([]);
-  filteredFiles = signal<LargeFileItem[]>([]);
   loading = signal(false);
   selectedFiles = signal<Set<string>>(new Set());
 
@@ -67,12 +62,33 @@ export class LargeFilesView implements OnInit {
 
   totalSize = computed(() => this.largeFiles().reduce((sum, file) => sum + file.size, 0));
 
-  columns: TableColumn[] = [
-    { key: 'name', label: 'Name', width: 'w-64', sortable: true },
-    { key: 'path', label: 'Path', width: 'flex-1', sortable: true },
-    { key: 'size', label: 'Size', align: 'right', width: 'w-32', sortable: true },
-    { key: 'modified', label: 'Modified', width: 'w-48', sortable: true },
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'description',
+      secondaryKey: 'path',
+      badge: 'sizeDisplay',
+      actions: [
+        {
+          id: 'preview',
+          icon: 'visibility',
+          tooltip: 'Preview file',
+        },
+      ],
+    },
   ];
+
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: true,
+    checkboxKey: 'path',
+    showActions: true,
+    actionsPosition: 'right',
+    showReloadButton: true,
+    searchPlaceholder: 'Search large files...',
+    emptyMessage: 'No large files found',
+  };
 
   async ngOnInit() {
     await this.loadData();
@@ -83,7 +99,6 @@ export class LargeFilesView implements OnInit {
     try {
       const result = await this.fileService.getLargeFiles(50, 0);
       this.largeFiles.set(result.data);
-      this.filteredFiles.set(result.data);
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
     } catch (error) {
@@ -101,7 +116,6 @@ export class LargeFilesView implements OnInit {
       const offset = this.largeFiles().length;
       const result = await this.fileService.getLargeFiles(50, offset);
       this.largeFiles.update((current) => [...current, ...result.data]);
-      this.filteredFiles.update((current) => [...current, ...result.data]);
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
     } catch (error) {
@@ -111,8 +125,8 @@ export class LargeFilesView implements OnInit {
     }
   }
 
-  onFilteredData(files: object[]): void {
-    this.filteredFiles.set(files as LargeFileItem[]);
+  onSelectionChange(keys: Set<string>): void {
+    this.selectedFiles.set(keys);
   }
 
   async clearSelectedFiles() {
@@ -136,19 +150,10 @@ export class LargeFilesView implements OnInit {
     }
   }
 
-  getTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: true,
-      checkboxKey: 'path',
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: true,
-      selectedActionText: 'Delete Selected',
-      showPreviewButton: true,
-      showSearch: true,
-      searchPlaceholder: 'Search large files...',
-    };
+  onRowAction(event: { action: string; item: LargeFileItem }): void {
+    if (event.action === 'preview') {
+      this.onPreview(event.item);
+    }
   }
 
   async onPreview(file: LargeFileItem): Promise<void> {

@@ -144,11 +144,11 @@
           </div>
 
           @if (rotatedLogs().length > 0) {
-            <app-data-table
+            <app-data-list
               [columns]="rotatedLogsColumns"
               [data]="rotatedLogs()"
+              [options]="rotatedLogsOptions"
               [loading]="loading()"
-              [options]="getRotatedLogsTableOptions()"
               [currentPage]="currentPage()"
               [pageSize]="pageSize()"
               [pageSizeOptions]="[10, 15, 25, 50, 100]"

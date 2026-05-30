@@ -3,7 +3,7 @@
     <div class="glass-card matte-surface border-trace">
       <div class="glass-card-header">
         <h3 class="text-sm font-semibold flex items-center gap-2">
-          <mat-icon class="text-[var(--accent-primary)] icon-sm">palette</mat-icon>
+          <mat-icon class="text-[var(--accent-icons)] icon-sm">palette</mat-icon>
           Appearance
         </h3>
       </div>
@@ -32,12 +32,12 @@
                 (click)="setAccentColor(color)"
                 class="w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
                 [style.background]="color"
-                [class.ring-2]="themeService.currentTheme().accentColor === color"
-                [class.ring-offset-2]="themeService.currentTheme().accentColor === color"
+                [class.ring-2]="themeService.currentTheme().accentConfig.general === color"
+                [class.ring-offset-2]="themeService.currentTheme().accentConfig.general === color"
                 [class.ring-offset-[var(--bg-surface)]]="true"
-                [class.ring-white]="themeService.currentTheme().accentColor === color"
+                [class.ring-white]="themeService.currentTheme().accentConfig.general === color"
               >
-                @if (themeService.currentTheme().accentColor === color) {
+                @if (themeService.currentTheme().accentConfig.general === color) {
                   <mat-icon class="text-white icon-sm">check</mat-icon>
                 }
               </button>
@@ -45,12 +45,44 @@
           </div>
         </div>
 
+        <div class="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
+          <div class="flex items-center justify-between">
+            <label class="block text-sm font-semibold text-[var(--text-muted)]">Element Accents</label>
+            <button (click)="resetAllAccents()" class="btn btn-secondary text-xs">
+              <mat-icon class="icon-xs">refresh</mat-icon>
+              Reset All
+            </button>
+          </div>
+          @for (cat of accentCategories; track cat.key) {
+           <div class="space-y-2">
+              <label class="block text-xs font-medium text-[var(--text-muted)]">{{ cat.label }}</label>
+              <div class="flex flex-wrap gap-2">
+                @for (color of themeService.accentColors(); track color) {
+                  <button
+                    (click)="setAccentForCategory(cat.key, color)"
+                    class="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 flex items-center justify-center"
+                    [style.background]="color"
+                    [class.ring-2]="themeService.currentTheme().accentConfig[cat.key] === color"
+                    [class.ring-offset-1]="themeService.currentTheme().accentConfig[cat.key] === color"
+                    [class.ring-offset-[var(--bg-surface)]]="true"
+                    [class.ring-white]="themeService.currentTheme().accentConfig[cat.key] === color"
+                  >
+                    @if (themeService.currentTheme().accentConfig[cat.key] === color) {
+                      <mat-icon class="text-white text-xs">check</mat-icon>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <label class="block text-sm font-semibold text-[var(--text-muted)]"
               >UI Transparency</label
             >
-            <span class="text-sm font-mono font-bold text-[var(--accent-primary)]"
+            <span class="text-sm font-mono font-bold text-[var(--accent-icons)]"
               >{{ (themeService.currentTheme().glassOpacity * 100).toFixed(0) }}%</span
             >
           </div>
@@ -70,7 +102,7 @@
     <div class="glass-card matte-surface border-trace">
       <div class="glass-card-header">
         <h3 class="text-sm font-semibold flex items-center gap-2">
-          <mat-icon class="text-[var(--accent-primary)] icon-sm">schedule</mat-icon>
+          <mat-icon class="text-[var(--accent-icons)] icon-sm">schedule</mat-icon>
           Maintenance Schedule
         </h3>
       </div>
@@ -83,7 +115,7 @@
           <button
             (click)="toggleSchedule()"
             class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-            [class.bg-[var(--accent-primary)]]="scheduleConfig().enabled"
+            [class.bg-[var(--accent-buttons)]]="scheduleConfig().enabled"
             [class.bg-[var(--bg-hover)]]]="!scheduleConfig().enabled"
           >
             <span
@@ -144,7 +176,7 @@
     <div class="glass-card lg:col-span-2">
       <div class="glass-card-header">
         <h3 class="text-sm font-semibold flex items-center gap-2">
-          <mat-icon class="text-[var(--accent-primary)] icon-sm">info</mat-icon>
+          <mat-icon class="text-[var(--accent-icons)] icon-sm">info</mat-icon>
           About
         </h3>
         <button (click)="checkUpdate()" [disabled]="isChecking()" class="btn btn-secondary">
@@ -170,7 +202,7 @@
           </div>
           <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
             <span class="text-xs text-[var(--text-muted)] block mb-1">Status</span>
-            <span class="text-lg font-bold text-[var(--accent-primary)]">Production</span>
+            <span class="text-lg font-bold text-[var(--accent-icons)]">Production</span>
           </div>
         </div>
 

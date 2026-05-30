@@ -2,7 +2,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <div class="stat-card matte-surface border-trace">
       <div class="stat-icon">
-        <mat-icon class="text-[var(--accent-primary)]">file_copy</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)]">file_copy</mat-icon>
       </div>
       <div class="stat-content">
         <span class="stat-label">Large Files Found</span>
@@ -23,16 +23,6 @@
 
   <div class="glass-card matte-surface border-trace">
     <div class="glass-card-header">
-      <div class="flex items-center gap-4 flex-1">
-        <app-search
-          [data]="largeFiles()"
-          [searchFields]="['name', 'path']"
-          (filteredData)="onFilteredData($event)"
-        />
-        <button (click)="loadData()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-          <mat-icon class="text-[var(--accent-primary)]">refresh</mat-icon>
-        </button>
-      </div>
       <button
         (click)="clearSelectedFiles()"
         [disabled]="selectedFiles().size === 0"
@@ -43,14 +33,14 @@
       </button>
     </div>
     <div class="glass-card-body">
-      <app-data-table
+      <app-data-list
         [columns]="columns"
-        [data]="filteredFiles()"
+        [data]="largeFiles()"
+        [options]="options"
         [loading]="loading()"
-        [options]="getTableOptions()"
         [selectedKeys]="selectedFiles()"
-        (selectionChange)="selectedFiles.set($event)"
-        (preview)="onPreview($event)"
+        (selectionChange)="onSelectionChange($event)"
+        (rowAction)="onRowAction($event)"
       />
     </div>
   </div>

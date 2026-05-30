@@ -23,12 +23,12 @@ import { FileService } from '@services/file.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 import { FilePreviewComponent } from '@components/file-preview/file-preview.component';
 import { FilePreviewData } from '@models/file-preview.model';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 import { DuplicateGroup, DuplicateFile } from '@models/duplicate.model';
 import { formatSize } from '@shared/utils/format.util';
 
@@ -53,7 +53,7 @@ interface FlattenedFile {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
     FilePreviewComponent,
   ],
   templateUrl: './duplicate-finder.view.html',
@@ -78,33 +78,29 @@ export class DuplicateFinderView implements OnInit {
   totalWastedSpace = signal(0);
   totalDuplicates = signal(0);
 
-  columns: TableColumn[] = [
-    { key: 'path', label: 'Path', sortable: true, resizable: true, minWidth: '200px' },
-    { key: 'name', label: 'Name', sortable: true, resizable: true, minWidth: '150px' },
+  columns: ListColumn[] = [
+    {
+      key: 'path',
+      primary: true,
+      icon: 'description',
+      truncate: true,
+      sortable: true,
+    },
     {
       key: 'size',
-      label: 'Size',
+      format: 'size',
       align: 'right',
       sortable: true,
-      resizable: true,
-      format: 'size',
-      minWidth: '100px',
     },
-    { key: 'hash', label: 'Hash', sortable: true, resizable: true, minWidth: '120px' },
   ];
 
-  tableOptions: TableOptions = {
-    showHeader: true,
+  options: ListOptions = {
     showCheckbox: true,
     checkboxKey: 'path',
     hoverable: true,
     showReloadButton: false,
-    showSelectedActions: false,
-    showPreviewButton: true,
     showSearch: true,
     searchPlaceholder: 'Search files...',
-    virtualScroll: true,
-    rowHeight: 48,
   };
 
   flattenedFiles = computed(() => {
@@ -164,7 +160,7 @@ export class DuplicateFinderView implements OnInit {
   }
 
   onRowDoubleClick(file: FlattenedFile): void {
-    this.onPreview(file);
+    this.onPreview(file as unknown as DuplicateFile);
   }
 
   async deleteSelectedFiles() {

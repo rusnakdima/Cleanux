@@ -7,7 +7,6 @@ import {
   signal,
   inject,
   NgZone,
-  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,11 +26,10 @@ import {
 } from '@services/memory-optimizer.service';
 
 /* components */
-import { DataTableComponent } from '@components/data-table/data-table.component';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+import { DataListComponent } from '@components/data-list/data-list.component';
 
 /* models */
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { ListColumn, ListOptions } from '@models/data-list.model';
 
 @Component({
   selector: 'app-memory-optimizer-view',
@@ -44,7 +42,7 @@ import { TableColumn, TableOptions } from '@models/data-table.model';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    DataTableComponent,
+    DataListComponent,
   ],
   templateUrl: './memory-optimizer.view.html',
 })
@@ -58,17 +56,31 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
   processes = signal<ProcessMemory[]>([]);
   loading = signal(false);
   optimizing = signal(false);
-  sortColumn = signal<string>('memory_mb');
-  sortDirection = signal<'asc' | 'desc'>('desc');
 
   currentPage = signal(1);
   pageSize = signal(15);
 
-  paginatedProcesses = computed(() => {
-    const data = this.processes();
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return data.slice(start, start + this.pageSize());
-  });
+  columns: ListColumn[] = [
+    {
+      key: 'name',
+      primary: true,
+      icon: 'memory',
+      badge: 'pid',
+      badgeClass: 'badge-primary',
+      secondaryKey: 'memory_mb',
+      format: 'number',
+      sortable: true,
+    },
+  ];
+
+  options: ListOptions = {
+    showSearch: true,
+    showCheckbox: false,
+    showActions: false,
+    showReloadButton: true,
+    searchPlaceholder: 'Search processes...',
+    emptyMessage: 'No processes found',
+  };
 
   ngOnInit() {
     this.loadData();
@@ -94,36 +106,10 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
       ]);
       this.memoryInfo.set(memory);
       this.swapInfo.set(swap);
-      this.processes.set(this.sortProcesses(procData));
+      this.processes.set(procData);
     } catch (error) {
       console.error('Failed to load memory data:', error);
     }
-  }
-
-  sortProcesses(processes: ProcessMemory[]): ProcessMemory[] {
-    const col = this.sortColumn();
-    const dir = this.sortDirection();
-    return [...processes].sort((a, b) => {
-      const aVal = (a as any)[col] ?? '';
-      const bVal = (b as any)[col] ?? '';
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return dir === 'asc' ? aVal - bVal : bVal - aVal;
-      } else {
-        const aStr = String(aVal).toLowerCase();
-        const bStr = String(bVal).toLowerCase();
-        return dir === 'asc' ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
-      }
-    });
-  }
-
-  onSort(column: string) {
-    if (this.sortColumn() === column) {
-      this.sortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
-      this.sortColumn.set(column);
-      this.sortDirection.set('desc');
-    }
-    this.processes.set(this.sortProcesses(this.processes()));
   }
 
   onPageChange(page: number): void {
@@ -165,29 +151,5 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
     const swap = this.swapInfo();
     if (!swap || swap.total === 0) return 0;
     return (swap.used / swap.total) * 100;
-  }
-
-  processColumns: TableColumn[] = [
-    { key: 'name', label: 'Name', width: 'flex-1', sortable: true },
-    { key: 'pid', label: 'PID', width: 'w-24', sortable: true },
-    { key: 'memory_mb', label: 'Memory (MB)', width: 'w-32', sortable: true, align: 'right' },
-    { key: 'cpu_percent', label: 'CPU %', width: 'w-24', sortable: true, align: 'right' },
-  ];
-
-  trackByPid(index: number, proc: ProcessMemory): number {
-    return proc.pid;
-  }
-
-  getTableOptions(): TableOptions {
-    return {
-      showHeader: true,
-      showCheckbox: false,
-      hoverable: true,
-      showReloadButton: true,
-      showSelectedActions: false,
-      showPreviewButton: false,
-      showSearch: true,
-      searchPlaceholder: 'Search processes...',
-    };
   }
 }
