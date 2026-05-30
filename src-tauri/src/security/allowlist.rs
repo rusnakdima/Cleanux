@@ -65,6 +65,8 @@ pub fn is_path_allowed(path: &PathBuf) -> bool {
 }
 
 pub fn validate_path(path: &str) -> Result<String, AppError> {
+  let path_buf = std::path::PathBuf::from(path);
+
   if path.is_empty() {
     return Err(AppError::InvalidPath("Path cannot be empty".to_string()));
   }
@@ -79,8 +81,6 @@ pub fn validate_path(path: &str) -> Result<String, AppError> {
     ));
   }
 
-  let path_buf = PathBuf::from(path);
-
   let canonical = path_buf
     .canonicalize()
     .map_err(|e| AppError::InvalidPath(format!("Cannot resolve path '{}': {}", path, e)))?;
@@ -88,6 +88,13 @@ pub fn validate_path(path: &str) -> Result<String, AppError> {
   if !is_path_allowed(&canonical) {
     return Err(AppError::PathOutsideAllowed(format!(
       "Path '{}' is not in allowed directories",
+      canonical.display()
+    )));
+  }
+
+  if crate::security::PathValidator::is_symlink(&canonical) {
+    return Err(AppError::InvalidPath(format!(
+      "Symlinks are not allowed: {}",
       canonical.display()
     )));
   }

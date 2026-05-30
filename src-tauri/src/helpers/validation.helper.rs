@@ -1,22 +1,10 @@
 /* sys lib */
 use std::path::{Path, PathBuf};
 
+use crate::security::PathValidator;
+
 pub fn validate_path(path: &str) -> Result<PathBuf, String> {
-  let path_buf = PathBuf::from(path);
-
-  let canonical = path_buf
-    .canonicalize()
-    .map_err(|e| format!("Failed to canonicalize path '{}': {}", path, e))?;
-
-  if !canonical.exists() {
-    return Err(format!("Path does not exist: {}", path));
-  }
-
-  if !canonical.is_file() && !canonical.is_dir() {
-    return Err(format!("Path is neither a file nor directory: {}", path));
-  }
-
-  Ok(canonical)
+  PathValidator::validate(path).map_err(|e| e.to_string())
 }
 
 pub fn is_allowed_path(path: &Path, home_dir: &Path) -> bool {

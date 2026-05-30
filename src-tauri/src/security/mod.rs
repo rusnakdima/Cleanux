@@ -70,10 +70,6 @@ impl PathValidator {
   }
 }
 
-pub trait InputValidator {
-  fn validate(&self) -> Result<(), AppError>;
-}
-
 pub fn sanitize_path(path: &str) -> String {
   let mut result = path.to_string();
 

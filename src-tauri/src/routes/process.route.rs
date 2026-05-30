@@ -1,4 +1,5 @@
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::helpers::ResponseBuilder;
+use crate::models::{DataValue, ResponseModel};
 use crate::services::process_service::ProcessService;
 
 #[tauri::command]
@@ -27,20 +28,26 @@ pub fn killSelectedProcesses(pids: Vec<u32>) -> Result<ResponseModel, ResponseMo
   }
 
   if failed.is_empty() {
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: format!("Killed {} processes", killed.len()),
-      data: DataValue::Array(killed.into_iter().map(serde_json::Value::from).collect()),
-    })
+    Ok(
+      ResponseBuilder::new()
+        .success(&format!("Killed {} processes", killed.len()))
+        .data(DataValue::Array(
+          killed.into_iter().map(serde_json::Value::from).collect(),
+        ))
+        .build(),
+    )
   } else {
-    Err(ResponseModel {
-      status: ResponseStatus::Error,
-      message: format!(
-        "Killed {} processes, failed to kill {}",
-        killed.len(),
-        failed.len()
-      ),
-      data: DataValue::Array(failed.into_iter().map(serde_json::Value::from).collect()),
-    })
+    Err(
+      ResponseBuilder::new()
+        .error(&format!(
+          "Killed {} processes, failed to kill {}",
+          killed.len(),
+          failed.len()
+        ))
+        .data(DataValue::Array(
+          failed.into_iter().map(serde_json::Value::from).collect(),
+        ))
+        .build(),
+    )
   }
 }
