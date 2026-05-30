@@ -214,7 +214,7 @@ mat-icon {
   }
 
   .nav-item.active {
-    color: var(--accent-primary);
+    color: var(--accent-nav);
   }
 
   .card {
@@ -267,9 +267,9 @@ mat-icon {
   }
 
   .btn-primary {
-    background: var(--accent-gradient);
+    background: var(--accent-buttons);
     color: white;
-    box-shadow: var(--shadow-glow-sm);
+    box-shadow: 0 0 10px var(--accent-buttons-glow);
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -285,7 +285,7 @@ mat-icon {
 
   .btn-secondary:hover:not(:disabled) {
     background: var(--bg-hover);
-    border-color: var(--accent-primary);
+    border-color: var(--accent-borders);
   }
 
   .btn-ghost {
@@ -330,8 +330,8 @@ mat-icon {
   }
 
   .input:focus {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+    border-color: var(--accent-borders);
+    box-shadow: 0 0 0 3px var(--accent-borders-light);
   }
 
   .input::placeholder {
@@ -348,9 +348,9 @@ mat-icon {
   }
 
   .badge-primary {
-    background: rgba(6, 182, 212, 0.15);
-    color: var(--accent-primary);
-    border: 1px solid rgba(6, 182, 212, 0.3);
+    background: var(--accent-buttons-light);
+    color: var(--accent-buttons);
+    border: 1px solid var(--accent-buttons-glow);
   }
 
   .badge-success {
@@ -394,7 +394,7 @@ mat-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-gradient);
+    background: var(--accent-icons);
     color: white;
   }
 
@@ -471,7 +471,7 @@ mat-icon {
 
   .progress-fill {
     height: 100%;
-    background: var(--accent-gradient);
+    background: var(--accent-icons);
     transition: width var(--transition-normal);
     position: relative;
     overflow: hidden;
@@ -544,13 +544,13 @@ mat-icon {
     gap: 0.75rem;
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--accent-primary);
+    border: 1px solid var(--accent-buttons);
     color: var(--text-primary);
     padding: 0.875rem 1.25rem;
     border-radius: var(--radius-lg);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.4),
-      var(--shadow-glow-sm);
+      0 0 10px var(--accent-buttons-glow);
     max-width: 24rem;
     animation: slideIn 0.3s ease-out;
   }
@@ -731,15 +731,15 @@ mat-icon {
   }
 
   .bottom-nav-item.active {
-    color: var(--accent-primary);
+    color: var(--accent-nav);
   }
 
   .bottom-nav-item.active .nav-indicator {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: var(--accent-primary);
-    box-shadow: 0 0 8px var(--accent-primary);
+    background: var(--accent-nav);
+    box-shadow: 0 0 8px var(--accent-nav);
   }
 
   .header-bar {
@@ -771,8 +771,8 @@ mat-icon {
 
   select.input:focus,
   select:focus {
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+    border-color: var(--accent-borders);
+    box-shadow: 0 0 0 3px var(--accent-borders-light);
     outline: none;
   }
 
@@ -821,24 +821,24 @@ mat-icon {
   }
 
   .category-card:hover {
-    border-color: var(--accent-primary);
+    border-color: var(--accent-buttons);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
 
   .category-card.active {
-    border-color: var(--accent-primary);
-    background: rgba(6, 182, 212, 0.05);
+    border-color: var(--accent-buttons);
+    background: var(--accent-buttons-light);
   }
 
   .clean-button {
-    background: var(--accent-gradient);
+    background: var(--accent-buttons);
     color: white;
     padding: 1rem 2rem;
     border-radius: var(--radius-full);
     font-weight: 700;
     font-size: 1rem;
-    box-shadow: var(--shadow-glow);
+    box-shadow: 0 0 20px var(--accent-buttons-glow);
     transition: all var(--transition-fast);
     border: none;
     cursor: pointer;
@@ -846,7 +846,7 @@ mat-icon {
 
   .clean-button:hover {
     transform: scale(1.02);
-    box-shadow: 0 0 30px rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 30px var(--accent-buttons-glow);
   }
 
   .clean-button:active {
