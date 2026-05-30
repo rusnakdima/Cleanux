@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
 
 export interface DevCacheItem {
@@ -21,7 +21,7 @@ export interface DevCacheSummary {
   providedIn: 'root',
 })
 export class DevCacheService {
-  constructor(private api: ApiService) {}
+  private api = inject(ApiService);
 
   async getDevCacheSummary(): Promise<DevCacheSummary> {
     return this.api.invoke<DevCacheSummary>('get_dev_cache_summary');

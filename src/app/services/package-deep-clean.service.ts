@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '@services/api.service';
 
 export interface PackageManagerSummary {
@@ -36,7 +36,7 @@ export interface DeepCleanResponse {
   providedIn: 'root',
 })
 export class PackageDeepCleanService {
-  constructor(private api: ApiService) {}
+  private api = inject(ApiService);
 
   readonly summary = signal<PackageManagerSummary | null>(null);
   readonly orphanedPackages = signal<OrphanedPackage[]>([]);

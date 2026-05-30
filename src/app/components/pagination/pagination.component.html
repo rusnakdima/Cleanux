@@ -13,7 +13,7 @@
       <select
         [value]="pageSize()"
         (change)="onPageSizeChange($any($event.target).value)"
-        class="h-8 px-2 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]/50 cursor-pointer"
+        class="h-8 px-2 text-sm rounded-lg border border-[var(--border-color)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-borders)]/50 cursor-pointer"
       >
         @for (size of pageSizeOptions(); track size) {
           <option [value]="size">{{ size }} per page</option>
@@ -54,7 +54,7 @@
             <button
               (click)="goToPage(page)"
               class="w-6 h-6 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
-              [class.bg-[var(--accent-primary)]]="p() === page"
+              [class.bg-[var(--accent-borders)]]="p() === page"
               [class.text-white]="p() === page"
               [class.text-[var(--text-secondary)]]="p() !== page"
               [class.hover:bg-[var(--bg-hover)]]="p() !== page"

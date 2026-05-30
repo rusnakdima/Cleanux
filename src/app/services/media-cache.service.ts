@@ -1,5 +1,5 @@
 /* sys lib */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
@@ -18,7 +18,7 @@ export interface MediaCacheSummary {
   providedIn: 'root',
 })
 export class MediaCacheService {
-  constructor(private api: ApiService) {}
+  private api = inject(ApiService);
 
   async getMediaCacheSummary(): Promise<MediaCacheSummary> {
     return this.api.invoke<MediaCacheSummary>('get_media_cache_summary');

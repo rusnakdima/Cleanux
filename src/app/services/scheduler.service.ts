@@ -1,5 +1,5 @@
 /* sys lib */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
@@ -11,7 +11,7 @@ import { ScheduleConfig } from '@models/schedule.model';
   providedIn: 'root',
 })
 export class SchedulerService {
-  constructor(private api: ApiService) {}
+  private api = inject(ApiService);
 
   async getScheduleConfig(): Promise<ScheduleConfig | null> {
     try {

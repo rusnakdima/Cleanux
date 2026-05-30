@@ -2,15 +2,33 @@ import { ChangeDetectionStrategy, Injectable, signal, effect } from '@angular/co
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 
+export type AccentCategory = 'general' | 'buttons' | 'navigation' | 'borders' | 'icons';
+
+export interface AccentConfig {
+  general: string;
+  buttons: string;
+  navigation: string;
+  borders: string;
+  icons: string;
+}
+
 export interface ThemeConfig {
   mode: ThemeMode;
-  accentColor: string;
+  accentConfig: AccentConfig;
   glassOpacity: number;
 }
 
+const DEFAULT_ACCENT_CONFIG: AccentConfig = {
+  general: '#6366f1',
+  buttons: '#6366f1',
+  navigation: '#6366f1',
+  borders: '#6366f1',
+  icons: '#6366f1',
+};
+
 const DEFAULT_THEME: ThemeConfig = {
   mode: 'dark',
-  accentColor: '#6366f1',
+  accentConfig: { ...DEFAULT_ACCENT_CONFIG },
   glassOpacity: 0.7,
 };
 
@@ -44,7 +62,12 @@ export class ThemeService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        return { ...DEFAULT_THEME, ...JSON.parse(stored) };
+        const parsed = JSON.parse(stored);
+        return {
+          ...DEFAULT_THEME,
+          ...parsed,
+          accentConfig: { ...DEFAULT_ACCENT_CONFIG, ...parsed.accentConfig },
+        };
       }
     } catch {}
     return { ...DEFAULT_THEME };
@@ -60,7 +83,37 @@ export class ThemeService {
   }
 
   setAccentColor(color: string) {
-    this.currentTheme.update((t) => ({ ...t, accentColor: color }));
+    this.currentTheme.update((t) => ({
+      ...t,
+      accentConfig: {
+        ...t.accentConfig,
+        general: color,
+        buttons: color,
+        navigation: color,
+        borders: color,
+        icons: color,
+      },
+    }));
+    this.saveTheme(this.currentTheme());
+  }
+
+  setAccentForCategory(category: AccentCategory, color: string) {
+    this.currentTheme.update((t) => ({
+      ...t,
+      accentConfig: { ...t.accentConfig, [category]: color },
+    }));
+    this.saveTheme(this.currentTheme());
+  }
+
+  resetAccentToDefault(category: AccentCategory) {
+    this.setAccentForCategory(category, DEFAULT_ACCENT_CONFIG[category]);
+  }
+
+  resetAllAccents() {
+    this.currentTheme.update((t) => ({
+      ...t,
+      accentConfig: { ...DEFAULT_ACCENT_CONFIG },
+    }));
     this.saveTheme(this.currentTheme());
   }
 
@@ -73,20 +126,24 @@ export class ThemeService {
     const root = document.documentElement;
     const body = document.body;
 
-    const accentColor = config.accentColor;
-    const r = parseInt(accentColor.slice(1, 3), 16);
-    const g = parseInt(accentColor.slice(3, 5), 16);
-    const b = parseInt(accentColor.slice(5, 7), 16);
+    const applyAccentVar = (name: string, color: string) => {
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      root.style.setProperty(name, color);
+      root.style.setProperty(name + '-light', `rgba(${r}, ${g}, ${b}, 0.1)`);
+      root.style.setProperty(name + '-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
+      root.style.setProperty(name + '-rgb', `${r}, ${g}, ${b}`);
+    };
 
-    root.style.setProperty('--accent', accentColor);
-    root.style.setProperty('--accent-500', accentColor);
-    root.style.setProperty('--accent-light', `rgba(${r}, ${g}, ${b}, 0.1)`);
-    root.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
-    root.style.setProperty('--accent-rgb', `${r}, ${g}, ${b}`);
+    applyAccentVar('--accent', config.accentConfig.general);
+    applyAccentVar('--accent-buttons', config.accentConfig.buttons);
+    applyAccentVar('--accent-nav', config.accentConfig.navigation);
+    applyAccentVar('--accent-borders', config.accentConfig.borders);
+    applyAccentVar('--accent-icons', config.accentConfig.icons);
     root.style.setProperty('--glass-opacity', config.glassOpacity.toString());
-
-    root.style.setProperty('--icon-cpu', accentColor);
-    root.style.setProperty('--icon-memory', accentColor);
+    root.style.setProperty('--icon-cpu', config.accentConfig.icons);
+    root.style.setProperty('--icon-memory', config.accentConfig.icons);
 
     const isDark =
       config.mode === 'dark' ||

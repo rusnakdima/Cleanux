@@ -1,5 +1,5 @@
 /* sys lib */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -19,7 +19,7 @@ const httpOptions = {
   providedIn: 'root',
 })
 export class AboutService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   gitRepoName: string = environment.gitRepoName;
   githubUser: string = environment.githubUser;

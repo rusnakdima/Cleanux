@@ -1,5 +1,5 @@
 /* sys lib */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
@@ -11,7 +11,7 @@ import { JunkCategorySummary, JunkItem } from '@models/junk-cleaner.model';
   providedIn: 'root',
 })
 export class JunkCleanerService {
-  constructor(private api: ApiService) {}
+  private api = inject(ApiService);
 
   async getJunkSummary(): Promise<JunkCategorySummary[]> {
     return this.api.invoke<JunkCategorySummary[]>('get_junk_summary');
