@@ -287,3 +287,27 @@ pub fn format_size(bytes: u64) -> String {
     format!("{} B", bytes)
   }
 }
+
+use crate::helpers::response_helper::data_string;
+use crate::helpers::response_helper::success_response;
+use crate::models::ResponseModel;
+
+pub fn clean_cache_dir(path: &Path, name: &str) -> Result<ResponseModel, AppError> {
+  if !path.exists() {
+    return Ok(success_response(
+      format!("{} cache already clean", name),
+      data_string("0"),
+    ));
+  }
+
+  match remove_dir_contents(path) {
+    Ok(count) => Ok(success_response(
+      format!("Cleaned {} cache ({} items)", name, count),
+      data_string(count.to_string()),
+    )),
+    Err(e) => Err(AppError::message(format!(
+      "Failed to clean {} cache: {}",
+      name, e
+    ))),
+  }
+}

@@ -21,7 +21,7 @@ pub mod home_macro;
 pub use crate::{config_dir, home};
 
 pub use filesystem_helper::{
-  calculate_dir_size, collect_cache_file_models, collect_log_file_models,
+  calculate_dir_size, clean_cache_dir, collect_cache_file_models, collect_log_file_models,
   collect_trash_file_models, format_size, get_dir_size, remove_dir_contents,
   remove_paths_with_errors, scan_large_file_models,
 };
@@ -34,3 +34,7 @@ pub use response_helper::{
 #[path = "service_macro.rs"]
 pub mod service_macro;
 pub use crate::service_method_full;
+
+#[path = "cache.helper.rs"]
+pub mod cache_helper;
+pub use cache_helper::TimedCache;

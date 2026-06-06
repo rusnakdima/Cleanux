@@ -1,6 +1,7 @@
 /* helpers */
 use crate::helpers::{
-  calculate_dir_size, data_string, home, remove_dir_contents, service_method_full, success_response,
+  calculate_dir_size, clean_cache_dir, data_string, home, remove_dir_contents, service_method_full,
+  success_response,
 };
 /* models */
 use crate::models::{AppError, ResponseModel};
@@ -215,24 +216,7 @@ impl DevCacheService {
   fn clean_npm_cache_inner(&self) -> DevCacheResult<ResponseModel> {
     let home = home!();
     let npm_path = home.join(".npm");
-
-    if !npm_path.exists() {
-      return Ok(success_response(
-        "npm cache already clean",
-        data_string("0"),
-      ));
-    }
-
-    match remove_dir_contents(&npm_path) {
-      Ok(count) => Ok(success_response(
-        format!("Cleaned npm cache ({} items)", count),
-        data_string(count.to_string()),
-      )),
-      Err(e) => Err(AppError::message(format!(
-        "Failed to clean npm cache: {}",
-        e
-      ))),
-    }
+    clean_cache_dir(&npm_path, "npm")
   }
 
   service_method_full!(clean_pip_cache => clean_pip_cache_inner);
@@ -240,24 +224,7 @@ impl DevCacheService {
   fn clean_pip_cache_inner(&self) -> DevCacheResult<ResponseModel> {
     let home = home!();
     let pip_path = home.join(".cache/pip");
-
-    if !pip_path.exists() {
-      return Ok(success_response(
-        "pip cache already clean",
-        data_string("0"),
-      ));
-    }
-
-    match remove_dir_contents(&pip_path) {
-      Ok(count) => Ok(success_response(
-        format!("Cleaned pip cache ({} items)", count),
-        data_string(count.to_string()),
-      )),
-      Err(e) => Err(AppError::message(format!(
-        "Failed to clean pip cache: {}",
-        e
-      ))),
-    }
+    clean_cache_dir(&pip_path, "pip")
   }
 
   service_method_full!(clean_cargo_cache => clean_cargo_cache_inner);
@@ -302,21 +269,7 @@ impl DevCacheService {
   fn clean_go_cache_inner(&self) -> DevCacheResult<ResponseModel> {
     let home = home!();
     let go_path = home.join("go/pkg/mod");
-
-    if !go_path.exists() {
-      return Ok(success_response("Go cache already clean", data_string("0")));
-    }
-
-    match remove_dir_contents(&go_path) {
-      Ok(count) => Ok(success_response(
-        format!("Cleaned Go cache ({} items)", count),
-        data_string(count.to_string()),
-      )),
-      Err(e) => Err(AppError::message(format!(
-        "Failed to clean Go cache: {}",
-        e
-      ))),
-    }
+    clean_cache_dir(&go_path, "Go")
   }
 
   service_method_full!(clean_maven_cache => clean_maven_cache_inner);
@@ -324,24 +277,7 @@ impl DevCacheService {
   fn clean_maven_cache_inner(&self) -> DevCacheResult<ResponseModel> {
     let home = home!();
     let maven_path = home.join(".m2/repository");
-
-    if !maven_path.exists() {
-      return Ok(success_response(
-        "Maven cache already clean",
-        data_string("0"),
-      ));
-    }
-
-    match remove_dir_contents(&maven_path) {
-      Ok(count) => Ok(success_response(
-        format!("Cleaned Maven cache ({} items)", count),
-        data_string(count.to_string()),
-      )),
-      Err(e) => Err(AppError::message(format!(
-        "Failed to clean Maven cache: {}",
-        e
-      ))),
-    }
+    clean_cache_dir(&maven_path, "Maven")
   }
 
   service_method_full!(clean_gradle_cache => clean_gradle_cache_inner);
@@ -349,24 +285,7 @@ impl DevCacheService {
   fn clean_gradle_cache_inner(&self) -> DevCacheResult<ResponseModel> {
     let home = home!();
     let gradle_path = home.join(".gradle/caches");
-
-    if !gradle_path.exists() {
-      return Ok(success_response(
-        "Gradle cache already clean",
-        data_string("0"),
-      ));
-    }
-
-    match remove_dir_contents(&gradle_path) {
-      Ok(count) => Ok(success_response(
-        format!("Cleaned Gradle cache ({} items)", count),
-        data_string(count.to_string()),
-      )),
-      Err(e) => Err(AppError::message(format!(
-        "Failed to clean Gradle cache: {}",
-        e
-      ))),
-    }
+    clean_cache_dir(&gradle_path, "Gradle")
   }
 
   pub fn clean_all_dev_caches(&self) -> Result<ResponseModel, ResponseModel> {

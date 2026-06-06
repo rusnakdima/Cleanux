@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::process::Command;
 
 /* models */
+use crate::helpers::service_method_full;
 use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 use crate::security::allowlist::is_path_allowed;
 
@@ -114,9 +115,7 @@ impl SystemService {
     }
   }
 
-  pub fn getAllServices(&self) -> Result<ResponseModel, ResponseModel> {
-    self.get_all_services_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(getAllServices => get_all_services_inner);
 
   fn get_all_services_inner(&self) -> ServiceResult<ResponseModel> {
     let output = Command::new("systemctl")

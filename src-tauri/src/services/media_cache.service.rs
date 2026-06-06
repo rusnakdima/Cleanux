@@ -1,7 +1,7 @@
 /* helpers */
 use crate::helpers::{
-  data_empty_string, format_size, get_dir_size, home, remove_dir_contents, service_method_full,
-  success_response,
+  clean_cache_dir, data_empty_string, format_size, get_dir_size, home, remove_dir_contents,
+  service_method_full, success_response,
 };
 /* models */
 use crate::models::{DataValue, ResponseModel};
@@ -79,19 +79,7 @@ impl MediaCacheService {
 
   fn clean_steam_shader_cache_inner(&self) -> MediaResult<ResponseModel> {
     let shader_path = home!().join(".steam/steam/steamapps/shader");
-
-    if !shader_path.exists() {
-      return Ok(success_response(
-        "No Steam shader cache found",
-        data_empty_string(),
-      ));
-    }
-
-    let cleared = remove_dir_contents(&shader_path)?;
-    Ok(success_response(
-      format!("Steam shader cache cleared: {}", format_size(cleared)),
-      data_empty_string(),
-    ))
+    clean_cache_dir(&shader_path, "Steam shader")
   }
 
   service_method_full!(clean_steam_download_cache => clean_steam_download_cache_inner);
@@ -184,19 +172,7 @@ impl MediaCacheService {
 
   fn clean_thumbnail_cache_inner(&self) -> MediaResult<ResponseModel> {
     let thumb_path = home!().join(".cache/thumbnails");
-
-    if !thumb_path.exists() {
-      return Ok(success_response(
-        "No thumbnail cache found",
-        data_empty_string(),
-      ));
-    }
-
-    let cleared = remove_dir_contents(&thumb_path)?;
-    Ok(success_response(
-      format!("Thumbnail cache cleared: {}", format_size(cleared)),
-      data_empty_string(),
-    ))
+    clean_cache_dir(&thumb_path, "Thumbnail")
   }
 
   pub fn get_icon_cache_size(&self) -> u64 {
@@ -210,16 +186,7 @@ impl MediaCacheService {
 
   fn clean_icon_cache_inner(&self) -> MediaResult<ResponseModel> {
     let icon_path = home!().join(".cache/icons");
-
-    if !icon_path.exists() {
-      return Ok(success_response("No icon cache found", data_empty_string()));
-    }
-
-    let cleared = remove_dir_contents(&icon_path)?;
-    Ok(success_response(
-      format!("Icon cache cleared: {}", format_size(cleared)),
-      data_empty_string(),
-    ))
+    clean_cache_dir(&icon_path, "Icon")
   }
 
   pub fn get_media_cache_summary(&self) -> ResponseModel {
