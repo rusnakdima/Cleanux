@@ -2,13 +2,11 @@
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm">info</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm" fontIcon="info" />
         About
       </h3>
       <button (click)="checkUpdate()" [disabled]="isChecking()" class="btn btn-secondary">
-        <mat-icon class="icon-xs" [class.animate-spin]="isChecking()">{{
-          isChecking() ? "sync" : "update"
-        }}</mat-icon>
+        <mat-icon class="icon-xs" [fontIcon]="isChecking() ? 'sync' : 'update'" [class.animate-spin]="isChecking()" />
         <span>Check for Updates</span>
       </button>
     </div>
@@ -36,7 +34,7 @@
         <div
           class="mt-4 p-4 rounded-lg bg-success/10 border border-success/30 flex items-center gap-3"
         >
-          <mat-icon class="text-success">check_circle</mat-icon>
+          <mat-icon class="text-success" fontIcon="check_circle" />
           <div>
             <span class="font-semibold text-zinc-900 dark:text-white block"
               >Update Available: {{ lastVersion() }}</span
@@ -51,7 +49,7 @@
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm">palette</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm" fontIcon="palette" />
         Appearance
       </h3>
     </div>
@@ -87,7 +85,7 @@
               [class.ring-white]="themeService.currentTheme().accentConfig.general === color"
             >
               @if (themeService.currentTheme().accentConfig.general === color) {
-                <mat-icon class="text-white icon-sm">check</mat-icon>
+                <mat-icon class="text-white icon-sm" fontIcon="check" />
               }
             </button>
           }
@@ -119,7 +117,7 @@
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm">schedule</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm" fontIcon="schedule" />
         Maintenance Schedule
       </h3>
     </div>
@@ -167,15 +165,11 @@
 
       <div class="flex gap-3 pt-2">
         <button (click)="saveSchedule()" [disabled]="isSaving()" class="btn btn-secondary flex-1">
-          <mat-icon class="icon-xs" [class.animate-spin]="isSaving()">{{
-            isSaving() ? "sync" : "save"
-          }}</mat-icon>
+          <mat-icon class="icon-xs" [fontIcon]="isSaving() ? 'sync' : 'save'" [class.animate-spin]="isSaving()" />
           <span>Save</span>
         </button>
         <button (click)="runNow()" [disabled]="isRunning()" class="btn btn-primary flex-1">
-          <mat-icon class="icon-xs" [class.animate-spin]="isRunning()">{{
-            isRunning() ? "sync" : "play_arrow"
-          }}</mat-icon>
+          <mat-icon class="icon-xs" [fontIcon]="isRunning() ? 'sync' : 'play_arrow'" [class.animate-spin]="isRunning()" />
           <span>Run Now</span>
         </button>
       </div>

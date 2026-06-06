@@ -1,7 +1,7 @@
 <nav class="bottom-nav">
   @for (item of listNavs; track item.route) {
     <a [routerLink]="item.route" [class.active]="isActiveRoute(item)" class="bottom-nav-item border-trace">
-      <mat-icon class="icon-base">{{ getIcon(item) }}</mat-icon>
+      <mat-icon class="icon-base" [fontIcon]="getIcon(item)" />
       <span class="bottom-nav-label">{{ getLabel(item) }}</span>
       @if (isActiveRoute(item)) {
         <div class="nav-indicator"></div>

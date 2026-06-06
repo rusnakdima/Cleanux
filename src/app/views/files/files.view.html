@@ -19,10 +19,10 @@
           [class.bg-emerald-500/20]="tool.color === 'emerald'"
           [class.text-emerald-500]="tool.color === 'emerald'"
         >
-          <mat-icon class="icon-xl">{{ tool.icon }}</mat-icon>
+          <mat-icon class="icon-xl" [fontIcon]="tool.icon" />
         </div>
         <h3 class="text-sm font-semibold text-white dark:text-zinc-900 mb-1">{{ tool.label }}</h3>
-        <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+        <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
       </a>
     }
   </div>
@@ -34,7 +34,7 @@
         <div
           class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-500"
         >
-          <mat-icon class="icon-base">cached</mat-icon>
+          <mat-icon class="icon-base" fontIcon="cached" />
         </div>
         <div>
           <p class="text-xs text-zinc-500 dark:text-zinc-400">Cache</p>
@@ -43,7 +43,7 @@
       </div>
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-error/20 flex items-center justify-center text-error">
-          <mat-icon class="icon-base">delete_outline</mat-icon>
+          <mat-icon class="icon-base" fontIcon="delete_outline" />
         </div>
         <div>
           <p class="text-xs text-zinc-500 dark:text-zinc-400">Trash</p>
@@ -54,7 +54,7 @@
         <div
           class="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center text-warning"
         >
-          <mat-icon class="icon-base">file_present</mat-icon>
+          <mat-icon class="icon-base" fontIcon="file_present" />
         </div>
         <div>
           <p class="text-xs text-zinc-500 dark:text-zinc-400">Large Files</p>

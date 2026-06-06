@@ -6,12 +6,12 @@
       (mouseleave)="onToolbarHoverLeave()"
     >
       <button class="search-toggle-btn" (click)="toggleToolbar()">
-        <mat-icon class="icon-sm">{{ toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search' }}</mat-icon>
+        <mat-icon class="icon-sm" [fontIcon]="toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search'" />
       </button>
 
       <div class="controls-bar" [class.toolbar-visible]="toolbarExpanded() || toolbarLocked()">
         <div class="search-input-wrapper">
-          <mat-icon class="search-icon">search</mat-icon>
+          <mat-icon class="search-icon" fontIcon="search" />
           <input
             type="text"
             class="search-input"
@@ -20,7 +20,7 @@
           />
           @if (searchControl.value) {
             <button (click)="clearSearch()" class="search-clear-btn">
-              <mat-icon class="clear-icon">close</mat-icon>
+              <mat-icon class="clear-icon" fontIcon="close" />
             </button>
           }
         </div>
@@ -37,7 +37,7 @@
 
           @if (showReloadButton) {
             <button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-              <mat-icon class="text-cyan-500 dark:text-cyan-400">refresh</mat-icon>
+              <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="refresh" />
             </button>
           }
         </div>
@@ -69,7 +69,7 @@
         >
           @if (hasRowActions && actionsPosition === 'right') {
             <div class="w-10 h-10 rounded-lg bg-zinc-700 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
-              <mat-icon class="!text-xl !w-5 !h-5 !text-zinc-500 dark:!text-zinc-400">{{ getItemIcon(item) }}</mat-icon>
+              <mat-icon class="!text-xl !w-5 !h-5 !text-zinc-500 dark:!text-zinc-400" [fontIcon]="getItemIcon(item)" />
             </div>
           }
 
@@ -114,7 +114,7 @@
                     [matTooltip]="action.tooltip ?? action.label ?? ''"
                     (click)="onRowAction({ action: action.id, item }); $event.stopPropagation()"
                   >
-                    <mat-icon class="!text-xl !w-5 !h-5">{{ action.icon }}</mat-icon>
+                    <mat-icon class="!text-xl !w-5 !h-5" [fontIcon]="action.icon" />
                   </button>
                 } @else {
                   <button
@@ -123,7 +123,7 @@
                     [matTooltip]="action.tooltip ?? action.label ?? ''"
                     (click)="onRowAction({ action: action.id, item }); $event.stopPropagation()"
                   >
-                    <mat-icon class="!text-xl !w-5 !h-5">{{ action.icon }}</mat-icon>
+                    <mat-icon class="!text-xl !w-5 !h-5" [fontIcon]="action.icon" />
                   </button>
                 }
               }
@@ -132,7 +132,7 @@
         </div>
       } @empty {
         <div class="flex flex-col items-center justify-center py-12 text-center">
-          <mat-icon class="!text-5xl text-zinc-500 dark:text-zinc-400 mb-4">inbox</mat-icon>
+<mat-icon class="!text-5xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="inbox" />
           <p class="text-zinc-400 dark:text-zinc-500">{{ options.emptyMessage ?? 'No items found' }}</p>
         </div>
       }

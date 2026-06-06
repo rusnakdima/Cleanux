@@ -108,43 +108,43 @@ mat-icon {
 
 @layer components {
   .glass-surface {
-    @apply bg-zinc-950/85 backdrop-blur-xl border border-white/10 rounded-3xl;
+    @apply bg-zinc-950/85 backdrop-blur-xl border border-zinc-700 rounded-3xl;
   }
 
   .light .glass-surface {
-    @apply bg-white/85 border-zinc-950/10;
+    @apply bg-white/85 border-zinc-300;
   }
 
   .glass-panel {
-    @apply bg-zinc-950/85 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl;
+    @apply bg-zinc-950/85 backdrop-blur-2xl border border-zinc-700 rounded-3xl shadow-2xl;
   }
 
   .light .glass-panel {
-    @apply bg-white/85 border-zinc-950/10;
+    @apply bg-white/85 border-zinc-300;
   }
 
   .glass-nav {
-    @apply bg-zinc-950/85 backdrop-blur-2xl border-t border-white/10;
+    @apply bg-zinc-950/85 backdrop-blur-2xl border-t border-zinc-700;
   }
 
   .light .glass-nav {
-    @apply bg-white/85 border-zinc-950/10;
+    @apply bg-white/85 border-zinc-300;
   }
 
   .glass-card {
-    @apply bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden;
+    @apply bg-zinc-950 border border-zinc-700 rounded-3xl overflow-hidden;
   }
 
   .light .glass-card {
-    @apply bg-white border-zinc-950/10;
+    @apply bg-white border-zinc-300;
   }
 
   .glass-card-header {
-    @apply p-4 border-b border-white/10 flex items-center justify-between flex-wrap gap-2;
+    @apply p-4 border-b border-zinc-700 flex items-center justify-between flex-wrap gap-2;
   }
 
   .light .glass-card-header {
-    @apply border-zinc-950/10;
+    @apply border-zinc-300;
   }
 
   @media (min-width: 640px) {
@@ -159,11 +159,11 @@ mat-icon {
   }
 
   .glass-card-footer {
-    @apply p-4 border-t border-white/10 flex justify-end gap-3;
+    @apply p-4 border-t border-zinc-700 flex justify-end gap-3;
   }
 
   .light .glass-card-footer {
-    @apply border-zinc-950/10;
+    @apply border-zinc-300;
   }
 
   .nav-item {
@@ -187,27 +187,27 @@ mat-icon {
   }
 
   .card {
-    @apply bg-zinc-950 border border-white/5 rounded-3xl overflow-hidden transition-all duration-250;
+    @apply bg-zinc-950 border border-zinc-700 rounded-3xl overflow-hidden transition-all duration-250;
   }
 
   .card:hover {
-    @apply border-white/10;
+    @apply border-zinc-600;
   }
 
   .light .card {
-    @apply bg-white border-zinc-950/5;
+    @apply bg-white border-zinc-300;
   }
 
   .light .card:hover {
-    @apply border-zinc-950/10;
+    @apply border-zinc-400;
   }
 
   .card-header {
-    @apply p-4 border-b border-white/5 flex items-center justify-between;
+    @apply p-4 border-b border-zinc-700 flex items-center justify-between;
   }
 
   .light .card-header {
-    @apply border-zinc-950/5;
+    @apply border-zinc-300;
   }
 
   .card-body {
@@ -238,11 +238,11 @@ mat-icon {
   }
 
   .btn-secondary {
-    @apply bg-zinc-900 text-white border border-white/10;
+    @apply bg-zinc-900 text-white border border-zinc-700;
   }
 
   .light .btn-secondary {
-    @apply bg-zinc-100 text-zinc-900 border-zinc-950/10;
+    @apply bg-zinc-100 text-zinc-900 border-zinc-300;
   }
 
   .btn-secondary:hover:not(:disabled) {
@@ -255,15 +255,15 @@ mat-icon {
   }
 
   .btn-ghost {
-    @apply bg-transparent text-zinc-400;
+    @apply bg-transparent text-zinc-400 border border-transparent;
   }
 
   .btn-ghost:hover:not(:disabled) {
-    @apply bg-zinc-800 text-white;
+    @apply bg-zinc-800 text-white border-zinc-600;
   }
 
   .light .btn-ghost:hover:not(:disabled) {
-    @apply bg-zinc-200 text-zinc-900;
+    @apply bg-zinc-200 text-zinc-900 border-zinc-300;
   }
 
   .btn-danger {
@@ -280,11 +280,11 @@ mat-icon {
   }
 
   .input {
-    @apply bg-zinc-950 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white transition-all duration-150 outline-none w-full;
+    @apply bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white transition-all duration-150 outline-none w-full;
   }
 
   .light .input {
-    @apply bg-white text-zinc-900 border-zinc-950/10;
+    @apply bg-white text-zinc-900 border-zinc-300;
   }
 
   .input:focus {
@@ -323,19 +323,19 @@ mat-icon {
   }
 
   .stat-card {
-    @apply bg-zinc-950 border border-white/5 rounded-3xl p-4 flex items-center gap-4 transition-all duration-250;
+    @apply bg-zinc-950 border border-zinc-700 rounded-3xl p-4 flex items-center gap-4 transition-all duration-250;
   }
 
   .stat-card:hover {
-    @apply border-white/10 -translate-y-0.5;
+    @apply border-zinc-600 -translate-y-0.5;
   }
 
   .light .stat-card {
-    @apply bg-white border-zinc-950/5;
+    @apply bg-white border-zinc-300;
   }
 
   .light .stat-card:hover {
-    @apply border-zinc-950/10;
+    @apply border-zinc-400;
   }
 
   .stat-icon {
@@ -435,11 +435,11 @@ mat-icon {
   }
 
   .table th, .table td {
-    @apply px-4 py-3 text-left border-b border-white/5;
+    @apply px-4 py-3 text-left border-b border-zinc-700;
   }
 
   .light .table th, .light .table td {
-    @apply border-zinc-950/5;
+    @apply border-zinc-300;
   }
 
   .table th {
@@ -475,7 +475,7 @@ mat-icon {
 
   .toast {
     @apply fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3.5 rounded-2xl max-w-sm;
-    @apply bg-zinc-950/85 backdrop-blur-xl border border-white/10 text-white;
+    @apply bg-zinc-950/85 backdrop-blur-xl border border-zinc-700 text-white;
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.4),
       0 0 10px var(--accent-glow);
@@ -483,7 +483,7 @@ mat-icon {
   }
 
   .light .toast {
-    @apply bg-white/85 text-zinc-900 border-zinc-950/10;
+    @apply bg-white/85 text-zinc-900 border-zinc-300;
   }
 
   @keyframes slideIn {
@@ -509,19 +509,19 @@ mat-icon {
   }
 
   .terminal-window {
-    @apply bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden flex flex-col shadow-2xl mt-12;
+    @apply bg-zinc-950 border border-zinc-700 rounded-3xl overflow-hidden flex flex-col shadow-2xl mt-12;
   }
 
   .light .terminal-window {
-    @apply bg-zinc-50 border-zinc-950/10;
+    @apply bg-zinc-50 border-zinc-300;
   }
 
   .terminal-header {
-    @apply bg-zinc-950 px-4 py-3 flex items-center justify-between border-b border-white/5;
+    @apply bg-zinc-950 px-4 py-3 flex items-center justify-between border-b border-zinc-700;
   }
 
   .light .terminal-header {
-    @apply bg-white border-zinc-950/5;
+    @apply bg-white border-zinc-300;
   }
 
   .terminal-dot {
@@ -579,18 +579,18 @@ mat-icon {
   }
 
   .command-block {
-    @apply font-mono text-xs text-zinc-500 bg-zinc-950 px-3 py-1 rounded-lg border border-white/10 block mt-2;
+    @apply font-mono text-xs text-zinc-500 bg-zinc-950 px-3 py-1 rounded-lg border border-zinc-700 block mt-2;
   }
 
   .light .command-block {
-    @apply bg-zinc-50 text-zinc-400 border-zinc-950/10;
+    @apply bg-zinc-50 text-zinc-400 border-zinc-300;
   }
 
   .bottom-nav {
     @apply fixed bottom-3 left-1/2 z-50 flex justify-center items-center p-2;
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
     margin-bottom: 10px;
-    @apply bg-zinc-900/95 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl min-w-max;
+    @apply bg-zinc-900/95 backdrop-blur-2xl border border-zinc-700 rounded-full shadow-2xl min-w-max;
     transform: translateX(-50%);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.4),
@@ -598,7 +598,7 @@ mat-icon {
   }
 
   .light .bottom-nav {
-    @apply bg-white/95 border-zinc-950/10;
+    @apply bg-white/95 border-zinc-300;
   }
 
   .bottom-nav-item {
@@ -650,7 +650,7 @@ mat-icon {
 
   select.input,
   select {
-    @apply bg-zinc-950 text-white border border-white/10 appearance-none rounded-xl px-3 py-2.5 text-sm cursor-pointer;
+    @apply bg-zinc-950 text-white border border-zinc-700 appearance-none rounded-xl px-3 py-2.5 text-sm cursor-pointer;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
@@ -658,7 +658,7 @@ mat-icon {
   }
 
   .light select.input, .light select {
-    @apply bg-white text-zinc-900 border-zinc-950/10;
+    @apply bg-white text-zinc-900 border-zinc-300;
   }
 
   select.input:focus,
@@ -686,11 +686,11 @@ mat-icon {
   }
 
   .hero-card {
-    @apply bg-zinc-950/85 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 relative overflow-hidden;
+    @apply bg-zinc-950/85 backdrop-blur-2xl border border-zinc-700 rounded-3xl p-6 relative overflow-hidden;
   }
 
   .light .hero-card {
-    @apply bg-white/85 border-zinc-950/10;
+    @apply bg-white/85 border-zinc-300;
   }
 
   .hero-card::before {
@@ -700,7 +700,7 @@ mat-icon {
   }
 
   .category-card {
-    @apply bg-zinc-950 border border-white/5 rounded-3xl p-5 transition-all duration-250 cursor-pointer;
+    @apply bg-zinc-950 border border-zinc-700 rounded-3xl p-5 transition-all duration-250 cursor-pointer;
   }
 
   .category-card:hover {
@@ -710,7 +710,7 @@ mat-icon {
   }
 
   .light .category-card {
-    @apply bg-white border-zinc-950/5;
+    @apply bg-white border-zinc-300;
   }
 
   .category-card.active {
@@ -754,12 +754,12 @@ mat-icon {
   }
 
   .modal-content {
-    @apply bg-zinc-950 border border-white/10 rounded-3xl p-6 max-w-sm w-full;
+    @apply bg-zinc-950 border border-zinc-700 rounded-3xl p-6 max-w-sm w-full;
     animation: slideUp 0.3s ease-out;
   }
 
   .light .modal-content {
-    @apply bg-white border-zinc-950/10;
+    @apply bg-white border-zinc-300;
   }
 
   @keyframes slideUp {
@@ -800,11 +800,11 @@ mat-icon {
   }
 
   .matte-surface {
-    @apply bg-zinc-900 border border-white/10 rounded-2xl;
+    @apply bg-zinc-900 border border-zinc-700 rounded-2xl;
   }
 
   .light .matte-surface {
-    @apply bg-zinc-100 border-zinc-950/10;
+    @apply bg-zinc-100 border-zinc-300;
   }
 
   .border-trace {
@@ -869,11 +869,11 @@ mat-icon {
 }
 
 .segmented-control {
-  @apply flex bg-zinc-950 border border-white/10 rounded-3xl p-1 gap-1 relative;
+  @apply flex bg-zinc-950 border border-zinc-700 rounded-3xl p-1 gap-1 relative;
 }
 
 .light .segmented-control {
-  @apply bg-zinc-50 border-zinc-950/10;
+  @apply bg-zinc-50 border-zinc-300;
 }
 
 .segmented-control .indicator {

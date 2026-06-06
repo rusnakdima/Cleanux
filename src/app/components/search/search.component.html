@@ -1,7 +1,7 @@
 <div class="search-wrapper">
   @if (isVisible()) {
     <div class="search-input-wrapper">
-      <mat-icon class="search-icon">search</mat-icon>
+      <mat-icon class="search-icon" fontIcon="search" />
       <input
         type="text"
         class="search-input"
@@ -11,13 +11,13 @@
       />
       @if (searchControl.value) {
         <button (click)="clearSearch()" class="search-clear-btn">
-          <mat-icon class="clear-icon">close</mat-icon>
+          <mat-icon class="clear-icon" fontIcon="close" />
         </button>
       }
     </div>
   } @else {
     <button (click)="show()" class="search-toggle-btn">
-      <mat-icon class="toggle-icon">search</mat-icon>
+      <mat-icon class="toggle-icon" fontIcon="search" />
       <span class="toggle-text">Search</span>
     </button>
   }

@@ -13,11 +13,11 @@
         class="hidden"
       />
       <button (click)="fileInput.click()" class="btn btn-secondary">
-        <mat-icon class="icon-sm">upload</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="upload" />
         Import
       </button>
       <button (click)="newProfile()" class="btn btn-primary">
-        <mat-icon class="icon-sm">add</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="add" />
         New Profile
       </button>
     </div>
@@ -146,7 +146,7 @@
     </div>
   } @else if (profiles().length === 0) {
     <div class="glass-surface matte-surface p-12 text-center">
-      <mat-icon class="icon-4xl text-zinc-500 dark:text-zinc-400 mb-4">folder</mat-icon>
+      <mat-icon class="icon-4xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="folder" />
       <h3 class="text-lg font-semibold text-zinc-400 dark:text-zinc-500">No Profiles Found</h3>
       <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
         Create profiles to save your cleaning configurations
@@ -166,7 +166,7 @@
             <div
               class="w-10 h-10 rounded-lg bg-[var(--accent-buttons)]/10 flex items-center justify-center"
             >
-              <mat-icon class="text-[var(--accent-icons)]">tune</mat-icon>
+              <mat-icon class="text-[var(--accent-icons)]" fontIcon="tune" />
             </div>
           </div>
           <div class="flex flex-wrap gap-2 mb-3">
@@ -186,25 +186,25 @@
           <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">{{ formatDate(profile.created_at) }}</p>
           <div class="flex items-center gap-2">
             <button (click)="applyProfile(profile)" class="btn btn-primary flex-1">
-              <mat-icon class="icon-sm">play_arrow</mat-icon>
+              <mat-icon class="icon-sm" fontIcon="play_arrow" />
               Apply
             </button>
             <button (click)="editProfile(profile)" class="btn btn-ghost btn-icon" matTooltip="Edit">
-              <mat-icon class="text-zinc-400 dark:text-zinc-500">edit</mat-icon>
+              <mat-icon class="text-zinc-400 dark:text-zinc-500" fontIcon="edit" />
             </button>
             <button
               (click)="exportProfile(profile)"
               class="btn btn-ghost btn-icon"
               matTooltip="Export"
             >
-              <mat-icon class="text-zinc-400 dark:text-zinc-500">download</mat-icon>
+              <mat-icon class="text-zinc-400 dark:text-zinc-500" fontIcon="download" />
             </button>
             <button
               (click)="deleteProfile(profile)"
               class="btn btn-ghost btn-icon"
               matTooltip="Delete"
             >
-              <mat-icon class="text-error">delete</mat-icon>
+              <mat-icon class="text-error" fontIcon="delete" />
             </button>
           </div>
         </div>

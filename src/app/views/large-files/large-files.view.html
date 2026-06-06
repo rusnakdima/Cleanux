@@ -2,7 +2,7 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <div class="stat-card matte-surface border-trace">
       <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="text-white">file_copy</mat-icon>
+        <mat-icon class="text-white" fontIcon="file_copy" />
       </div>
       <div class="stat-content">
         <span class="stat-label">Large Files Found</span>
@@ -12,7 +12,7 @@
 
     <div class="stat-card matte-surface border-trace">
       <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="text-white">storage</mat-icon>
+        <mat-icon class="text-white" fontIcon="storage" />
       </div>
       <div class="stat-content">
         <span class="stat-label">Total Space</span>
@@ -28,7 +28,7 @@
         [disabled]="selectedFiles().size === 0"
         class="btn btn-danger"
       >
-        <mat-icon class="icon-sm">delete</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="delete" />
         Delete Selected
       </button>
     </div>

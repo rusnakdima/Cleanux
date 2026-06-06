@@ -11,7 +11,7 @@
         <p class="text-2xl font-bold">{{ formatSize(downloadsSize()) }}</p>
       </div>
       <button (click)="scanDownloads()" [disabled]="isScanning()" class="btn btn-primary">
-        <mat-icon class="icon-sm" [class.animate-spin]="isScanning()">search</mat-icon>
+        <mat-icon class="icon-sm" [class.animate-spin]="isScanning()" fontIcon="search" />
         {{ isScanning() ? "Scanning..." : "Scan" }}
       </button>
     </div>
@@ -63,7 +63,7 @@
           [disabled]="selectedFiles().size === 0"
           class="btn btn-danger"
         >
-          <mat-icon class="icon-sm">delete</mat-icon>
+          <mat-icon class="icon-sm" fontIcon="delete" />
           Clean Selected ({{ selectedFiles().size }})
         </button>
       </div>
@@ -77,7 +77,7 @@
     </div>
   } @else {
     <div class="glass-surface matte-surface p-8 text-center">
-      <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4">folder_open</mat-icon>
+      <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="folder_open" />
       <p class="text-zinc-400 dark:text-zinc-500">No files found in Downloads</p>
       <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Click Scan to search for cleanable files</p>
     </div>

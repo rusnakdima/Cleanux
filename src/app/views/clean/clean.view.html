@@ -23,10 +23,10 @@
           class="clean-button"
         >
           @if (isCleaning()) {
-            <mat-icon class="icon-sm animate-spin">refresh</mat-icon>
+            <mat-icon class="icon-sm animate-spin" fontIcon="refresh" />
             Cleaning...
           } @else {
-            <mat-icon class="icon-sm">cleanup</mat-icon>
+            <mat-icon class="icon-sm" fontIcon="cleanup" />
             Clean All
           }
         </button>
@@ -55,7 +55,7 @@
             [class.bg-warning/20]="category.color === 'warning'"
             [class.text-warning]="category.color === 'warning'"
           >
-            <mat-icon class="icon-xl">{{ category.icon }}</mat-icon>
+            <mat-icon class="icon-xl" [fontIcon]="category.icon" />
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="text-sm font-semibold">{{ category.label }}</h3>
@@ -78,21 +78,21 @@
       }
     </div>
 
-    <div class="glass-surface p-4 mt-6 flex items-center justify-between flex-wrap gap-4">
+    <div class="glass-surface matte-surface p-4 mt-6 flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-3">
-        <mat-icon class="text-zinc-500 dark:text-zinc-400">info</mat-icon>
+        <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="info" />
         <span class="text-sm text-zinc-400 dark:text-zinc-500">
           Select a category to clean specific items
         </span>
       </div>
-      <button
-        (click)="onCleanCategory(activeCategory())"
-        [disabled]="isCleaning() || getCategorySize(activeCategory()) === 0"
-        class="btn btn-danger"
-      >
-        <mat-icon class="icon-sm">delete</mat-icon>
-        Clean {{ activeCategory() }}
-      </button>
+<button
+          (click)="onCleanCategory(activeCategory())"
+          [disabled]="isCleaning() || getCategorySize(activeCategory()) === 0"
+          class="btn btn-danger"
+        >
+          <mat-icon class="icon-sm" fontIcon="delete" />
+          Clean {{ activeCategory() }}
+        </button>
     </div>
 
     <div class="mt-6">
@@ -102,39 +102,39 @@
           <div
             class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-500 shrink-0"
           >
-            <mat-icon class="icon-lg">download</mat-icon>
+            <mat-icon class="icon-lg" fontIcon="download" />
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="text-sm font-semibold">Downloads</h3>
             <p class="text-xs text-zinc-500 dark:text-zinc-400">Clean downloaded files</p>
           </div>
-          <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+          <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
         </a>
 
         <a routerLink="/recent" class="category-card matte-surface border-trace flex items-center gap-3 no-underline">
           <div
             class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0"
           >
-            <mat-icon class="icon-lg">history</mat-icon>
+            <mat-icon class="icon-lg" fontIcon="history" />
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="text-sm font-semibold">Recent Files</h3>
             <p class="text-xs text-zinc-500 dark:text-zinc-400">Clear file history</p>
           </div>
-          <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+          <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
         </a>
 
         <a routerLink="/clipboard" class="category-card matte-surface border-trace flex items-center gap-3 no-underline">
           <div
             class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 shrink-0"
           >
-            <mat-icon class="icon-lg">content_paste</mat-icon>
+            <mat-icon class="icon-lg" fontIcon="content_paste" />
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="text-sm font-semibold">Clipboard</h3>
             <p class="text-xs text-zinc-500 dark:text-zinc-400">Manage clipboard</p>
           </div>
-          <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+          <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
         </a>
       </div>
     </div>

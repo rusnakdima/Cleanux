@@ -19,13 +19,11 @@
 
       <div class="flex items-center gap-3">
         <button (click)="startScan()" [disabled]="isScanning()" class="btn btn-secondary">
-          <mat-icon class="icon-sm" [class.animate-spin]="isScanning()">
-            {{ isScanning() ? 'refresh' : 'search' }}
-          </mat-icon>
+          <mat-icon class="icon-sm" [class.animate-spin]="isScanning()" [fontIcon]="isScanning() ? 'refresh' : 'search'" />
           {{ isScanning() ? "Scanning..." : "Scan" }}
         </button>
-        <a routerLink="/clean" class="clean-button border-trace">
-          <mat-icon class="icon-sm">cleanup</mat-icon>
+        <a routerLink="/clean" class="clean-button matte-surface">
+          <mat-icon class="icon-sm" fontIcon="cleanup" />
           Clean Now
         </a>
       </div>
@@ -47,46 +45,46 @@
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <a routerLink="/cleaner" [queryParams]="{tab: 'cache'}" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base">cached</mat-icon>
+        <mat-icon class="icon-base" fontIcon="cached" />
       </div>
       <div class="stat-content">
         <span class="stat-label">Cache</span>
         <span class="stat-value">{{ formatSize(cacheSize()) }}</span>
       </div>
-      <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+      <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
     </a>
 
     <a routerLink="/cleaner" [queryParams]="{tab: 'trash'}" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base">delete_outline</mat-icon>
+        <mat-icon class="icon-base" fontIcon="delete_outline" />
       </div>
       <div class="stat-content">
         <span class="stat-label">Trash</span>
         <span class="stat-value">{{ formatSize(trashSize()) }}</span>
       </div>
-      <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+      <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
     </a>
 
     <a routerLink="/cleaner" [queryParams]="{tab: 'logs'}" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base">description</mat-icon>
+        <mat-icon class="icon-base" fontIcon="description" />
       </div>
       <div class="stat-content">
         <span class="stat-label">Logs</span>
         <span class="stat-value">{{ formatSize(logSize()) }}</span>
       </div>
-      <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+      <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
     </a>
 
     <a routerLink="/large-files" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base">file_present</mat-icon>
+        <mat-icon class="icon-base" fontIcon="file_present" />
       </div>
       <div class="stat-content">
         <span class="stat-label">Large Files</span>
         <span class="stat-value">{{ formatSize(largeFileSize()) }}</span>
       </div>
-      <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+      <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
     </a>
   </div>
 
@@ -99,7 +97,7 @@
           [disabled]="cacheSize() === 0"
           class="btn btn-secondary justify-start"
         >
-          <mat-icon class="icon-sm text-cyan-500">cached</mat-icon>
+          <mat-icon class="icon-sm text-cyan-500" fontIcon="cached" />
           Clear Cache
         </button>
         <button
@@ -107,7 +105,7 @@
           [disabled]="trashSize() === 0"
           class="btn btn-secondary justify-start"
         >
-          <mat-icon class="icon-sm text-error">delete_outline</mat-icon>
+          <mat-icon class="icon-sm text-error" fontIcon="delete_outline" />
           Empty Trash
         </button>
         <button
@@ -115,13 +113,13 @@
           [disabled]="logSize() === 0"
           class="btn btn-secondary justify-start"
         >
-          <mat-icon class="icon-sm text-info">description</mat-icon>
+          <mat-icon class="icon-sm text-info" fontIcon="description" />
           Clear Logs
         </button>
-        <a routerLink="/large-files" class="btn btn-secondary justify-start no-underline border-trace">
-          <mat-icon class="icon-sm text-warning">file_present</mat-icon>
+<a routerLink="/large-files" class="btn btn-secondary justify-start no-underline border-trace">
+          <mat-icon class="icon-sm text-warning" fontIcon="file_present" />
           Find Large Files
-          <mat-icon class="text-zinc-500 dark:text-zinc-400 ml-auto">chevron_right</mat-icon>
+          <mat-icon class="text-zinc-500 dark:text-zinc-400 ml-auto" fontIcon="chevron_right" />
         </a>
       </div>
     </div>
@@ -172,15 +170,7 @@
         @for (activity of recentActivities(); track activity.id) {
           <div class="flex items-center gap-3 text-sm">
             <div class="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center">
-              <mat-icon class="icon-xs text-zinc-500 dark:text-zinc-400">
-                {{
-                  activity.type === "clean"
-                    ? "cleanup"
-                    : activity.type === "scan"
-                      ? "search"
-                      : "info"
-                }}
-              </mat-icon>
+              <mat-icon class="icon-xs text-zinc-500 dark:text-zinc-400" [fontIcon]="activity.type === 'clean' ? 'cleanup' : activity.type === 'scan' ? 'search' : 'info'" />
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-zinc-900 dark:text-white truncate">{{ activity.description }}</p>

@@ -13,37 +13,40 @@
         <div
           class="w-12 h-12 rounded-xl bg-cyan-500/20 dark:bg-cyan-400/20 flex items-center justify-center text-cyan-500 dark:text-cyan-400 shrink-0"
         >
-          <mat-icon class="icon-lg">{{ tool.icon }}</mat-icon>
+          <mat-icon class="icon-lg" [fontIcon]="tool.icon" />
         </div>
         <div class="flex-1 min-w-0">
           <h3 class="text-sm font-semibold">{{ tool.label }}</h3>
           <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ tool.desc }}</p>
         </div>
-        <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+        <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
       </a>
     }
   </div>
 
   <div class="glass-surface matte-surface p-6 mb-6">
-    <h3 class="section-title mb-4">Power Profiles</h3>
-    <div class="segmented-control">
-      <span class="indicator"></span>
-      @for (profile of powerProfiles(); track profile.name) {
-        <button
-          (click)="setProfile(profile.name)"
-          [class.active]="profile.active"
-          class="segment capitalize"
-        >
-          {{ profile.name }}
-        </button>
-      }
+    <div class="space-y-3">
+      <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Power Profiles</label>
+      <div class="flex gap-2">
+        @for (profile of powerProfiles(); track profile.name) {
+          <button
+            (click)="setProfile(profile.name)"
+            class="btn flex-1 capitalize"
+            [class.btn-primary]="profile.active"
+            [class.btn-secondary]="!profile.active"
+          >
+            <mat-icon class="icon-sm" [fontIcon]="getProfileIcon(profile.name)" />
+            <span>{{ getProfileLabel(profile.name) }}</span>
+          </button>
+        }
+      </div>
     </div>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
     <div class="glass-surface matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400">{{ getBatteryIcon() }}</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400" [fontIcon]="getBatteryIcon()" />
         <h3 class="text-sm font-semibold">Battery</h3>
       </div>
       @if (batteryInfo(); as battery) {
@@ -68,7 +71,7 @@
 
     <div class="glass-surface matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400">thermal</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="thermal" />
         <h3 class="text-sm font-semibold">Temperature</h3>
       </div>
       <div class="text-2xl font-bold">{{ getThermalStatus() }}</div>
@@ -86,7 +89,7 @@
 
     <div class="glass-surface matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400">memory</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="memory" />
         <h3 class="text-sm font-semibold">System Status</h3>
       </div>
       <div class="space-y-3">

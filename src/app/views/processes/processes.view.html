@@ -6,7 +6,7 @@
     </div>
     <div class="flex gap-2">
       <button (click)="flushRamCaches()" class="btn btn-secondary">
-        <mat-icon class="icon-sm">memory</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="memory" />
         Flush RAM
       </button>
     </div>
@@ -22,7 +22,7 @@
         [disabled]="selectedPids().size === 0"
         class="btn btn-danger"
       >
-        <mat-icon class="icon-sm">stop</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="stop" />
         Kill Selected
       </button>
     </div>

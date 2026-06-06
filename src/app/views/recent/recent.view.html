@@ -11,7 +11,7 @@
         <p class="text-2xl font-bold">{{ items().length }}</p>
       </div>
       <button (click)="clearAll()" [disabled]="items().length === 0" class="btn btn-danger">
-        <mat-icon class="icon-sm">delete_sweep</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="delete_sweep" />
         Clear All History
       </button>
     </div>
@@ -31,7 +31,7 @@
       />
     } @else {
       <div class="p-8 text-center">
-        <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">history</mat-icon>
+        <mat-icon class="icon-xl text-[var(--text-muted)] mb-4" fontIcon="history" />
         <p class="text-[var(--text-secondary)]">No recent files tracked</p>
         <p class="text-sm text-[var(--text-muted)] mt-1">Recent file activity will appear here</p>
       </div>
@@ -46,7 +46,7 @@
           (click)="clearApp(app.id)"
           class="category-card matte-surface {{ i % 2 === 0 ? 'border-gray-light' : 'border-gray-dark' }} flex flex-col items-center justify-center p-4 no-underline"
         >
-          <mat-icon class="icon-lg text-[var(--text-muted)] mb-2">{{ app.icon }}</mat-icon>
+          <mat-icon class="icon-lg text-[var(--text-muted)] mb-2" [fontIcon]="app.icon" />
           <span class="text-xs">{{ app.name }}</span>
         </button>
       }

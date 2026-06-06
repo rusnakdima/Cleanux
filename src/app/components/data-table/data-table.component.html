@@ -7,12 +7,12 @@
         (mouseleave)="onToolbarHoverLeave()"
       >
         <button class="search-toggle-btn" (click)="toggleToolbar()">
-          <mat-icon class="icon-sm">{{ toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search' }}</mat-icon>
+          <mat-icon class="icon-sm" [fontIcon]="toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search'" />
         </button>
 
         <div class="controls-bar" [class.toolbar-visible]="toolbarExpanded() || toolbarLocked()">
           <div class="search-input-wrapper">
-            <mat-icon class="search-icon">search</mat-icon>
+            <mat-icon class="search-icon" fontIcon="search" />
             <input
               type="text"
               class="search-input"
@@ -21,7 +21,7 @@
             />
             @if (searchControl.value) {
               <button (click)="clearSearch()" class="search-clear-btn">
-                <mat-icon class="clear-icon">close</mat-icon>
+                <mat-icon class="clear-icon" fontIcon="close" />
               </button>
             }
           </div>
@@ -37,9 +37,9 @@
             }
 
             @if (showReloadButton) {
-              <button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-                <mat-icon class="text-cyan-500 dark:text-cyan-400">refresh</mat-icon>
-              </button>
+<button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+              <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="refresh" />
+            </button>
             }
           </div>
         </div>
@@ -66,9 +66,7 @@
                 @if (column.sortable) {
                   <span class="flex items-center gap-1">
                     {{ column.label }}
-                    <mat-icon class="sort-icon" [class.active]="isSortActive(column)">
-                      {{ getSortIcon(column) }}
-                    </mat-icon>
+                    <mat-icon class="sort-icon" [class.active]="isSortActive(column)" [fontIcon]="getSortIcon(column)" />
                   </span>
                 } @else {
                   {{ column.label }}
@@ -232,7 +230,7 @@
                       [matTooltip]="action.tooltip ?? action.label"
                       (click)="onRowAction(action, item, $event)"
                     >
-                      <mat-icon>{{ action.icon ?? "more_horiz" }}</mat-icon>
+                      <mat-icon [fontIcon]="action.icon ?? 'more_horiz'" />
                     </button>
                   }
                 </div>
@@ -240,7 +238,7 @@
             </div>
           } @empty {
             <div class="no-data-msg">
-              <mat-icon class="w-15! h-15! text-5xl! mt-4 opacity-20 block mx-auto">inbox</mat-icon>
+              <mat-icon class="w-15! h-15! text-5xl! mt-4 opacity-20 block mx-auto" fontIcon="inbox" />
               {{ options.emptyMessage ?? "No items found to display" }}
             </div>
           }

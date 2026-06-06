@@ -1,16 +1,16 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="flex items-center justify-end mb-6">
-    <button (click)="generateReport()" class="btn btn-primary">
-      <mat-icon class="icon-sm">add</mat-icon>
-      Generate Demo Report
-    </button>
+<button (click)="generateReport()" class="btn btn-primary">
+        <mat-icon class="icon-sm" fontIcon="add" />
+        Generate Demo Report
+      </button>
   </div>
 
   @if (reportsWithChart().length > 1) {
     <div class="glass-card matte-surface mb-6">
       <div class="glass-card-header">
         <h3 class="text-sm font-semibold flex items-center gap-2">
-          <mat-icon class="text-[var(--accent-icons)] icon-sm">timeline</mat-icon>
+          <mat-icon class="text-[var(--accent-icons)] icon-sm" fontIcon="timeline" />
           Space Reclaimed Over Time
         </h3>
       </div>
@@ -84,12 +84,12 @@
 
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
-      <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-[var(--accent-icons)] icon-sm">history</mat-icon>
-        Cleaning History
-      </h3>
+<h3 class="text-sm font-semibold flex items-center gap-2">
+          <mat-icon class="text-[var(--accent-icons)] icon-sm" fontIcon="history" />
+          Cleaning History
+        </h3>
       <button (click)="loadReports()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-        <mat-icon class="text-[var(--accent-icons)]">refresh</mat-icon>
+        <mat-icon class="text-[var(--accent-icons)]" fontIcon="refresh" />
       </button>
     </div>
     <div class="glass-card-body">
@@ -99,7 +99,7 @@
         </div>
       } @else if (reports().length === 0) {
         <div class="flex flex-col items-center justify-center h-64 text-zinc-500 dark:text-zinc-400">
-          <mat-icon class="icon-4xl mb-4">description</mat-icon>
+          <mat-icon class="icon-4xl mb-4" fontIcon="description" />
           <p class="text-lg font-medium">No reports yet</p>
           <p class="text-sm">Run a cleaning session to generate your first report</p>
         </div>
@@ -124,7 +124,7 @@
   @if (comparingReportIds().before && comparingReportIds().after) {
     <div class="flex justify-center mt-6">
       <button (click)="compareSnapshots()" class="btn btn-primary">
-        <mat-icon class="icon-sm">compare</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="compare" />
         Compare Snapshots
       </button>
     </div>

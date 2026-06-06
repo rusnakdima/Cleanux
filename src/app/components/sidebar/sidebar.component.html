@@ -13,7 +13,7 @@
         class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg"
         [style.background]="getAccentGradient()"
       >
-        <mat-icon class="text-zinc-950 text-xl font-bold">cleaning_services</mat-icon>
+        <mat-icon class="text-zinc-950 text-xl font-bold" fontIcon="cleaning_services" />
       </div>
       @if (!isCollapsed()) {
         <div>
@@ -27,7 +27,7 @@
         (click)="onClose()"
         class="md:hidden text-zinc-400 hover:text-white p-1"
       >
-        <mat-icon class="text-base">close</mat-icon>
+        <mat-icon class="text-base" fontIcon="close" />
       </button>
     }
   </div>
@@ -47,7 +47,7 @@
       [matTooltip]="isCollapsed() ? 'Dashboard' : ''"
       matTooltipPosition="right"
     >
-      <mat-icon class="text-base shrink-0">dashboard</mat-icon>
+      <mat-icon class="text-base shrink-0" fontIcon="dashboard" />
       @if (!isCollapsed()) {
         <span>Dashboard</span>
       }
@@ -65,7 +65,7 @@
       [matTooltip]="isCollapsed() ? 'System Clean' : ''"
       matTooltipPosition="right"
     >
-      <mat-icon class="text-base shrink-0">terminal</mat-icon>
+      <mat-icon class="text-base shrink-0" fontIcon="terminal" />
       @if (!isCollapsed()) {
         <span>System Clean</span>
       }
@@ -78,7 +78,7 @@
       [matTooltip]="isCollapsed() ? 'User Space' : ''"
       matTooltipPosition="right"
     >
-      <mat-icon class="text-base shrink-0">folder_open</mat-icon>
+      <mat-icon class="text-base shrink-0" fontIcon="folder_open" />
       @if (!isCollapsed()) {
         <span>User Space</span>
       }
@@ -96,7 +96,7 @@
       [matTooltip]="isCollapsed() ? 'Live Optimizer' : ''"
       matTooltipPosition="right"
     >
-      <mat-icon class="text-base shrink-0">memory</mat-icon>
+      <mat-icon class="text-base shrink-0" fontIcon="memory" />
       @if (!isCollapsed()) {
         <span>Live Optimizer</span>
       }
@@ -109,7 +109,7 @@
       [matTooltip]="isCollapsed() ? 'Autopilot' : ''"
       matTooltipPosition="right"
     >
-      <mat-icon class="text-base shrink-0">schedule</mat-icon>
+      <mat-icon class="text-base shrink-0" fontIcon="schedule" />
       @if (!isCollapsed()) {
         <span>Autopilot</span>
       }

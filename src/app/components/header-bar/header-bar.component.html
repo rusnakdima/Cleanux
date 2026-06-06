@@ -1,20 +1,23 @@
-<header class="header-bar">
+<header class="header-bar bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
   <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3">
     <div class="flex min-w-0 items-center gap-3">
       @if (showBack()) {
         <button
-          class="flex h-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-transparent px-3 py-2 shadow-lg shadow-black/10 backdrop-blur-sm transition-all hover:bg-white/20 dark:border-white/20 dark:hover:bg-white/10 light:border-zinc-300 light:hover:bg-zinc-200/50"
+          class="flex h-9 flex-shrink-0 items-center justify-center rounded-full bg-white dark:bg-zinc-800 px-3 py-2 shadow-lg shadow-black/10 backdrop-blur-sm transition-all hover:bg-zinc-100 dark:hover:bg-zinc-700"
           (click)="backClick.emit()"
         >
-          <mat-icon class="text-base text-white dark:text-zinc-900">chevron_left</mat-icon>
+          <mat-icon class="text-base text-zinc-700 dark:text-zinc-200" fontIcon="chevron_left" />
         </button>
       }
 
       <div class="flex min-w-0 flex-1 flex-col">
+        @if (breadcrumb()) {
+          <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-0.5 ml-1">{{ breadcrumb() }}</span>
+        }
         <div
-          class="flex items-center gap-2 rounded-full border border-white/20 bg-transparent px-4 py-2 shadow-lg shadow-black/10 backdrop-blur-sm dark:border-white/20 light:border-zinc-300 light:shadow-zinc-200/20"
+          class="flex items-center gap-2 rounded-full bg-white dark:bg-zinc-800 px-4 py-2 shadow-lg shadow-black/10 backdrop-blur-sm"
         >
-          <h1 class="header-title text-normal truncate text-lg font-semibold text-white dark:text-zinc-900">{{ title() }}</h1>
+          <h1 class="header-title text-normal truncate text-lg font-semibold text-zinc-900 dark:text-white">{{ title() }}</h1>
         </div>
       </div>
     </div>

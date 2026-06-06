@@ -28,7 +28,7 @@
       </div>
 
       <button class="btn btn-primary">
-        <mat-icon class="icon-sm">save</mat-icon>
+        <mat-icon class="icon-sm" fontIcon="save" />
         Write to Crontab
       </button>
     </div>
@@ -68,9 +68,7 @@
             <div
               class="w-12 h-12 rounded-xl bg-[var(--accent-icons)]/10 flex items-center justify-center"
             >
-              <mat-icon class="text-[var(--accent-icons)] icon-lg">{{
-                getActionIcon(action)
-              }}</mat-icon>
+              <mat-icon class="text-[var(--accent-icons)] icon-lg" [fontIcon]="getActionIcon(action)" />
             </div>
             <div class="flex-1 min-w-0">
               <h3 class="font-semibold text-sm truncate text-white dark:text-zinc-900">
@@ -78,7 +76,7 @@
               </h3>
               <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">{{ action.description }}</p>
             </div>
-            <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
+            <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ action.actions.length }} steps</span>
@@ -86,7 +84,7 @@
               class="btn btn-ghost btn-icon"
               (click)="$event.stopPropagation(); executeQuickAction(action)"
             >
-              <mat-icon class="text-[var(--accent-icons)]">play_arrow</mat-icon>
+              <mat-icon class="text-[var(--accent-icons)]" fontIcon="play_arrow" />
             </button>
           </div>
         </div>

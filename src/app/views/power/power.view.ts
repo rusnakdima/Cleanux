@@ -100,6 +100,19 @@ export class PowerView implements OnInit {
     }
   }
 
+  getProfileIcon(profileName: string): string {
+    const icons: Record<string, string> = {
+      'power-saver': 'battery_saver',
+      'balanced': 'dashboard',
+      'performance': 'bolt',
+    };
+    return icons[profileName] || 'settings';
+  }
+
+  getProfileLabel(profileName: string): string {
+    return profileName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
   getBatteryIcon(): string {
     const battery = this.batteryInfo();
     if (!battery || !battery.present) return 'battery_unknown';

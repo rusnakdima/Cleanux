@@ -2,7 +2,7 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="stat-card matte-surface border-trace flex items-center gap-4">
       <div class="w-14 h-14 rounded-xl bg-info/10 flex items-center justify-center">
-        <mat-icon class="text-info icon-xl">settings</mat-icon>
+        <mat-icon class="text-info icon-xl" fontIcon="settings" />
       </div>
       <div>
         <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
@@ -14,7 +14,7 @@
 
     <div class="stat-card matte-surface border-trace flex items-center gap-4">
       <div class="w-14 h-14 rounded-xl bg-success/10 flex items-center justify-center">
-        <mat-icon class="text-success icon-xl">play_arrow</mat-icon>
+        <mat-icon class="text-success icon-xl" fontIcon="play_arrow" />
       </div>
       <div>
         <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Active</p>
@@ -24,7 +24,7 @@
 
     <div class="stat-card matte-surface border-trace flex items-center gap-4">
       <div class="w-14 h-14 rounded-xl bg-error/10 flex items-center justify-center">
-        <mat-icon class="text-error icon-xl">stop</mat-icon>
+        <mat-icon class="text-error icon-xl" fontIcon="stop" />
       </div>
       <div>
         <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Inactive</p>
@@ -41,7 +41,7 @@
           [disabled]="selectedServices().size === 0"
           class="btn btn-danger"
         >
-          <mat-icon class="icon-sm">stop</mat-icon>
+          <mat-icon class="icon-sm" fontIcon="stop" />
           Stop Selected
         </button>
         <button
@@ -49,7 +49,7 @@
           [disabled]="selectedServices().size === 0"
           class="btn btn-primary"
         >
-          <mat-icon class="icon-sm">play_arrow</mat-icon>
+          <mat-icon class="icon-sm" fontIcon="play_arrow" />
           Start Selected
         </button>
       </div>
