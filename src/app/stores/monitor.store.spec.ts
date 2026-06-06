@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Injector, runInInjectionContext, NgZone } from '@angular/core';
+import { formatSize } from '@shared/utils/format.util';
 
 vi.mock('@api/tauri-api.service');
 
@@ -56,16 +57,11 @@ describe('MonitorStore', () => {
   });
 
   it('should format bytes correctly', async () => {
-    const { MonitorStore } = await import('./monitor.store');
-    const store = runInInjectionContext(injector, () => new MonitorStore());
-
-    expect(store.formatBytes(0)).toBe('0 B');
-    expect(store.formatBytes(1024)).toBe('1 KB');
-    expect(store.formatBytes(1024 * 1024)).toBe('1 MB');
-    expect(store.formatBytes(1024 * 1024 * 1024)).toBe('1 GB');
-    expect(store.formatBytes(1.5 * 1024 * 1024 * 1024)).toBe('1.5 GB');
-
-    store.ngOnDestroy();
+    expect(formatSize(0)).toBe('0 B');
+    expect(formatSize(1024)).toBe('1 KB');
+    expect(formatSize(1024 * 1024)).toBe('1 MB');
+    expect(formatSize(1024 * 1024 * 1024)).toBe('1 GB');
+    expect(formatSize(1.5 * 1024 * 1024 * 1024)).toBe('1.5 GB');
   });
 
   it('should return success for low usage', async () => {
