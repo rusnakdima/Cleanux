@@ -2,5 +2,22 @@
   "identifier": "default",
   "description": "Default capabilities for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "core:webview:allow-internal-toggle-devtools"]
+  "permissions": [
+    "core:default",
+    "core:webview:allow-internal-toggle-devtools",
+    "mcp-bridge:default",
+    "mcp-bridge:allow-capture-native-screenshot",
+    "mcp-bridge:allow-emit-event",
+    "mcp-bridge:allow-execute-command",
+    "mcp-bridge:allow-execute-js",
+    "mcp-bridge:allow-get-backend-state",
+    "mcp-bridge:allow-get-ipc-events",
+    "mcp-bridge:allow-get-window-info",
+    "mcp-bridge:allow-list-windows",
+    "mcp-bridge:allow-report-ipc-event",
+    "mcp-bridge:allow-request-script-injection",
+    "mcp-bridge:allow-script-result",
+    "mcp-bridge:allow-start-ipc-monitor",
+    "mcp-bridge:allow-stop-ipc-monitor"
+  ]
 }

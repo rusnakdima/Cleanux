@@ -16,6 +16,7 @@ fn is_cache_file(name: &OsStr) -> bool {
 use crate::models::{DataValue, ResponseModel, ScanSummaryModel, SystemServiceModel};
 
 /* helpers */
+use crate::helpers::constants_helper::LARGE_FILE_THRESHOLD_BYTES;
 use crate::helpers::ResponseBuilder;
 use rayon::prelude::*;
 use walkdir::WalkDir;
@@ -113,13 +114,13 @@ impl DashboardService {
       .reduce(|| (0u64, 0usize), |(a, b), (c, d)| (a + c, b + d));
 
     let summary = ScanSummaryModel {
+      fileCount,
       totalSize,
-      totalItems: fileCount,
     };
 
     Ok(
       ResponseBuilder::new()
-        .success("Cache summary retrieved successfully")
+        .success("Large files summary retrieved successfully")
         .data(DataValue::Object(
           serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
         ))
@@ -144,7 +145,7 @@ impl DashboardService {
 
     let summary = ScanSummaryModel {
       totalSize,
-      totalItems: fileCount,
+      fileCount,
     };
 
     Ok(
@@ -183,7 +184,7 @@ impl DashboardService {
 
     let summary = ScanSummaryModel {
       totalSize,
-      totalItems: fileCount,
+      fileCount,
     };
 
     Ok(
@@ -198,7 +199,7 @@ impl DashboardService {
 
   pub fn getLargeFilesSummary(&self) -> Result<ResponseModel, ResponseModel> {
     let home = dirs::home_dir().ok_or("Home directory not found")?;
-    let threshold = 100 * 1024 * 1024;
+    let threshold = LARGE_FILE_THRESHOLD_BYTES;
 
     let dirsToScan = vec![
       home.join("Downloads"),
@@ -233,7 +234,7 @@ impl DashboardService {
 
     let summary = ScanSummaryModel {
       totalSize,
-      totalItems: fileCount,
+      fileCount,
     };
 
     Ok(

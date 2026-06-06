@@ -248,7 +248,7 @@ impl AppResidueService {
       }
     }
 
-    residues.sort_by(|a, b| b.size.cmp(&a.size));
+    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
     residues
   }
 
@@ -316,7 +316,7 @@ impl AppResidueService {
       }
     }
 
-    residues.sort_by(|a, b| b.size.cmp(&a.size));
+    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
     residues
   }
 
@@ -366,7 +366,7 @@ impl AppResidueService {
       }
     }
 
-    residues.sort_by(|a, b| b.size.cmp(&a.size));
+    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
     residues
   }
 
@@ -469,7 +469,7 @@ impl AppResidueService {
       }
     }
 
-    residues.sort_by(|a, b| b.size.cmp(&a.size));
+    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
     residues
   }
 

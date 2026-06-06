@@ -93,7 +93,19 @@ pub fn run() {
 
   #[cfg(all(feature = "mcp-bridge", debug_assertions))]
   {
-    builder = builder.plugin(tauri_plugin_mcp_bridge::init());
+    let bridge_addr =
+      std::env::var("CLEANUX_MCP_BRIDGE_ADDR").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let bridge_port: u16 = std::env::var("CLEANUX_MCP_BRIDGE_PORT")
+      .ok()
+      .and_then(|v| v.parse().ok())
+      .unwrap_or(9223);
+
+    let bridge_plugin = tauri_plugin_mcp_bridge::Builder::new()
+      .bind_address(&bridge_addr)
+      .base_port(bridge_port)
+      .build();
+
+    builder = builder.plugin(bridge_plugin);
   }
 
   builder

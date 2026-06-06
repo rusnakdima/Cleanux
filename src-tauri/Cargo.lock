@@ -515,6 +515,7 @@ dependencies = [
  "tauri-plugin-fs",
  "tauri-plugin-mcp-bridge",
  "tauri-plugin-opener",
+ "tempfile",
  "thiserror 1.0.69",
  "walkdir",
 ]

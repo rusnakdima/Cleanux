@@ -1,8 +1,10 @@
 /* sys lib */
+use std::path::PathBuf;
 use std::process::Command;
 
 /* models */
 use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+use crate::security::allowlist::is_path_allowed;
 
 pub struct SystemService;
 
@@ -91,9 +93,6 @@ impl SystemService {
   }
 
   fn open_file_inner(&self, path: &str, _command: Option<String>) -> ServiceResult<ResponseModel> {
-    use crate::security::allowlist::is_path_allowed;
-    use std::path::PathBuf;
-
     let path_buf = PathBuf::from(path);
     if !is_path_allowed(&path_buf) {
       return Err(AppError::PathOutsideAllowed(format!(

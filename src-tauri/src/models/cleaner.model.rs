@@ -65,6 +65,6 @@ pub struct TrashFileModel {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[allow(non_snake_case)]
 pub struct ScanSummaryModel {
-  pub totalItems: usize,
+  pub fileCount: usize,
   pub totalSize: u64,
 }

@@ -150,7 +150,7 @@ impl ScannerService {
       }
     }
 
-    duplicate_groups.sort_by(|a, b| b.wasted_space.cmp(&a.wasted_space));
+    duplicate_groups.sort_by_key(|b| std::cmp::Reverse(b.wasted_space));
 
     let total_duplicates: u64 = duplicate_groups.iter().map(|g| g.files.len() as u64).sum();
 

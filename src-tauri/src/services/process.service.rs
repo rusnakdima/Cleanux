@@ -7,10 +7,10 @@ type ProcessResult<T> = Result<T, AppError>;
 
 #[derive(serde::Serialize)]
 pub struct ProcessItem {
-  pid: u32,
-  name: String,
-  cpu_usage: f32,
-  memory_usage: u64,
+  pub pid: u32,
+  pub name: String,
+  pub cpu_usage: f32,
+  pub memory_usage: u64,
 }
 
 #[allow(non_snake_case)]

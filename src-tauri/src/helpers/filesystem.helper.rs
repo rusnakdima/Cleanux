@@ -1,4 +1,5 @@
 /* helpers */
+use crate::helpers::constants_helper::LARGE_FILE_THRESHOLD_BYTES;
 use crate::helpers::validation_helper::{is_allowed_path, validate_path};
 /* models */
 use crate::models::{AppError, CacheFileModel, LargeFileModel, LogFileModel, TrashFileModel};
@@ -8,8 +9,6 @@ use rayon::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
-
-pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 
 pub fn home_scan_dirs(home: &Path) -> Vec<PathBuf> {
   vec![
@@ -155,7 +154,7 @@ pub fn scan_large_file_models(
     .flatten()
     .collect();
 
-  files.sort_by(|a, b| b.size.cmp(&a.size));
+  files.sort_by_key(|b| std::cmp::Reverse(b.size));
 
   let total = files.len();
 

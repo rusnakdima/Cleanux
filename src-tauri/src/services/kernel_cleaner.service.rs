@@ -300,7 +300,7 @@ impl KernelCleanerService {
       }
     }
 
-    initramfs_files.sort_by(|a, b| b.size.cmp(&a.size));
+    initramfs_files.sort_by_key(|b| std::cmp::Reverse(b.size));
     initramfs_files
   }
 

@@ -176,11 +176,43 @@ impl LogManagerService {
   }
 
   pub fn vacuum_journal(size_mb: u32) -> Result<ResponseModel, ResponseModel> {
-    let _ = Command::new("journalctl")
-      .args(["--rotate", "--vacuum-time=1s"])
-      .output();
+    let mut warnings = Vec::new();
 
-    let _ = Command::new("journalctl").args(["--flush"]).output();
+    if let Err(e) = Command::new("journalctl")
+      .args(["--rotate", "--vacuum-time=1s"])
+      .output()
+      .map_err(|e| format!("Failed to rotate journal: {}", e))
+      .and_then(|output| {
+        if !output.status.success() {
+          Err(format!(
+            "Rotate failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+          ))
+        } else {
+          Ok(output)
+        }
+      })
+    {
+      warnings.push(e);
+    }
+
+    if let Err(e) = Command::new("journalctl")
+      .args(["--flush"])
+      .output()
+      .map_err(|e| format!("Failed to flush journal: {}", e))
+      .and_then(|output| {
+        if !output.status.success() {
+          Err(format!(
+            "Flush failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+          ))
+        } else {
+          Ok(output)
+        }
+      })
+    {
+      warnings.push(e);
+    }
 
     let vacuum_output = Command::new("journalctl")
       .args(&[format!("--vacuum-size={}M", size_mb)])
@@ -206,11 +238,43 @@ impl LogManagerService {
   }
 
   pub fn vacuum_journal_by_days(days: u32) -> Result<ResponseModel, ResponseModel> {
-    let _ = Command::new("journalctl")
-      .args(["--rotate", "--vacuum-time=1s"])
-      .output();
+    let mut warnings = Vec::new();
 
-    let _ = Command::new("journalctl").args(["--flush"]).output();
+    if let Err(e) = Command::new("journalctl")
+      .args(["--rotate", "--vacuum-time=1s"])
+      .output()
+      .map_err(|e| format!("Failed to rotate journal: {}", e))
+      .and_then(|output| {
+        if !output.status.success() {
+          Err(format!(
+            "Rotate failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+          ))
+        } else {
+          Ok(output)
+        }
+      })
+    {
+      warnings.push(e);
+    }
+
+    if let Err(e) = Command::new("journalctl")
+      .args(["--flush"])
+      .output()
+      .map_err(|e| format!("Failed to flush journal: {}", e))
+      .and_then(|output| {
+        if !output.status.success() {
+          Err(format!(
+            "Flush failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+          ))
+        } else {
+          Ok(output)
+        }
+      })
+    {
+      warnings.push(e);
+    }
 
     let vacuum_output = Command::new("journalctl")
       .args(&[format!("--vacuum-time={}d", days)])
@@ -336,7 +400,7 @@ impl LogManagerService {
       }
     }
 
-    logs.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes));
+    logs.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
     Ok(logs)
   }
 
@@ -526,7 +590,7 @@ impl LogManagerService {
       Self::collect_log_files(log_path, &mut files)?;
     }
 
-    files.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes));
+    files.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
     files.truncate(limit);
 
     Ok(files)
