@@ -1,5 +1,7 @@
 /* helpers */
-use crate::helpers::{calculate_dir_size, data_string, remove_dir_contents, success_response};
+use crate::helpers::{
+  calculate_dir_size, data_string, home, remove_dir_contents, service_method_full, success_response,
+};
 /* models */
 use crate::models::{AppError, DataValue, ResponseModel};
 /* sys lib */
@@ -38,9 +40,7 @@ pub struct JunkSummary {
 pub struct JunkCleanerService;
 
 impl JunkCleanerService {
-  pub fn get_junk_summary(&self) -> Result<ResponseModel, ResponseModel> {
-    self.get_junk_summary_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(get_junk_summary => get_junk_summary_inner);
 
   fn get_junk_summary_inner(&self) -> CleanerResult<ResponseModel> {
     let mut summary = serde_json::Map::new();
@@ -165,8 +165,7 @@ impl JunkCleanerService {
 
   fn scan_browser_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
     let mut items = Vec::new();
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
 
     let browser_paths = [
       (
@@ -228,8 +227,7 @@ impl JunkCleanerService {
   }
 
   fn scan_thumbnail_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let path = home.join(".cache/thumbnails");
 
     if !path.exists() {
@@ -272,8 +270,7 @@ impl JunkCleanerService {
 
   fn scan_application_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
     let mut items = Vec::new();
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
 
     let app_cache_paths = [
       (
@@ -468,8 +465,7 @@ impl JunkCleanerService {
   }
 
   fn clean_browser_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let browser_paths = [
       home.join(".cache/mozilla"),
       home.join(".cache/google-chrome"),
@@ -504,8 +500,7 @@ impl JunkCleanerService {
   }
 
   fn clean_thumbnail_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let path = home.join(".cache/thumbnails");
 
     if !path.exists() {
@@ -528,8 +523,7 @@ impl JunkCleanerService {
   }
 
   fn clean_application_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let paths = [
       (home.join(".cache/flatpak"), "Flatpak"),
       (home.join(".var/app"), "Flatpak alt"),

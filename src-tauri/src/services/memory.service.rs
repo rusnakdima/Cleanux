@@ -1,5 +1,9 @@
-use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+use std::sync::Mutex;
 use sysinfo::System;
+
+use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+
+static PROCESS_SYSTEM: Mutex<Option<System>> = Mutex::new(None);
 
 pub struct MemoryService;
 
@@ -97,7 +101,16 @@ impl MemoryService {
   }
 
   pub fn get_process_memory() -> Result<ResponseModel, ResponseModel> {
-    let mut sys = System::new_all();
+    {
+      let mut sys = PROCESS_SYSTEM.lock().unwrap();
+      if sys.is_none() {
+        let mut s = System::new_all();
+        s.refresh_all();
+        *sys = Some(s);
+      }
+    }
+    let mut sys = PROCESS_SYSTEM.lock().unwrap();
+    let sys = sys.as_mut().unwrap();
     sys.refresh_all();
 
     let mut processes: Vec<ProcessMemory> = sys

@@ -1,4 +1,4 @@
-use crate::helpers::{calculate_directory_size, data_string, success_response};
+use crate::helpers::{calculate_dir_size, data_string, success_response};
 use crate::models::{AppError, DataValue, ResponseModel};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -160,7 +160,7 @@ impl PackageService {
       return None;
     }
 
-    let size = calculate_directory_size(path);
+    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
     Some(PackageCacheInfo {
       name: "snap".to_string(),
       cachePath: snap_path.to_string_lossy().to_string(),
@@ -178,7 +178,7 @@ impl PackageService {
       return None;
     }
 
-    let size = calculate_directory_size(path);
+    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
     Some(PackageCacheInfo {
       name: "flatpak".to_string(),
       cachePath: flatpak_path.to_string_lossy().to_string(),
@@ -195,7 +195,7 @@ impl PackageService {
       return None;
     }
 
-    let size = calculate_directory_size(path);
+    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
     Some(PackageCacheInfo {
       name: "yum".to_string(),
       cachePath: cache_path.to_string(),
@@ -338,7 +338,9 @@ impl PackageService {
   pub fn get_apt_cache_size_internal(&self) -> u64 {
     let cache_path = Path::new("/var/cache/apt/archives/");
     if cache_path.exists() {
-      calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -472,7 +474,9 @@ impl PackageService {
   pub fn get_dnf_cache_size_internal(&self) -> u64 {
     let cache_path = Path::new("/var/cache/dnf/");
     if cache_path.exists() {
-      calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -502,7 +506,9 @@ impl PackageService {
   pub fn get_pacman_cache_size_internal(&self) -> u64 {
     let cache_path = Path::new("/var/cache/pacman/pkg/");
     if cache_path.exists() {
-      calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -577,7 +583,9 @@ impl PackageService {
   pub fn get_zypper_cache_size_internal(&self) -> u64 {
     let cache_path = Path::new("/var/cache/zypp/");
     if cache_path.exists() {
-      calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }

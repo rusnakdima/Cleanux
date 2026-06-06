@@ -502,7 +502,6 @@ dependencies = [
  "chrono",
  "dirs 5.0.1",
  "flate2",
- "parking_lot",
  "rayon",
  "rusqlite",
  "serde",

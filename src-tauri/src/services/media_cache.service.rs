@@ -1,6 +1,7 @@
 /* helpers */
 use crate::helpers::{
-  data_empty_string, format_size, get_dir_size, remove_dir_contents, success_response,
+  data_empty_string, format_size, get_dir_size, home, remove_dir_contents, service_method_full,
+  success_response,
 };
 /* models */
 use crate::models::{DataValue, ResponseModel};
@@ -74,16 +75,10 @@ impl MediaCacheService {
     }
   }
 
-  pub fn clean_steam_shader_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_steam_shader_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_steam_shader_cache => clean_steam_shader_cache_inner);
 
   fn clean_steam_shader_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let shader_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".steam/steam/steamapps/shader");
+    let shader_path = home!().join(".steam/steam/steamapps/shader");
 
     if !shader_path.exists() {
       return Ok(success_response(
@@ -99,16 +94,10 @@ impl MediaCacheService {
     ))
   }
 
-  pub fn clean_steam_download_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_steam_download_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_steam_download_cache => clean_steam_download_cache_inner);
 
   fn clean_steam_download_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let download_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".local/share/Steam");
+    let download_path = home!().join(".local/share/Steam");
 
     if !download_path.exists() {
       return Ok(success_response(
@@ -134,19 +123,11 @@ impl MediaCacheService {
     get_dir_size(&cache_path) + get_dir_size(&local_share)
   }
 
-  pub fn clean_spotify_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_spotify_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_spotify_cache => clean_spotify_cache_inner);
 
   fn clean_spotify_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let cache_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/spotify");
-    let local_share = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".local/share/spotify");
+    let cache_path = home!().join(".cache/spotify");
+    let local_share = home!().join(".local/share/spotify");
 
     let mut cleared: u64 = 0;
     if cache_path.exists() {
@@ -172,17 +153,11 @@ impl MediaCacheService {
     get_dir_size(&cache_path) + get_dir_size(&config_path)
   }
 
-  pub fn clean_vlc_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self.clean_vlc_cache_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_vlc_cache => clean_vlc_cache_inner);
 
   fn clean_vlc_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let cache_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/vlc");
-    let config_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".config/vlc");
+    let cache_path = home!().join(".cache/vlc");
+    let config_path = home!().join(".config/vlc");
 
     let mut cleared: u64 = 0;
     if cache_path.exists() {
@@ -205,16 +180,10 @@ impl MediaCacheService {
     get_dir_size(&thumb_path)
   }
 
-  pub fn clean_thumbnail_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_thumbnail_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_thumbnail_cache => clean_thumbnail_cache_inner);
 
   fn clean_thumbnail_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let thumb_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/thumbnails");
+    let thumb_path = home!().join(".cache/thumbnails");
 
     if !thumb_path.exists() {
       return Ok(success_response(
@@ -237,14 +206,10 @@ impl MediaCacheService {
     get_dir_size(&icon_path)
   }
 
-  pub fn clean_icon_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self.clean_icon_cache_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_icon_cache => clean_icon_cache_inner);
 
   fn clean_icon_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let icon_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/icons");
+    let icon_path = home!().join(".cache/icons");
 
     if !icon_path.exists() {
       return Ok(success_response("No icon cache found", data_empty_string()));

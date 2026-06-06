@@ -1,6 +1,7 @@
 /* models */
-use crate::helpers::validation_helper::{is_allowed_path, validate_path};
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
+/* security */
+use crate::security::PathValidator;
 /* sys lib */
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -32,37 +33,18 @@ impl ScannerService {
     path: &str,
     extension_filter: Option<String>,
   ) -> Result<ResponseModel, ResponseModel> {
-    let home = match dirs::home_dir() {
-      Some(h) => h,
-      None => {
-        return Err(ResponseModel {
-          status: ResponseStatus::Error,
-          message: "Home directory not found".to_string(),
-          data: DataValue::Array(vec![]),
-        });
-      }
-    };
-
-    let validated_path = match validate_path(path) {
+    let validated_path = match PathValidator::validate(path) {
       Ok(p) => p,
       Err(e) => {
         return Err(ResponseModel {
           status: ResponseStatus::Error,
-          message: e,
+          message: e.to_string(),
           data: DataValue::Array(vec![]),
         });
       }
     };
 
-    if !is_allowed_path(&validated_path, &home) {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Path is not within allowed directories: {}", path),
-        data: DataValue::Array(vec![]),
-      });
-    }
-
-    let start_path = Path::new(path);
+    let start_path = Path::new(&validated_path);
 
     let mut hash_map: HashMap<String, Vec<(String, u64)>> = HashMap::new();
 

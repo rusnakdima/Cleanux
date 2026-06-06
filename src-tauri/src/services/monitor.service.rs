@@ -1,10 +1,12 @@
 /* sys lib */
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 use sysinfo::System;
 
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 
 static MONITORING_ACTIVE: AtomicBool = AtomicBool::new(false);
+static SYSTEM: Mutex<Option<System>> = Mutex::new(None);
 
 pub struct MonitorService;
 
@@ -21,7 +23,16 @@ pub struct SystemStats {
 
 impl MonitorService {
   pub fn get_system_stats() -> Result<ResponseModel, ResponseModel> {
-    let mut sys = System::new_all();
+    {
+      let mut sys = SYSTEM.lock().unwrap();
+      if sys.is_none() {
+        let mut s = System::new_all();
+        s.refresh_all();
+        *sys = Some(s);
+      }
+    }
+    let mut sys = SYSTEM.lock().unwrap();
+    let sys = sys.as_mut().unwrap();
     sys.refresh_all();
 
     let cpu_usage = sys.global_cpu_usage();

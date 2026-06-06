@@ -24,9 +24,6 @@ pub mod health_history_service;
 #[path = "large_file_cleaning.service.rs"]
 pub mod large_file_cleaning_service;
 
-#[path = "log_analyzer.service.rs"]
-pub mod log_analyzer_service;
-
 #[path = "log_cleaning.service.rs"]
 pub mod log_cleaning_service;
 
@@ -39,8 +36,8 @@ pub mod memory_service;
 #[path = "monitor.service.rs"]
 pub mod monitor_service;
 
-#[path = "package_manager.service.rs"]
-pub mod package_manager_service;
+#[path = "package.service.rs"]
+pub mod package_service;
 
 #[path = "process.service.rs"]
 pub mod process_service;
@@ -92,6 +89,3 @@ pub mod kernel_cleaner_service;
 
 #[path = "dev_cache.service.rs"]
 pub mod dev_cache_service;
-
-#[path = "package_deep_clean.service.rs"]
-pub mod package_deep_clean_service;

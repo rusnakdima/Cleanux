@@ -15,6 +15,11 @@ pub mod process_helper;
 #[path = "validation.helper.rs"]
 pub mod validation_helper;
 
+#[path = "home_macro.rs"]
+pub mod home_macro;
+
+pub use crate::{config_dir, home};
+
 pub use filesystem_helper::{
   calculate_dir_size, collect_cache_file_models, collect_log_file_models,
   collect_trash_file_models, format_size, get_dir_size, remove_dir_contents,
@@ -25,3 +30,7 @@ pub use response_helper::{
   data_empty_string, data_string, error_response, info_response, models_into_data_array,
   success_response, ResponseBuilder,
 };
+
+#[path = "service_macro.rs"]
+pub mod service_macro;
+pub use crate::service_method_full;

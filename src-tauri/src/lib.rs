@@ -53,13 +53,12 @@ use routes::{
   },
   memory_route::{get_memory_info, get_process_memory, get_swap_info, optimize_memory},
   monitor_route::{get_system_stats, start_monitoring, stop_monitoring},
-  package_deep_clean_route::{
-    apt_autoclean, apt_autoremove, apt_clean, deep_clean_all, deep_clean_remove_orphaned_package,
-    dnf_clean_all, get_apt_cache_size, get_dnf_cache_size, get_orphaned_packages,
-    get_package_summary, get_pacman_cache_size, get_partial_downloads, get_zypper_cache_size,
-    pacman_clean, pacman_full_clean, zypper_clean,
+  package_route::{
+    apt_autoclean, apt_autoremove, apt_clean, clean_package_cache, deep_clean_all,
+    deep_clean_remove_orphaned_package, dnf_clean_all, get_apt_cache_size, get_dnf_cache_size,
+    get_orphaned_packages, get_package_cache_info, get_package_summary, get_pacman_cache_size,
+    get_partial_downloads, get_zypper_cache_size, pacman_clean, pacman_full_clean, zypper_clean,
   },
-  package_manager_route::{clean_package_cache, get_package_cache_info},
   power_route::{get_battery_info, get_power_profiles, get_thermal_info, set_power_profile},
   process_route::{getProcesses, killProcess, killSelectedProcesses},
   profile_route::{apply_profile, delete_profile, list_profiles, load_profile, save_profile},
@@ -69,6 +68,9 @@ use routes::{
   },
   report_route::{
     compare_snapshots, export_to_html, generate_cleaning_report, get_cleaning_history,
+  },
+  scheduler_route::{
+    delete_schedule_config, get_schedule_config, run_cleaning_now, save_schedule_config,
   },
   startup_route::{disable_startup_item, enable_startup_item, get_startup_items},
   system_route::{
@@ -258,6 +260,10 @@ pub fn run() {
       get_gpu_temperature,
       clean_package_cache,
       get_package_cache_info,
+      get_schedule_config,
+      save_schedule_config,
+      delete_schedule_config,
+      run_cleaning_now,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {

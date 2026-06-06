@@ -36,9 +36,6 @@ pub mod startup_route;
 #[path = "scheduler.route.rs"]
 pub mod scheduler_route;
 
-#[path = "log_analyzer.route.rs"]
-pub mod log_analyzer_route;
-
 #[path = "memory.route.rs"]
 pub mod memory_route;
 
@@ -50,9 +47,6 @@ pub mod temperature_route;
 
 #[path = "health_history.route.rs"]
 pub mod health_history_route;
-
-#[path = "package_manager.route.rs"]
-pub mod package_manager_route;
 
 #[path = "report.route.rs"]
 pub mod report_route;
@@ -78,5 +72,5 @@ pub mod media_cache_route;
 #[path = "dev_cache.route.rs"]
 pub mod dev_cache_route;
 
-#[path = "package_deep_clean.route.rs"]
-pub mod package_deep_clean_route;
+#[path = "package.route.rs"]
+pub mod package_route;

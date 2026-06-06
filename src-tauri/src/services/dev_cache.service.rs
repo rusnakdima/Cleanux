@@ -1,5 +1,7 @@
 /* helpers */
-use crate::helpers::{calculate_dir_size, data_string, remove_dir_contents, success_response};
+use crate::helpers::{
+  calculate_dir_size, data_string, home, remove_dir_contents, service_method_full, success_response,
+};
 /* models */
 use crate::models::{AppError, ResponseModel};
 /* sys lib */
@@ -28,15 +30,10 @@ pub struct DevCacheSummary {
 pub struct DevCacheService;
 
 impl DevCacheService {
-  pub fn get_all_dev_caches(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .get_all_dev_caches_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(get_all_dev_caches => get_all_dev_caches_inner);
 
   fn get_all_dev_caches_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
 
     let npm = self.scan_npm_cache_inner(&home);
     let pip = self.scan_pip_cache_inner(&home);
@@ -213,13 +210,10 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_npm_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self.clean_npm_cache_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_npm_cache => clean_npm_cache_inner);
 
   fn clean_npm_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let npm_path = home.join(".npm");
 
     if !npm_path.exists() {
@@ -241,13 +235,10 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_pip_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self.clean_pip_cache_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_pip_cache => clean_pip_cache_inner);
 
   fn clean_pip_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let pip_path = home.join(".cache/pip");
 
     if !pip_path.exists() {
@@ -269,15 +260,10 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_cargo_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_cargo_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_cargo_cache => clean_cargo_cache_inner);
 
   fn clean_cargo_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let registry = home.join(".cargo/registry");
     let git = home.join(".cargo/git");
 
@@ -311,13 +297,10 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_go_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self.clean_go_cache_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_go_cache => clean_go_cache_inner);
 
   fn clean_go_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let go_path = home.join("go/pkg/mod");
 
     if !go_path.exists() {
@@ -336,15 +319,10 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_maven_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_maven_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_maven_cache => clean_maven_cache_inner);
 
   fn clean_maven_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let maven_path = home.join(".m2/repository");
 
     if !maven_path.exists() {
@@ -366,15 +344,10 @@ impl DevCacheService {
     }
   }
 
-  pub fn clean_gradle_cache(&self) -> Result<ResponseModel, ResponseModel> {
-    self
-      .clean_gradle_cache_inner()
-      .map_err(|e| e.into_response())
-  }
+  service_method_full!(clean_gradle_cache => clean_gradle_cache_inner);
 
   fn clean_gradle_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let gradle_path = home.join(".gradle/caches");
 
     if !gradle_path.exists() {

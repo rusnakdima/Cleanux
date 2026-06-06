@@ -1,7 +1,7 @@
 /* helpers */
 use crate::helpers::{
-  collect_trash_file_models, data_empty_string, models_into_data_array, remove_paths_with_errors,
-  success_response,
+  collect_trash_file_models, data_empty_string, home, models_into_data_array,
+  remove_paths_with_errors, service_method_full, success_response,
 };
 /* models */
 use crate::models::{ResponseModel, TrashFileModel};
@@ -16,13 +16,10 @@ type CleanResult<T> = Result<T, AppError>;
 
 #[allow(non_snake_case)]
 impl TrashCleaningService {
-  pub fn getTrashFiles(&self) -> Result<ResponseModel, ResponseModel> {
-    self.get_trash_files_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(getTrashFiles => get_trash_files_inner);
 
   fn get_trash_files_inner(&self) -> CleanResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home!();
     let trash_dir = home.join(".local/share/Trash/files");
     let trash_files: Vec<TrashFileModel> = collect_trash_file_models(&trash_dir);
     let data = models_into_data_array(trash_files)?;
@@ -52,9 +49,7 @@ impl TrashCleaningService {
   }
 
   pub fn clearTrash(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))
-      .map_err(|e| e.into_response())?;
+    let home = home!();
     let trash_dir = home.join(".local/share/Trash/files");
     match fs::read_dir(&trash_dir) {
       Ok(entries) => {

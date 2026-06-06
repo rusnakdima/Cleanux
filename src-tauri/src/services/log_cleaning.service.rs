@@ -1,7 +1,7 @@
 /* helpers */
 use crate::helpers::{
   collect_log_file_models, data_empty_string, data_string, models_into_data_array, pkexec_rm_paths,
-  stderr_message, success_response,
+  service_method_full, stderr_message, success_response,
 };
 /* models */
 use crate::models::{LogFileModel, ResponseModel};
@@ -16,9 +16,7 @@ type CleanResult<T> = Result<T, AppError>;
 
 #[allow(non_snake_case)]
 impl LogCleaningService {
-  pub fn getSystemLogs(&self) -> Result<ResponseModel, ResponseModel> {
-    self.get_system_logs_inner().map_err(|e| e.into_response())
-  }
+  service_method_full!(getSystemLogs => get_system_logs_inner);
 
   fn get_system_logs_inner(&self) -> CleanResult<ResponseModel> {
     let log_dir = Path::new("/var/log");

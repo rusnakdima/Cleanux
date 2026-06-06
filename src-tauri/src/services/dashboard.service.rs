@@ -17,7 +17,7 @@ use crate::models::{DataValue, ResponseModel, ScanSummaryModel, SystemServiceMod
 
 /* helpers */
 use crate::helpers::constants_helper::LARGE_FILE_THRESHOLD_BYTES;
-use crate::helpers::ResponseBuilder;
+use crate::helpers::{home, ResponseBuilder};
 use rayon::prelude::*;
 use walkdir::WalkDir;
 
@@ -129,7 +129,7 @@ impl DashboardService {
   }
 
   pub fn getTrashSummary(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
+    let home = home!();
     let trashDir = home.join(".local/share/Trash/files");
     let mut totalSize = 0;
     let mut fileCount = 0;
@@ -198,7 +198,7 @@ impl DashboardService {
   }
 
   pub fn getLargeFilesSummary(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
+    let home = home!();
     let threshold = LARGE_FILE_THRESHOLD_BYTES;
 
     let dirsToScan = vec![

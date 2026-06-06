@@ -13,20 +13,9 @@ pub fn get_package_summary() -> Result<ResponseModel, ResponseModel> {
 }
 
 #[tauri::command]
-pub fn get_package_cache_info() -> Result<ResponseModel, ResponseModel> {
-  PackageService::get_package_cache_info()
-}
-
-#[tauri::command]
-#[allow(non_snake_case)]
-pub fn clean_package_cache(manager: String) -> Result<ResponseModel, ResponseModel> {
-  PackageService::clean_package_cache(&manager)
-}
-
-#[tauri::command]
 pub fn deep_clean_all() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.deep_clean_all()?)
+  service.deep_clean_all().map_err(|e| e.into_response())
 }
 
 #[tauri::command]
@@ -39,19 +28,19 @@ pub fn get_apt_cache_size() -> u64 {
 #[tauri::command]
 pub fn apt_clean() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.apt_clean()?)
+  service.apt_clean().map_err(|e| e.into_response())
 }
 
 #[tauri::command]
 pub fn apt_autoremove() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.apt_autoremove()?)
+  service.apt_autoremove().map_err(|e| e.into_response())
 }
 
 #[tauri::command]
 pub fn apt_autoclean() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.apt_autoclean()?)
+  service.apt_autoclean().map_err(|e| e.into_response())
 }
 
 #[tauri::command]
@@ -64,7 +53,9 @@ pub fn get_orphaned_packages() -> Vec<OrphanedPackage> {
 #[allow(non_snake_case)]
 pub fn deep_clean_remove_orphaned_package(name: String) -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.remove_orphaned_package(&name)?)
+  service
+    .remove_orphaned_package(&name)
+    .map_err(|e| e.into_response())
 }
 
 #[tauri::command]
@@ -83,7 +74,7 @@ pub fn get_dnf_cache_size() -> u64 {
 #[tauri::command]
 pub fn dnf_clean_all() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.dnf_clean_all()?)
+  service.dnf_clean_all().map_err(|e| e.into_response())
 }
 
 #[tauri::command]
@@ -96,14 +87,16 @@ pub fn get_pacman_cache_size() -> u64 {
 #[tauri::command]
 pub fn pacman_clean(keep_recent: u32) -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.pacman_clean(keep_recent)?)
+  service
+    .pacman_clean(keep_recent)
+    .map_err(|e| e.into_response())
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn pacman_full_clean() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.pacman_full_clean()?)
+  service.pacman_full_clean().map_err(|e| e.into_response())
 }
 
 #[tauri::command]
@@ -116,5 +109,17 @@ pub fn get_zypper_cache_size() -> u64 {
 #[tauri::command]
 pub fn zypper_clean() -> Result<ResponseModel, ResponseModel> {
   let service = PackageService;
-  Ok(service.zypper_clean()?)
+  service.zypper_clean().map_err(|e| e.into_response())
+}
+
+#[tauri::command]
+#[allow(non_snake_case)]
+pub fn get_package_cache_info() -> Result<ResponseModel, ResponseModel> {
+  PackageService::get_package_cache_info()
+}
+
+#[tauri::command]
+#[allow(non_snake_case)]
+pub fn clean_package_cache(manager: String) -> Result<ResponseModel, ResponseModel> {
+  PackageService::clean_package_cache(&manager)
 }
