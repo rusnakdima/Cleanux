@@ -932,9 +932,9 @@ mat-icon {
     pointer-events: none;
   }
 
-  .border-trace:hover::before {
+  a.border-trace:hover::before {
     opacity: 1;
-    animation: border-draw 1.5s ease-out forwards;
+    animation: border-draw 0.3s ease-out forwards;
   }
 
 @keyframes border-draw {

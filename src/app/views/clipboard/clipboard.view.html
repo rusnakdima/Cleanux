@@ -4,7 +4,7 @@
     <p>Manage clipboard history</p>
   </div>
 
-  <div class="glass-surface matte-surface border-trace p-6 mb-6">
+  <div class="glass-surface matte-surface p-6 mb-6">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Clipboard History</p>
@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div class="glass-surface matte-surface border-trace overflow-hidden">
+  <div class="glass-surface matte-surface overflow-hidden">
     <app-data-list
       [columns]="columns"
       [data]="items()"
@@ -31,7 +31,7 @@
   </div>
 
   @if (items().length === 0) {
-    <div class="glass-surface matte-surface border-trace p-8 text-center">
+    <div class="glass-surface matte-surface p-8 text-center">
       <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">content_paste</mat-icon>
       <p class="text-[var(--text-secondary)]">Clipboard is empty</p>
       <p class="text-sm text-[var(--text-muted)] mt-1">Copied text and images will appear here</p>

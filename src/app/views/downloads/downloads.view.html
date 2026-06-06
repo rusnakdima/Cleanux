@@ -4,7 +4,7 @@
     <p>Clean up your Downloads folder</p>
   </div>
 
-  <div class="glass-surface matte-surface border-trace p-6 mb-6">
+  <div class="glass-surface matte-surface p-6 mb-6">
     <div class="flex items-center justify-between mb-4">
       <div>
         <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Downloads Size</p>
@@ -55,7 +55,7 @@
       <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
     </div>
   } @else if (files().length > 0) {
-    <div class="glass-surface matte-surface border-trace overflow-hidden">
+    <div class="glass-surface matte-surface overflow-hidden">
       <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
         <span class="text-sm text-[var(--text-secondary)]">{{ files().length }} files</span>
         <button
@@ -76,7 +76,7 @@
       />
     </div>
   } @else {
-    <div class="glass-surface matte-surface border-trace p-8 text-center">
+    <div class="glass-surface matte-surface p-8 text-center">
       <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">folder_open</mat-icon>
       <p class="text-[var(--text-secondary)]">No files found in Downloads</p>
       <p class="text-sm text-[var(--text-muted)] mt-1">Click Scan to search for cleanable files</p>

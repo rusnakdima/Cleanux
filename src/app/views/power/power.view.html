@@ -24,7 +24,7 @@
     }
   </div>
 
-  <div class="glass-surface matte-surface border-trace p-6 mb-6">
+  <div class="glass-surface matte-surface p-6 mb-6">
     <h3 class="section-title mb-4">Power Profiles</h3>
     <div class="flex flex-wrap gap-2">
       @for (profile of powerProfiles(); track profile.name) {
@@ -41,7 +41,7 @@
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-    <div class="glass-surface matte-surface border-trace p-5">
+    <div class="glass-surface matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
         <mat-icon class="text-[var(--accent-icons)]">{{ getBatteryIcon() }}</mat-icon>
         <h3 class="text-sm font-semibold">Battery</h3>
@@ -66,7 +66,7 @@
       }
     </div>
 
-    <div class="glass-surface matte-surface border-trace p-5">
+    <div class="glass-surface matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
         <mat-icon class="text-[var(--accent-icons)]">thermal</mat-icon>
         <h3 class="text-sm font-semibold">Temperature</h3>
@@ -84,7 +84,7 @@
       }
     </div>
 
-    <div class="glass-surface matte-surface border-trace p-5">
+    <div class="glass-surface matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
         <mat-icon class="text-[var(--accent-icons)]">memory</mat-icon>
         <h3 class="text-sm font-semibold">System Status</h3>

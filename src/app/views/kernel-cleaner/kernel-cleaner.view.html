@@ -13,7 +13,7 @@
   </div>
 
   @if (bootSpaceInfo()) {
-    <div class="glass-card matte-surface border-trace p-6">
+    <div class="glass-card matte-surface p-6">
       <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-4">Boot Partition Space</h3>
       <div class="flex items-center gap-4">
         <div class="flex-1">
@@ -46,7 +46,7 @@
     </div>
   }
 
-  <div class="glass-card matte-surface border-trace p-6">
+  <div class="glass-card matte-surface p-6">
     <div class="flex items-center justify-between mb-4">
       <div>
         <h3 class="text-lg font-semibold text-[var(--text-primary)]">Current Kernel</h3>
@@ -61,7 +61,7 @@
     </div>
   </div>
 
-  <div class="glass-card matte-surface border-trace p-6">
+  <div class="glass-card matte-surface p-6">
     <div class="flex items-center justify-between mb-4">
       <div>
         <h3 class="text-lg font-semibold text-[var(--text-primary)]">All Installed Kernels</h3>
@@ -91,7 +91,7 @@
   </div>
 
   @if (oldKernels().length > 0) {
-    <div class="glass-card matte-surface border-trace p-6">
+    <div class="glass-card matte-surface p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="text-lg font-semibold text-[var(--text-primary)]">Removable Old Kernels</h3>
@@ -128,7 +128,7 @@
   }
 
   @if (oldInitramfs().length > 0) {
-    <div class="glass-card matte-surface border-trace p-6">
+    <div class="glass-card matte-surface p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="text-lg font-semibold text-[var(--text-primary)]">Old Initramfs Files</h3>

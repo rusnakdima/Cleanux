@@ -4,7 +4,7 @@
     <p>Clean recent file history</p>
   </div>
 
-  <div class="glass-surface matte-surface border-trace p-6 mb-6">
+  <div class="glass-surface matte-surface p-6 mb-6">
     <div class="flex items-center justify-between">
       <div>
         <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Tracked Items</p>
@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div class="glass-surface matte-surface border-trace overflow-hidden">
+  <div class="glass-surface matte-surface overflow-hidden">
     @if (items().length > 0) {
       <app-data-list
         [columns]="columns"
@@ -38,7 +38,7 @@
     }
   </div>
 
-  <div class="glass-surface matte-surface border-trace p-5 mt-6">
+  <div class="glass-surface matte-surface p-5 mt-6">
     <h3 class="section-title mb-4">Apps with Recent History</h3>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
       @for (app of apps; track app.id; let i = $index) {

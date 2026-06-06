@@ -20,21 +20,21 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="glass-card matte-surface border-trace text-center p-4">
+            <div class="glass-card matte-surface text-center p-4">
               <div class="text-4xl mb-2">🎮</div>
               <div class="text-sm text-[var(--text-muted)]">Games Detected</div>
               <div class="text-[var(--text-primary)] text-2xl font-bold">
                 {{ summary()?.steamGameCount || 0 }}
               </div>
             </div>
-            <div class="glass-card matte-surface border-trace text-center p-4">
+            <div class="glass-card matte-surface text-center p-4">
               <div class="text-4xl mb-2">💾</div>
               <div class="text-sm text-[var(--text-muted)]">Shader Cache</div>
               <div class="text-[var(--text-primary)] text-2xl font-bold">
                 {{ formatSize(summary()?.steamShaderSize || 0) }}
               </div>
             </div>
-            <div class="glass-card matte-surface border-trace text-center p-4">
+            <div class="glass-card matte-surface text-center p-4">
               <div class="text-4xl mb-2">📥</div>
               <div class="text-sm text-[var(--text-muted)]">Download Cache</div>
               <div class="text-[var(--text-primary)] text-2xl font-bold">

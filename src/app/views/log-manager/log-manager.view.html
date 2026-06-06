@@ -5,28 +5,28 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="matte-surface border-trace p-4">
+      <div class="matte-surface p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">Journal Size</div>
         <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
           {{ summary()?.journal_size_human || "0 B" }}
         </div>
       </div>
 
-      <div class="matte-surface border-trace p-4">
+      <div class="matte-surface p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">Rotated Logs</div>
         <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
           {{ formatSize(rotatedLogsSize()) }}
         </div>
       </div>
 
-      <div class="matte-surface border-trace p-4">
+      <div class="matte-surface p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">/var/log Total</div>
         <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
           {{ varLogUsage()?.total_human || "0 B" }}
         </div>
       </div>
 
-      <div class="matte-surface border-trace p-4">
+      <div class="matte-surface p-4">
         <div class="text-sm text-slate-500 dark:text-slate-400">Logrotate Configs</div>
         <div class="text-2xl font-bold text-green-600 dark:text-green-400">
           {{ logrotateAnalysis()?.total_configs || 0 }}
@@ -273,7 +273,7 @@
       </mat-tab>
     </mat-tab-group>
 
-    <div class="matte-surface border-trace p-6">
+    <div class="matte-surface p-6">
       <h3 class="text-lg font-semibold mb-4">Largest Log Files in /var/log</h3>
       @if (largestLogs().length > 0) {
         <div class="overflow-auto max-h-[calc(100vh-400px)]">

@@ -13,7 +13,7 @@
       <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
     </div>
   } @else if (backups().length === 0) {
-    <div class="glass-surface matte-surface border-trace p-12 text-center">
+    <div class="glass-surface matte-surface p-12 text-center">
       <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">backup</mat-icon>
       <h3 class="text-lg font-semibold text-[var(--text-secondary)]">No Backups Found</h3>
       <p class="text-sm text-[var(--text-muted)] mt-2">
@@ -21,7 +21,7 @@
       </p>
     </div>
   } @else {
-    <div class="glass-card matte-surface border-trace">
+    <div class="glass-card matte-surface">
       <div class="glass-card-header">
         <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
           {{ backups().length }} backup(s)
