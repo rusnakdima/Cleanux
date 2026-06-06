@@ -30,14 +30,14 @@
         <div class="flex items-center gap-2 flex-wrap">
           @for (crumb of breadcrumbs(); track crumb.path; let i = $index) {
             @if (i > 0) {
-              <mat-icon class="icon-sm text-[var(--text-muted)]">chevron_right</mat-icon>
+              <mat-icon class="icon-sm text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
             }
             <button
               (click)="navigateToBreadcrumb(i)"
               class="text-sm"
               [class.font-bold]="i === breadcrumbs().length - 1"
               [class.text-[var(--accent-icons)]]]="i === breadcrumbs().length - 1"
-              [class.text-[var(--text-secondary)]]]="i !== breadcrumbs().length - 1"
+              [class.text-zinc-400 dark:text-zinc-500]="i !== breadcrumbs().length - 1"
             >
               {{ crumb.name }}
             </button>
@@ -47,8 +47,8 @@
       <div class="glass-card-body">
         @if (currentNode(); as node) {
           <div class="mb-4 flex items-center gap-2">
-            <span class="text-sm text-[var(--text-muted)]">Total Size:</span>
-            <span class="font-bold text-lg text-[var(--text-primary)]">{{
+            <span class="text-sm text-zinc-500 dark:text-zinc-400">Total Size:</span>
+            <span class="font-bold text-lg text-white dark:text-zinc-900">{{
               formatSize(node.size)
             }}</span>
           </div>
@@ -65,19 +65,19 @@
                 <div class="font-semibold text-sm truncate mb-1" [matTooltip]="item.node.name">
                   {{ item.node.name }}
                 </div>
-                <div class="text-sm text-[var(--text-secondary)]">
+                <div class="text-sm text-zinc-400 dark:text-zinc-500">
                   {{ formatSize(item.node.size) }}
                 </div>
-                <div class="text-xs text-[var(--text-muted)] mt-auto pt-2">
+                <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-auto pt-2">
                   {{ item.percentage | number: "1.1-1" }}%
                 </div>
                 @if (item.node.children.length > 0) {
-                  <div class="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-1">
+                  <div class="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
                     <mat-icon class="icon-xs">folder_open</mat-icon>
                     {{ item.node.children.length }} items
                   </div>
                 }
-                <mat-icon class="text-[var(--text-muted)] mt-auto">chevron_right</mat-icon>
+                <mat-icon class="text-zinc-500 dark:text-zinc-400 mt-auto">chevron_right</mat-icon>
               </div>
             </div>
           }

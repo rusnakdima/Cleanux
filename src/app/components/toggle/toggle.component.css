@@ -5,10 +5,6 @@
   user-select: none;
 }
 
-.dark .toggle-label {
-  color: #fafafa;
-}
-
 .light .toggle-label {
   color: #18181b;
 }
@@ -31,11 +27,6 @@
   cursor: pointer;
   transition: all 150ms ease;
   outline: none;
-}
-
-.dark .toggle-track {
-  border-color: #3f3f46;
-  background: #27272a;
 }
 
 .light .toggle-track {

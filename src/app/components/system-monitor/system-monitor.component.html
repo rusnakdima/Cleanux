@@ -1,15 +1,15 @@
 <div class="space-y-4 font-mono">
   <div class="flex items-center justify-between mb-4">
-    <h3 class="font-bold text-xs text-slate-200 uppercase tracking-widest flex items-center gap-2">
+    <h3 class="font-bold text-xs text-slate-200 dark:text-slate-200 uppercase tracking-widest flex items-center gap-2">
       <span class="inline-block w-2.5 h-2.5 rounded-full bg-clean-500 animate-ping"></span>
       <span>System Resource Telemetry</span>
     </h3>
-    <div class="flex items-center gap-2 bg-slate-950/60 px-2 py-1 rounded border border-slate-800">
+    <div class="flex items-center gap-2 bg-slate-950/60 dark:bg-slate-900/60 px-2 py-1 rounded border border-slate-800 dark:border-slate-700">
       <span
         class="w-1.5 h-1.5 rounded-full bg-emerald-500"
         [class.animate-pulse]="store.isMonitoring()"
       ></span>
-      <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{{
+      <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-tighter">{{
         store.isMonitoring() ? "Live Stream" : "Telemetry Paused"
       }}</span>
     </div>
@@ -25,17 +25,17 @@
           >
             <mat-icon class="icon-xs">memory</mat-icon>
           </div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase">Processor Load</span>
+          <span class="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Processor Load</span>
         </div>
         <span
-          class="text-xs font-black text-white"
+          class="text-xs font-black text-white dark:text-zinc-900"
           [style.color]="getCpuColor(store.systemStats().cpuUsage)"
         >
           {{ store.systemStats().cpuUsage | number: "1.0-1" }}%
         </span>
       </div>
       <div
-        class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/80"
+        class="w-full bg-slate-950 dark:bg-slate-200 h-1.5 rounded-full overflow-hidden border border-slate-800/80 dark:border-slate-300/80"
       >
         <div
           class="h-full transition-all duration-300 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
@@ -53,19 +53,19 @@
           >
             <mat-icon class="icon-xs">storage</mat-icon>
           </div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase">Workstation RAM</span>
+          <span class="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Workstation RAM</span>
         </div>
         <div class="text-right">
-          <span class="text-xs font-black text-white block"
+          <span class="text-xs font-black text-white dark:text-zinc-900 block"
             >{{ store.systemStats().memoryUsagePercent | number: "1.0-1" }}%</span
           >
-          <span class="text-[9px] text-slate-500 block"
+          <span class="text-[9px] text-slate-500 dark:text-slate-500 block"
             >{{ store.memoryUsedFormatted() }} / {{ store.memoryTotalFormatted() }}</span
           >
         </div>
       </div>
       <div
-        class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/80"
+        class="w-full bg-slate-950 dark:bg-slate-200 h-1.5 rounded-full overflow-hidden border border-slate-800/80 dark:border-slate-300/80"
       >
         <div
           class="h-full transition-all duration-300 bg-cyber-cyan shadow-[0_0_10px_rgba(6,182,212,0.5)]"
@@ -83,19 +83,19 @@
           >
             <mat-icon class="icon-xs">disc_full</mat-icon>
           </div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase">Disk Partition</span>
+          <span class="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase">Disk Partition</span>
         </div>
         <div class="text-right">
-          <span class="text-xs font-black text-white block"
+          <span class="text-xs font-black text-white dark:text-zinc-900 block"
             >{{ store.systemStats().diskUsage | number: "1.0-1" }}%</span
           >
-          <span class="text-[9px] text-slate-500 block"
+          <span class="text-[9px] text-slate-500 dark:text-slate-500 block"
             >{{ store.diskUsedFormatted() }} / {{ store.diskTotalFormatted() }}</span
           >
         </div>
       </div>
       <div
-        class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800/80"
+        class="w-full bg-slate-950 dark:bg-slate-200 h-1.5 rounded-full overflow-hidden border border-slate-800/80 dark:border-slate-300/80"
       >
         <div
           class="h-full transition-all duration-300 bg-cyber-amber shadow-[0_0_10px_rgba(245,158,11,0.5)]"

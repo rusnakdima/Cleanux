@@ -1,8 +1,8 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h2 class="text-xl font-bold text-[var(--text-primary)]">Backup Management</h2>
-      <p class="text-sm text-[var(--text-muted)] mt-1">
+      <h2 class="text-xl font-bold text-white dark:text-zinc-900">Backup Management</h2>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
         Create and restore backups before cleaning operations
       </p>
     </div>
@@ -14,16 +14,16 @@
     </div>
   } @else if (backups().length === 0) {
     <div class="glass-surface matte-surface p-12 text-center">
-      <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">backup</mat-icon>
-      <h3 class="text-lg font-semibold text-[var(--text-secondary)]">No Backups Found</h3>
-      <p class="text-sm text-[var(--text-muted)] mt-2">
+      <mat-icon class="icon-4xl text-zinc-500 dark:text-zinc-400 mb-4">backup</mat-icon>
+      <h3 class="text-lg font-semibold text-zinc-400 dark:text-zinc-500">No Backups Found</h3>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
         Backups created before cleaning operations will appear here
       </p>
     </div>
   } @else {
     <div class="glass-card matte-surface">
       <div class="glass-card-header">
-        <h3 class="text-sm font-semibold text-[var(--text-secondary)]">
+        <h3 class="text-sm font-semibold text-zinc-400 dark:text-zinc-500">
           {{ backups().length }} backup(s)
         </h3>
       </div>

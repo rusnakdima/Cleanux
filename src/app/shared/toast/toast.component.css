@@ -24,11 +24,6 @@
   animation: slideIn 0.3s ease-out;
 }
 
-.dark .toast {
-  background: #18181b;
-  border-color: #3f3f46;
-}
-
 .light .toast {
   background: #ffffff;
   border-color: #e4e4e7;
@@ -91,10 +86,6 @@
   line-height: 1.4;
 }
 
-.dark .toast-message {
-  color: #fafafa;
-}
-
 .light .toast-message {
   color: #18181b;
 }
@@ -114,20 +105,11 @@
   flex-shrink: 0;
 }
 
-.dark .toast-close {
-  color: #71717a;
-}
-
 .light .toast-close {
   color: #a1a1aa;
 }
 
 .toast-close:hover {
-  background: #27272a;
-  color: #fafafa;
-}
-
-.dark .toast-close:hover {
   background: #27272a;
   color: #fafafa;
 }

@@ -1,8 +1,8 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h2 class="text-xl font-bold text-[var(--text-primary)]">Cleaning Profiles</h2>
-      <p class="text-sm text-[var(--text-muted)] mt-1">Save and manage cleaning configurations</p>
+      <h2 class="text-xl font-bold text-white dark:text-zinc-900">Cleaning Profiles</h2>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Save and manage cleaning configurations</p>
     </div>
     <div class="flex items-center gap-2">
       <input
@@ -29,13 +29,13 @@
     </div>
   } @else if (isEditing()) {
     <div class="glass-surface matte-surface p-6">
-      <h3 class="text-lg font-semibold text-[var(--text-primary)] mb-6">
+      <h3 class="text-lg font-semibold text-white dark:text-zinc-900 mb-6">
         {{ selectedProfile() ? "Edit Profile" : "Create New Profile" }}
       </h3>
       <div class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="block text-sm font-semibold text-[var(--text-muted)]">Name</label>
+            <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Name</label>
             <input
               type="text"
               [ngModel]="editingProfile()?.name"
@@ -45,7 +45,7 @@
             />
           </div>
           <div class="space-y-2">
-            <label class="block text-sm font-semibold text-[var(--text-muted)]">Description</label>
+            <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Description</label>
             <input
               type="text"
               [ngModel]="editingProfile()?.description"
@@ -59,7 +59,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-[var(--text-muted)]"
+          <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
             >Custom Paths (one per line)</label
           >
           <textarea
@@ -71,7 +71,7 @@
         </div>
 
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-[var(--text-muted)]"
+          <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
             >Exclude Patterns (one per line)</label
           >
           <textarea
@@ -92,7 +92,7 @@
               "
               class="accent-[var(--accent-buttons)]"
             />
-            <span class="text-sm text-[var(--text-secondary)]">Clean Cache</span>
+            <span class="text-sm text-zinc-400 dark:text-zinc-500">Clean Cache</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <input
@@ -103,7 +103,7 @@
               "
               class="accent-[var(--accent-buttons)]"
             />
-            <span class="text-sm text-[var(--text-secondary)]">Clean Trash</span>
+            <span class="text-sm text-zinc-400 dark:text-zinc-500">Clean Trash</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <input
@@ -112,12 +112,12 @@
               (ngModelChange)="editingProfile.update((p) => (p ? { ...p, clean_logs: $event } : p))"
               class="accent-[var(--accent-buttons)]"
             />
-            <span class="text-sm text-[var(--text-secondary)]">Clean Logs</span>
+            <span class="text-sm text-zinc-400 dark:text-zinc-500">Clean Logs</span>
           </label>
         </div>
 
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-[var(--text-muted)]"
+          <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
             >Min Large File Size: {{ editingProfile()?.min_large_file_size | number }} bytes</label
           >
           <input
@@ -131,7 +131,7 @@
             step="10485760"
             class="w-full"
           />
-          <div class="flex justify-between text-xs text-[var(--text-muted)]">
+          <div class="flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
             <span>0 B</span>
             <span>100 MB</span>
             <span>1 GB</span>
@@ -146,9 +146,9 @@
     </div>
   } @else if (profiles().length === 0) {
     <div class="glass-surface matte-surface p-12 text-center">
-      <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">folder</mat-icon>
-      <h3 class="text-lg font-semibold text-[var(--text-secondary)]">No Profiles Found</h3>
-      <p class="text-sm text-[var(--text-muted)] mt-2">
+      <mat-icon class="icon-4xl text-zinc-500 dark:text-zinc-400 mb-4">folder</mat-icon>
+      <h3 class="text-lg font-semibold text-zinc-400 dark:text-zinc-500">No Profiles Found</h3>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">
         Create profiles to save your cleaning configurations
       </p>
     </div>
@@ -158,9 +158,9 @@
         <div class="glass-card matte-surface p-5">
           <div class="flex items-start justify-between mb-3">
             <div>
-              <h4 class="font-semibold text-[var(--text-primary)]">{{ profile.name }}</h4>
+              <h4 class="font-semibold text-white dark:text-zinc-900">{{ profile.name }}</h4>
               @if (profile.description) {
-                <p class="text-sm text-[var(--text-muted)] mt-1">{{ profile.description }}</p>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{{ profile.description }}</p>
               }
             </div>
             <div
@@ -183,21 +183,21 @@
               <span class="badge badge-primary">Large Files</span>
             }
           </div>
-          <p class="text-xs text-[var(--text-muted)] mb-4">{{ formatDate(profile.created_at) }}</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">{{ formatDate(profile.created_at) }}</p>
           <div class="flex items-center gap-2">
             <button (click)="applyProfile(profile)" class="btn btn-primary flex-1">
               <mat-icon class="icon-sm">play_arrow</mat-icon>
               Apply
             </button>
             <button (click)="editProfile(profile)" class="btn btn-ghost btn-icon" matTooltip="Edit">
-              <mat-icon class="text-[var(--text-secondary)]">edit</mat-icon>
+              <mat-icon class="text-zinc-400 dark:text-zinc-500">edit</mat-icon>
             </button>
             <button
               (click)="exportProfile(profile)"
               class="btn btn-ghost btn-icon"
               matTooltip="Export"
             >
-              <mat-icon class="text-[var(--text-secondary)]">download</mat-icon>
+              <mat-icon class="text-zinc-400 dark:text-zinc-500">download</mat-icon>
             </button>
             <button
               (click)="deleteProfile(profile)"

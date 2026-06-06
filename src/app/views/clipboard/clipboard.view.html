@@ -7,7 +7,7 @@
   <div class="glass-surface matte-surface p-6 mb-6">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Clipboard History</p>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Clipboard History</p>
         <p class="text-2xl font-bold">{{ items().length }} items</p>
       </div>
       <button (click)="clearUnpinned()" class="btn btn-danger">
@@ -32,9 +32,9 @@
 
   @if (items().length === 0) {
     <div class="glass-surface matte-surface p-8 text-center">
-      <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">content_paste</mat-icon>
-      <p class="text-[var(--text-secondary)]">Clipboard is empty</p>
-      <p class="text-sm text-[var(--text-muted)] mt-1">Copied text and images will appear here</p>
+      <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4">content_paste</mat-icon>
+      <p class="text-zinc-400 dark:text-zinc-500">Clipboard is empty</p>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Copied text and images will appear here</p>
     </div>
   }
 

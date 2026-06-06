@@ -26,10 +26,10 @@
                 }}</span>
               </div>
               <div>
-                <h3 class="text-lg font-semibold text-[var(--text-primary)]">
+                <h3 class="text-lg font-semibold text-white dark:text-zinc-900">
                   {{ category.label }}
                 </h3>
-                <p class="text-sm text-[var(--text-secondary)]">
+                <p class="text-sm text-zinc-400 dark:text-zinc-500">
                   {{ summary?.description || "No data" }}
                 </p>
               </div>
@@ -39,49 +39,49 @@
           <div class="glass-card-body">
             <div class="grid grid-cols-2 gap-4 mb-4">
               <div class="stat-card matte-surface p-3">
-                <div class="text-xs text-[var(--text-secondary)] uppercase tracking-wide">
+                <div class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
                   Total Size
                 </div>
-                <div class="text-xl font-semibold text-[var(--text-primary)]">
+                <div class="text-xl font-semibold text-white dark:text-zinc-900">
                   {{ formatSize(summary?.totalSize || 0) }}
                 </div>
               </div>
               <div class="stat-card matte-surface p-3">
-                <div class="text-xs text-[var(--text-secondary)] uppercase tracking-wide">
+                <div class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
                   Files
                 </div>
-                <div class="text-xl font-semibold text-[var(--text-primary)]">
+                <div class="text-xl font-semibold text-white dark:text-zinc-900">
                   {{ summary?.fileCount || 0 }}
                 </div>
               </div>
             </div>
 
-            <div class="text-xs text-[var(--text-secondary)] mb-3">
+            <div class="text-xs text-zinc-400 dark:text-zinc-500 mb-3">
               Last cleaned: {{ formatLastCleaned(category.key) }}
             </div>
 
-            <mat-expansion-panel class="bg-[var(--bg-elevated)]">
+            <mat-expansion-panel class="bg-zinc-800 dark:bg-zinc-100">
               <mat-expansion-panel-header>
-                <mat-panel-title class="text-[var(--text-secondary)] text-sm">
+                <mat-panel-title class="text-zinc-400 dark:text-zinc-500 text-sm">
                   View Items ({{ summary?.items?.length || 0 }})
                 </mat-panel-title>
               </mat-expansion-panel-header>
 
               <div class="max-h-64 overflow-y-auto">
                 @for (item of summary?.items || []; track item.path) {
-                  <div class="py-2 px-3 border-b border-[var(--border-color)] last:border-0">
+                  <div class="py-2 px-3 border-b border-zinc-700 dark:border-zinc-300 last:border-0">
                     <div
-                      class="text-[var(--text-secondary)] text-sm truncate"
+                      class="text-zinc-400 dark:text-zinc-500 text-sm truncate"
                       [matTooltip]="item.path"
                     >
                       {{ item.path }}
                     </div>
-                    <div class="text-xs text-[var(--text-muted)] mt-1">
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                       {{ formatSize(item.size) }} · {{ item.fileCount }} files
                     </div>
                   </div>
                 } @empty {
-                  <div class="py-4 text-center text-[var(--text-secondary)] text-sm">
+                  <div class="py-4 text-center text-zinc-400 dark:text-zinc-500 text-sm">
                     No items found
                   </div>
                 }

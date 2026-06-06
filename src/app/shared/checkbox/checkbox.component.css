@@ -35,11 +35,6 @@
   flex-shrink: 0;
 }
 
-.dark .checkbox-mark {
-  border-color: #3f3f46;
-  background: #18181b;
-}
-
 .light .checkbox-mark {
   border-color: #d4d4d8;
   background: #ffffff;
@@ -78,10 +73,6 @@
 }
 
 .checkbox-wrapper.disabled .checkbox-mark {
-  background: #27272a;
-}
-
-.dark .checkbox-wrapper.disabled .checkbox-mark {
   background: #27272a;
 }
 

@@ -21,8 +21,8 @@
         >
           <mat-icon class="icon-xl">{{ tool.icon }}</mat-icon>
         </div>
-        <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-1">{{ tool.label }}</h3>
-        <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+        <h3 class="text-sm font-semibold text-white dark:text-zinc-900 mb-1">{{ tool.label }}</h3>
+        <mat-icon class="text-zinc-500 dark:text-zinc-400">chevron_right</mat-icon>
       </a>
     }
   </div>
@@ -37,7 +37,7 @@
           <mat-icon class="icon-base">cached</mat-icon>
         </div>
         <div>
-          <p class="text-xs text-[var(--text-muted)]">Cache</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Cache</p>
           <p class="text-lg font-bold">{{ formatSize(cacheSize()) }}</p>
         </div>
       </div>
@@ -46,7 +46,7 @@
           <mat-icon class="icon-base">delete_outline</mat-icon>
         </div>
         <div>
-          <p class="text-xs text-[var(--text-muted)]">Trash</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Trash</p>
           <p class="text-lg font-bold">{{ formatSize(trashSize()) }}</p>
         </div>
       </div>
@@ -57,7 +57,7 @@
           <mat-icon class="icon-base">file_present</mat-icon>
         </div>
         <div>
-          <p class="text-xs text-[var(--text-muted)]">Large Files</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Large Files</p>
           <p class="text-lg font-bold">{{ formatSize(largeFileSize()) }}</p>
         </div>
       </div>

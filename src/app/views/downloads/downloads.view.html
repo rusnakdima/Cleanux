@@ -7,7 +7,7 @@
   <div class="glass-surface matte-surface p-6 mb-6">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Downloads Size</p>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Downloads Size</p>
         <p class="text-2xl font-bold">{{ formatSize(downloadsSize()) }}</p>
       </div>
       <button (click)="scanDownloads()" [disabled]="isScanning()" class="btn btn-primary">
@@ -56,8 +56,8 @@
     </div>
   } @else if (files().length > 0) {
     <div class="glass-surface matte-surface overflow-hidden">
-      <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
-        <span class="text-sm text-[var(--text-secondary)]">{{ files().length }} files</span>
+      <div class="p-4 border-b border-zinc-700 dark:border-zinc-300 flex items-center justify-between">
+        <span class="text-sm text-zinc-400 dark:text-zinc-500">{{ files().length }} files</span>
         <button
           (click)="cleanSelected()"
           [disabled]="selectedFiles().size === 0"
@@ -77,9 +77,9 @@
     </div>
   } @else {
     <div class="glass-surface matte-surface p-8 text-center">
-      <mat-icon class="icon-xl text-[var(--text-muted)] mb-4">folder_open</mat-icon>
-      <p class="text-[var(--text-secondary)]">No files found in Downloads</p>
-      <p class="text-sm text-[var(--text-muted)] mt-1">Click Scan to search for cleanable files</p>
+      <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4">folder_open</mat-icon>
+      <p class="text-zinc-400 dark:text-zinc-500">No files found in Downloads</p>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Click Scan to search for cleanable files</p>
     </div>
   }
 </div>
