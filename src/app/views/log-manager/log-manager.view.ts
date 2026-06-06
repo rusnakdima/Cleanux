@@ -27,6 +27,7 @@ import {
   VarLogUsage,
 } from '@services/log-manager.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
@@ -57,6 +58,7 @@ type TabType = 'journal' | 'rotated' | 'logrotate';
 export class LogManagerView implements OnInit {
   private logManagerService = inject(LogManagerService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   loading = signal(false);
   activeTab = signal<TabType>('journal');
@@ -154,7 +156,10 @@ export class LogManagerView implements OnInit {
   }
 
   async vacuumJournal() {
-    if (!confirm(`Vacuum journal to retain ${this.vacuumSizeMb()}MB?`)) return;
+    if (!await this.confirmDialogService.confirm({
+      title: 'Vacuum Journal',
+      message: `Vacuum journal to retain ${this.vacuumSizeMb()}MB?`,
+    })) return;
     this.loading.set(true);
     try {
       await this.logManagerService.vacuumJournal(this.vacuumSizeMb());
@@ -168,7 +173,10 @@ export class LogManagerView implements OnInit {
   }
 
   async vacuumJournalByDays() {
-    if (!confirm(`Vacuum journal to retain last ${this.vacuumDays()} days?`)) return;
+    if (!await this.confirmDialogService.confirm({
+      title: 'Vacuum Journal',
+      message: `Vacuum journal to retain last ${this.vacuumDays()} days?`,
+    })) return;
     this.loading.set(true);
     try {
       await this.logManagerService.vacuumJournalByDays(this.vacuumDays());
@@ -182,7 +190,10 @@ export class LogManagerView implements OnInit {
   }
 
   async cleanRotatedLogs() {
-    if (!confirm(`Clean rotated logs older than ${this.cleanRotatedDays()} days?`)) return;
+    if (!await this.confirmDialogService.confirm({
+      title: 'Clean Rotated Logs',
+      message: `Clean rotated logs older than ${this.cleanRotatedDays()} days?`,
+    })) return;
     this.loading.set(true);
     try {
       await this.logManagerService.cleanRotatedLogs(this.cleanRotatedDays());

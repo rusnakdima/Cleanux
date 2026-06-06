@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 /* services */
 import { SystemService, ProcessItem } from '@services/system.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -45,6 +46,7 @@ export class ProcessesView implements OnInit {
   private systemService = inject(SystemService);
   private document = inject(DOCUMENT);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   processesData = signal<ProcessItem[]>([]);
   loading = signal(false);
@@ -126,7 +128,11 @@ export class ProcessesView implements OnInit {
     const pidsToKill = Array.from(this.selectedPids());
     if (pidsToKill.length === 0) return;
 
-    const confirmed = confirm(`Kill ${pidsToKill.length} process(es)?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Kill Processes',
+      message: `Kill ${pidsToKill.length} process(es)?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
     try {

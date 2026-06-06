@@ -57,4 +57,4 @@ export class TauriApiService {
 
 export { ApiException } from '@models/error.model';
 export type { Response } from '@models/response.model';
-export { getData, isSuccess, isError } from '@models/response.model';
+export { getData } from '@models/response.model';

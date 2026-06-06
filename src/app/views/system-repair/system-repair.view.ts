@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RepairService, RepairItem } from '@services/repair.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 type RepairTab = 'symlinks' | 'packages' | 'cache' | 'permissions';
 
@@ -27,6 +28,7 @@ type RepairTab = 'symlinks' | 'packages' | 'cache' | 'permissions';
 export class SystemRepairView {
   private repairService = inject(RepairService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   activeTab = signal<RepairTab>('symlinks');
   loading = signal(false);
@@ -101,7 +103,11 @@ export class SystemRepairView {
   }
 
   async fixSymlink(item: RepairItem) {
-    const confirmed = confirm(`Remove broken symlink: ${item.path}?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Fix Symlink',
+      message: `Remove broken symlink: ${item.path}?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
     try {
       await this.repairService.removeBrokenSymlink(item.path);
@@ -114,7 +120,11 @@ export class SystemRepairView {
   async fixAllSymlinks() {
     const items = this.symlinksData();
     if (items.length === 0) return;
-    const confirmed = confirm(`Remove all ${items.length} broken symlinks?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Fix All Symlinks',
+      message: `Remove all ${items.length} broken symlinks?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
     for (const item of items) {
       try {
@@ -127,7 +137,11 @@ export class SystemRepairView {
   }
 
   async fixPackage(item: RepairItem) {
-    const confirmed = confirm(`Purge orphaned package: ${item.path}?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Purge Package',
+      message: `Purge orphaned package: ${item.path}?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
     try {
       await this.repairService.removeOrphanedPackage(item.path);
@@ -140,7 +154,11 @@ export class SystemRepairView {
   async fixAllPackages() {
     const items = this.packagesData();
     if (items.length === 0) return;
-    const confirmed = confirm(`Purge all ${items.length} orphaned packages?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Purge All Packages',
+      message: `Purge all ${items.length} orphaned packages?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
     for (const item of items) {
       try {

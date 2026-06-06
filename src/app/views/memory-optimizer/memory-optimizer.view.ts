@@ -30,6 +30,7 @@ import { DataListComponent } from '@components/data-list/data-list.component';
 
 /* models */
 import { ListColumn, ListOptions } from '@models/data-list.model';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-memory-optimizer-view',
@@ -134,11 +135,7 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
   }
 
   formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return formatSize(bytes);
   }
 
   get memoryUsagePercent(): number {

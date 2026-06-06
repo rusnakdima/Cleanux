@@ -11,8 +11,8 @@ import { RouterLink } from '@angular/router';
 
 /* services */
 import { FileService } from '@services/file.service';
-import { LogAnalyzerService } from '@services/log-analyzer.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
 
 type CleanCategory = 'cache' | 'trash' | 'logs' | 'packages';
@@ -26,8 +26,8 @@ type CleanCategory = 'cache' | 'trash' | 'logs' | 'packages';
 })
 export class CleanView implements OnInit {
   private fileService = inject(FileService);
-  private logAnalyzerService = inject(LogAnalyzerService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -113,7 +113,11 @@ export class CleanView implements OnInit {
   }
 
   async onCleanCategory(category: CleanCategory) {
-    const confirmed = confirm(`Clean all ${category}? This action cannot be undone.`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean Category',
+      message: `Clean all ${category}? This action cannot be undone.`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
     this.isCleaning.set(true);
@@ -149,9 +153,11 @@ export class CleanView implements OnInit {
     const totalSize = this.cacheSize() + this.trashSize() + this.logSize();
     if (totalSize === 0) return;
 
-    const confirmed = confirm(
-      `Clean all items (${this.formatSize(totalSize)})? This action cannot be undone.`
-    );
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean All',
+      message: `Clean all items (${this.formatSize(totalSize)})? This action cannot be undone.`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
     this.isCleaning.set(true);

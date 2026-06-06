@@ -1,4 +1,5 @@
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { ChangeDetectionStrategy, Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
@@ -35,6 +36,7 @@ type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
 export class AppResidueCleanerView {
   private residueService = inject(AppResidueService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -388,9 +390,11 @@ export class AppResidueCleanerView {
 
     if (paths.length === 0) return;
 
-    const confirmed = confirm(
-      `Are you sure you want to clean ${paths.length} item(s)?\n\nThis action cannot be undone. Consider backing up your data first.`
-    );
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean Residues',
+      message: `Are you sure you want to clean ${paths.length} item(s)?\n\nThis action cannot be undone. Consider backing up your data first.`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
     this.loading.set(true);

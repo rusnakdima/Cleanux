@@ -1,16 +1,11 @@
 /* sys lib */
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 
 /* services */
-import { I18nService } from './services/i18n.service';
-
-/* interceptors */
-import { ErrorInterceptorService } from '@interceptors/error.interceptor';
-import { LoadingInterceptorService } from '@interceptors/loading.interceptor';
-import { LoggingInterceptorService } from '@interceptors/logging.interceptor';
+import { ThemeService } from './services/theme.service';
 
 /* api */
 import { TauriApiService } from '@api/tauri-api.service';
@@ -24,20 +19,29 @@ import { AutomationStore } from '@stores/automation.store';
 /* routes */
 import { routes } from './app.routes';
 
+function initializeTheme(themeService: ThemeService) {
+  return () => {
+    themeService.applyTheme(themeService.currentTheme());
+  };
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(),
-    I18nService,
+    ThemeService,
     TauriApiService,
     CleanerStore,
     SystemStore,
     MonitorStore,
     AutomationStore,
-    ErrorInterceptorService,
-    LoadingInterceptorService,
-    LoggingInterceptorService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeTheme,
+      deps: [ThemeService],
+      multi: true,
+    },
   ],
 };

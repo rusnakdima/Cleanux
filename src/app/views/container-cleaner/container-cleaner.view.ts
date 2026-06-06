@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ContainerService, ContainerSummary } from '@services/container.service';
 import { formatSize } from '@shared/utils/format.util';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 type ContainerTab = 'docker' | 'podman';
 
@@ -26,6 +27,7 @@ type ContainerTab = 'docker' | 'podman';
 })
 export class ContainerCleanerView implements OnInit {
   private containerService = inject(ContainerService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -76,7 +78,11 @@ export class ContainerCleanerView implements OnInit {
       ? 'Warning: Using -a flag will remove ALL unused images, not just dangling ones. This cannot be undone!'
       : 'This will remove all stopped containers, unused networks, and dangling images. Continue?';
 
-    if (!confirm(warning)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Docker System Prune',
+      message: warning,
+    });
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.dockerPreview.set(null);
@@ -96,7 +102,11 @@ export class ContainerCleanerView implements OnInit {
       ? 'Warning: Using -a flag will remove ALL unused images. This cannot be undone!'
       : 'This will remove all dangling images. Continue?';
 
-    if (!confirm(warning)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Docker Image Prune',
+      message: warning,
+    });
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.dockerPreview.set(null);
@@ -112,7 +122,11 @@ export class ContainerCleanerView implements OnInit {
   }
 
   async dockerContainerPrune() {
-    if (!confirm('This will remove all stopped containers. Continue?')) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Docker Container Prune',
+      message: 'This will remove all stopped containers. Continue?',
+    });
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.dockerPreview.set(null);
@@ -128,12 +142,11 @@ export class ContainerCleanerView implements OnInit {
   }
 
   async dockerVolumePrune() {
-    if (
-      !confirm(
-        'This will remove all unused volumes. Data in these volumes will be lost forever! Continue?'
-      )
-    )
-      return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Docker Volume Prune',
+      message: 'This will remove all unused volumes. Data in these volumes will be lost forever! Continue?',
+    });
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.dockerPreview.set(null);
@@ -153,7 +166,11 @@ export class ContainerCleanerView implements OnInit {
       ? 'Warning: Using -a flag will remove ALL unused images and containers. This cannot be undone!'
       : 'This will remove all stopped containers, unused networks, and dangling images. Continue?';
 
-    if (!confirm(warning)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Podman System Prune',
+      message: warning,
+    });
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.podmanPreview.set(null);
@@ -173,7 +190,11 @@ export class ContainerCleanerView implements OnInit {
       ? 'Warning: Using -a flag will remove ALL unused images. This cannot be undone!'
       : 'This will remove all dangling images. Continue?';
 
-    if (!confirm(warning)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Podman Image Prune',
+      message: warning,
+    });
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.podmanPreview.set(null);
@@ -192,13 +213,11 @@ export class ContainerCleanerView implements OnInit {
     const s = this.summary();
     if (!s || s.docker_containers_count === 0) return;
 
-    const confirm1 = confirm(
-      `You are about to remove ${s.docker_containers_count} Docker containers. This is irreversible! Click OK to confirm.`
+    const confirmed = await this.confirmDialogService.confirmDangerous(
+      `You are about to remove ${s.docker_containers_count} Docker containers. This is irreversible!`,
+      true
     );
-    if (!confirm1) return;
-
-    const confirm2 = confirm('Are you absolutely sure? Type "YES" in the next prompt to proceed.');
-    if (!confirm2) return;
+    if (!confirmed) return;
 
     this.loading.set(true);
     this.dockerPreview.set(null);

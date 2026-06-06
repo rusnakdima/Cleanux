@@ -1,8 +1,9 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatIconModule } from '@angular/material/icon';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
@@ -23,6 +24,8 @@ interface RecentItem {
   templateUrl: './recent.view.html',
 })
 export class RecentView {
+  private confirmDialogService = inject(ConfirmDialogService);
+
   currentPage = signal(1);
   pageSize = signal(15);
 
@@ -91,17 +94,24 @@ export class RecentView {
     this.items.update((items) => items.filter((i) => i.id !== id));
   }
 
-  clearApp(appId: string) {
+  async clearApp(appId: string) {
     const app = this.apps.find((a) => a.id === appId);
-    if (app && confirm(`Clear recent history for ${app.name}?`)) {
+    if (app && await this.confirmDialogService.confirm({
+      title: 'Clear History',
+      message: `Clear recent history for ${app.name}?`,
+    })) {
       this.items.update((items) =>
         items.filter((i) => i.app.toLowerCase() !== appId.toLowerCase())
       );
     }
   }
 
-  clearAll() {
-    if (confirm('Clear all recent file history? This cannot be undone.')) {
+  async clearAll() {
+    if (await this.confirmDialogService.confirm({
+      title: 'Clear All History',
+      message: 'Clear all recent file history? This cannot be undone.',
+      dangerous: true,
+    })) {
       this.items.set([]);
     }
   }

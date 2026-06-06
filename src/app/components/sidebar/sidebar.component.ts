@@ -66,6 +66,10 @@ export class SidebarComponent implements OnInit {
     this.themeService.applyTheme(this.themeService.currentTheme());
   }
 
+  getAccentGradient(): string {
+    return this.themeService.getAccentGradient();
+  }
+
   onToggleDarkMode() {
     const current = this.themeService.currentTheme();
     const newMode = current.mode === 'dark' ? 'light' : 'dark';

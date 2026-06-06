@@ -1,15 +1,22 @@
 import { Injectable } from '@angular/core';
+import { ToastService } from '../shared/toast/toast.service';
+import { ConfirmDialogService } from '../shared/confirm-dialog/confirm-dialog.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationService {
+  constructor(
+    private toastService: ToastService,
+    private confirmDialogService: ConfirmDialogService
+  ) {}
+
   alert(message: string): void {
-    window.alert(message);
+    this.toastService.show(message, 'info');
   }
 
-  confirm(message: string): boolean {
-    return window.confirm(message);
+  async confirm(message: string): Promise<boolean> {
+    return this.confirmDialogService.confirm({ title: 'Confirm', message });
   }
 
   error(title: string, error: unknown): void {
@@ -18,7 +25,7 @@ export class NotificationService {
   }
 
   success(message: string): void {
-    this.alert(message);
+    this.toastService.show(message, 'success');
   }
 
   cleanError(operation: string, error: unknown): void {

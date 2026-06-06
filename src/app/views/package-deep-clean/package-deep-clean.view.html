@@ -13,8 +13,8 @@
             <mat-icon class="text-white icon-2xl" fontIcon="inventory_2" />
           </div>
           <div>
-            <h2 class="text-xl font-bold text-[var(--text-primary)]">Package Manager Deep Clean</h2>
-            <p class="text-sm text-[var(--text-secondary)]">
+            <h2 class="text-xl font-bold text-white dark:text-zinc-900">Package Manager Deep Clean</h2>
+            <p class="text-sm text-zinc-400 dark:text-zinc-500">
               Clean package caches and remove orphaned packages
             </p>
           </div>
@@ -51,7 +51,7 @@
                     <mat-icon class="text-info" fontIcon="cached" />
                   </div>
                   <div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase">Cache Size</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase">Cache Size</p>
                     <p class="text-xl font-bold">{{ formatSize(summary()!.aptCacheSize) }}</p>
                   </div>
                 </div>
@@ -62,7 +62,7 @@
                     <mat-icon class="text-warning" fontIcon="folder_delete" />
                   </div>
                   <div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase">Orphaned</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase">Orphaned</p>
                     <p class="text-xl font-bold">{{ summary()!.aptOrphanedCount }} packages</p>
                   </div>
                 </div>
@@ -73,7 +73,7 @@
                     <mat-icon class="text-warning" fontIcon="download" />
                   </div>
                   <div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase">Partial Downloads</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase">Partial Downloads</p>
                     <p class="text-xl font-bold">{{ summary()!.aptPartialDownloads }} files</p>
                   </div>
                 </div>
@@ -109,7 +109,7 @@
 
             @if (orphanedPackages().length > 0) {
               <div class="mt-6">
-                <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4">Orphaned Packages</h3>
+                <h3 class="text-lg font-bold text-white dark:text-zinc-900 mb-4">Orphaned Packages</h3>
                 <div class="bg-error/10 border border-error/30 rounded-xl p-4">
                   <p class="text-sm text-error mb-3">
                     These packages are marked for removal but not fully cleaned:
@@ -117,7 +117,7 @@
                   <div class="flex flex-wrap gap-2">
                     @for (pkg of orphanedPackages(); track pkg.name) {
                       <span
-                        class="inline-flex items-center gap-2 px-3 py-1 bg-[var(--bg-elevated)] rounded-lg text-sm"
+                        class="inline-flex items-center gap-2 px-3 py-1 bg-zinc-800 dark:bg-zinc-100 rounded-lg text-sm"
                       >
                         <mat-icon class="text-error icon-sm" fontIcon="warning" />
                         {{ pkg.name }}
@@ -137,14 +137,14 @@
 
             @if (partialDownloads().length > 0) {
               <div class="mt-6">
-                <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4">Partial Downloads</h3>
+                <h3 class="text-lg font-bold text-white dark:text-zinc-900 mb-4">Partial Downloads</h3>
                 <div class="bg-warning/10 border border-warning/30 rounded-xl p-4">
                   <p class="text-sm text-warning mb-3">
                     Incomplete package downloads (.part files):
                   </p>
                   <div class="flex flex-wrap gap-2">
                     @for (file of partialDownloads(); track file) {
-                      <span class="px-3 py-1 bg-[var(--bg-elevated)] rounded-lg text-sm font-mono">
+                      <span class="px-3 py-1 bg-zinc-800 dark:bg-zinc-100 rounded-lg text-sm font-mono">
                         {{ file }}
                       </span>
                     }
@@ -166,7 +166,7 @@
                     <mat-icon class="text-success">cached</mat-icon>
                   </div>
                   <div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase">Cache Size</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase">Cache Size</p>
                     <p class="text-xl font-bold">{{ formatSize(summary()!.dnfCacheSize) }}</p>
                   </div>
                 </div>
@@ -184,7 +184,7 @@
               </button>
             </div>
 
-            <p class="text-sm text-[var(--text-muted)]">
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">
               Cleans all DNF/YUM cache including metadata, packages, and sqlite databases.
             </p>
           </div>
@@ -201,7 +201,7 @@
                     <mat-icon class="text-info icon-sm" fontIcon="cached" />
                   </div>
                   <div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase">Cache Size</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase">Cache Size</p>
                     <p class="text-xl font-bold">{{ formatSize(summary()!.pacmanCacheSize) }}</p>
                   </div>
                 </div>
@@ -209,7 +209,7 @@
             </div>
 
             <div class="flex items-center gap-4">
-              <label class="text-sm font-medium text-[var(--text-secondary)]"
+              <label class="text-sm font-medium text-zinc-400 dark:text-zinc-500"
                 >Keep most recent:</label
               >
               <input
@@ -218,9 +218,9 @@
                 max="10"
                 [value]="pacmanKeepRecent()"
                 (change)="pacmanKeepRecent.set(+$any($event.target).value)"
-                class="w-20 px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-elevated)] text-[var(--text-primary)] text-sm text-center"
+                class="w-20 px-3 py-2 border border-zinc-700 dark:border-zinc-300 rounded-lg bg-zinc-800 dark:bg-zinc-100 text-white dark:text-zinc-900 text-sm text-center"
               />
-              <span class="text-sm text-[var(--text-muted)]">packages</span>
+              <span class="text-sm text-zinc-500 dark:text-zinc-400">packages</span>
             </div>
 
             <div class="flex flex-wrap gap-3">
@@ -269,7 +269,7 @@
                     <mat-icon class="text-success">cached</mat-icon>
                   </div>
                   <div>
-                    <p class="text-xs text-[var(--text-muted)] uppercase">Cache Size</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase">Cache Size</p>
                     <p class="text-xl font-bold">{{ formatSize(summary()!.zypperCacheSize) }}</p>
                   </div>
                 </div>
@@ -287,7 +287,7 @@
               </button>
             </div>
 
-            <p class="text-sm text-[var(--text-muted)]">
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">
               Cleans all Zypper cache including downloaded packages and metadata.
             </p>
           </div>
@@ -301,11 +301,11 @@
         !summary()?.zypperAvailable
       ) {
         <div class="p-12 text-center">
-          <mat-icon class="icon-4xl text-[var(--text-muted)]" fontIcon="inventory_2" />
-          <h3 class="text-xl font-semibold text-[var(--text-secondary)] mt-4">
+          <mat-icon class="icon-4xl text-zinc-500 dark:text-zinc-400" fontIcon="inventory_2" />
+          <h3 class="text-xl font-semibold text-zinc-400 dark:text-zinc-500 mt-4">
             No Package Manager Detected
           </h3>
-          <p class="text-[var(--text-muted)] mt-2">
+          <p class="text-zinc-500 dark:text-zinc-400 mt-2">
             No supported package managers (APT, DNF, Pacman, Zypper) were found on this system.
           </p>
         </div>

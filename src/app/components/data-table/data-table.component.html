@@ -28,25 +28,17 @@
 
           <div class="controls-right">
             @if (showCheckbox && options.showHeader) {
-              <label class="custom-checkbox select-all-checkbox" [matTooltip]="allSelected() ? 'Deselect All' : 'Select All'">
-                <input
-                  type="checkbox"
-                  [checked]="allSelected()"
-                  (change)="toggleSelectAll($any($event.target).checked)"
-                />
-                <span class="checkmark" [class.indeterminate]="indeterminate()">
-                  @if (indeterminate()) {
-                    <mat-icon class="check-icon">remove</mat-icon>
-                  } @else {
-                    <mat-icon class="check-icon">check</mat-icon>
-                  }
-                </span>
-              </label>
+              <app-checkbox
+                [checked]="allSelected()"
+                [indeterminate]="indeterminate()"
+                (changed)="toggleSelectAll($event)"
+                [tooltip]="allSelected() ? 'Deselect All' : 'Select All'"
+              />
             }
 
             @if (showReloadButton) {
               <button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-                <mat-icon class="text-[var(--accent-icons)]">refresh</mat-icon>
+                <mat-icon class="text-cyan-500 dark:text-cyan-400">refresh</mat-icon>
               </button>
             }
           </div>
@@ -55,7 +47,7 @@
     }
     @if (options.showHeader && columns.length > 0) {
       <div
-        class="table-header sticky top-0 z-20 w-full bg-[var(--bg-surface)]/95 backdrop-blur-lg border-b border-[var(--border-color)] shrink-0"
+        class="table-header sticky top-0 z-20 w-full bg-zinc-900/95 dark:bg-white/95 backdrop-blur-lg border-b border-zinc-700 dark:border-zinc-200 shrink-0"
       >
         <div class="flex items-center px-4">
           @if (showPreviewButton) {
@@ -111,21 +103,6 @@
             (click)="onRowClick(item, $event)"
             (dblclick)="onRowDoubleClick(item)"
           >
-            @if (showCheckbox) {
-              <div class="checkbox-container w-10 shrink-0">
-                <label class="custom-checkbox">
-                  <input
-                    type="checkbox"
-                    [checked]="isSelected(item)"
-                    (change)="toggleSelectItem(item, $any($event.target).checked)"
-                    (click)="$event.stopPropagation()"
-                  />
-                  <span class="checkmark">
-                    <mat-icon class="check-icon">check</mat-icon>
-                  </span>
-                </label>
-              </div>
-            }
             @if (showPreviewButton) {
               <div class="preview-btn-container">
                 <button
@@ -198,21 +175,6 @@
               (click)="onRowClick(item, $event)"
               (dblclick)="onRowDoubleClick(item)"
             >
-              @if (showCheckbox) {
-                <div class="checkbox-container w-10 shrink-0">
-                  <label class="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      [checked]="isSelected(item)"
-                      (change)="toggleSelectItem(item, $any($event.target).checked)"
-                      (click)="$event.stopPropagation()"
-                    />
-                    <span class="checkmark">
-                      <mat-icon class="check-icon">check</mat-icon>
-                    </span>
-                  </label>
-                </div>
-              }
               @if (showPreviewButton) {
                 <div class="preview-btn-container">
                   <button

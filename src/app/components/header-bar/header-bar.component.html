@@ -3,7 +3,7 @@
     <div class="flex min-w-0 items-center gap-3">
       @if (showBack()) {
         <button
-          class="flex h-9 flex-shrink-0 items-center justify-center rounded-full border border-gray-200/50 bg-white/80 px-3 py-2 shadow-lg shadow-black/10 backdrop-blur-sm transition-all hover:bg-white dark:border-zinc-700/50 dark:bg-zinc-800/80 dark:hover:bg-zinc-700"
+          class="flex h-9 flex-shrink-0 items-center justify-center rounded-full border border-white/20 bg-transparent px-3 py-2 shadow-lg shadow-black/10 backdrop-blur-sm transition-all hover:bg-white/20 dark:border-white/20 dark:hover:bg-white/10"
           (click)="backClick.emit()"
         >
           <mat-icon class="text-base">chevron_left</mat-icon>
@@ -12,9 +12,9 @@
 
       <div class="flex min-w-0 flex-1 flex-col">
         <div
-          class="flex items-center gap-2 rounded-full border border-gray-200/50 bg-white/80 px-4 py-2 shadow-lg shadow-black/10 backdrop-blur-sm dark:border-zinc-700/50 dark:bg-zinc-800/80"
+          class="flex items-center gap-2 rounded-full border border-white/20 bg-transparent px-4 py-2 shadow-lg shadow-black/10 backdrop-blur-sm dark:border-white/20"
         >
-          <h1 class="header-title text-normal truncate text-lg font-semibold">{{ title() }}</h1>
+          <h1 class="header-title text-normal truncate text-lg font-semibold text-white dark:text-zinc-900">{{ title() }}</h1>
         </div>
       </div>
     </div>

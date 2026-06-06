@@ -1,0 +1,26 @@
+<label
+  class="checkbox-wrapper"
+  [class.checked]="checked"
+  [class.indeterminate]="indeterminate"
+  [class.disabled]="disabled"
+  [matTooltip]="tooltip"
+  tabindex="0"
+  role="checkbox"
+  [attr.aria-checked]="indeterminate ? 'mixed' : checked"
+  (click)="onClick($event)"
+  (keydown)="onKeydown($event)"
+>
+  <input
+    type="checkbox"
+    [checked]="checked"
+    [disabled]="disabled"
+    class="checkbox-input"
+  />
+  <span class="checkbox-mark">
+    @if (indeterminate) {
+      <mat-icon class="checkbox-icon">remove</mat-icon>
+    } @else if (checked) {
+      <mat-icon class="checkbox-icon">check</mat-icon>
+    }
+  </span>
+</label>

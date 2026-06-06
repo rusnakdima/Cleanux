@@ -19,8 +19,8 @@ import { RouterLink } from '@angular/router';
 /* services */
 import { FileService, ScanSummary } from '@services/file.service';
 import { ApiService } from '@services/api.service';
-import { SystemService } from '@services/system.service';
 import { HealthHistoryService } from '@services/health-history.service';
+import { ThemeService } from '@services/theme.service';
 import { MonitorStore } from '@stores/monitor.store';
 import { formatSize } from '@shared/utils/format.util';
 import {
@@ -66,8 +66,8 @@ const WIDGET_STORAGE_KEY = 'cleanux_widget_layout';
 export class DashboardView implements OnInit, OnDestroy {
   private fileService = inject(FileService);
   private api = inject(ApiService);
-  private systemService = inject(SystemService);
   private healthHistoryService = inject(HealthHistoryService);
+  private themeService = inject(ThemeService);
   protected monitorStore = inject(MonitorStore);
 
   private unlisten: (() => void) | null = null;
@@ -360,5 +360,9 @@ export class DashboardView implements OnInit, OnDestroy {
     if (score >= 80) return 'Your system is in great condition!';
     if (score >= 50) return 'Consider running a cleanup to improve performance.';
     return 'System needs attention. Run a deep clean recommended.';
+  }
+
+  getAccentGradient(): string {
+    return this.themeService.getAccentGradient();
   }
 }

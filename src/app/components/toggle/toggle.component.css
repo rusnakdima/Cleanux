@@ -1,8 +1,16 @@
 .toggle-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #fafafa;
   user-select: none;
+}
+
+.dark .toggle-label {
+  color: #fafafa;
+}
+
+.light .toggle-label {
+  color: #18181b;
 }
 
 .toggle-label-left {
@@ -18,15 +26,25 @@
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  border: 2px solid var(--border-color);
-  background: var(--bg-hover);
+  border: 2px solid #3f3f46;
+  background: #27272a;
   cursor: pointer;
   transition: all 150ms ease;
   outline: none;
 }
 
+.dark .toggle-track {
+  border-color: #3f3f46;
+  background: #27272a;
+}
+
+.light .toggle-track {
+  border-color: #d4d4d8;
+  background: #e4e4e7;
+}
+
 .toggle-track:focus-visible {
-  box-shadow: 0 0 0 3px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.3);
 }
 
 .toggle-track:active:not(.toggle-disabled) {
@@ -39,9 +57,9 @@
 }
 
 .toggle-track.toggle-checked {
-  background: var(--accent-buttons, var(--accent));
-  border-color: var(--accent-buttons, var(--accent));
-  box-shadow: 0 0 12px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 .toggle-knob {

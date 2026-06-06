@@ -18,6 +18,7 @@ import {
   InitramfsInfo,
   BootSpaceInfo,
 } from '@services/kernel-cleaner.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
@@ -39,6 +40,7 @@ import { ListColumn, ListOptions } from '@models/data-list.model';
 })
 export class KernelCleanerView implements OnInit {
   private kernelService = inject(KernelCleanerService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -182,11 +184,14 @@ export class KernelCleanerView implements OnInit {
     const selected = Array.from(this.selectedKernels());
     if (selected.length === 0) return;
 
-    const confirmed = confirm(
-      `Remove ${selected.length} kernel(s)? This cannot be undone.\n\n` +
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Remove Kernels',
+      message:
+        `Remove ${selected.length} kernel(s)? This cannot be undone.\n\n` +
         `Selected versions:\n${selected.join('\n')}\n\n` +
-        `WARNING: Make sure you have a working kernel to boot into!`
-    );
+        `WARNING: Make sure you have a working kernel to boot into!`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
     this.loading.set(true);
@@ -243,7 +248,10 @@ export class KernelCleanerView implements OnInit {
     const selected = Array.from(this.selectedInitramfs());
     if (selected.length === 0) return;
 
-    const confirmed = confirm(`Remove ${selected.length} old initramfs file(s)?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean Initramfs',
+      message: `Remove ${selected.length} old initramfs file(s)?`,
+    });
     if (!confirmed) return;
 
     this.loading.set(true);

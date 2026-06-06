@@ -18,6 +18,7 @@ import {
   OrphanedPackage,
 } from '@services/package-deep-clean.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 import { formatSize } from '@shared/utils/format.util';
 
@@ -40,6 +41,7 @@ import { formatSize } from '@shared/utils/format.util';
 export class PackageDeepCleanView implements OnInit {
   private service = inject(PackageDeepCleanService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -117,7 +119,10 @@ export class PackageDeepCleanView implements OnInit {
   }
 
   async aptAutoremove() {
-    const confirmed = confirm('Run apt autoremove to remove unused packages?');
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'APT Autoremove',
+      message: 'Run apt autoremove to remove unused packages?',
+    });
     if (!confirmed) return;
     try {
       const result = await this.service.aptAutoremove();
@@ -139,7 +144,11 @@ export class PackageDeepCleanView implements OnInit {
   }
 
   async removeOrphanedPackage(pkg: OrphanedPackage) {
-    const confirmed = confirm(`Remove orphaned package "${pkg.name}"?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Remove Package',
+      message: `Remove orphaned package "${pkg.name}"?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
     try {
       await this.service.removeOrphanedPackage(pkg.name);
@@ -170,14 +179,19 @@ export class PackageDeepCleanView implements OnInit {
   }
 
   async pacmanFullClean() {
-    const confirmed = confirm(
-      'WARNING: Full clean (-Scc) will remove ALL cached packages including the current version!\n\nThis is a destructive operation. Are you sure?'
-    );
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Pacman Full Clean',
+      message:
+        'WARNING: Full clean (-Scc) will remove ALL cached packages including the current version!\n\nThis is a destructive operation. Are you sure?',
+      dangerous: true,
+    });
     if (!confirmed) return;
 
-    const doubleConfirmed = confirm(
-      'This will remove ALL package cache, including those for currently installed packages. Type "YES" to confirm.'
-    );
+    const doubleConfirmed = await this.confirmDialogService.confirm({
+      title: 'Confirm Full Clean',
+      message: 'This will remove ALL package cache, including those for currently installed packages. Type "YES" to confirm.',
+      requireYesToConfirm: true,
+    });
     if (!doubleConfirmed) return;
 
     try {
@@ -200,7 +214,10 @@ export class PackageDeepCleanView implements OnInit {
   }
 
   async deepCleanAll() {
-    const confirmed = confirm('Run deep clean for all available package managers?');
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Deep Clean',
+      message: 'Run deep clean for all available package managers?',
+    });
     if (!confirmed) return;
     try {
       const result = await this.service.deepCleanAll();

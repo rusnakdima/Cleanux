@@ -1,5 +1,5 @@
 <aside
-  class="fixed md:sticky top-0 left-0 h-screen z-50 bg-[#18181b] border-r border-zinc-800 flex flex-col transition-transform duration-300 shrink-0"
+  class="fixed md:sticky top-0 left-0 h-screen z-50 bg-zinc-800 dark:bg-zinc-800 border-r border-zinc-700 dark:border-zinc-700 flex flex-col transition-transform duration-300 shrink-0"
   [class.w-64]="!isCollapsed()"
   [class.w-20]="isCollapsed()"
   [class.-translate-x-full]="!isOpen()"
@@ -7,24 +7,25 @@
   [class.md:translate-x-0]="true"
 >
   <!-- Brand Logo -->
-  <div class="p-6 border-b border-zinc-850 flex items-center justify-between">
+  <div class="p-6 border-b border-zinc-700 dark:border-zinc-700 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <div
-        class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg"
+        class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg"
+        [style.background]="getAccentGradient()"
       >
         <mat-icon class="text-zinc-950 text-xl font-bold">cleaning_services</mat-icon>
       </div>
       @if (!isCollapsed()) {
         <div>
           <span class="font-bold text-sm tracking-wide gradient-text">TuxClean Pro</span>
-          <p class="text-[10px] text-[var(--text-muted)] font-mono">Optimizer Daemon</p>
+          <p class="text-[10px] text-zinc-500 dark:text-zinc-400 font-mono">Optimizer Daemon</p>
         </div>
       }
     </div>
     @if (!isCollapsed()) {
       <button
         (click)="onClose()"
-        class="md:hidden text-[var(--text-secondary)] hover:text-white p-1"
+        class="md:hidden text-zinc-400 hover:text-white p-1"
       >
         <mat-icon class="text-base">close</mat-icon>
       </button>
@@ -34,7 +35,7 @@
   <!-- Navigation -->
   <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
     <span
-      class="px-3 text-[9px] font-bold tracking-wider text-[var(--text-muted)] uppercase block mb-3"
+      class="px-3 text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase block mb-3"
       >System Overview</span
     >
 
@@ -53,7 +54,7 @@
     </a>
 
     <span
-      class="px-3 pt-6 text-[9px] font-bold tracking-wider text-[var(--text-muted)] uppercase block mb-3"
+      class="px-3 pt-6 text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase block mb-3"
       >Cleaning Modules</span
     >
 
@@ -84,7 +85,7 @@
     </a>
 
     <span
-      class="px-3 pt-6 text-[9px] font-bold tracking-wider text-[var(--text-muted)] uppercase block mb-3"
+      class="px-3 pt-6 text-[9px] font-bold tracking-wider text-zinc-500 dark:text-zinc-400 uppercase block mb-3"
       >Live Utilities</span
     >
 
@@ -116,14 +117,15 @@
   </nav>
 
   <!-- Disk Usage Progress (Bottom) -->
-  <div class="p-4 border-t border-zinc-850 bg-zinc-950/20">
-    <div class="flex items-center justify-between text-xs mb-2 text-[var(--text-secondary)]">
+  <div class="p-4 border-t border-zinc-700 dark:border-zinc-700 bg-zinc-900/20 dark:bg-zinc-900/20">
+    <div class="flex items-center justify-between text-xs mb-2 text-zinc-400 dark:text-zinc-500">
       <span>Disk Usage</span>
-      <span class="font-mono text-[var(--text-primary)]">{{ diskUsageDisplay() }}</span>
+      <span class="font-mono text-white dark:text-zinc-900">{{ diskUsageDisplay() }}</span>
     </div>
-    <div class="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+    <div class="w-full h-1.5 bg-zinc-700 dark:bg-zinc-700 rounded-full overflow-hidden">
       <div
-        class="bg-gradient-to-r from-teal-500 to-emerald-400 h-full transition-all duration-500"
+        class="h-full transition-all duration-500"
+        [style.background]="getAccentGradient()"
         [style.width.%]="diskUsagePercent()"
       ></div>
     </div>

@@ -27,7 +27,7 @@
       <div class="glass-card-body">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, §2563eb)">
+            <div class="stat-icon" [style.background]="getAccentGradient()">
               <mat-icon class="text-white">content_copy</mat-icon>
             </div>
             <div class="stat-content">
@@ -36,7 +36,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c)">
+            <div class="stat-icon" [style.background]="getAccentGradient()">
               <mat-icon class="text-white">files</mat-icon>
             </div>
             <div class="stat-content">
@@ -45,7 +45,7 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626)">
+            <div class="stat-icon" [style.background]="getAccentGradient()">
               <mat-icon class="text-white">delete</mat-icon>
             </div>
             <div class="stat-content">
@@ -71,7 +71,7 @@
       </div>
     } @else {
       <div
-        class="glass-card-body flex flex-col items-center justify-center h-64 text-[var(--text-muted)]"
+        class="glass-card-body flex flex-col items-center justify-center h-64 text-zinc-500 dark:text-zinc-400"
       >
         <mat-icon class="icon-4xl mb-4">content_copy</mat-icon>
         <p class="text-lg font-medium">No duplicate files found</p>

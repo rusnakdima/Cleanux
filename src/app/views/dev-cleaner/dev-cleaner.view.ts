@@ -5,8 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DevCacheService, DevCacheItem, DevCacheSummary } from '@services/dev-cache.service';
-import { NotificationService } from '@services/notification.service';
 import { formatSize } from '@shared/utils/format.util';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 interface DevToolCard {
   name: string;
@@ -29,13 +29,11 @@ interface DevToolCard {
   ],
   templateUrl: './dev-cleaner.view.html',
 })
-export class DevCleanerView implements OnInit {
+export class DevCleanerView extends LoadingErrorMixin implements OnInit {
   private devCacheService = inject(DevCacheService);
-  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
-  loading = signal(true);
   cleaning = signal(false);
   summary = signal<DevCacheSummary | null>(null);
 
@@ -53,16 +51,12 @@ export class DevCleanerView implements OnInit {
   }
 
   async loadSummary(): Promise<void> {
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       const summary = await this.devCacheService.getDevCacheSummary();
       this.summary.set(summary);
       this.updateDevTools(summary);
-    } catch (error) {
-      console.error('Failed to load dev cache summary:', error);
-    } finally {
-      this.loading.set(false);
-    }
+      return summary;
+    }, { errorMessage: 'Failed to load dev cache summary' });
   }
 
   private updateDevTools(summary: DevCacheSummary): void {
@@ -85,7 +79,10 @@ export class DevCleanerView implements OnInit {
   }
 
   async cleanTool(name: string): Promise<void> {
-    const confirmed = confirm(`Clean ${name} cache?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean Cache',
+      message: `Clean ${name} cache?`,
+    });
     if (!confirmed) return;
 
     this.cleaning.set(true);
@@ -123,7 +120,10 @@ export class DevCleanerView implements OnInit {
   }
 
   async cleanAll(): Promise<void> {
-    const confirmed = confirm('Clean all dev caches?');
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean All Caches',
+      message: 'Clean all dev caches?',
+    });
     if (!confirmed) return;
 
     this.cleaning.set(true);

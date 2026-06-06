@@ -1,8 +1,8 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     <div class="stat-card matte-surface border-trace">
-      <div class="stat-icon">
-        <mat-icon class="text-[var(--accent-icons)]">file_copy</mat-icon>
+      <div class="stat-icon" [style.background]="getAccentGradient()">
+        <mat-icon class="text-white">file_copy</mat-icon>
       </div>
       <div class="stat-content">
         <span class="stat-label">Large Files Found</span>
@@ -11,7 +11,7 @@
     </div>
 
     <div class="stat-card matte-surface border-trace">
-      <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c)">
+      <div class="stat-icon" [style.background]="getAccentGradient()">
         <mat-icon class="text-white">storage</mat-icon>
       </div>
       <div class="stat-content">

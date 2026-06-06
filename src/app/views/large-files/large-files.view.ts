@@ -17,7 +17,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
 import { FileService, LargeFileItem } from '@services/file.service';
+import { ThemeService } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -43,7 +45,9 @@ import { formatSize } from '@shared/utils/format.util';
 })
 export class LargeFilesView implements OnInit {
   private fileService = inject(FileService);
+  private themeService = inject(ThemeService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -136,7 +140,10 @@ export class LargeFilesView implements OnInit {
 
     if (filesToClear.length === 0) return;
 
-    const confirmed = confirm(`Clear ${filesToClear.length} large file(s)?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clear Files',
+      message: `Clear ${filesToClear.length} large file(s)?`,
+    });
     if (!confirmed) return;
 
     try {
@@ -196,5 +203,9 @@ export class LargeFilesView implements OnInit {
     } catch (error: unknown) {
       this.notification.error('Failed to open file', error);
     }
+  }
+
+  getAccentGradient(): string {
+    return this.themeService.getAccentGradient();
   }
 }

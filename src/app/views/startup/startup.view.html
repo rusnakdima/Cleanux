@@ -1,8 +1,8 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="stat-card matte-surface">
-      <div class="stat-icon">
-        <mat-icon class="text-info">apps</mat-icon>
+      <div class="stat-icon" [style.background]="getAccentGradient()">
+        <mat-icon class="text-white">apps</mat-icon>
       </div>
       <div class="stat-content">
         <span class="stat-label">Total Items</span>
@@ -11,7 +11,7 @@
     </div>
 
     <div class="stat-card matte-surface">
-      <div class="stat-icon" style="background: linear-gradient(135deg, #22c55e, #10b981)">
+      <div class="stat-icon" [style.background]="getAccentGradient()">
         <mat-icon class="text-white">check_circle</mat-icon>
       </div>
       <div class="stat-content">
@@ -21,7 +21,7 @@
     </div>
 
     <div class="stat-card matte-surface">
-      <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626)">
+      <div class="stat-icon" [style.background]="getAccentGradient()">
         <mat-icon class="text-white">cancel</mat-icon>
       </div>
       <div class="stat-content">

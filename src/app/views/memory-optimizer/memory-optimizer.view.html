@@ -1,7 +1,7 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
     <div class="glass-surface matte-surface p-6">
-      <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+      <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-white dark:text-zinc-900">
         <mat-icon class="text-[var(--accent-icons)] icon-sm">memory</mat-icon>
         Memory Usage
       </h3>
@@ -12,7 +12,7 @@
             cy="50"
             r="40"
             stroke="currentColor"
-            class="text-[var(--bg-elevated)]"
+            class="bg-zinc-800 dark:bg-zinc-200"
             stroke-width="8"
             fill="none"
           />
@@ -32,35 +32,35 @@
           />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="text-3xl font-bold text-[var(--text-primary)]"
+          <span class="text-3xl font-bold text-white dark:text-zinc-900"
             >{{ memoryUsagePercent | number: "1.0-0" }}%</span
           >
-          <span class="text-xs text-[var(--text-muted)]">Used</span>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">Used</span>
         </div>
       </div>
       @if (memoryInfo()) {
         <div class="mt-4 space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-[var(--text-muted)]">Total</span>
-            <span class="font-medium text-[var(--text-primary)]">{{
+            <span class="text-zinc-500 dark:text-zinc-400">Total</span>
+            <span class="font-medium text-white dark:text-zinc-900">{{
               formatBytes(memoryInfo()!.total)
             }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-[var(--text-muted)]">Used</span>
-            <span class="font-medium text-[var(--text-primary)]">{{
+            <span class="text-zinc-500 dark:text-zinc-400">Used</span>
+            <span class="font-medium text-white dark:text-zinc-900">{{
               formatBytes(memoryInfo()!.used)
             }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-[var(--text-muted)]">Available</span>
-            <span class="font-medium text-[var(--text-primary)]">{{
+            <span class="text-zinc-500 dark:text-zinc-400">Available</span>
+            <span class="font-medium text-white dark:text-zinc-900">{{
               formatBytes(memoryInfo()!.available)
             }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-[var(--text-muted)]">Cached</span>
-            <span class="font-medium text-[var(--text-primary)]">{{
+            <span class="text-zinc-500 dark:text-zinc-400">Cached</span>
+            <span class="font-medium text-white dark:text-zinc-900">{{
               formatBytes(memoryInfo()!.cached)
             }}</span>
           </div>
@@ -69,7 +69,7 @@
     </div>
 
     <div class="glass-surface matte-surface p-6">
-      <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+      <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 text-white dark:text-zinc-900">
         <mat-icon class="text-[var(--accent-icons)] icon-sm">swap_vert</mat-icon>
         Swap Usage
       </h3>
@@ -80,7 +80,7 @@
             cy="50"
             r="40"
             stroke="currentColor"
-            class="text-[var(--bg-elevated)]"
+            class="bg-zinc-800 dark:bg-zinc-200"
             stroke-width="8"
             fill="none"
           />
@@ -99,23 +99,23 @@
           />
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
-          <span class="text-3xl font-bold text-[var(--text-primary)]"
+          <span class="text-3xl font-bold text-white dark:text-zinc-900"
             >{{ swapUsagePercent | number: "1.0-0" }}%</span
           >
-          <span class="text-xs text-[var(--text-muted)]">Used</span>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">Used</span>
         </div>
       </div>
       @if (swapInfo()) {
         <div class="mt-4 space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-[var(--text-muted)]">Total</span>
-            <span class="font-medium text-[var(--text-primary)]">{{
+            <span class="text-zinc-500 dark:text-zinc-400">Total</span>
+            <span class="font-medium text-white dark:text-zinc-900">{{
               formatBytes(swapInfo()!.total)
             }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-[var(--text-muted)]">Used</span>
-            <span class="font-medium text-[var(--text-primary)]">{{
+            <span class="text-zinc-500 dark:text-zinc-400">Used</span>
+            <span class="font-medium text-white dark:text-zinc-900">{{
               formatBytes(swapInfo()!.used)
             }}</span>
           </div>
@@ -138,7 +138,7 @@
 
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
-      <h3 class="text-sm font-semibold flex items-center gap-2 text-[var(--text-primary)]">
+      <h3 class="text-sm font-semibold flex items-center gap-2 text-white dark:text-zinc-900">
         <mat-icon class="text-[var(--accent-icons)] icon-sm">list</mat-icon>
         Processes by Memory
       </h3>

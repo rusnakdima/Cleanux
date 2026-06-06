@@ -12,7 +12,6 @@ import { MatCardModule } from '@angular/material/card';
 
 /* services */
 import { JunkCleanerService } from '@services/junk-cleaner.service';
-import { NotificationService } from '@services/notification.service';
 
 /* models */
 import {
@@ -22,6 +21,7 @@ import {
   JunkCategoryKey,
 } from '@models/junk-cleaner.model';
 import { formatSize } from '@shared/utils/format.util';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 @Component({
   selector: 'app-advanced-cleaner-view',
@@ -38,14 +38,12 @@ import { formatSize } from '@shared/utils/format.util';
   ],
   templateUrl: './advanced-cleaner.view.html',
 })
-export class AdvancedCleanerView implements OnInit {
-  private notification = inject(NotificationService);
+export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
   private junkCleanerService = inject(JunkCleanerService);
 
   formatSize = formatSize;
 
   junkSummary = signal<JunkCategorySummary[]>([]);
-  loading = signal(false);
   scanningCategory = signal<string | null>(null);
   lastCleaned = signal<Record<string, string>>({});
 
@@ -57,15 +55,10 @@ export class AdvancedCleanerView implements OnInit {
   }
 
   async loadJunkSummary(): Promise<void> {
-    this.loading.set(true);
-    try {
-      const summary = await this.junkCleanerService.getJunkSummary();
-      this.junkSummary.set(summary);
-    } catch (error) {
-      console.error('Failed to load junk summary:', error);
-    } finally {
-      this.loading.set(false);
-    }
+    await this.runWithLoading(() => this.junkCleanerService.getJunkSummary().then(s => {
+      this.junkSummary.set(s);
+      return s;
+    }), { errorMessage: 'Failed to load junk summary' });
   }
 
   loadLastCleaned(): void {
@@ -101,7 +94,10 @@ export class AdvancedCleanerView implements OnInit {
           await this.junkCleanerService.scanLogRotations();
           break;
       }
-      await this.loadJunkSummary();
+      await this.runWithLoading(() => this.junkCleanerService.getJunkSummary().then(s => {
+        this.junkSummary.set(s);
+        return s;
+      }), { errorMessage: `Failed to scan ${category}` });
     } catch (error) {
       console.error(`Failed to scan ${category}:`, error);
     } finally {
@@ -111,24 +107,19 @@ export class AdvancedCleanerView implements OnInit {
 
   async cleanCategory(category: JunkCategoryKey): Promise<void> {
     const categoryLabel = this.junkCategories.find((c) => c.key === category)?.label || category;
-    const confirmed = confirm(
-      `Are you sure you want to clean all ${categoryLabel} junk files?\n\nThis action cannot be undone.`
-    );
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clean Category',
+      message: `Are you sure you want to clean all ${categoryLabel} junk files?\n\nThis action cannot be undone.`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       await this.junkCleanerService.cleanJunkCategory(category);
       this.saveLastCleaned(category);
-      await this.loadJunkSummary();
-    } catch (error) {
-      this.notification.error(
-        `Failed to clean ${categoryLabel}`,
-        error instanceof Error ? error.message : String(error)
-      );
-    } finally {
-      this.loading.set(false);
-    }
+      const summary = await this.junkCleanerService.getJunkSummary();
+      this.junkSummary.set(summary);
+    }, { errorMessage: `Failed to clean ${categoryLabel}`, notificationMessage: `Failed to clean ${categoryLabel}` });
   }
 
   getCategorySummary(key: JunkCategoryKey): JunkCategorySummary | undefined {

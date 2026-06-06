@@ -18,6 +18,8 @@ import {
 import { ProfileService } from '@services/profile.service';
 import { CleaningProfile } from '@models/profile.model';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { ToastService } from '@shared/toast';
 
 @Component({
   selector: 'app-automation',
@@ -40,6 +42,8 @@ export class AutomationView implements OnInit {
   private automationService = inject(AutomationService);
   private profileService = inject(ProfileService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private dialog = inject(MatDialog);
 
   quickActions = signal<QuickAction[]>([]);
@@ -87,7 +91,11 @@ export class AutomationView implements OnInit {
   }
 
   async executeQuickAction(action: QuickAction) {
-    if (!confirm(`Execute "${action.name}"?`)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Execute Action',
+      message: `Execute "${action.name}"?`,
+    });
+    if (!confirmed) return;
     this.isLoading.set(true);
     try {
       await this.automationService.executeAction(action.id);
@@ -101,7 +109,11 @@ export class AutomationView implements OnInit {
   }
 
   async executeRecipe(recipe: AutomationRecipe) {
-    if (!confirm(`Execute recipe "${recipe.name}"?`)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Execute Recipe',
+      message: `Execute recipe "${recipe.name}"?`,
+    });
+    if (!confirmed) return;
     this.isLoading.set(true);
     try {
       await this.automationService.executeRecipe(recipe.id);
@@ -125,7 +137,11 @@ export class AutomationView implements OnInit {
   }
 
   async deleteRecipe(recipe: AutomationRecipe) {
-    if (!confirm(`Delete recipe "${recipe.name}"?`)) return;
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Delete Recipe',
+      message: `Delete recipe "${recipe.name}"?`,
+    });
+    if (!confirmed) return;
     this.isLoading.set(true);
     try {
       await this.automationService.deleteRecipe(recipe.id);
@@ -198,11 +214,11 @@ export class AutomationView implements OnInit {
   async saveRecipe() {
     const name = this.newRecipeName();
     if (!name.trim()) {
-      this.notification.alert('Recipe name is required');
+      this.toastService.show('Recipe name is required', 'warning');
       return;
     }
     if (this.newRecipeSteps().length === 0) {
-      this.notification.alert('At least one step is required');
+      this.toastService.show('At least one step is required', 'warning');
       return;
     }
 

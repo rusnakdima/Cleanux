@@ -12,7 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { StartupService } from '@services/startup.service';
+import { ThemeService } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { StartupItem } from '@models/startup.model';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
@@ -33,7 +35,9 @@ import { ListColumn, ListOptions } from '@models/data-list.model';
 })
 export class StartupView implements OnInit {
   private startupService = inject(StartupService);
+  private themeService = inject(ThemeService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   startupData = signal<StartupItem[]>([]);
   loading = signal(false);
@@ -101,7 +105,10 @@ export class StartupView implements OnInit {
 
   async toggleItem(item: StartupItem) {
     if (item.enabled) {
-      const confirmed = confirm(`Disable "${item.name}" from starting at login?`);
+      const confirmed = await this.confirmDialogService.confirm({
+        title: 'Disable Startup Item',
+        message: `Disable "${item.name}" from starting at login?`,
+      });
       if (!confirmed) return;
       try {
         this.loading.set(true);
@@ -141,5 +148,9 @@ export class StartupView implements OnInit {
 
   onReload() {
     this.loadData();
+  }
+
+  getAccentGradient(): string {
+    return this.themeService.getAccentGradient();
   }
 }

@@ -12,10 +12,10 @@ import { MatTabsModule } from '@angular/material/tabs';
 
 /* services */
 import { MediaCacheService, MediaCacheSummary } from '@services/media-cache.service';
-import { NotificationService } from '@services/notification.service';
 
 /* models */
 import { formatSize } from '@shared/utils/format.util';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 @Component({
   selector: 'app-media-cleaner-view',
@@ -32,14 +32,12 @@ import { formatSize } from '@shared/utils/format.util';
   ],
   templateUrl: './media-cleaner.view.html',
 })
-export class MediaCleanerView implements OnInit {
+export class MediaCleanerView extends LoadingErrorMixin implements OnInit {
   private mediaCacheService = inject(MediaCacheService);
-  private notification = inject(NotificationService);
 
   formatSize = formatSize;
 
   summary = signal<MediaCacheSummary | null>(null);
-  loading = signal(false);
   cleaning = signal<string | null>(null);
 
   tabs = [
@@ -55,19 +53,15 @@ export class MediaCleanerView implements OnInit {
   }
 
   async loadSummary(): Promise<void> {
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       const data = await this.mediaCacheService.getMediaCacheSummary();
       this.summary.set(data);
-    } catch (error) {
-      console.error('Failed to load media cache summary:', error);
-    } finally {
-      this.loading.set(false);
-    }
+      return data;
+    }, { errorMessage: 'Failed to load media cache summary' });
   }
 
   async cleanSteamShaderCache(): Promise<void> {
-    if (!this.confirmClean('Steam shader cache')) return;
+    if (!await this.confirmClean('Steam shader cache')) return;
     this.cleaning.set('steam-shader');
     try {
       await this.mediaCacheService.cleanSteamShaderCache();
@@ -80,7 +74,7 @@ export class MediaCleanerView implements OnInit {
   }
 
   async cleanSteamDownloadCache(): Promise<void> {
-    if (!this.confirmClean('Steam download cache')) return;
+    if (!await this.confirmClean('Steam download cache')) return;
     this.cleaning.set('steam-download');
     try {
       await this.mediaCacheService.cleanSteamDownloadCache();
@@ -93,7 +87,7 @@ export class MediaCleanerView implements OnInit {
   }
 
   async cleanSpotifyCache(): Promise<void> {
-    if (!this.confirmClean('Spotify cache')) return;
+    if (!await this.confirmClean('Spotify cache')) return;
     this.cleaning.set('spotify');
     try {
       await this.mediaCacheService.cleanSpotifyCache();
@@ -106,7 +100,7 @@ export class MediaCleanerView implements OnInit {
   }
 
   async cleanVlcCache(): Promise<void> {
-    if (!this.confirmClean('VLC cache')) return;
+    if (!await this.confirmClean('VLC cache')) return;
     this.cleaning.set('vlc');
     try {
       await this.mediaCacheService.cleanVlcCache();
@@ -119,7 +113,7 @@ export class MediaCleanerView implements OnInit {
   }
 
   async cleanThumbnailCache(): Promise<void> {
-    if (!this.confirmClean('thumbnail cache')) return;
+    if (!await this.confirmClean('thumbnail cache')) return;
     this.cleaning.set('thumbnails');
     try {
       await this.mediaCacheService.cleanThumbnailCache();
@@ -132,7 +126,7 @@ export class MediaCleanerView implements OnInit {
   }
 
   async cleanIconCache(): Promise<void> {
-    if (!this.confirmClean('icon cache')) return;
+    if (!await this.confirmClean('icon cache')) return;
     this.cleaning.set('icons');
     try {
       await this.mediaCacheService.cleanIconCache();
@@ -144,8 +138,12 @@ export class MediaCleanerView implements OnInit {
     }
   }
 
-  private confirmClean(type: string): boolean {
-    return confirm(`Are you sure you want to clean the ${type}?\n\nThis action cannot be undone.`);
+  private async confirmClean(type: string): Promise<boolean> {
+    return this.confirmDialogService.confirm({
+      title: 'Confirm Clean',
+      message: `Are you sure you want to clean the ${type}?\n\nThis action cannot be undone.`,
+      dangerous: true,
+    });
   }
 
   isCleaning(key: string): boolean {

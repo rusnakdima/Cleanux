@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 /* services */
 import { SystemService, SystemServiceItem } from '@services/system.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -43,6 +44,7 @@ export class SystemView implements OnInit {
   private systemService = inject(SystemService);
   private document = inject(DOCUMENT);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   servicesData = signal<SystemServiceItem[]>([]);
   loading = signal(false);
@@ -120,7 +122,10 @@ export class SystemView implements OnInit {
     const servicesToStop = Array.from(this.selectedServices());
     if (servicesToStop.length === 0) return;
 
-    const confirmed = confirm(`Stop ${servicesToStop.length} service(s)?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Stop Services',
+      message: `Stop ${servicesToStop.length} service(s)?`,
+    });
     if (!confirmed) return;
 
     try {
@@ -142,7 +147,10 @@ export class SystemView implements OnInit {
     const servicesToStart = Array.from(this.selectedServices());
     if (servicesToStart.length === 0) return;
 
-    const confirmed = confirm(`Start ${servicesToStart.length} service(s)?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Start Services',
+      message: `Start ${servicesToStart.length} service(s)?`,
+    });
     if (!confirmed) return;
 
     try {
@@ -161,7 +169,10 @@ export class SystemView implements OnInit {
   }
 
   async startService(name: string) {
-    const confirmed = confirm(`Start ${name}?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Start Service',
+      message: `Start ${name}?`,
+    });
     if (!confirmed) return;
 
     try {

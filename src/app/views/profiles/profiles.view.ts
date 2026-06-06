@@ -6,7 +6,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProfileService } from '@services/profile.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { ToastService } from '@shared/toast';
 import { CleaningProfile, createEmptyProfile } from '@models/profile.model';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-profiles',
@@ -17,6 +20,8 @@ import { CleaningProfile, createEmptyProfile } from '@models/profile.model';
 export class ProfilesView implements OnInit {
   private profileService = inject(ProfileService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
 
   profiles = signal<CleaningProfile[]>([]);
   isLoading = signal(false);
@@ -60,7 +65,7 @@ export class ProfilesView implements OnInit {
   async saveProfile() {
     const profile = this.editingProfile();
     if (!profile || !profile.name.trim()) {
-      this.notification.alert('Profile name is required');
+      this.toastService.show('Profile name is required', 'warning');
       return;
     }
 
@@ -78,7 +83,11 @@ export class ProfilesView implements OnInit {
   }
 
   async deleteProfile(profile: CleaningProfile) {
-    if (!confirm(`Delete profile "${profile.name}"?`)) return;
+    if (!await this.confirmDialogService.confirm({
+      title: 'Delete Profile',
+      message: `Delete profile "${profile.name}"?`,
+      dangerous: true,
+    })) return;
 
     this.isLoading.set(true);
     try {
@@ -95,7 +104,10 @@ export class ProfilesView implements OnInit {
   }
 
   async applyProfile(profile: CleaningProfile) {
-    if (!confirm(`Apply profile "${profile.name}"?`)) return;
+    if (!await this.confirmDialogService.confirm({
+      title: 'Apply Profile',
+      message: `Apply profile "${profile.name}"?`,
+    })) return;
 
     this.isLoading.set(true);
     try {
@@ -160,10 +172,6 @@ export class ProfilesView implements OnInit {
   }
 
   formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return formatSize(bytes);
   }
 }

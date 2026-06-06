@@ -2,7 +2,7 @@
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-[var(--accent-icons)] icon-sm">info</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm">info</mat-icon>
         About
       </h3>
       <button (click)="checkUpdate()" [disabled]="isChecking()" class="btn btn-secondary">
@@ -14,21 +14,21 @@
     </div>
     <div class="glass-card-body">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-<div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
-          <span class="text-xs text-[var(--text-muted)] block mb-1">Version</span>
-          <span class="text-lg font-bold text-[var(--text-primary)]">{{ version }}</span>
+<div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
+          <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Version</span>
+          <span class="text-lg font-bold text-zinc-900 dark:text-white">{{ version }}</span>
         </div>
-        <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
-          <span class="text-xs text-[var(--text-muted)] block mb-1">Release Date</span>
-          <span class="text-lg font-bold text-[var(--text-secondary)]">{{ dateVersion() }}</span>
+        <div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
+          <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Release Date</span>
+          <span class="text-lg font-bold text-zinc-400 dark:text-zinc-500">{{ dateVersion() }}</span>
         </div>
-        <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
-          <span class="text-xs text-[var(--text-muted)] block mb-1">Last Check</span>
-          <span class="text-lg font-bold text-[var(--text-secondary)]">{{ dateCheck() }}</span>
+        <div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
+          <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Last Check</span>
+          <span class="text-lg font-bold text-zinc-400 dark:text-zinc-500">{{ dateCheck() }}</span>
         </div>
-        <div class="text-center p-4 rounded-lg bg-[var(--bg-elevated)]">
-          <span class="text-xs text-[var(--text-muted)] block mb-1">Status</span>
-          <span class="text-lg font-bold text-[var(--accent-icons)]">Production</span>
+        <div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
+          <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Status</span>
+          <span class="text-lg font-bold text-cyan-500 dark:text-cyan-400">Production</span>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
         >
           <mat-icon class="text-success">check_circle</mat-icon>
           <div>
-            <span class="font-semibold text-[var(--text-primary)] block"
+            <span class="font-semibold text-zinc-900 dark:text-white block"
               >Update Available: {{ lastVersion() }}</span
             >
             <span class="text-xs text-success">A new version is available for download.</span>
@@ -51,13 +51,13 @@
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-[var(--accent-icons)] icon-sm">palette</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm">palette</mat-icon>
         Appearance
       </h3>
     </div>
     <div class="glass-card-body space-y-6">
       <div class="space-y-3">
-        <label class="block text-sm font-semibold text-[var(--text-muted)]">Theme Mode</label>
+        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Theme Mode</label>
         <div class="flex gap-2">
           @for (mode of themeModes; track mode) {
             <button
@@ -73,7 +73,7 @@
       </div>
 
       <div class="space-y-3">
-        <label class="block text-sm font-semibold text-[var(--text-muted)]">Accent Color</label>
+        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Accent Color</label>
         <div class="flex flex-wrap gap-3">
           @for (color of themeService.accentColors(); track color) {
             <button
@@ -82,7 +82,8 @@
               [style.background]="color"
               [class.ring-2]="themeService.currentTheme().accentConfig.general === color"
               [class.ring-offset-2]="themeService.currentTheme().accentConfig.general === color"
-              [class.ring-offset-[var(--bg-surface)]]="true"
+              [class.ring-offset-zinc-100]="themeService.currentTheme().accentConfig.general === color"
+              [class.dark:ring-offset-zinc-800]="themeService.currentTheme().accentConfig.general === color"
               [class.ring-white]="themeService.currentTheme().accentConfig.general === color"
             >
               @if (themeService.currentTheme().accentConfig.general === color) {
@@ -93,44 +94,12 @@
         </div>
       </div>
 
-      <div class="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
-        <div class="flex items-center justify-between">
-          <label class="block text-sm font-semibold text-[var(--text-muted)]">Element Accents</label>
-          <button (click)="resetAllAccents()" class="btn btn-secondary text-xs">
-            <mat-icon class="icon-xs">refresh</mat-icon>
-            Reset All
-          </button>
-        </div>
-        @for (cat of accentCategories; track cat.key) {
-         <div class="space-y-2">
-            <label class="block text-xs font-medium text-[var(--text-muted)]">{{ cat.label }}</label>
-            <div class="flex flex-wrap gap-2">
-              @for (color of themeService.accentColors(); track color) {
-                <button
-                  (click)="setAccentForCategory(cat.key, color)"
-                  class="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 flex items-center justify-center"
-                  [style.background]="color"
-                  [class.ring-2]="themeService.currentTheme().accentConfig[cat.key] === color"
-                  [class.ring-offset-1]="themeService.currentTheme().accentConfig[cat.key] === color"
-                  [class.ring-offset-[var(--bg-surface)]]="true"
-                  [class.ring-white]="themeService.currentTheme().accentConfig[cat.key] === color"
-                >
-                  @if (themeService.currentTheme().accentConfig[cat.key] === color) {
-                    <mat-icon class="text-white text-xs">check</mat-icon>
-                  }
-                </button>
-              }
-            </div>
-          </div>
-        }
-      </div>
-
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <label class="block text-sm font-semibold text-[var(--text-muted)]"
+          <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
             >UI Transparency</label
           >
-          <span class="text-sm font-mono font-bold text-[var(--accent-icons)]"
+          <span class="text-sm font-mono font-bold text-cyan-500 dark:text-cyan-400"
             >{{ (themeService.currentTheme().glassOpacity * 100).toFixed(0) }}%</span
           >
         </div>
@@ -141,7 +110,7 @@
           min="0"
           max="100"
           step="5"
-          class="w-full h-2 bg-[var(--bg-elevated)] rounded-lg appearance-none cursor-pointer"
+          class="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer"
         />
       </div>
     </div>
@@ -150,15 +119,15 @@
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-[var(--accent-icons)] icon-sm">schedule</mat-icon>
+        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm">schedule</mat-icon>
         Maintenance Schedule
       </h3>
     </div>
     <div class="glass-card-body space-y-4">
-      <div class="p-4 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between">
+      <div class="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700 flex items-center justify-between">
         <div>
-          <span class="font-semibold text-[var(--text-primary)] block">Automated Scheduler</span>
-          <p class="text-xs text-[var(--text-muted)]">Run cleaning on defined intervals</p>
+          <span class="font-semibold text-zinc-900 dark:text-white block">Automated Scheduler</span>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Run cleaning on defined intervals</p>
         </div>
         <app-toggle
           [checked]="scheduleConfig().enabled"
@@ -168,7 +137,7 @@
 
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-2">
-          <label class="text-sm font-semibold text-[var(--text-muted)] block">Interval</label>
+          <label class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 block">Interval</label>
           <select
             [(ngModel)]="scheduleConfig().interval_hours"
             (change)="onIntervalChange()"
@@ -180,7 +149,7 @@
           </select>
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-semibold text-[var(--text-muted)] block"
+          <label class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 block"
             >Cleaning Type</label
           >
           <select

@@ -5,16 +5,12 @@ import {
   Input,
   Output,
   EventEmitter,
-  signal,
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormControl } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
-/* materials */
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,10 +19,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* components */
 import { PaginationComponent } from '../pagination/pagination.component';
+import { BaseListComponent } from '../base-list/base-list.component';
 
 /* models */
 import { ListColumn, ListOptions, ListActionEvent } from '@models/data-list.model';
 import { formatSize } from '@shared/utils/format.util';
+import { CheckboxComponent } from '@shared/checkbox';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 @Component({
   selector: 'app-data-list',
@@ -43,13 +42,13 @@ import { formatSize } from '@shared/utils/format.util';
     FormsModule,
     ReactiveFormsModule,
     PaginationComponent,
+    CheckboxComponent,
   ],
   templateUrl: './data-list.component.html',
   styleUrl: './data-list.component.css',
 })
-export class DataListComponent<T extends object = object> implements OnChanges {
+export class DataListComponent<T extends object = object> extends BaseListComponent<T> implements OnChanges {
   @Input() columns: ListColumn[] = [];
-  @Input() data: T[] = [];
   @Input() options: ListOptions = {};
   @Input() loading = false;
   @Input() currentPage = 1;
@@ -62,7 +61,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     this._selectedKeys = keys;
   }
 
-  @Output() selectionChange = new EventEmitter<Set<string>>();
   @Output() rowClick = new EventEmitter<T>();
   @Output() rowDoubleClick = new EventEmitter<T>();
   @Output() reload = new EventEmitter<void>();
@@ -70,66 +68,25 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   @Output() pageChange = new EventEmitter<number>();
   @Output() newPageSize = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
-  @Output() searchChange = new EventEmitter<string>();
-
-  _selectedKeys = new Set<string>();
-  _originalData: T[] = [];
-  _filteredData: T[] = [];
-
-  allSelected = signal(false);
-  indeterminate = signal(false);
-
-  sortKey = signal<string | null>(null);
-  sortDirection = signal<'asc' | 'desc'>('asc');
-  searchQuery = signal<string>('');
-  toolbarExpanded = signal(false);
-  toolbarLocked = signal(false);
-
-  private destroy$ = new Subject<void>();
-  searchControl = new FormControl('');
 
   formatSize = formatSize;
 
   p = 1;
 
-  ngOnChanges(changes: SimpleChanges): void {
+  constructor() {
+    super();
+  }
+
+  get checkboxKey(): string {
+    return this.options.checkboxKey ?? 'id';
+  }
+
+  override ngOnChanges(changes: SimpleChanges): void {
+    super.ngOnChanges(changes);
+
     if (changes['currentPage']) {
       this.p = this.currentPage;
     }
-
-    if (changes['data'] && changes['data'].currentValue) {
-      this._originalData = [...changes['data'].currentValue];
-      this.onSearch();
-    }
-
-    if (
-      changes['searchQuery'] &&
-      changes['searchQuery'].currentValue !== undefined &&
-      changes['searchQuery'].currentValue !== null
-    ) {
-      this.searchQuery.set(changes['searchQuery'].currentValue);
-      this.searchControl.setValue(changes['searchQuery'].currentValue);
-    }
-  }
-
-  ngOnInit(): void {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((value) => {
-        const query = value ?? '';
-        this.searchQuery.set(query);
-        this.onSearch();
-        this.searchChange.emit(query);
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private rowRecord(item: T): Record<string, unknown> {
-    return item as unknown as Record<string, unknown>;
   }
 
   get paginatedData(): T[] {
@@ -149,33 +106,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     return this._filteredData.length;
   }
 
-  private sortData(data: T[], key: string, direction: 'asc' | 'desc'): T[] {
-    return data.sort((a, b) => {
-      const aVal = this.cellValue(a, key);
-      const bVal = this.cellValue(b, key);
-
-      if (aVal === bVal) return 0;
-      if (aVal === null || aVal === undefined) return 1;
-      if (bVal === null || bVal === undefined) return -1;
-
-      let comparison: number;
-
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        comparison = aVal - bVal;
-      } else if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
-        comparison = aVal === bVal ? 0 : aVal ? -1 : 1;
-      } else {
-        comparison = String(aVal).localeCompare(String(bVal));
-      }
-
-      return direction === 'asc' ? comparison : -comparison;
-    });
-  }
-
-  cellValue(item: T, key: string): unknown {
-    return this.rowRecord(item)[key];
-  }
-
   onPageChange(page: number): void {
     this.p = page;
     this.pageChange.emit(this.p);
@@ -187,10 +117,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
 
   get showSelectAll(): boolean {
     return this.options.showSelectAll ?? this.showCheckbox;
-  }
-
-  get checkboxKey(): string {
-    return this.options.checkboxKey ?? 'id';
   }
 
   get showReloadButton(): boolean {
@@ -228,103 +154,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   getRowClass(item: T): string {
     const fn = this.rowClassFn;
     return fn ? fn(item) : '';
-  }
-
-  isSelected(item: T): boolean {
-    const key = String(this.rowRecord(item)[this.checkboxKey]);
-    return this._selectedKeys.has(key);
-  }
-
-  toggleSelectAll(checked: boolean): void {
-    if (checked) {
-      this.data.forEach((item) => {
-        this._selectedKeys.add(String(this.rowRecord(item)[this.checkboxKey]));
-      });
-      this.allSelected.set(true);
-      this.indeterminate.set(false);
-    } else {
-      this._selectedKeys.clear();
-      this.allSelected.set(false);
-      this.indeterminate.set(false);
-    }
-    this.selectionChange.emit(new Set(this._selectedKeys));
-  }
-
-  toggleSelectItem(item: T, checked: boolean): void {
-    const key = String(this.rowRecord(item)[this.checkboxKey]);
-    if (checked) {
-      this._selectedKeys.add(key);
-    } else {
-      this._selectedKeys.delete(key);
-    }
-    this.updateSelectionState();
-    this.selectionChange.emit(new Set(this._selectedKeys));
-  }
-
-  private updateSelectionState(): void {
-    const total = this.data.length;
-    const selected = this._selectedKeys.size;
-
-    if (selected === 0) {
-      this.allSelected.set(false);
-      this.indeterminate.set(false);
-    } else if (selected === total) {
-      this.allSelected.set(true);
-      this.indeterminate.set(false);
-    } else {
-      this.allSelected.set(false);
-      this.indeterminate.set(true);
-    }
-  }
-
-  onSearch(): void {
-    const query = this.searchQuery().toLowerCase().trim();
-
-    if (!query) {
-      this._filteredData = [...this._originalData];
-    } else {
-      const filtered = this._originalData.filter((item) => {
-        const rec = this.rowRecord(item);
-        return Object.values(rec).some((value) => {
-          if (typeof value === 'object' && value !== null) return false;
-          return String(value).toLowerCase().includes(query);
-        });
-      });
-      this._filteredData = filtered;
-    }
-
-    if (this.totalItems === 0) {
-      this.p = 1;
-    }
-  }
-
-  clearSearch(): void {
-    this.searchQuery.set('');
-    this.searchControl.setValue('');
-    this.onSearch();
-    this.searchChange.emit('');
-  }
-
-  onToolbarHoverEnter(): void {
-    if (!this.toolbarLocked()) {
-      this.toolbarExpanded.set(true);
-    }
-  }
-
-  onToolbarHoverLeave(): void {
-    if (!this.toolbarLocked()) {
-      this.toolbarExpanded.set(false);
-    }
-  }
-
-  toggleToolbar(): void {
-    this.toolbarLocked.set(!this.toolbarLocked());
-  }
-
-  formatCell(columnKey: string, item: T): string {
-    const v = this.cellValue(item, columnKey);
-    if (v === null || v === undefined) return '';
-    return String(v);
   }
 
   getCellClass(column: ListColumn, item: T): string {
@@ -455,10 +284,14 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     return this.sortKey() === column.key;
   }
 
-  onRowAction(action: ListActionEvent<T>): void {
+  async onRowAction(action: ListActionEvent<T>): Promise<void> {
     const act = this.rowActions.find((a) => a.id === action.action);
     if (act?.confirmMessage) {
-      if (!confirm(act.confirmMessage)) {
+      const confirmed = await this.confirmDialogService.confirm({
+        title: 'Confirm Action',
+        message: act.confirmMessage,
+      });
+      if (!confirmed) {
         return;
       }
     }
@@ -488,10 +321,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     const act = this.rowActions.find((a) => a.id === actionId);
     if (!act?.toggleState) return false;
     return act.toggleState(item);
-  }
-
-  trackByFn(index: number, item: T): number {
-    return index;
   }
 
   get primaryColumn(): ListColumn | undefined {

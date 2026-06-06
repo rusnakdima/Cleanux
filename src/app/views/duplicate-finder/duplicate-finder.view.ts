@@ -19,8 +19,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
 import { DuplicateService } from '@services/duplicate.service';
+import { ThemeService } from '@services/theme.service';
 import { FileService } from '@services/file.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -60,9 +62,11 @@ interface FlattenedFile {
 })
 export class DuplicateFinderView implements OnInit {
   private duplicateService = inject(DuplicateService);
+  private themeService = inject(ThemeService);
   private fileService = inject(FileService);
   private document = inject(DOCUMENT);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
@@ -170,7 +174,11 @@ export class DuplicateFinderView implements OnInit {
 
     if (filesToDelete.length === 0) return;
 
-    const confirmed = confirm(`Delete ${filesToDelete.length} duplicate file(s)?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Delete Files',
+      message: `Delete ${filesToDelete.length} duplicate file(s)?`,
+      dangerous: true,
+    });
     if (!confirmed) return;
 
     try {
@@ -225,5 +233,9 @@ export class DuplicateFinderView implements OnInit {
     } catch (error: unknown) {
       this.notification.error('Failed to open file', error);
     }
+  }
+
+  getAccentGradient(): string {
+    return this.themeService.getAccentGradient();
   }
 }

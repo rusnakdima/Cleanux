@@ -7,7 +7,7 @@
             <button (click)="loadSymlinks()" class="btn btn-ghost" matTooltip="Refresh">
               <mat-icon fontIcon="refresh" />
             </button>
-            <span class="text-sm text-[var(--text-muted)]"
+            <span class="text-sm text-zinc-500 dark:text-zinc-400"
               >{{ symlinkCount() }} broken symlinks found</span
             >
           </div>
@@ -21,7 +21,7 @@
             <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
           </div>
         } @else if (symlinksData().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
+          <div class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400">
             <mat-icon class="icon-4xl mb-4" fontIcon="link_off" />
             <p class="text-lg font-medium">No broken symlinks found</p>
           </div>
@@ -29,7 +29,7 @@
           <div class="space-y-2">
             @for (item of symlinksData(); track item.path) {
               <div
-                class="glass-card p-4 flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors"
+                class="glass-card p-4 flex items-center justify-between hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
                   <mat-icon
@@ -38,13 +38,13 @@
                   ></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
-                      class="font-medium text-[var(--text-primary)] truncate"
+                      class="font-medium text-white dark:text-zinc-900 truncate"
                       [matTooltip]="item.path"
                       >{{ item.path }}</span
                     >
                     @if (item.description) {
                       <span
-                        class="text-xs text-[var(--text-muted)] truncate"
+                        class="text-xs text-zinc-500 dark:text-zinc-400 truncate"
                         [matTooltip]="item.description"
                         >{{ item.description }}</span
                       >
@@ -66,7 +66,7 @@
             <button (click)="loadPackages()" class="btn btn-ghost" matTooltip="Refresh">
               <mat-icon fontIcon="refresh" />
             </button>
-            <span class="text-sm text-[var(--text-muted)]"
+            <span class="text-sm text-zinc-500 dark:text-zinc-400"
               >{{ packagesCount() }} orphaned packages found</span
             >
           </div>
@@ -80,7 +80,7 @@
             <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
           </div>
         } @else if (packagesData().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
+          <div class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400">
             <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2" />
             <p class="text-lg font-medium">No orphaned packages found</p>
           </div>
@@ -88,7 +88,7 @@
           <div class="space-y-2">
             @for (item of packagesData(); track item.path) {
               <div
-                class="glass-card p-4 flex items-center justify-between hover:bg-[var(--bg-hover)] transition-colors"
+                class="glass-card p-4 flex items-center justify-between hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors"
               >
                 <div class="flex items-center gap-4 flex-1 min-w-0">
                   <mat-icon
@@ -97,13 +97,13 @@
                   ></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
-                      class="font-medium text-[var(--text-primary)] truncate"
+                      class="font-medium text-white dark:text-zinc-900 truncate"
                       [matTooltip]="item.path"
                       >{{ item.path }}</span
                     >
                     @if (item.description) {
                       <span
-                        class="text-xs text-[var(--text-muted)] truncate"
+                        class="text-xs text-zinc-500 dark:text-zinc-400 truncate"
                         [matTooltip]="item.description"
                         >{{ item.description }}</span
                       >
@@ -123,8 +123,8 @@
         <div class="glass-card p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-[var(--text-primary)]">Font Cache</h3>
-              <p class="text-sm text-[var(--text-muted)]">
+              <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Font Cache</h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400">
                 Clean cached font data in ~/.cache/fontconfig
               </p>
             </div>
@@ -137,15 +137,15 @@
             </button>
           </div>
           @if (fontCacheResult()) {
-            <p class="mt-4 text-sm text-[var(--text-secondary)]">{{ fontCacheResult() }}</p>
+            <p class="mt-4 text-sm text-zinc-400 dark:text-zinc-500">{{ fontCacheResult() }}</p>
           }
         </div>
 
         <div class="glass-card p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-[var(--text-primary)]">Icon Cache</h3>
-              <p class="text-sm text-[var(--text-muted)]">
+              <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Icon Cache</h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400">
                 Clean cached icon data in ~/.cache/icon-cache
               </p>
             </div>
@@ -158,7 +158,7 @@
             </button>
           </div>
           @if (iconCacheResult()) {
-            <p class="mt-4 text-sm text-[var(--text-secondary)]">{{ iconCacheResult() }}</p>
+            <p class="mt-4 text-sm text-zinc-400 dark:text-zinc-500">{{ iconCacheResult() }}</p>
           }
         </div>
       </div>
@@ -169,8 +169,8 @@
         <div class="glass-card p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-[var(--text-primary)]">Repair Permissions</h3>
-              <p class="text-sm text-[var(--text-muted)]">
+              <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Repair Permissions</h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400">
                 Fix common permission issues in config directories
               </p>
             </div>
@@ -183,7 +183,7 @@
             </button>
           </div>
           @if (permissionsResult()) {
-            <p class="mt-4 text-sm text-[var(--text-secondary)]">{{ permissionsResult() }}</p>
+            <p class="mt-4 text-sm text-zinc-400 dark:text-zinc-500">{{ permissionsResult() }}</p>
           }
         </div>
       </div>

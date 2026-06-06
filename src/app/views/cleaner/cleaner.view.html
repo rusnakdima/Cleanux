@@ -20,7 +20,7 @@
         [class.border-teal-500]="store.activeTab() === 'cache'"
         [class.bg-teal-500/10]="store.activeTab() === 'cache'"
         [class.border-zinc-850]="store.activeTab() !== 'cache'"
-        [class.bg-[var(--bg-surface)]]="store.activeTab() !== 'cache'"
+        [class.bg-zinc-900 dark:bg-white]="store.activeTab() !== 'cache'"
       >
         <div
           class="w-10 h-10 rounded-lg bg-teal-500/20 text-teal-500 flex items-center justify-center"
@@ -28,8 +28,8 @@
           <mat-icon class="icon-lg">cached</mat-icon>
         </div>
         <div class="flex-1 text-left">
-          <h5 class="text-sm font-semibold text-[var(--text-primary)]">System Cache</h5>
-          <span class="text-xs text-[var(--text-muted)]">{{ store.cacheCount() }} files</span>
+          <h5 class="text-sm font-semibold text-white dark:text-zinc-900">System Cache</h5>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ store.cacheCount() }} files</span>
         </div>
         <span class="text-sm font-bold text-teal-500">{{ formatSize(store.cacheSize()) }}</span>
       </button>
@@ -40,14 +40,14 @@
         [class.border-error]="store.activeTab() === 'trash'"
         [class.bg-error/10]="store.activeTab() === 'trash'"
         [class.border-zinc-850]="store.activeTab() !== 'trash'"
-        [class.bg-[var(--bg-surface)]]="store.activeTab() !== 'trash'"
+        [class.bg-zinc-900 dark:bg-white]="store.activeTab() !== 'trash'"
       >
         <div class="w-10 h-10 rounded-lg bg-error/20 text-error flex items-center justify-center">
           <mat-icon class="icon-lg">delete_outline</mat-icon>
         </div>
         <div class="flex-1 text-left">
-          <h5 class="text-sm font-semibold text-[var(--text-primary)]">Trash</h5>
-          <span class="text-xs text-[var(--text-muted)]">{{ store.trashCount() }} files</span>
+          <h5 class="text-sm font-semibold text-white dark:text-zinc-900">Trash</h5>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ store.trashCount() }} files</span>
         </div>
         <span class="text-sm font-bold text-error">{{ formatSize(store.trashSize()) }}</span>
       </button>
@@ -58,14 +58,14 @@
         [class.border-info]="store.activeTab() === 'logs'"
         [class.bg-info/10]="store.activeTab() === 'logs'"
         [class.border-zinc-850]="store.activeTab() !== 'logs'"
-        [class.bg-[var(--bg-surface)]]="store.activeTab() !== 'logs'"
+        [class.bg-zinc-900 dark:bg-white]="store.activeTab() !== 'logs'"
       >
         <div class="w-10 h-10 rounded-lg bg-info/20 text-info flex items-center justify-center">
           <mat-icon class="icon-lg">description</mat-icon>
         </div>
         <div class="flex-1 text-left">
-          <h5 class="text-sm font-semibold text-[var(--text-primary)]">System Logs</h5>
-          <span class="text-xs text-[var(--text-muted)]">{{ store.logCount() }} files</span>
+          <h5 class="text-sm font-semibold text-white dark:text-zinc-900">System Logs</h5>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ store.logCount() }} files</span>
         </div>
         <span class="text-sm font-bold text-info">{{ formatSize(store.logSize()) }}</span>
       </button>
@@ -76,7 +76,7 @@
         [class.border-warning]="store.activeTab() === 'packages'"
         [class.bg-warning/10]="store.activeTab() === 'packages'"
         [class.border-zinc-850]="store.activeTab() !== 'packages'"
-        [class.bg-[var(--bg-surface)]]="store.activeTab() !== 'packages'"
+        [class.bg-zinc-900 dark:bg-white]="store.activeTab() !== 'packages'"
       >
         <div
           class="w-10 h-10 rounded-lg bg-warning/20 text-warning flex items-center justify-center"
@@ -84,8 +84,8 @@
           <mat-icon class="icon-lg">package</mat-icon>
         </div>
         <div class="flex-1 text-left">
-          <h5 class="text-sm font-semibold text-[var(--text-primary)]">Package Caches</h5>
-          <span class="text-xs text-[var(--text-muted)]"
+          <h5 class="text-sm font-semibold text-white dark:text-zinc-900">Package Caches</h5>
+          <span class="text-xs text-zinc-500 dark:text-zinc-400"
             >{{ store.packageCacheData().length }} managers</span
           >
         </div>
@@ -143,7 +143,7 @@
       </div>
 
       <div class="glass-card-header border-t">
-        <span class="text-sm text-[var(--text-muted)]">
+        <span class="text-sm text-zinc-500 dark:text-zinc-400">
           Selected: {{ store.getSelectedCount() }} items
         </span>
         <button

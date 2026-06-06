@@ -11,9 +11,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
 import { FileService } from '@services/file.service';
-import { CleanerViewStore } from '@services/cleaner-view.store';
+import { CleanerStore } from '@stores/cleaner.store';
 import { LogAnalyzerService } from '@services/log-analyzer.service';
 import { NotificationService } from '@services/notification.service';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -39,7 +40,7 @@ export type PackageManagerRow = {
   selector: 'app-cleaner-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [CleanerViewStore],
+  providers: [CleanerStore],
   imports: [
     CommonModule,
     MatButtonModule,
@@ -52,10 +53,11 @@ export type PackageManagerRow = {
   templateUrl: './cleaner.view.html',
 })
 export class CleanerView implements OnInit {
-  readonly store = inject(CleanerViewStore);
+  readonly store = inject(CleanerStore);
   private fileService = inject(FileService);
   private logAnalyzerService = inject(LogAnalyzerService);
   private notification = inject(NotificationService);
+  private confirmDialogService = inject(ConfirmDialogService);
   private route = inject(ActivatedRoute);
 
   formatSize = formatSize;
@@ -171,7 +173,10 @@ export class CleanerView implements OnInit {
   async cleanOldLogs(): Promise<void> {
     const days = this.cleanDays();
     if (days <= 0) return;
-    const confirmed = confirm(`Clear all logs older than ${days} days?`);
+    const confirmed = await this.confirmDialogService.confirm({
+      title: 'Clear Old Logs',
+      message: `Clear all logs older than ${days} days?`,
+    });
     if (!confirmed) return;
     try {
       const result = await this.logAnalyzerService.cleanOldLogs(days);

@@ -20,17 +20,6 @@ export class ConfirmDialogService {
     });
   }
 
-  confirmDelete(itemName: string): Promise<boolean> {
-    return this.confirm({
-      title: 'Confirm Delete',
-      message: `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      confirmColor: 'warn',
-      dangerous: true,
-    });
-  }
-
   confirmDangerous(action: string, requireYes: boolean = false): Promise<boolean> {
     return this.confirm({
       title: 'Dangerous Action',
@@ -42,21 +31,6 @@ export class ConfirmDialogService {
       requireYesToConfirm: requireYes,
       closeOnClickOutside: !requireYes,
       closeOnEscape: !requireYes,
-    });
-  }
-
-  confirmCheckbox(
-    message: string,
-    checkboxLabel: string = 'I understand this action cannot be undone'
-  ): Promise<boolean> {
-    return this.confirm({
-      title: 'Confirm Action',
-      message,
-      confirmText: 'Confirm',
-      cancelText: 'Cancel',
-      confirmColor: 'primary',
-      showCheckbox: true,
-      checkboxLabel,
     });
   }
 

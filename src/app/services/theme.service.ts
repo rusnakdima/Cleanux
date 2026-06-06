@@ -166,4 +166,38 @@ export class ThemeService {
       (config.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
     );
   }
+
+  getAccentColor(): string {
+    return this.currentTheme().accentConfig.general;
+  }
+
+  getAccentGradient(): string {
+    const color = this.getAccentColor();
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    return `linear-gradient(135deg, ${color}, rgba(${r}, ${g}, ${b}, 0.8))`;
+  }
+
+  getAccentLightGradient(): string {
+    const color = this.getAccentColor();
+    return `linear-gradient(135deg, ${color}33, ${color}22)`;
+  }
+
+  getSecondaryAccentGradient(): string {
+    const secondary = this.currentTheme().accentConfig.buttons;
+    const color = this.currentTheme().accentConfig.general;
+    const r = parseInt(secondary.slice(1, 3), 16);
+    const g = parseInt(secondary.slice(3, 5), 16);
+    const b = parseInt(secondary.slice(5, 7), 16);
+    return `linear-gradient(135deg, ${color}, rgba(${r}, ${g}, ${b}, 0.8))`;
+  }
+
+  getStatIconGradient(category: 'default' | 'success' | 'warning' | 'error' = 'default'): string {
+    const color = this.getAccentColor();
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    return `linear-gradient(135deg, ${color}, rgba(${r}, ${g}, ${b}, 0.8))`;
+  }
 }

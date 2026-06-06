@@ -1,11 +1,12 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { formatSize } from '@shared/utils/format.util';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
@@ -25,6 +26,8 @@ interface DownloadFile {
   templateUrl: './downloads.view.html',
 })
 export class DownloadsView {
+  private confirmDialogService = inject(ConfirmDialogService);
+
   formatSize = formatSize;
   isScanning = signal(false);
   downloadsSize = signal(0);
@@ -92,9 +95,13 @@ export class DownloadsView {
     this.selectedFiles.set(keys);
   }
 
-  cleanSelected() {
+  async cleanSelected() {
     const count = this.selectedFiles().size;
-    if (confirm(`Delete ${count} selected files? This cannot be undone.`)) {
+    if (await this.confirmDialogService.confirm({
+      title: 'Delete Files',
+      message: `Delete ${count} selected files? This cannot be undone.`,
+      dangerous: true,
+    })) {
       this.files.set([]);
       this.selectedFiles.set(new Set());
       this.downloadsSize.set(0);
