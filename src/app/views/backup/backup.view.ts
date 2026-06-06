@@ -77,6 +77,7 @@ export class BackupView implements OnInit {
     showActions: true,
     actionsPosition: 'right',
     showReloadButton: true,
+    searchTogglable: true,
     searchPlaceholder: 'Search backups...',
     emptyMessage: 'No backups found',
   };

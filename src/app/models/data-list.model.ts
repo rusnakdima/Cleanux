@@ -46,6 +46,7 @@ export interface ListOptions {
   actionsPosition?: 'right' | 'bottom';
   rowClass?: string | ((item: unknown) => string);
   showSelectAll?: boolean;
+  searchTogglable?: boolean;
 }
 
 export interface ListActionEvent<T = unknown> {

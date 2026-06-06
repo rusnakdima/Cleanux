@@ -69,9 +69,6 @@
           {{ allKernels().length }} kernel(s) installed
         </p>
       </div>
-      <button (click)="loadData()" class="btn btn-ghost" matTooltip="Refresh">
-        <mat-icon fontIcon="refresh" />
-      </button>
     </div>
 
     @if (loading()) {
@@ -88,6 +85,7 @@
         [showPageSizeSelector]="true"
         (pageChange)="onKernelsPageChange($event)"
         (newPageSize)="onKernelsPageSizeChange($event)"
+        (reload)="loadData()"
       />
     }
   </div>

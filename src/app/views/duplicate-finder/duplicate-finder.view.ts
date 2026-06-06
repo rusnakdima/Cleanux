@@ -100,6 +100,7 @@ export class DuplicateFinderView implements OnInit {
     hoverable: true,
     showReloadButton: false,
     showSearch: true,
+    showSelectAll: true,
     searchPlaceholder: 'Search files...',
   };
 

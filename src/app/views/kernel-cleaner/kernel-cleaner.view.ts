@@ -80,7 +80,8 @@ export class KernelCleanerView implements OnInit {
     showCheckbox: false,
     hoverable: true,
     showReloadButton: true,
-    showSearch: false,
+    searchTogglable: true,
+    showSearch: true,
     rowClass: (item: unknown) => {
       const kernel = item as KernelInfo;
       return kernel.is_current ? 'bg-success/10 border-success/30' : 'border-[var(--border-color)]';
@@ -107,7 +108,8 @@ export class KernelCleanerView implements OnInit {
     checkboxKey: 'version',
     hoverable: true,
     showReloadButton: false,
-    showSearch: false,
+    showSearch: true,
+    showSelectAll: true,
   };
 
   onKernelsPageChange(page: number) {

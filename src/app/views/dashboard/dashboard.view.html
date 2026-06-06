@@ -19,7 +19,9 @@
 
       <div class="flex items-center gap-3">
         <button (click)="startScan()" [disabled]="isScanning()" class="btn btn-secondary">
-          <mat-icon class="icon-sm" [class.animate-spin]="isScanning()">search</mat-icon>
+          <mat-icon class="icon-sm" [class.animate-spin]="isScanning()">
+            {{ isScanning() ? 'refresh' : 'search' }}
+          </mat-icon>
           {{ isScanning() ? "Scanning..." : "Scan" }}
         </button>
         <a routerLink="/clean" class="clean-button">
@@ -43,7 +45,7 @@
   </div>
 
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="stat-card matte-surface border-trace">
+    <a routerLink="/cleaner" [queryParams]="{tab: 'cache'}" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon">
         <mat-icon class="icon-base">cached</mat-icon>
       </div>
@@ -51,9 +53,10 @@
         <span class="stat-label">Cache</span>
         <span class="stat-value">{{ formatSize(cacheSize()) }}</span>
       </div>
-    </div>
+      <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+    </a>
 
-    <div class="stat-card matte-surface border-trace">
+    <a routerLink="/cleaner" [queryParams]="{tab: 'trash'}" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626)">
         <mat-icon class="icon-base">delete_outline</mat-icon>
       </div>
@@ -61,9 +64,10 @@
         <span class="stat-label">Trash</span>
         <span class="stat-value">{{ formatSize(trashSize()) }}</span>
       </div>
-    </div>
+      <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+    </a>
 
-    <div class="stat-card matte-surface border-trace">
+    <a routerLink="/cleaner" [queryParams]="{tab: 'logs'}" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">
         <mat-icon class="icon-base">description</mat-icon>
       </div>
@@ -71,9 +75,10 @@
         <span class="stat-label">Logs</span>
         <span class="stat-value">{{ formatSize(logSize()) }}</span>
       </div>
-    </div>
+      <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+    </a>
 
-    <div class="stat-card matte-surface border-trace">
+    <a routerLink="/large-files" class="stat-card matte-surface border-trace no-underline">
       <div class="stat-icon" style="background: linear-gradient(135deg, #f97316, #ea580c)">
         <mat-icon class="icon-base">file_present</mat-icon>
       </div>
@@ -81,7 +86,8 @@
         <span class="stat-label">Large Files</span>
         <span class="stat-value">{{ formatSize(largeFileSize()) }}</span>
       </div>
-    </div>
+      <mat-icon class="text-[var(--text-muted)]">chevron_right</mat-icon>
+    </a>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
@@ -115,6 +121,7 @@
         <a routerLink="/large-files" class="btn btn-secondary justify-start no-underline">
           <mat-icon class="icon-sm text-warning">file_present</mat-icon>
           Find Large Files
+          <mat-icon class="text-[var(--text-muted)] ml-auto">chevron_right</mat-icon>
         </a>
       </div>
     </div>

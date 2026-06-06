@@ -5,10 +5,6 @@
       <p class="text-sm text-[var(--text-muted)] mt-1">View and manage running processes</p>
     </div>
     <div class="flex gap-2">
-      <button (click)="loadData()" class="btn btn-secondary">
-        <mat-icon class="icon-sm">refresh</mat-icon>
-        Refresh
-      </button>
       <button (click)="flushRamCaches()" class="btn btn-secondary">
         <mat-icon class="icon-sm">memory</mat-icon>
         Flush RAM
@@ -45,6 +41,7 @@
         (newPageSize)="onPageSizeChange($event)"
         (selectionChange)="onSelectionChange($event)"
         (rowAction)="onRowAction($event)"
+        (reload)="loadData()"
       />
     </div>
   </div>

@@ -17,6 +17,9 @@ import { SchedulerService } from '@services/scheduler.service';
 import { ThemeService, ThemeMode, AccentCategory } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
 
+/* components */
+import { ToggleComponent } from '@components/toggle/toggle.component';
+
 /* models */
 import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
 import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
@@ -25,7 +28,7 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
   selector: 'app-settings',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, FormsModule],
+  imports: [CommonModule, MatIconModule, FormsModule, ToggleComponent],
   templateUrl: './settings.view.html',
 })
 export class SettingsView {
@@ -80,10 +83,6 @@ export class SettingsView {
 
   toggleAutoClean() {
     this.autoClean.update((v) => !v);
-  }
-
-  toggleSchedule() {
-    this.scheduleConfig.update((c) => ({ ...c, enabled: !c.enabled }));
   }
 
   onIntervalChange() {

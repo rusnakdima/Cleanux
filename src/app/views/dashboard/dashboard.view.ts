@@ -23,6 +23,13 @@ import { SystemService } from '@services/system.service';
 import { HealthHistoryService } from '@services/health-history.service';
 import { MonitorStore } from '@stores/monitor.store';
 import { formatSize } from '@shared/utils/format.util';
+import {
+  CRITICAL_JUNK_SIZE,
+  WARNING_JUNK_SIZE,
+  HEALTHY_SCORE,
+  WARNING_SCORE,
+  CRITICAL_SCORE,
+} from '@shared/constants/size.constants';
 
 /* types */
 interface QuickAction {
@@ -105,16 +112,16 @@ export class DashboardView implements OnInit, OnDestroy {
 
   systemStatus = computed(() => {
     const size = this.totalJunkSize();
-    if (size > 1024 * 1024 * 1024 * 2) return 'Critical';
-    if (size > 1024 * 1024 * 500) return 'Needs Attention';
+    if (size > CRITICAL_JUNK_SIZE) return 'Critical';
+    if (size > WARNING_JUNK_SIZE) return 'Needs Attention';
     return 'Healthy';
   });
 
   healthScore = computed(() => {
     const size = this.totalJunkSize();
-    if (size > 1024 * 1024 * 1024 * 2) return 40;
-    if (size > 1024 * 1024 * 500) return 65;
-    return 95;
+    if (size > CRITICAL_JUNK_SIZE) return CRITICAL_SCORE;
+    if (size > WARNING_JUNK_SIZE) return WARNING_SCORE;
+    return HEALTHY_SCORE;
   });
 
   ngOnInit() {

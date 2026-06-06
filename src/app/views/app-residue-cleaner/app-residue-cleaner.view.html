@@ -1,4 +1,155 @@
 <div class="view-layout max-w-4xl mx-auto">
+  <style>
+    .search-controls-bar {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .search-toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      background: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 150ms ease;
+    }
+
+    .search-toggle-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      max-width: 0;
+      overflow: hidden;
+      transition: max-width 200ms ease-out;
+    }
+
+    .search-input-wrapper.search-expanded {
+      max-width: 250px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 2.5rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .search-clear-btn,
+    .search-close-btn {
+      position: absolute;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-clear-btn {
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .search-close-btn {
+      right: 2.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .search-clear-btn:hover,
+    .search-close-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .select-all-checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-right: 0.25rem;
+    }
+
+    .custom-checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .custom-checkbox input[type="checkbox"] {
+      display: none;
+    }
+
+    .custom-checkbox .checkmark {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-color-strong);
+      border-radius: 4px;
+      background: var(--bg-surface);
+      transition: all 150ms ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .custom-checkbox .checkmark .check-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      color: transparent;
+      transition: all 150ms ease;
+    }
+
+    .custom-checkbox input:checked + .checkmark {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .custom-checkbox input:checked + .checkmark .check-icon {
+      color: white;
+    }
+
+    .custom-checkbox .checkmark.indeterminate {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .custom-checkbox .checkmark.indeterminate .check-icon {
+      color: white;
+      font-size: 16px;
+    }
+
+    .custom-checkbox:hover .checkmark {
+      border-color: var(--accent);
+    }
+  </style>
   @if (showBackupWarning()) {
     <div class="bg-warning/10 border border-warning/30 rounded-lg p-4 flex items-start gap-3">
       <mat-icon class="text-warning mt-0.5" fontIcon="warning" />
@@ -24,14 +175,59 @@
       <div class="pt-4">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
+            <div
+              class="search-controls-bar"
+              (mouseenter)="onSearchHoverEnter()"
+              (mouseleave)="onSearchHoverLeave()"
+            >
+              @if (!searchVisible()) {
+                <button class="search-toggle-btn" (click)="showSearchInput()">
+                  <mat-icon class="toggle-icon">search</mat-icon>
+                </button>
+              } @else {
+                <div class="search-input-wrapper">
+                  <mat-icon class="search-icon">search</mat-icon>
+                  <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search configs..."
+                    [value]="searchQuery()"
+                    (input)="onSearchChange($any($event.target).value)"
+                    (focus)="onSearchFocus()"
+                    (blur)="onSearchBlur()"
+                  />
+                  @if (searchQuery()) {
+                    <button (click)="clearSearch()" class="search-clear-btn">
+                      <mat-icon class="clear-icon">close</mat-icon>
+                    </button>
+                  }
+                  <button (click)="hideSearchInput()" class="search-close-btn">
+                    <mat-icon class="close-icon">close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (configsData().length > 0) {
+              <label class="custom-checkbox select-all-checkbox" [matTooltip]="configsAllSelected() ? 'Deselect All' : 'Select All'">
+                <input
+                  type="checkbox"
+                  [checked]="configsAllSelected()"
+                  (change)="selectAll(configsData(), $any($event.target).checked)"
+                />
+                <span class="checkmark" [class.indeterminate]="configsIndeterminate()">
+                  @if (configsIndeterminate()) {
+                    <mat-icon class="check-icon">remove</mat-icon>
+                  } @else {
+                    <mat-icon class="check-icon">check</mat-icon>
+                  }
+                </span>
+              </label>
+            }
+
             <button (click)="loadConfigs()" class="btn btn-ghost" matTooltip="Refresh">
               <mat-icon fontIcon="refresh" />
             </button>
-            @if (configsData().length > 0) {
-              <button (click)="selectAll(configsData())" class="btn btn-secondary">
-                Select All
-              </button>
-            }
           </div>
           @if (getSelectedCount() > 0) {
             <div class="flex items-center gap-2">
@@ -117,12 +313,59 @@
       <div class="pt-4">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
+            <div
+              class="search-controls-bar"
+              (mouseenter)="onSearchHoverEnter()"
+              (mouseleave)="onSearchHoverLeave()"
+            >
+              @if (!searchVisible()) {
+                <button class="search-toggle-btn" (click)="showSearchInput()">
+                  <mat-icon class="toggle-icon">search</mat-icon>
+                </button>
+              } @else {
+                <div class="search-input-wrapper">
+                  <mat-icon class="search-icon">search</mat-icon>
+                  <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search data..."
+                    [value]="searchQuery()"
+                    (input)="onSearchChange($any($event.target).value)"
+                    (focus)="onSearchFocus()"
+                    (blur)="onSearchBlur()"
+                  />
+                  @if (searchQuery()) {
+                    <button (click)="clearSearch()" class="search-clear-btn">
+                      <mat-icon class="clear-icon">close</mat-icon>
+                    </button>
+                  }
+                  <button (click)="hideSearchInput()" class="search-close-btn">
+                    <mat-icon class="close-icon">close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (dataData().length > 0) {
+              <label class="custom-checkbox select-all-checkbox" [matTooltip]="dataAllSelected() ? 'Deselect All' : 'Select All'">
+                <input
+                  type="checkbox"
+                  [checked]="dataAllSelected()"
+                  (change)="selectAll(dataData(), $any($event.target).checked)"
+                />
+                <span class="checkmark" [class.indeterminate]="dataIndeterminate()">
+                  @if (dataIndeterminate()) {
+                    <mat-icon class="check-icon">remove</mat-icon>
+                  } @else {
+                    <mat-icon class="check-icon">check</mat-icon>
+                  }
+                </span>
+              </label>
+            }
+
             <button (click)="loadData()" class="btn btn-ghost" matTooltip="Refresh">
               <mat-icon fontIcon="refresh" />
             </button>
-            @if (dataData().length > 0) {
-              <button (click)="selectAll(dataData())" class="btn btn-secondary">Select All</button>
-            }
           </div>
           @if (getSelectedCount() > 0) {
             <div class="flex items-center gap-2">
@@ -208,14 +451,59 @@
       <div class="pt-4">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-4">
+            <div
+              class="search-controls-bar"
+              (mouseenter)="onSearchHoverEnter()"
+              (mouseleave)="onSearchHoverLeave()"
+            >
+              @if (!searchVisible()) {
+                <button class="search-toggle-btn" (click)="showSearchInput()">
+                  <mat-icon class="toggle-icon">search</mat-icon>
+                </button>
+              } @else {
+                <div class="search-input-wrapper">
+                  <mat-icon class="search-icon">search</mat-icon>
+                  <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search caches..."
+                    [value]="searchQuery()"
+                    (input)="onSearchChange($any($event.target).value)"
+                    (focus)="onSearchFocus()"
+                    (blur)="onSearchBlur()"
+                  />
+                  @if (searchQuery()) {
+                    <button (click)="clearSearch()" class="search-clear-btn">
+                      <mat-icon class="clear-icon">close</mat-icon>
+                    </button>
+                  }
+                  <button (click)="hideSearchInput()" class="search-close-btn">
+                    <mat-icon class="close-icon">close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (cachesData().length > 0) {
+              <label class="custom-checkbox select-all-checkbox" [matTooltip]="cachesAllSelected() ? 'Deselect All' : 'Select All'">
+                <input
+                  type="checkbox"
+                  [checked]="cachesAllSelected()"
+                  (change)="selectAll(cachesData(), $any($event.target).checked)"
+                />
+                <span class="checkmark" [class.indeterminate]="cachesIndeterminate()">
+                  @if (cachesIndeterminate()) {
+                    <mat-icon class="check-icon">remove</mat-icon>
+                  } @else {
+                    <mat-icon class="check-icon">check</mat-icon>
+                  }
+                </span>
+              </label>
+            }
+
             <button (click)="loadCaches()" class="btn btn-ghost" matTooltip="Refresh">
               <mat-icon fontIcon="refresh" />
             </button>
-            @if (cachesData().length > 0) {
-              <button (click)="selectAll(cachesData())" class="btn btn-secondary">
-                Select All
-              </button>
-            }
           </div>
           @if (getSelectedCount() > 0) {
             <div class="flex items-center gap-2">

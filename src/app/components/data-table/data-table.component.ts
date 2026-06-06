@@ -85,6 +85,8 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
   sortKey = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc'>('asc');
   searchQuery = signal<string>('');
+  toolbarExpanded = signal(false);
+  toolbarLocked = signal(false);
 
   lastSelectedIndex = signal<number | null>(null);
 
@@ -327,6 +329,10 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     return this.options.showReloadButton ?? false;
   }
 
+  get searchTogglable(): boolean {
+    return this.options.searchTogglable ?? false;
+  }
+
   get showSelectedActions(): boolean {
     return this.options.showSelectedActions ?? false;
   }
@@ -412,6 +418,22 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     this.searchControl.setValue('');
     this.onSearch();
     this.searchChange.emit('');
+  }
+
+  onToolbarHoverEnter(): void {
+    if (!this.toolbarLocked()) {
+      this.toolbarExpanded.set(true);
+    }
+  }
+
+  onToolbarHoverLeave(): void {
+    if (!this.toolbarLocked()) {
+      this.toolbarExpanded.set(false);
+    }
+  }
+
+  toggleToolbar(): void {
+    this.toolbarLocked.set(!this.toolbarLocked());
   }
 
   formatCell(columnKey: string, item: T): string {

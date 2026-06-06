@@ -1,6 +1,7 @@
 /* sys lib */
 import { ChangeDetectionStrategy, Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
 /* materials */
 import { MatButtonModule } from '@angular/material/button';
@@ -55,6 +56,7 @@ export class CleanerView implements OnInit {
   private fileService = inject(FileService);
   private logAnalyzerService = inject(LogAnalyzerService);
   private notification = inject(NotificationService);
+  private route = inject(ActivatedRoute);
 
   formatSize = formatSize;
 
@@ -101,6 +103,7 @@ export class CleanerView implements OnInit {
       hoverable: true,
       showReloadButton: true,
       showSearch: true,
+      showSelectAll: true,
       searchPlaceholder: 'Search...',
     };
   }
@@ -112,6 +115,7 @@ export class CleanerView implements OnInit {
       hoverable: true,
       showReloadButton: true,
       showSearch: true,
+      showSelectAll: true,
       searchPlaceholder: 'Search...',
     };
   }
@@ -123,6 +127,7 @@ export class CleanerView implements OnInit {
       hoverable: true,
       showReloadButton: true,
       showSearch: true,
+      showSelectAll: true,
       searchPlaceholder: 'Search...',
     };
   }
@@ -138,7 +143,12 @@ export class CleanerView implements OnInit {
   }
 
   async ngOnInit() {
-    await this.store.loadActiveTabData();
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab && ['cache', 'trash', 'logs', 'packages'].includes(tab)) {
+      await this.onTabChange(tab as 'cache' | 'trash' | 'logs' | 'packages');
+    } else {
+      await this.store.loadActiveTabData();
+    }
   }
 
   async onTabChange(tab: 'cache' | 'trash' | 'logs' | 'packages'): Promise<void> {

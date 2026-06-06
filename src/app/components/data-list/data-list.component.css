@@ -1,22 +1,68 @@
+/* data-list-container */
 .data-list-container {
   display: flex;
   flex-direction: column;
 }
 
+/* Search Toolbar */
 .data-list-search {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-surface);
+  gap: 0.75rem;
 }
 
-.search-input-wrapper {
-  position: relative;
-  flex: 1;
+.search-toggle-btn {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.search-toggle-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  max-width: 0;
+  overflow: hidden;
+  transition: max-width 200ms ease-out;
+}
+
+.controls-bar.toolbar-visible {
+  max-width: 500px;
+}
+
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Search Input */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .search-icon {
@@ -26,6 +72,7 @@
   transform: translateY(-50%);
   color: var(--text-muted);
   font-size: 0.875rem;
+  pointer-events: none;
 }
 
 .search-input {
@@ -37,6 +84,7 @@
   font-size: 0.875rem;
   color: var(--text-primary);
   outline: none;
+  transition: border-color 150ms ease;
 }
 
 .search-input::placeholder {
@@ -66,6 +114,13 @@
   color: var(--text-primary);
 }
 
+.clear-icon {
+  font-size: 1rem;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Loading */
 .data-list-loading {
   display: flex;
   align-items: center;
@@ -73,6 +128,7 @@
   height: 12rem;
 }
 
+/* Empty */
 .data-list-empty {
   display: flex;
   flex-direction: column;
@@ -84,10 +140,13 @@
 
 .data-list-empty .icon-4xl {
   font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
   color: var(--text-muted);
   margin-bottom: 1rem;
 }
 
+/* Items */
 .data-list-items {
   display: flex;
   flex-direction: column;
@@ -121,6 +180,7 @@
   flex-shrink: 0;
 }
 
+/* Custom Checkbox */
 .custom-checkbox {
   position: relative;
   display: flex;
@@ -143,6 +203,18 @@
   height: 1.25rem;
   border: 2px solid var(--border-color);
   border-radius: 0.25rem;
+  background: var(--bg-elevated);
+  transition: all 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-checkbox .checkmark .check-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: transparent;
   transition: all 150ms ease;
 }
 
@@ -151,21 +223,18 @@
   border-color: var(--accent-primary);
 }
 
-.custom-checkbox input:checked + .checkmark::after {
-  content: '';
-  position: absolute;
-  top: 0.2rem;
-  left: 0.4rem;
-  width: 0.35rem;
-  height: 0.6rem;
-  border-right: 2px solid white;
-  border-bottom: 2px solid white;
-  transform: rotate(45deg);
+.custom-checkbox input:checked + .checkmark .check-icon {
+  color: white;
 }
 
 .custom-checkbox .checkmark.indeterminate {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
+}
+
+.custom-checkbox .checkmark.indeterminate .check-icon {
+  color: white;
+  font-size: 16px;
 }
 
 .item-icon {

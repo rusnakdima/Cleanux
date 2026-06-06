@@ -1,5 +1,7 @@
 import { Injectable, signal, inject, OnDestroy, computed, NgZone } from '@angular/core';
 import { TauriApiService } from '@api/tauri-api.service';
+import { formatSize } from '@shared/utils/format.util';
+import { DEFAULT_JUNK_THRESHOLD } from '@shared/constants/size.constants';
 
 export interface SystemStats {
   cpuUsage: number;
@@ -71,16 +73,16 @@ export class MonitorStore implements OnDestroy {
   readonly isMonitoring = signal(false);
 
   readonly memoryUsedFormatted = computed(() =>
-    this.formatBytes(this.systemStats().memoryUsed ?? 0)
+    formatSize(this.systemStats().memoryUsed ?? 0)
   );
   readonly memoryTotalFormatted = computed(() =>
-    this.formatBytes(this.systemStats().memoryTotal ?? 0)
+    formatSize(this.systemStats().memoryTotal ?? 0)
   );
-  readonly diskUsedFormatted = computed(() => this.formatBytes(this.systemStats().diskUsed ?? 0));
-  readonly diskTotalFormatted = computed(() => this.formatBytes(this.systemStats().diskTotal ?? 0));
+  readonly diskUsedFormatted = computed(() => formatSize(this.systemStats().diskUsed ?? 0));
+  readonly diskTotalFormatted = computed(() => formatSize(this.systemStats().diskTotal ?? 0));
 
   readonly healthScore = signal(87);
-  readonly totalJunkSize = signal(256 * 1024 * 1024);
+  readonly totalJunkSize = signal(DEFAULT_JUNK_THRESHOLD);
 
   constructor() {
     this.visibilityHandler = () => {
@@ -255,14 +257,6 @@ export class MonitorStore implements OnDestroy {
     } catch (error) {
       console.error('Failed to save health snapshot:', error);
     }
-  }
-
-  formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 
   getUsageColor(percent: number): string {

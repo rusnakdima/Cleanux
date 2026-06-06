@@ -5,7 +5,9 @@
       <p>Clean cache, trash, and logs to free up space</p>
     </div>
     <button (click)="store.forceReloadActiveTab()" class="btn btn-secondary">
-      <mat-icon class="icon-sm" [class.animate-spin]="store.loading()">refresh</mat-icon>
+      <mat-icon class="icon-sm" [class.animate-spin]="store.loading()">
+        {{ store.loading() ? 'refresh' : 'search' }}
+      </mat-icon>
       Refresh
     </button>
   </div>

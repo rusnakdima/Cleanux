@@ -1,0 +1,98 @@
+.toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  user-select: none;
+}
+
+.toggle-label-left {
+  margin-right: 0.75rem;
+}
+
+.toggle-label-right {
+  margin-left: 0.75rem;
+}
+
+.toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-hover);
+  cursor: pointer;
+  transition: all 150ms ease;
+  outline: none;
+}
+
+.toggle-track:focus-visible {
+  box-shadow: 0 0 0 3px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
+}
+
+.toggle-track:active:not(.toggle-disabled) {
+  transform: scale(0.97);
+}
+
+.toggle-track.toggle-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-track.toggle-checked {
+  background: var(--accent-buttons, var(--accent));
+  border-color: var(--accent-buttons, var(--accent));
+  box-shadow: 0 0 12px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
+}
+
+.toggle-knob {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-sm {
+  height: 24px;
+  width: 40px;
+}
+
+.toggle-sm .toggle-knob {
+  height: 18px;
+  width: 18px;
+  left: 1px;
+}
+
+.toggle-sm.toggle-checked .toggle-knob {
+  transform: translateX(18px);
+}
+
+.toggle-md {
+  height: 28px;
+  width: 48px;
+}
+
+.toggle-md .toggle-knob {
+  height: 22px;
+  width: 22px;
+  left: 2px;
+}
+
+.toggle-md.toggle-checked .toggle-knob {
+  transform: translateX(22px);
+}
+
+.toggle-lg {
+  height: 36px;
+  width: 60px;
+}
+
+.toggle-lg .toggle-knob {
+  height: 28px;
+  width: 28px;
+  left: 3px;
+}
+
+.toggle-lg.toggle-checked .toggle-knob {
+  transform: translateX(26px);
+}

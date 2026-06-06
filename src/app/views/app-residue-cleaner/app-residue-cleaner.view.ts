@@ -66,6 +66,10 @@ export class AppResidueCleanerView {
   orphanedPage = signal(1);
   orphanedPageSize = signal(15);
 
+  searchVisible = signal(false);
+  searchQuery = signal('');
+  searchFocused = signal(false);
+
   configsCount = () => this.configsData().length;
   dataCount = () => this.dataData().length;
   cachesCount = () => this.cachesData().length;
@@ -89,6 +93,54 @@ export class AppResidueCleanerView {
   paginatedOrphaned = computed(() => {
     const start = (this.orphanedPage() - 1) * this.orphanedPageSize();
     return this.orphanedData().slice(start, start + this.orphanedPageSize());
+  });
+
+  configsAllSelected = computed(() => {
+    const total = this.configsData().length;
+    const selected = this.selectedConfigs().size;
+    return total > 0 && selected === total;
+  });
+
+  configsIndeterminate = computed(() => {
+    const total = this.configsData().length;
+    const selected = this.selectedConfigs().size;
+    return selected > 0 && selected < total;
+  });
+
+  dataAllSelected = computed(() => {
+    const total = this.dataData().length;
+    const selected = this.selectedData().size;
+    return total > 0 && selected === total;
+  });
+
+  dataIndeterminate = computed(() => {
+    const total = this.dataData().length;
+    const selected = this.selectedData().size;
+    return selected > 0 && selected < total;
+  });
+
+  cachesAllSelected = computed(() => {
+    const total = this.cachesData().length;
+    const selected = this.selectedCaches().size;
+    return total > 0 && selected === total;
+  });
+
+  cachesIndeterminate = computed(() => {
+    const total = this.cachesData().length;
+    const selected = this.selectedCaches().size;
+    return selected > 0 && selected < total;
+  });
+
+  orphanedAllSelected = computed(() => {
+    const total = this.orphanedData().length;
+    const selected = this.selectedOrphaned().size;
+    return total > 0 && selected === total;
+  });
+
+  orphanedIndeterminate = computed(() => {
+    const total = this.orphanedData().length;
+    const selected = this.selectedOrphaned().size;
+    return selected > 0 && selected < total;
   });
 
   onConfigsPageChange(page: number) {
@@ -177,22 +229,39 @@ export class AppResidueCleanerView {
     }
   }
 
-  selectAll(items: AppResidue[]): void {
+  selectAll(items: AppResidue[], checked = true): void {
     const tab = this.activeTab();
     const allPaths = new Set(items.map((i) => i.path));
-    switch (tab) {
-      case 'configs':
-        this.selectedConfigs.set(allPaths);
-        break;
-      case 'data':
-        this.selectedData.set(allPaths);
-        break;
-      case 'caches':
-        this.selectedCaches.set(allPaths);
-        break;
-      case 'orphaned':
-        this.selectedOrphaned.set(allPaths);
-        break;
+    if (!checked) {
+      switch (tab) {
+        case 'configs':
+          this.selectedConfigs.set(new Set());
+          break;
+        case 'data':
+          this.selectedData.set(new Set());
+          break;
+        case 'caches':
+          this.selectedCaches.set(new Set());
+          break;
+        case 'orphaned':
+          this.selectedOrphaned.set(new Set());
+          break;
+      }
+    } else {
+      switch (tab) {
+        case 'configs':
+          this.selectedConfigs.set(allPaths);
+          break;
+        case 'data':
+          this.selectedData.set(allPaths);
+          break;
+        case 'caches':
+          this.selectedCaches.set(allPaths);
+          break;
+        case 'orphaned':
+          this.selectedOrphaned.set(allPaths);
+          break;
+      }
     }
   }
 
@@ -414,5 +483,40 @@ export class AppResidueCleanerView {
       default:
         return 'bg-slate-500/10 text-slate-600';
     }
+  }
+
+  showSearchInput(): void {
+    this.searchVisible.set(true);
+  }
+
+  hideSearchInput(): void {
+    if (!this.searchFocused()) {
+      this.searchVisible.set(false);
+    }
+  }
+
+  onSearchHoverEnter(): void {
+    if (!this.searchVisible()) {
+      this.searchVisible.set(true);
+    }
+  }
+
+  onSearchHoverLeave(): void {
+  }
+
+  onSearchFocus(): void {
+    this.searchFocused.set(true);
+  }
+
+  onSearchBlur(): void {
+    this.searchFocused.set(false);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+  }
+
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query.toLowerCase());
   }
 }

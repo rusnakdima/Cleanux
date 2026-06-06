@@ -87,6 +87,7 @@ export class SystemView implements OnInit {
     showActions: true,
     actionsPosition: 'right',
     showReloadButton: true,
+    showSelectAll: true,
     searchPlaceholder: 'Search services...',
     emptyMessage: 'No services found',
   };

@@ -9,7 +9,7 @@ import {
   OnChanges,
   SimpleChanges,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -34,6 +34,7 @@ import { formatSize } from '@shared/utils/format.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    NgClass,
     MatCheckboxModule,
     MatIconModule,
     MatButtonModule,
@@ -81,6 +82,8 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   sortKey = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc'>('asc');
   searchQuery = signal<string>('');
+  toolbarExpanded = signal(false);
+  toolbarLocked = signal(false);
 
   private destroy$ = new Subject<void>();
   searchControl = new FormControl('');
@@ -198,6 +201,10 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     return this.options.showSearch ?? true;
   }
 
+  get searchTogglable(): boolean {
+    return this.options.searchTogglable ?? false;
+  }
+
   get showPagination(): boolean {
     return this.options.showPagination ?? true;
   }
@@ -296,6 +303,22 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     this.searchControl.setValue('');
     this.onSearch();
     this.searchChange.emit('');
+  }
+
+  onToolbarHoverEnter(): void {
+    if (!this.toolbarLocked()) {
+      this.toolbarExpanded.set(true);
+    }
+  }
+
+  onToolbarHoverLeave(): void {
+    if (!this.toolbarLocked()) {
+      this.toolbarExpanded.set(false);
+    }
+  }
+
+  toggleToolbar(): void {
+    this.toolbarLocked.set(!this.toolbarLocked());
   }
 
   formatCell(columnKey: string, item: T): string {

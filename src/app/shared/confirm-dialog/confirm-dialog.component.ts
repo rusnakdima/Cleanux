@@ -8,7 +8,7 @@ import {
   Output,
   EventEmitter,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogConfig, DEFAULT_DIALOG_CONFIG } from './confirm-dialog.config';
 
@@ -16,7 +16,7 @@ import { ConfirmDialogConfig, DEFAULT_DIALOG_CONFIG } from './confirm-dialog.con
   selector: 'app-confirm-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, NgClass, FormsModule],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.css',
 })
@@ -71,5 +71,20 @@ export class ConfirmDialogComponent {
     if (this.config.closeOnClickOutside !== false && !this.config.dangerous) {
       this.onCancel();
     }
+  }
+
+  getCancelBtnClass(): string {
+    return 'btn-cancel bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]';
+  }
+
+  getConfirmBtnClass(): string {
+    const base = 'text-white border-transparent';
+    if (this.config.confirmColor === 'accent') {
+      return `btn-accent bg-[var(--accent-secondary)] ${base}`;
+    }
+    if (this.config.confirmColor === 'warn') {
+      return `btn-warn bg-[var(--color-error)] ${base}`;
+    }
+    return `btn-primary bg-[var(--accent-primary)] ${base}`;
   }
 }

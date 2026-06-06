@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
 import { MonitorStore } from '@stores/monitor.store';
+import { formatSize } from '@shared/utils/format.util';
 
 @Component({
   selector: 'app-system-monitor',
@@ -29,7 +30,7 @@ export class SystemMonitorComponent implements OnInit, OnDestroy {
   ngOnDestroy() {}
 
   formatBytes(bytes: number): string {
-    return this.store.formatBytes(bytes);
+    return formatSize(bytes);
   }
 
   getUsageColor(percent: number): string {

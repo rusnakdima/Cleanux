@@ -1,0 +1,24 @@
+<!-- Layout wrapper uses Tailwind, toggle mechanics kept in component CSS -->
+@if (label() && labelPosition() === 'left') {
+  <span class="text-sm font-medium text-[var(--text-primary)] select-none mr-3">{{ label() }}</span>
+}
+
+<button
+  type="button"
+  role="switch"
+  class="toggle-track"
+  [class.toggle-checked]="checked()"
+  [class.toggle-disabled]="disabled()"
+  [class.toggle-sm]="size() === 'sm'"
+  [class.toggle-md]="size() === 'md'"
+  [class.toggle-lg]="size() === 'lg'"
+  [attr.aria-checked]="checked()"
+  [disabled]="disabled()"
+  (click)="onToggle()"
+>
+  <span class="toggle-knob"></span>
+</button>
+
+@if (label() && labelPosition() === 'right') {
+  <span class="text-sm font-medium text-[var(--text-primary)] select-none ml-3">{{ label() }}</span>
+}

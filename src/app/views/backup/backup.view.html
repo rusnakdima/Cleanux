@@ -6,10 +6,6 @@
         Create and restore backups before cleaning operations
       </p>
     </div>
-    <button (click)="loadBackups()" class="btn btn-primary">
-      <mat-icon class="icon-sm">refresh</mat-icon>
-      Refresh
-    </button>
   </div>
 
   @if (loading()) {
@@ -42,6 +38,7 @@
           (pageChange)="onPageChange($event)"
           (newPageSize)="onPageSizeChange($event)"
           (rowAction)="onRowAction($event)"
+          (reload)="loadBackups()"
         />
       </div>
     </div>

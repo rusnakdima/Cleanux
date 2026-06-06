@@ -82,6 +82,8 @@ export class ProcessesView implements OnInit {
     showActions: true,
     actionsPosition: 'right',
     showReloadButton: true,
+    searchTogglable: true,
+    showSelectAll: true,
     searchPlaceholder: 'Search processes...',
     emptyMessage: 'No processes found',
   };

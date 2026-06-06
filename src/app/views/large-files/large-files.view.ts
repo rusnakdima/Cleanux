@@ -86,6 +86,7 @@ export class LargeFilesView implements OnInit {
     showActions: true,
     actionsPosition: 'right',
     showReloadButton: true,
+    showSelectAll: true,
     searchPlaceholder: 'Search large files...',
     emptyMessage: 'No large files found',
   };

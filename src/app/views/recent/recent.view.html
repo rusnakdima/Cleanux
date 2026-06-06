@@ -41,10 +41,10 @@
   <div class="glass-surface matte-surface border-trace p-5 mt-6">
     <h3 class="section-title mb-4">Apps with Recent History</h3>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      @for (app of apps; track app.id) {
+      @for (app of apps; track app.id; let i = $index) {
         <button
           (click)="clearApp(app.id)"
-          class="category-card matte-surface border-trace flex flex-col items-center justify-center p-4 no-underline"
+          class="category-card matte-surface {{ i % 2 === 0 ? 'border-gray-light' : 'border-gray-dark' }} flex flex-col items-center justify-center p-4 no-underline"
         >
           <mat-icon class="icon-lg text-[var(--text-muted)] mb-2">{{ app.icon }}</mat-icon>
           <span class="text-xs">{{ app.name }}</span>

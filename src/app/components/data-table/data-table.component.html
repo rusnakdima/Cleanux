@@ -2,21 +2,54 @@
   <div class="table-container flex flex-col flex-1 min-h-0">
     @if (options.showSearch) {
       <div
-        class="search-container py-3 px-4 border-b border-[var(--border-color)] bg-[var(--bg-surface)]"
+        class="search-container"
+        (mouseenter)="onToolbarHoverEnter()"
+        (mouseleave)="onToolbarHoverLeave()"
       >
-        <div class="search-input-wrapper">
-          <mat-icon class="search-icon">search</mat-icon>
-          <input
-            type="text"
-            class="search-input"
-            placeholder="{{ options.searchPlaceholder ?? 'Search...' }}"
-            [formControl]="searchControl"
-          />
-          @if (searchControl.value) {
-            <button (click)="clearSearch()" class="search-clear-btn">
-              <mat-icon class="clear-icon">close</mat-icon>
-            </button>
-          }
+        <button class="search-toggle-btn" (click)="toggleToolbar()">
+          <mat-icon class="icon-sm">{{ toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search' }}</mat-icon>
+        </button>
+
+        <div class="controls-bar" [class.toolbar-visible]="toolbarExpanded() || toolbarLocked()">
+          <div class="search-input-wrapper">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="{{ options.searchPlaceholder ?? 'Search...' }}"
+              [formControl]="searchControl"
+            />
+            @if (searchControl.value) {
+              <button (click)="clearSearch()" class="search-clear-btn">
+                <mat-icon class="clear-icon">close</mat-icon>
+              </button>
+            }
+          </div>
+
+          <div class="controls-right">
+            @if (showCheckbox && options.showHeader) {
+              <label class="custom-checkbox select-all-checkbox" [matTooltip]="allSelected() ? 'Deselect All' : 'Select All'">
+                <input
+                  type="checkbox"
+                  [checked]="allSelected()"
+                  (change)="toggleSelectAll($any($event.target).checked)"
+                />
+                <span class="checkmark" [class.indeterminate]="indeterminate()">
+                  @if (indeterminate()) {
+                    <mat-icon class="check-icon">remove</mat-icon>
+                  } @else {
+                    <mat-icon class="check-icon">check</mat-icon>
+                  }
+                </span>
+              </label>
+            }
+
+            @if (showReloadButton) {
+              <button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+                <mat-icon class="text-[var(--accent-icons)]">refresh</mat-icon>
+              </button>
+            }
+          </div>
         </div>
       </div>
     }
@@ -25,18 +58,6 @@
         class="table-header sticky top-0 z-20 w-full bg-[var(--bg-surface)]/95 backdrop-blur-lg border-b border-[var(--border-color)] shrink-0"
       >
         <div class="flex items-center px-4">
-          @if (showCheckbox) {
-            <div class="checkbox-container w-10 shrink-0">
-              <label class="custom-checkbox">
-                <input
-                  type="checkbox"
-                  [checked]="allSelected()"
-                  (change)="toggleSelectAll($any($event.target).checked)"
-                />
-                <span class="checkmark" [class.indeterminate]="indeterminate()"></span>
-              </label>
-            </div>
-          }
           @if (showPreviewButton) {
             <div class="w-10 shrink-0"></div>
           }
@@ -99,7 +120,9 @@
                     (change)="toggleSelectItem(item, $any($event.target).checked)"
                     (click)="$event.stopPropagation()"
                   />
-                  <span class="checkmark"></span>
+                  <span class="checkmark">
+                    <mat-icon class="check-icon">check</mat-icon>
+                  </span>
                 </label>
               </div>
             }
@@ -184,7 +207,9 @@
                       (change)="toggleSelectItem(item, $any($event.target).checked)"
                       (click)="$event.stopPropagation()"
                     />
-                    <span class="checkmark"></span>
+                    <span class="checkmark">
+                      <mat-icon class="check-icon">check</mat-icon>
+                    </span>
                   </label>
                 </div>
               }

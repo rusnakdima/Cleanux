@@ -40,6 +40,7 @@ export interface TableOptions {
   rowHeight?: number;
   emptyMessage?: string;
   persistKey?: string;
+  searchTogglable?: boolean;
 }
 
 export interface SortEvent {

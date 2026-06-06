@@ -1,6 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons+Outlined");
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
 
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
@@ -26,6 +29,12 @@
   --color-warning: #f97316;
   --color-error: #ef4444;
   --color-info: #3b82f6;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
 }
 
 :root {
@@ -39,18 +48,16 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-
-  --accent-primary: #06b6d4;
-  --accent-secondary: #8b5cf6;
-  --accent-gradient: linear-gradient(135deg, #06b6d4, #8b5cf6);
-  --color-primary: #06b6d4;
+  --accent-primary: var(--accent, #06b6d4);
+  --accent-secondary: var(--accent-secondary, #8b5cf6);
+  --accent-gradient: linear-gradient(135deg, var(--accent, #06b6d4), var(--accent-secondary, #8b5cf6));
+  --color-primary: var(--accent, #06b6d4);
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-2xl: 32px;
-  --radius-full: 9999px;
 
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
@@ -60,7 +67,7 @@
   --shadow-glow-sm: 0 0 10px rgba(6, 182, 212, 0.2);
 }
 
-.light {
+.light, :host-context(.light) {
   --bg-base: #f8fafc;
   --bg-surface: #ffffff;
   --bg-elevated: #f1f5f9;
@@ -71,9 +78,9 @@
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --accent-primary: #0891b2;
-  --accent-secondary: #7c3aed;
-  --color-primary: #0891b2;
+  --accent-primary: var(--accent, #0891b2);
+  --accent-secondary: var(--accent-secondary, #7c3aed);
+  --color-primary: var(--accent, #0891b2);
 }
 
 html {
@@ -84,9 +91,7 @@ body {
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  transition:
-    background-color var(--transition-normal),
-    color var(--transition-normal);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
   min-height: 100vh;
   margin: 0;
   -webkit-font-smoothing: antialiased;
@@ -118,35 +123,15 @@ mat-icon {
   font-family: "Material Icons Outlined" !important;
 }
 
-.icon-xs {
-  font-size: 1rem !important;
-  width: 1rem !important;
-  height: 1rem !important;
-}
-.icon-sm {
-  font-size: 1.25rem !important;
-  width: 1.25rem !important;
-  height: 1.25rem !important;
-}
-.icon-base {
-  font-size: 1.5rem !important;
-  width: 1.5rem !important;
-  height: 1.5rem !important;
-}
-.icon-lg {
-  font-size: 2rem !important;
-  width: 2rem !important;
-  height: 2rem !important;
-}
-.icon-xl {
-  font-size: 2.5rem !important;
-  width: 2.5rem !important;
-  height: 2.5rem !important;
-}
+.icon-xs { font-size: 1rem !important; width: 1rem !important; height: 1rem !important; }
+.icon-sm { font-size: 1.25rem !important; width: 1.25rem !important; height: 1.25rem !important; }
+.icon-base { font-size: 1.5rem !important; width: 1.5rem !important; height: 1.5rem !important; }
+.icon-lg { font-size: 2rem !important; width: 2rem !important; height: 2rem !important; }
+.icon-xl { font-size: 2.5rem !important; width: 2.5rem !important; height: 2.5rem !important; }
 
 @layer components {
   .glass-surface {
-    background: var(--bg-glass);
+    background: color-mix(in srgb, var(--bg-surface) calc(var(--glass-opacity, 0.7) * 100%), transparent);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
@@ -160,7 +145,7 @@ mat-icon {
   }
 
   .glass-panel {
-    background: var(--bg-glass);
+    background: color-mix(in srgb, var(--bg-surface) calc(var(--glass-opacity, 0.7) * 100%), transparent);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid var(--border-color);
@@ -188,7 +173,15 @@ mat-icon {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .glass-card-header {
+      flex-wrap: nowrap;
+      gap: 1rem;
+    }
   }
 
   .glass-card-body {
@@ -214,7 +207,7 @@ mat-icon {
   }
 
   .nav-item.active {
-    color: var(--accent-nav);
+    color: var(--accent-nav, var(--accent));
   }
 
   .card {
@@ -249,7 +242,7 @@ mat-icon {
     padding: 0.625rem 1.25rem;
     font-size: 0.8125rem;
     font-weight: 600;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-xl);
     transition: all var(--transition-fast);
     cursor: pointer;
     border: none;
@@ -267,9 +260,9 @@ mat-icon {
   }
 
   .btn-primary {
-    background: var(--accent-buttons);
+    background: var(--accent-buttons, var(--accent));
     color: white;
-    box-shadow: 0 0 10px var(--accent-buttons-glow);
+    box-shadow: 0 0 10px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
   }
 
   .btn-primary:hover:not(:disabled) {
@@ -285,7 +278,7 @@ mat-icon {
 
   .btn-secondary:hover:not(:disabled) {
     background: var(--bg-hover);
-    border-color: var(--accent-borders);
+    border-color: var(--accent-borders, var(--accent));
   }
 
   .btn-ghost {
@@ -330,8 +323,8 @@ mat-icon {
   }
 
   .input:focus {
-    border-color: var(--accent-borders);
-    box-shadow: 0 0 0 3px var(--accent-borders-light);
+    border-color: var(--accent-borders, var(--accent));
+    box-shadow: 0 0 0 3px var(--accent-borders-light, rgba(99, 102, 241, 0.1));
   }
 
   .input::placeholder {
@@ -348,9 +341,9 @@ mat-icon {
   }
 
   .badge-primary {
-    background: var(--accent-buttons-light);
-    color: var(--accent-buttons);
-    border: 1px solid var(--accent-buttons-glow);
+    background: var(--accent-buttons-light, rgba(99, 102, 241, 0.1));
+    color: var(--accent-buttons, var(--accent));
+    border: 1px solid var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
   }
 
   .badge-success {
@@ -394,16 +387,18 @@ mat-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-icons);
+    background: var(--accent-icons, var(--accent));
     color: white;
   }
 
   .stat-icon.success {
     background: linear-gradient(135deg, #22c55e, #10b981);
   }
+
   .stat-icon.warning {
     background: linear-gradient(135deg, #f97316, #ea580c);
   }
+
   .stat-icon.error {
     background: linear-gradient(135deg, #ef4444, #dc2626);
   }
@@ -471,7 +466,7 @@ mat-icon {
 
   .progress-fill {
     height: 100%;
-    background: var(--accent-icons);
+    background: var(--accent-icons, var(--accent));
     transition: width var(--transition-normal);
     position: relative;
     overflow: hidden;
@@ -499,8 +494,7 @@ mat-icon {
     border-collapse: collapse;
   }
 
-  .table th,
-  .table td {
+  .table th, .table td {
     padding: 0.875rem 1rem;
     text-align: left;
     border-bottom: 1px solid var(--border-color-subtle);
@@ -542,15 +536,15 @@ mat-icon {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: var(--bg-glass);
+    background: color-mix(in srgb, var(--bg-surface) calc(var(--glass-opacity, 0.7) * 100%), transparent);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--accent-buttons);
+    border: 1px solid var(--accent-buttons, var(--accent));
     color: var(--text-primary);
     padding: 0.875rem 1.25rem;
     border-radius: var(--radius-lg);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.4),
-      0 0 10px var(--accent-buttons-glow);
+      0 0 10px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
     max-width: 24rem;
     animation: slideIn 0.3s ease-out;
   }
@@ -575,13 +569,8 @@ mat-icon {
   }
 
   @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 
   .terminal-window {
@@ -731,15 +720,15 @@ mat-icon {
   }
 
   .bottom-nav-item.active {
-    color: var(--accent-nav);
+    color: var(--accent-nav, var(--accent));
   }
 
   .bottom-nav-item.active .nav-indicator {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: var(--accent-nav);
-    box-shadow: 0 0 8px var(--accent-nav);
+    background: var(--accent-nav, var(--accent));
+    box-shadow: 0 0 8px var(--accent-nav, var(--accent));
   }
 
   .header-bar {
@@ -771,8 +760,8 @@ mat-icon {
 
   select.input:focus,
   select:focus {
-    border-color: var(--accent-borders);
-    box-shadow: 0 0 0 3px var(--accent-borders-light);
+    border-color: var(--accent-borders, var(--accent));
+    box-shadow: 0 0 0 3px var(--accent-borders-light, rgba(99, 102, 241, 0.1));
     outline: none;
   }
 
@@ -792,7 +781,7 @@ mat-icon {
   }
 
   .hero-card {
-    background: var(--bg-glass);
+    background: color-mix(in srgb, var(--bg-surface) calc(var(--glass-opacity, 0.7) * 100%), transparent);
     backdrop-filter: blur(24px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-2xl);
@@ -821,24 +810,24 @@ mat-icon {
   }
 
   .category-card:hover {
-    border-color: var(--accent-buttons);
+    border-color: var(--accent-buttons, var(--accent));
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
 
   .category-card.active {
-    border-color: var(--accent-buttons);
-    background: var(--accent-buttons-light);
+    border-color: var(--accent-buttons, var(--accent));
+    background: var(--accent-buttons-light, rgba(99, 102, 241, 0.1));
   }
 
   .clean-button {
-    background: var(--accent-buttons);
+    background: var(--accent-buttons, var(--accent));
     color: white;
     padding: 1rem 2rem;
     border-radius: var(--radius-full);
     font-weight: 700;
     font-size: 1rem;
-    box-shadow: 0 0 20px var(--accent-buttons-glow);
+    box-shadow: 0 0 20px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
     transition: all var(--transition-fast);
     border: none;
     cursor: pointer;
@@ -846,7 +835,7 @@ mat-icon {
 
   .clean-button:hover {
     transform: scale(1.02);
-    box-shadow: 0 0 30px var(--accent-buttons-glow);
+    box-shadow: 0 0 30px var(--accent-buttons-glow, rgba(99, 102, 241, 0.3));
   }
 
   .clean-button:active {
@@ -874,12 +863,8 @@ mat-icon {
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   .modal-content {
@@ -916,12 +901,8 @@ mat-icon {
   }
 
   @keyframes skeleton-loading {
-    0% {
-      background-position: 200% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
   .matte-surface {
@@ -956,105 +937,38 @@ mat-icon {
     animation: border-draw 1.5s ease-out forwards;
   }
 
-  @keyframes border-draw {
-    0% {
-      clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0);
-    }
-    3.125% {
-      clip-path: polygon(0 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 0 0);
-    }
-    6.25% {
-      clip-path: polygon(0 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 0 0);
-    }
-    9.375% {
-      clip-path: polygon(0 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 0 0);
-    }
-    12.5% {
-      clip-path: polygon(0 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 0 0);
-    }
-    15.625% {
-      clip-path: polygon(0 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 0 0);
-    }
-    18.75% {
-      clip-path: polygon(0 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 0 0);
-    }
-    21.875% {
-      clip-path: polygon(0 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 0 0);
-    }
-    25% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 0 0);
-    }
-    28.125% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 0 12.5%);
-    }
-    31.25% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 25%, 0 25%);
-    }
-    34.375% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 0 37.5%);
-    }
-    37.5% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 50%, 0 50%);
-    }
-    40.625% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 0 62.5%);
-    }
-    43.75% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 75%, 0 75%);
-    }
-    46.875% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 87.5%, 0 87.5%);
-    }
-    50% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 100%, 0 100%);
-    }
-    53.125% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 100% 12.5%, 100% 100%, 0 100%);
-    }
-    56.25% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 25%, 100% 25%, 100% 100%, 0 100%);
-    }
-    59.375% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 100% 37.5%, 100% 100%, 0 100%);
-    }
-    62.5% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 50%, 100% 50%, 100% 100%, 0 100%);
-    }
-    65.625% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 100% 62.5%, 100% 100%, 0 100%);
-    }
-    68.75% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 75%, 100% 75%, 100% 100%, 0 100%);
-    }
-    71.875% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 87.5%, 100% 87.5%, 100% 100%, 0 100%);
-    }
-    75% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 100%, 100% 100%, 100% 100%, 0 100%);
-    }
-    78.125% {
-      clip-path: polygon(0 0, 100% 0, 100% 0, 0 0, 0 0, 0 0, 100% 100%, 0 100%);
-    }
-    81.25% {
-      clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%);
-    }
-    84.375% {
-      clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 0, 0 0, 100% 100%, 0 100%);
-    }
-    87.5% {
-      clip-path: polygon(0 0, 100% 0, 100% 75%, 0 75%, 0 0, 0 0, 100% 100%, 0 100%);
-    }
-    90.625% {
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
-    }
-    93.75% {
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
-    }
-    96.875% {
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
-    }
-    100% {
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
-    }
+@keyframes border-draw {
+    0% { clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0); }
+    3.125% { clip-path: polygon(0 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 0 0); }
+    6.25% { clip-path: polygon(0 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 0 0); }
+    9.375% { clip-path: polygon(0 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 0 0); }
+    12.5% { clip-path: polygon(0 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 0 0); }
+    15.625% { clip-path: polygon(0 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 0 0); }
+    18.75% { clip-path: polygon(0 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 0 0); }
+    21.875% { clip-path: polygon(0 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 0 0); }
+    25% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 0 0); }
+    28.125% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 0 12.5%); }
+    31.25% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 25%, 0 25%); }
+    34.375% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 0 37.5%); }
+    37.5% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 50%, 0 50%); }
+    40.625% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 0 62.5%); }
+    43.75% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 75%, 0 75%); }
+    46.875% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 87.5%, 0 87.5%); }
+    50% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 100%, 0 100%); }
+    53.125% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 100% 12.5%, 100% 100%, 0 100%); }
+    56.25% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 25%, 100% 25%, 100% 100%, 0 100%); }
+    59.375% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 100% 37.5%, 100% 100%, 0 100%); }
+    62.5% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 50%, 100% 50%, 100% 100%, 0 100%); }
+    65.625% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 100% 62.5%, 100% 100%, 0 100%); }
+    68.75% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 75%, 100% 75%, 100% 100%, 0 100%); }
+    71.875% { clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%); }
+    81.25% { clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%); }
+    84.375% { clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 0, 0 0, 100% 100%, 0 100%); }
+    87.5% { clip-path: polygon(0 0, 100% 0, 100% 75%, 0 75%, 0 0, 0 0, 100% 100%, 0 100%); }
+    90.625% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
+    93.75% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
+    96.875% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
+    100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
   }
 }
+
