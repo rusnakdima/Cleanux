@@ -36,3 +36,6 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 [features]
 default = ["mcp-bridge"]
 mcp-bridge = ["dep:tauri-plugin-mcp-bridge"]
+
+[dev-dependencies]
+tempfile = "3.10"
