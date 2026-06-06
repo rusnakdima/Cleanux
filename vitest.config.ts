@@ -33,8 +33,6 @@ export default defineConfig({
       '@env': resolve(__dirname, 'src/environments'),
       '@api': resolve(__dirname, 'src/app/api'),
       '@stores': resolve(__dirname, 'src/app/stores'),
-      '@interceptors': resolve(__dirname, 'src/app/interceptors'),
-      '@resolvers': resolve(__dirname, 'src/app/resolvers'),
       '@test-utils': resolve(__dirname, 'src/test-utils'),
     },
   },
