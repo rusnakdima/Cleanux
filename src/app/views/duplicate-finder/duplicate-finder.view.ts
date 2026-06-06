@@ -21,8 +21,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DuplicateService } from '@services/duplicate.service';
 import { ThemeService } from '@services/theme.service';
 import { FileService } from '@services/file.service';
-import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -60,18 +60,15 @@ interface FlattenedFile {
   ],
   templateUrl: './duplicate-finder.view.html',
 })
-export class DuplicateFinderView implements OnInit {
+export class DuplicateFinderView extends LoadingErrorMixin implements OnInit {
   private duplicateService = inject(DuplicateService);
   private themeService = inject(ThemeService);
   private fileService = inject(FileService);
   private document = inject(DOCUMENT);
-  private notification = inject(NotificationService);
-  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
   duplicateGroups = signal<DuplicateGroup[]>([]);
-  loading = signal(false);
   scanningPath = signal('');
   extensionFilter = signal('');
 
@@ -141,10 +138,9 @@ export class DuplicateFinderView implements OnInit {
   async scanForDuplicates() {
     if (!this.scanningPath()) return;
 
-    this.loading.set(true);
     this.selectedFiles.set(new Set());
 
-    try {
+    await this.runWithLoading(async () => {
       const result = await this.duplicateService.findDuplicates(
         this.scanningPath(),
         this.extensionFilter() || undefined
@@ -152,12 +148,7 @@ export class DuplicateFinderView implements OnInit {
       this.duplicateGroups.set(result.groups);
       this.totalWastedSpace.set(result.totalWastedSpace);
       this.totalDuplicates.set(result.totalDuplicates);
-    } catch (error) {
-      console.error('Failed to scan for duplicates:', error);
-      this.notification.error('Failed to scan', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to scan for duplicates', notificationMessage: 'Failed to scan for duplicates' });
   }
 
   onSelectionChange(keys: Set<string>): void {
@@ -181,8 +172,7 @@ export class DuplicateFinderView implements OnInit {
     });
     if (!confirmed) return;
 
-    try {
-      this.loading.set(true);
+    await this.runWithLoading(async () => {
       if (this.fileService.deleteFiles) {
         await this.fileService.deleteFiles(filesToDelete);
       } else {
@@ -190,11 +180,7 @@ export class DuplicateFinderView implements OnInit {
       }
       this.selectedFiles.set(new Set());
       await this.scanForDuplicates();
-    } catch (error) {
-      this.notification.error('Failed to delete files', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to delete files', notificationMessage: 'Failed to delete files' });
   }
 
   async onPreview(file: DuplicateFile): Promise<void> {

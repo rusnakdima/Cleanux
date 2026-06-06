@@ -54,8 +54,6 @@ interface ScanProgress {
   current_path: string;
 }
 
-const WIDGET_STORAGE_KEY = 'cleanux_widget_layout';
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -94,21 +92,11 @@ export class DashboardView implements OnInit, OnDestroy {
     change_percent: 0,
   });
 
-  showWidgetSettings = signal(false);
   recentActivities = signal<ActivityItem[]>([]);
-
-  quickActions: QuickAction[] = [
-    { id: 'scan', label: 'Scan', icon: 'search', action: 'scan' },
-    { id: 'clean-cache', label: 'Clear Cache', icon: 'auto_delete', action: 'clean-cache' },
-    { id: 'clean-trash', label: 'Empty Trash', icon: 'delete_outline', action: 'clean-trash' },
-    { id: 'clean-logs', label: 'Clear Logs', icon: 'description', action: 'clean-logs' },
-  ];
 
   totalJunkSize = computed(
     () => this.cacheSize() + this.trashSize() + this.logSize() + this.largeFileSize()
   );
-
-  largeFilesSize = computed(() => this.largeFileSize());
 
   systemStatus = computed(() => {
     const size = this.totalJunkSize();

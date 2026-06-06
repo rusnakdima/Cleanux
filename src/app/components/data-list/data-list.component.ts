@@ -7,9 +7,11 @@ import {
   EventEmitter,
   OnChanges,
   SimpleChanges,
+  signal,
+  computed,
 } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,7 +21,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* components */
 import { PaginationComponent } from '../pagination/pagination.component';
-import { BaseListComponent } from '../base-list/base-list.component';
 
 /* models */
 import { ListColumn, ListOptions, ListActionEvent } from '@models/data-list.model';
@@ -45,9 +46,8 @@ import { ConfirmDialogService } from '@shared/confirm-dialog';
     CheckboxComponent,
   ],
   templateUrl: './data-list.component.html',
-  styleUrl: './data-list.component.css',
 })
-export class DataListComponent<T extends object = object> extends BaseListComponent<T> implements OnChanges {
+export class DataListComponent<T extends object = object> implements OnChanges {
   @Input() columns: ListColumn[] = [];
   @Input() options: ListOptions = {};
   @Input() loading = false;
@@ -73,17 +73,38 @@ export class DataListComponent<T extends object = object> extends BaseListCompon
 
   p = 1;
 
-  constructor() {
-    super();
+  private _selectedKeys = new Set<string>();
+  private _data: T[] = [];
+  private _filteredData: T[] = [];
+  sortKey = signal<string | null>(null);
+  sortDirection = signal<'asc' | 'desc'>('asc');
+  @Output() selectionChange = new EventEmitter<Set<string>>();
+  toolbarExpanded = signal(false);
+  toolbarLocked = signal(false);
+  searchControl = new FormControl('');
+
+  allSelected = computed(() => {
+    if (this._data.length === 0) return false;
+    return this._data.every((item) => this._selectedKeys.has(this.getKey(item)));
+  });
+
+  indeterminate = computed(() => {
+    const selectedCount = this._selectedKeys.size;
+    return selectedCount > 0 && selectedCount < this._data.length;
+  });
+
+  @Input() set data(value: T[]) {
+    this._data = value;
+    this._filteredData = [...value];
   }
+
+  constructor(private confirmDialogService: ConfirmDialogService) {}
 
   get checkboxKey(): string {
     return this.options.checkboxKey ?? 'id';
   }
 
-  override ngOnChanges(changes: SimpleChanges): void {
-    super.ngOnChanges(changes);
-
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentPage']) {
       this.p = this.currentPage;
     }
@@ -341,5 +362,95 @@ export class DataListComponent<T extends object = object> extends BaseListCompon
     }
 
     return cls;
+  }
+
+  updateSelectionState(): void {}
+
+  rowRecord(item: T): Record<string, unknown> {
+    return item as Record<string, unknown>;
+  }
+
+  cellValue(item: T, key: string): unknown {
+    const keys = key.split('.');
+    let value: unknown = item;
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        return undefined;
+      }
+    }
+    return value;
+  }
+
+  sortData(data: T[], key: string, direction: 'asc' | 'desc'): T[] {
+    return [...data].sort((a, b) => {
+      const aVal = this.cellValue(a, key);
+      const bVal = this.cellValue(b, key);
+
+      if (aVal === null || aVal === undefined) return direction === 'asc' ? 1 : -1;
+      if (bVal === null || bVal === undefined) return direction === 'asc' ? -1 : 1;
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return direction === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+
+      if (aStr < bStr) return direction === 'asc' ? -1 : 1;
+      if (aStr > bStr) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
+  }
+
+  toggleToolbar(): void {
+    this.toolbarExpanded.update((v) => !v);
+  }
+
+  onToolbarHoverEnter(): void {
+    if (!this.searchTogglable) return;
+    this.toolbarExpanded.set(true);
+  }
+
+  onToolbarHoverLeave(): void {
+    if (!this.searchTogglable) return;
+    if (!this.toolbarLocked()) {
+      this.toolbarExpanded.set(false);
+    }
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      this._data.forEach((item) => {
+        this._selectedKeys.add(this.getKey(item));
+      });
+    } else {
+      this._selectedKeys.clear();
+    }
+    this.updateSelectionState();
+    this.selectionChange.emit(new Set(this._selectedKeys));
+  }
+
+  isSelected(item: T): boolean {
+    return this._selectedKeys.has(this.getKey(item));
+  }
+
+  formatCell(key: string, item: T): string {
+    const value = this.cellValue(item, key);
+    if (value === null || value === undefined) return '';
+    return String(value);
+  }
+
+  trackByFn(index: number, item: T): number {
+    return index;
+  }
+
+  private getKey(item: T): string {
+    return String(this.rowRecord(item)[this.checkboxKey]);
   }
 }

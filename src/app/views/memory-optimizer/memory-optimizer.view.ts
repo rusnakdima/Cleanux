@@ -18,12 +18,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import {
-  MemoryOptimizerService,
-  MemoryInfo,
-  SwapInfo,
-  ProcessMemory,
-} from '@services/memory-optimizer.service';
+import { MemoryOptimizerService } from '@services/memory-optimizer.service';
+import { MemoryInfo, SwapInfo, ProcessMemory } from '@models/memory.model';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -47,7 +44,7 @@ import { formatSize } from '@shared/utils/format.util';
   ],
   templateUrl: './memory-optimizer.view.html',
 })
-export class MemoryOptimizerView implements OnInit, OnDestroy {
+export class MemoryOptimizerView extends LoadingErrorMixin implements OnInit, OnDestroy {
   private memoryService = inject(MemoryOptimizerService);
   private ngZone = inject(NgZone);
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
@@ -55,8 +52,6 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
   memoryInfo = signal<MemoryInfo | null>(null);
   swapInfo = signal<SwapInfo | null>(null);
   processes = signal<ProcessMemory[]>([]);
-  loading = signal(false);
-  optimizing = signal(false);
 
   currentPage = signal(1);
   pageSize = signal(15);
@@ -99,7 +94,7 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
   }
 
   async loadData() {
-    try {
+    await this.runWithLoading(async () => {
       const [memory, swap, procData] = await Promise.all([
         this.memoryService.getMemoryInfo(),
         this.memoryService.getSwapInfo(),
@@ -108,9 +103,7 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
       this.memoryInfo.set(memory);
       this.swapInfo.set(swap);
       this.processes.set(procData);
-    } catch (error) {
-      console.error('Failed to load memory data:', error);
-    }
+    }, { errorMessage: 'Failed to load memory data' });
   }
 
   onPageChange(page: number): void {
@@ -123,15 +116,10 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
   }
 
   async optimizeMemory() {
-    this.optimizing.set(true);
-    try {
+    await this.runWithLoading(async () => {
       await this.memoryService.optimizeMemory();
       await this.loadData();
-    } catch (error) {
-      console.error('Failed to optimize memory:', error);
-    } finally {
-      this.optimizing.set(false);
-    }
+    }, { errorMessage: 'Failed to optimize memory', notificationMessage: 'Memory optimization failed' });
   }
 
   formatBytes(bytes: number): string {

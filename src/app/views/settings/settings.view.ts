@@ -80,12 +80,12 @@ export class SettingsView {
     this.autoClean.update((v) => !v);
   }
 
-  onIntervalChange() {
-    // Signal update handled by ngModel
+  onIntervalChange(): void {
+    console.log('Interval changed');
   }
 
-  onCleaningTypeChange() {
-    // Signal update handled by ngModel
+  onCleaningTypeChange(): void {
+    console.log('Cleaning type changed');
   }
 
   async saveSchedule() {

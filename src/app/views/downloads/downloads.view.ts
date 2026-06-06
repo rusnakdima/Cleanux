@@ -33,7 +33,6 @@ export class DownloadsView {
   downloadsSize = signal(0);
   files = signal<DownloadFile[]>([]);
   selectedFiles = signal<Set<string>>(new Set());
-  selectedAge = 'week';
 
   columns: ListColumn[] = [
     {
@@ -41,7 +40,6 @@ export class DownloadsView {
       primary: true,
       icon: 'description',
       secondary: 'path',
-      badge: 'sizeDisplay',
       timestamp: 'age',
       format: 'number',
     },
@@ -54,10 +52,6 @@ export class DownloadsView {
     showActions: false,
     emptyMessage: 'No files found in Downloads',
   };
-
-  get sizeDisplay(): string {
-    return '';
-  }
 
   async scanDownloads() {
     this.isScanning.set(true);

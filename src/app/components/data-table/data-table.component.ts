@@ -10,9 +10,10 @@ import {
   ElementRef,
   NgZone,
   signal,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -23,7 +24,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* components */
 import { PaginationComponent } from '../pagination/pagination.component';
-import { BaseListComponent } from '../base-list/base-list.component';
 
 /* models */
 import { TableColumn, TableOptions, TableAction, RowActionEvent } from '@models/data-table.model';
@@ -49,9 +49,8 @@ import { ConfirmDialogService } from '@shared/confirm-dialog';
     CheckboxComponent,
   ],
   templateUrl: './data-table.component.html',
-  styleUrl: './data-table.component.css',
 })
-export class DataTableComponent<T extends object = object> extends BaseListComponent<T> implements OnChanges {
+export class DataTableComponent<T extends object = object> implements OnChanges {
   @Input() columns: TableColumn[] = [];
   @Input() options: TableOptions = {};
   @Input() loading = false;
@@ -63,8 +62,6 @@ export class DataTableComponent<T extends object = object> extends BaseListCompo
   @Input() set selectedKeys(keys: Set<string>) {
     this._selectedKeys = keys;
   }
-
-  public p: number = 1;
 
   @Output() rowClick = new EventEmitter<T>();
   @Output() rowDoubleClick = new EventEmitter<T>();
@@ -82,15 +79,43 @@ export class DataTableComponent<T extends object = object> extends BaseListCompo
   resizingColumn = signal<string | null>(null);
   resizeStartX = signal<number>(0);
   resizeStartWidth = signal<number>(0);
+  lastSelectedIndex = signal<number | null>(null);
 
   private resizeColumnKey = signal<string | null>(null);
+  private _selectedKeys = new Set<string>();
+  private _data: T[] = [];
+  private _filteredData: T[] = [];
+  sortKey = signal<string | null>(null);
+  sortDirection = signal<'asc' | 'desc'>('asc');
+  @Output() selectionChange = new EventEmitter<Set<string>>();
+  toolbarExpanded = signal(false);
+  toolbarLocked = signal(false);
+  searchControl = new FormControl('');
+
+  public p: number = 1;
+
+  allSelected = computed(() => {
+    if (this._data.length === 0) return false;
+    return this._data.every((item) => this._selectedKeys.has(this.getKey(item)));
+  });
+
+  indeterminate = computed(() => {
+    const selectedCount = this._selectedKeys.size;
+    return selectedCount > 0 && selectedCount < this._data.length;
+  });
 
   readonly VIRTUAL_SCROLL_THRESHOLD = 100;
   readonly DEFAULT_ROW_HEIGHT = 48;
 
-  constructor() {
-    super();
+  @Input() set data(value: T[]) {
+    this._data = value;
+    this._filteredData = [...value];
   }
+
+  constructor(
+    private confirmDialogService: ConfirmDialogService,
+    private ngZone: NgZone
+  ) {}
 
   get rowHeight(): number {
     return this.options.rowHeight ?? this.DEFAULT_ROW_HEIGHT;
@@ -104,9 +129,7 @@ export class DataTableComponent<T extends object = object> extends BaseListCompo
     return this.options.checkboxKey ?? 'id';
   }
 
-  override ngOnChanges(changes: SimpleChanges): void {
-    super.ngOnChanges(changes);
-
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentPage']) {
       this.p = this.currentPage;
     }
@@ -304,8 +327,6 @@ export class DataTableComponent<T extends object = object> extends BaseListCompo
     return '';
   }
 
-  lastSelectedIndex = signal<number | null>(null);
-
   onRowClick(item: T, event?: MouseEvent): void {
     const key = String(this.rowRecord(item)[this.checkboxKey]);
     const currentIndex = this.useVirtualScroll
@@ -434,5 +455,99 @@ export class DataTableComponent<T extends object = object> extends BaseListCompo
   sizeFromItem(item: T): number {
     const s = this.rowRecord(item)['size'];
     return typeof s === 'number' ? s : 0;
+  }
+
+  updateSelectionState(): void {}
+
+  rowRecord(item: T): Record<string, unknown> {
+    return item as Record<string, unknown>;
+  }
+
+  cellValue(item: T, key: string): unknown {
+    const keys = key.split('.');
+    let value: unknown = item;
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        return undefined;
+      }
+    }
+    return value;
+  }
+
+  sortData(data: T[], key: string, direction: 'asc' | 'desc'): T[] {
+    return [...data].sort((a, b) => {
+      const aVal = this.cellValue(a, key);
+      const bVal = this.cellValue(b, key);
+
+      if (aVal === null || aVal === undefined) return direction === 'asc' ? 1 : -1;
+      if (bVal === null || bVal === undefined) return direction === 'asc' ? -1 : 1;
+
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return direction === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+
+      const aStr = String(aVal).toLowerCase();
+      const bStr = String(bVal).toLowerCase();
+
+      if (aStr < bStr) return direction === 'asc' ? -1 : 1;
+      if (aStr > bStr) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
+  }
+
+  toggleToolbar(): void {
+    this.toolbarExpanded.update((v) => !v);
+  }
+
+  onToolbarHoverEnter(): void {
+    if (!this.searchTogglable) return;
+    this.ngZone.runOutsideAngular(() => {
+      this.toolbarExpanded.set(true);
+    });
+  }
+
+  onToolbarHoverLeave(): void {
+    if (!this.searchTogglable) return;
+    this.ngZone.runOutsideAngular(() => {
+      if (!this.toolbarLocked()) {
+        this.toolbarExpanded.set(false);
+      }
+    });
+  }
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      this._data.forEach((item) => {
+        this._selectedKeys.add(this.getKey(item));
+      });
+    } else {
+      this._selectedKeys.clear();
+    }
+    this.updateSelectionState();
+    this.selectionChange.emit(new Set(this._selectedKeys));
+  }
+
+  isSelected(item: T): boolean {
+    return this._selectedKeys.has(this.getKey(item));
+  }
+
+  formatCell(key: string, item: T): string {
+    const value = this.cellValue(item, key);
+    if (value === null || value === undefined) return '';
+    return String(value);
+  }
+
+  trackByFn(index: number, item: T): number {
+    return index;
+  }
+
+  private getKey(item: T): string {
+    return String(this.rowRecord(item)[this.checkboxKey]);
   }
 }

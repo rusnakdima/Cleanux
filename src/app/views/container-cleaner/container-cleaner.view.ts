@@ -5,7 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { ContainerService, ContainerSummary } from '@services/container.service';
+import { ContainerService } from '@services/container.service';
+import { ContainerSummary } from '@models/container.model';
 import { formatSize } from '@shared/utils/format.util';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 

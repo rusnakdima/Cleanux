@@ -153,8 +153,7 @@ export class ProcessesView implements OnInit {
     }
   }
 
-  async flushRamCaches() {
-    console.log('Flushing RAM caches...');
-    this.notification.success('RAM caches flushed successfully!');
+  async flushRamCaches(): Promise<void> {
+    console.log('flushRamCaches called - implementation pending');
   }
 }

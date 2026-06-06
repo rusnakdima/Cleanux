@@ -29,8 +29,6 @@ export class App {
 
   private router = inject(Router);
 
-  private mainTabs = ['home', 'files', 'clean', 'power', 'settings'];
-
   private routeInfo: Record<string, RouteInfo> = {
     home: { title: 'Home', breadcrumb: '', parent: '', showBack: false },
     files: { title: 'Files', breadcrumb: '', parent: '', showBack: false },

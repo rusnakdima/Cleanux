@@ -6,12 +6,6 @@ import { SystemServiceItem, ProcessItem } from '@models/system.model';
 export class SystemStore {
   private api = inject(TauriApiService);
 
-  readonly services = signal<SystemServiceItem[]>([]);
-  readonly processes = signal<ProcessItem[]>([]);
-  readonly loading = signal(false);
-  readonly selectedServices = signal<Set<string>>(new Set());
-  readonly selectedProcesses = signal<Set<number>>(new Set());
-
   async loadSystemServices(): Promise<SystemServiceItem[]> {
     return await this.api.invoke<SystemServiceItem[]>('getSystemServices');
   }

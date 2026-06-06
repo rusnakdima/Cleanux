@@ -1,8 +1,8 @@
 /* sys lib */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { BaseApiService } from './base-api.service';
 
 /* models */
 import { HealthSnapshot, HealthTrend } from '@models/health-history.model';
@@ -10,9 +10,7 @@ import { HealthSnapshot, HealthTrend } from '@models/health-history.model';
 @Injectable({
   providedIn: 'root',
 })
-export class HealthHistoryService {
-  private api = inject(ApiService);
-
+export class HealthHistoryService extends BaseApiService {
   async saveHealthSnapshot(
     healthScore: number,
     cacheSize: number,
@@ -20,7 +18,7 @@ export class HealthHistoryService {
     logSize: number,
     largeFilesCount: number
   ): Promise<{ id: number }> {
-    return await this.api.invoke<{ id: number }>('save_health_snapshot', {
+    return await this.call<{ id: number }>('save_health_snapshot', {
       health_score: healthScore,
       cache_size: cacheSize,
       trash_size: trashSize,
@@ -30,10 +28,10 @@ export class HealthHistoryService {
   }
 
   async getHealthHistory(days: number): Promise<HealthSnapshot[]> {
-    return await this.api.invoke<HealthSnapshot[]>('get_health_history', { days });
+    return await this.call<HealthSnapshot[]>('get_health_history', { days });
   }
 
   async getHealthTrends(days: number): Promise<HealthTrend> {
-    return await this.api.invoke<HealthTrend>('get_health_trends', { days });
+    return await this.call<HealthTrend>('get_health_trends', { days });
   }
 }

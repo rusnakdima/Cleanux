@@ -1,8 +1,8 @@
 /* sys lib */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { BaseApiService } from './base-api.service';
 
 /* models */
 import { LogSummary, LogEntry, LogCategorySummary } from '@models/log-analyzer.model';
@@ -10,18 +10,16 @@ import { LogSummary, LogEntry, LogCategorySummary } from '@models/log-analyzer.m
 @Injectable({
   providedIn: 'root',
 })
-export class LogAnalyzerService {
-  private api = inject(ApiService);
-
+export class LogAnalyzerService extends BaseApiService {
   async getLogSummary(): Promise<LogSummary> {
-    return await this.api.invoke<LogSummary>('get_log_summary');
+    return await this.call<LogSummary>('get_log_summary');
   }
 
   async getLogEntries(category: string): Promise<LogEntry[]> {
-    return await this.api.invoke<LogEntry[]>('get_log_entries', { category });
+    return await this.call<LogEntry[]>('get_log_entries', { category });
   }
 
   async cleanOldLogs(days: number): Promise<string> {
-    return await this.api.invoke<string>('clean_old_logs', { days });
+    return await this.call<string>('clean_old_logs', { days });
   }
 }

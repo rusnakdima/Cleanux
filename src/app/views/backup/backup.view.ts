@@ -10,13 +10,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { BackupService, BackupItem } from '@services/backup.service';
+import { BackupService } from '@services/backup.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
 
 /* models */
+import { BackupItem } from '@models/backup.model';
 import { ListColumn, ListOptions } from '@models/data-list.model';
 import { formatSize } from '@shared/utils/format.util';
 

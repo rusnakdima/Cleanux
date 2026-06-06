@@ -13,11 +13,6 @@ export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry }
 export class AutomationStore {
   private api = inject(TauriApiService);
 
-  readonly quickActions = signal<QuickAction[]>([]);
-  readonly recipes = signal<AutomationRecipe[]>([]);
-  readonly executionHistory = signal<ExecutionHistoryEntry[]>([]);
-  readonly loading = signal(false);
-
   async loadQuickActions(): Promise<QuickAction[]> {
     return await this.api.invoke<QuickAction[]>('get_quick_actions');
   }

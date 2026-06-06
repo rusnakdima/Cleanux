@@ -12,12 +12,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import {
-  KernelCleanerService,
-  KernelInfo,
-  InitramfsInfo,
-  BootSpaceInfo,
-} from '@services/kernel-cleaner.service';
+import { KernelCleanerService } from '@services/kernel-cleaner.service';
+import { KernelInfo, InitramfsInfo, BootSpaceInfo } from '@models/kernel.model';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
 import { DataListComponent } from '@components/data-list/data-list.component';

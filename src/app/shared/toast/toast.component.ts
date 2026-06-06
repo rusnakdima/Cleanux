@@ -8,7 +8,6 @@ import { ToastService, ToastMessage } from './toast.service';
   standalone: true,
   imports: [CommonModule, MatIconModule],
   templateUrl: './toast.component.html',
-  styleUrl: './toast.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToastComponent {

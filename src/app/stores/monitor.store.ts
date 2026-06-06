@@ -1,7 +1,6 @@
 import { Injectable, signal, inject, OnDestroy, computed, NgZone } from '@angular/core';
 import { TauriApiService } from '@api/tauri-api.service';
 import { formatSize } from '@shared/utils/format.util';
-import { DEFAULT_JUNK_THRESHOLD } from '@shared/constants/size.constants';
 
 export interface SystemStats {
   cpuUsage: number;
@@ -80,9 +79,6 @@ export class MonitorStore implements OnDestroy {
   );
   readonly diskUsedFormatted = computed(() => formatSize(this.systemStats().diskUsed ?? 0));
   readonly diskTotalFormatted = computed(() => formatSize(this.systemStats().diskTotal ?? 0));
-
-  readonly healthScore = signal(87);
-  readonly totalJunkSize = signal(DEFAULT_JUNK_THRESHOLD);
 
   constructor() {
     this.visibilityHandler = () => {

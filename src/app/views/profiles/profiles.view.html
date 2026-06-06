@@ -75,7 +75,7 @@
             >Exclude Patterns (one per line)</label
           >
           <textarea
-            [ngModel]="editingProfile()?.exclude_patterns?.join('\n')"
+            [ngModel]="editingProfile()?.excludePatterns?.join('\n')"
             (ngModelChange)="onExcludePatternsChange($event)"
             class="input min-h-[100px]"
             placeholder="*.log&#10;node_modules&#10;.cache"
@@ -86,9 +86,9 @@
           <label class="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              [ngModel]="editingProfile()?.clean_cache"
+              [ngModel]="editingProfile()?.cleanCache"
               (ngModelChange)="
-                editingProfile.update((p) => (p ? { ...p, clean_cache: $event } : p))
+                editingProfile.update((p) => (p ? { ...p, cleanCache: $event } : p))
               "
               class="accent-[var(--accent-buttons)]"
             />
@@ -97,9 +97,9 @@
           <label class="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              [ngModel]="editingProfile()?.clean_trash"
+              [ngModel]="editingProfile()?.cleanTrash"
               (ngModelChange)="
-                editingProfile.update((p) => (p ? { ...p, clean_trash: $event } : p))
+                editingProfile.update((p) => (p ? { ...p, cleanTrash: $event } : p))
               "
               class="accent-[var(--accent-buttons)]"
             />
@@ -108,8 +108,8 @@
           <label class="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
-              [ngModel]="editingProfile()?.clean_logs"
-              (ngModelChange)="editingProfile.update((p) => (p ? { ...p, clean_logs: $event } : p))"
+              [ngModel]="editingProfile()?.cleanLogs"
+              (ngModelChange)="editingProfile.update((p) => (p ? { ...p, cleanLogs: $event } : p))"
               class="accent-[var(--accent-buttons)]"
             />
             <span class="text-sm text-zinc-400 dark:text-zinc-500">Clean Logs</span>
@@ -118,13 +118,13 @@
 
         <div class="space-y-2">
           <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
-            >Min Large File Size: {{ editingProfile()?.min_large_file_size | number }} bytes</label
+            >Min Large File Size: {{ editingProfile()?.minLargeFileSize | number }} bytes</label
           >
           <input
             type="range"
-            [ngModel]="editingProfile()?.min_large_file_size"
+            [ngModel]="editingProfile()?.minLargeFileSize"
             (ngModelChange)="
-              editingProfile.update((p) => (p ? { ...p, min_large_file_size: +$event } : p))
+              editingProfile.update((p) => (p ? { ...p, minLargeFileSize: +$event } : p))
             "
             min="0"
             max="1073741824"
@@ -170,20 +170,20 @@
             </div>
           </div>
           <div class="flex flex-wrap gap-2 mb-3">
-            @if (profile.clean_cache) {
+            @if (profile.cleanCache) {
               <span class="badge badge-primary">Cache</span>
             }
-            @if (profile.clean_trash) {
+            @if (profile.cleanTrash) {
               <span class="badge badge-success">Trash</span>
             }
-            @if (profile.clean_logs) {
+            @if (profile.cleanLogs) {
               <span class="badge badge-warning">Logs</span>
             }
-            @if (profile.min_large_file_size > 0) {
+            @if (profile.minLargeFileSize > 0) {
               <span class="badge badge-primary">Large Files</span>
             }
           </div>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">{{ formatDate(profile.created_at) }}</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4">{{ formatDate(profile.createdAt) }}</p>
           <div class="flex items-center gap-2">
             <button (click)="applyProfile(profile)" class="btn btn-primary flex-1">
               <mat-icon class="icon-sm" fontIcon="play_arrow" />

@@ -30,34 +30,9 @@ export class PowerView implements OnInit {
   activeProfile = signal<string>('balanced');
 
   powerTools = [
-    {
-      id: 'memory-optimizer',
-      label: 'Memory',
-      icon: 'memory',
-      route: '/memory-optimizer',
-      desc: 'Optimize RAM usage',
-    },
-    {
-      id: 'processes',
-      label: 'Processes',
-      icon: 'list',
-      route: '/processes',
-      desc: 'Manage running processes',
-    },
-    {
-      id: 'startup',
-      label: 'Startup',
-      icon: 'rocket_launch',
-      route: '/startup',
-      desc: 'Control startup programs',
-    },
-    {
-      id: 'automation',
-      label: 'Automation',
-      icon: 'schedule',
-      route: '/automation',
-      desc: 'Set up automated tasks',
-    },
+    { id: 'battery', label: 'Battery Manager', desc: 'Monitor and optimize battery usage', icon: 'battery_saver', route: '/power' },
+    { id: 'thermal', label: 'Thermal Monitor', desc: 'Track CPU and system temperatures', icon: 'thermostat', route: '/power' },
+    { id: 'profiles', label: 'Power Profiles', desc: 'Switch between power modes', icon: 'tune', route: '/power' },
   ];
 
   ngOnInit() {

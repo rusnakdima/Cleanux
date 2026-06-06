@@ -1,8 +1,8 @@
 /* sys lib */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { BaseApiService } from './base-api.service';
 
 /* models */
 import { CleaningReport, SnapshotComparison } from '@models/report.model';
@@ -10,9 +10,7 @@ import { CleaningReport, SnapshotComparison } from '@models/report.model';
 @Injectable({
   providedIn: 'root',
 })
-export class ReportService {
-  private api = inject(ApiService);
-
+export class ReportService extends BaseApiService {
   async generateCleaningReport(
     itemsCleaned: number,
     spaceReclaimed: number,
@@ -23,7 +21,7 @@ export class ReportService {
     largeFileItems: number,
     duplicateItems: number
   ): Promise<{ id: number }> {
-    return await this.api.invoke<{ id: number }>('generate_cleaning_report', {
+    return await this.call<{ id: number }>('generate_cleaning_report', {
       items_cleaned: itemsCleaned,
       space_reclaimed: spaceReclaimed,
       duration: duration,
@@ -36,15 +34,15 @@ export class ReportService {
   }
 
   async getCleaningHistory(limit?: number): Promise<CleaningReport[]> {
-    return await this.api.invoke<CleaningReport[]>('get_cleaning_history', { limit });
+    return await this.call<CleaningReport[]>('get_cleaning_history', { limit });
   }
 
   async exportToHtml(reportId: number): Promise<{ html: string }> {
-    return await this.api.invoke<{ html: string }>('export_to_html', { report_id: reportId });
+    return await this.call<{ html: string }>('export_to_html', { report_id: reportId });
   }
 
   async compareSnapshots(beforeId: number, afterId: number): Promise<SnapshotComparison> {
-    return await this.api.invoke<SnapshotComparison>('compare_snapshots', {
+    return await this.call<SnapshotComparison>('compare_snapshots', {
       before_id: beforeId,
       after_id: afterId,
     });

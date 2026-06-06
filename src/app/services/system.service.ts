@@ -1,8 +1,8 @@
 /* sys lib */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { BaseApiService } from '@services/base-api.service';
 
 /* models */
 import { SystemServiceItem, ProcessItem } from '@models/system.model';
@@ -12,46 +12,44 @@ export type { SystemServiceItem, ProcessItem } from '@models/system.model';
 @Injectable({
   providedIn: 'root',
 })
-export class SystemService {
-  private api = inject(ApiService);
-
+export class SystemService extends BaseApiService {
   async getSystemServices(): Promise<SystemServiceItem[]> {
-    return await this.api.invoke<SystemServiceItem[]>('getSystemServices');
+    return this.call<SystemServiceItem[]>('getSystemServices');
   }
 
   async getAllServices(): Promise<SystemServiceItem[]> {
-    return await this.api.invoke<SystemServiceItem[]>('getAllServices');
+    return this.call<SystemServiceItem[]>('getAllServices');
   }
 
   async stopService(service: string): Promise<string> {
-    return await this.api.invoke<string>('stopService', { service });
+    return this.call<string>('stopService', { service });
   }
 
   async stopSelectedServices(services: string[]): Promise<string> {
-    return await this.api.invoke<string>('stopSelectedServices', { services });
+    return this.call<string>('stopSelectedServices', { services });
   }
 
   async startService(service: string): Promise<string> {
-    return await this.api.invoke<string>('startService', { service });
+    return this.call<string>('startService', { service });
   }
 
   async enableService(service: string): Promise<string> {
-    return await this.api.invoke<string>('enableService', { service });
+    return this.call<string>('enableService', { service });
   }
 
   async enableSelectedServices(services: string[]): Promise<string> {
-    return await this.api.invoke<string>('enableSelectedServices', { services });
+    return this.call<string>('enableSelectedServices', { services });
   }
 
   async getProcesses(): Promise<ProcessItem[]> {
-    return await this.api.invoke<ProcessItem[]>('getProcesses');
+    return this.call<ProcessItem[]>('getProcesses');
   }
 
   async killProcess(pid: number): Promise<string> {
-    return await this.api.invoke<string>('killProcess', { pid });
+    return this.call<string>('killProcess', { pid });
   }
 
   async killSelectedProcesses(pids: number[]): Promise<string> {
-    return await this.api.invoke<string>('killSelectedProcesses', { pids });
+    return this.call<string>('killSelectedProcesses', { pids });
   }
 }

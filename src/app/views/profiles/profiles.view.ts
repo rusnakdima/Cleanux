@@ -159,7 +159,7 @@ export class ProfilesView implements OnInit {
     const input = event.target as HTMLInputElement;
     const profile = this.editingProfile();
     if (profile) {
-      profile.exclude_patterns = input.value
+      profile.excludePatterns = input.value
         .split('\n')
         .map((p) => p.trim())
         .filter((p) => p);

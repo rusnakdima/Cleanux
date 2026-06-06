@@ -1,31 +1,29 @@
-import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { Injectable } from '@angular/core';
+import { BaseApiService } from '@services/base-api.service';
 import { CleaningProfile, createEmptyProfile } from '@models/profile.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ProfileService {
-  private api = inject(ApiService);
-
+export class ProfileService extends BaseApiService {
   async saveProfile(profile: CleaningProfile): Promise<string> {
-    return await this.api.invoke<string>('save_profile', { profile });
+    return await this.call<string>('save_profile', { profile });
   }
 
   async loadProfile(name: string): Promise<CleaningProfile> {
-    return await this.api.invoke<CleaningProfile>('load_profile', { name });
+    return await this.call<CleaningProfile>('load_profile', { name });
   }
 
   async listProfiles(): Promise<CleaningProfile[]> {
-    return await this.api.invoke<CleaningProfile[]>('list_profiles');
+    return await this.call<CleaningProfile[]>('list_profiles');
   }
 
   async deleteProfile(name: string): Promise<string> {
-    return await this.api.invoke<string>('delete_profile', { name });
+    return await this.call<string>('delete_profile', { name });
   }
 
   async applyProfile(name: string): Promise<string> {
-    return await this.api.invoke<string>('apply_profile', { name });
+    return await this.call<string>('apply_profile', { name });
   }
 
   exportProfile(profile: CleaningProfile): void {

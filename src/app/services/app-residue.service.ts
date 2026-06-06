@@ -1,5 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { ApiService } from './api.service';
+import { Injectable } from '@angular/core';
+import { BaseApiService } from './base-api.service';
+import { OperationResult } from '@models/cleaner.models';
 
 export interface AppResidue {
   path: string;
@@ -23,46 +24,39 @@ export interface AppResidueSummary {
   found_uninstalled: number;
 }
 
-export interface CleanResult {
-  removed: number;
-  failed: string[];
-}
-
 @Injectable({
   providedIn: 'root',
 })
-export class AppResidueService {
-  private api = inject(ApiService);
-
+export class AppResidueService extends BaseApiService {
   async getResidueSummary(): Promise<AppResidueSummary> {
-    return await this.api.invoke<AppResidueSummary>('get_residue_summary');
+    return await this.call<AppResidueSummary>('get_residue_summary');
   }
 
   async scanUserConfigs(): Promise<AppResidue[]> {
-    return await this.api.invoke<AppResidue[]>('scan_user_configs');
+    return await this.call<AppResidue[]>('scan_user_configs');
   }
 
   async scanUserData(): Promise<AppResidue[]> {
-    return await this.api.invoke<AppResidue[]>('scan_user_data');
+    return await this.call<AppResidue[]>('scan_user_data');
   }
 
   async scanUserCaches(): Promise<AppResidue[]> {
-    return await this.api.invoke<AppResidue[]>('scan_user_caches');
+    return await this.call<AppResidue[]>('scan_user_caches');
   }
 
   async scanHomeResidues(): Promise<AppResidue[]> {
-    return await this.api.invoke<AppResidue[]>('scan_home_residues');
+    return await this.call<AppResidue[]>('scan_home_residues');
   }
 
   async getOrphanedConfigs(): Promise<OrphanedConfig[]> {
-    return await this.api.invoke<OrphanedConfig[]>('get_orphaned_configs');
+    return await this.call<OrphanedConfig[]>('get_orphaned_configs');
   }
 
-  async cleanResidue(path: string): Promise<CleanResult> {
-    return await this.api.invoke<CleanResult>('clean_app_residue', { path });
+  async cleanResidue(path: string): Promise<OperationResult> {
+    return await this.call<OperationResult>('clean_app_residue', { path });
   }
 
-  async cleanMultipleResidues(paths: string[]): Promise<CleanResult> {
-    return await this.api.invoke<CleanResult>('clean_multiple_app_residues', { paths });
+  async cleanMultipleResidues(paths: string[]): Promise<OperationResult> {
+    return await this.call<OperationResult>('clean_multiple_app_residues', { paths });
   }
 }

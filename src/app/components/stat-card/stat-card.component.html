@@ -1,0 +1,9 @@
+<div class="stat-card matte-surface">
+  <div class="stat-icon" [style.background]="computedGradient()">
+    <mat-icon class="text-white" [fontIcon]="icon()" />
+  </div>
+  <div class="stat-content">
+    <span class="stat-label">{{ label() }}</span>
+    <span class="stat-value">{{ value() }}</span>
+  </div>
+</div>

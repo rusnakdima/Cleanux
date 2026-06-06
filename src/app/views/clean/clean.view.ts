@@ -11,9 +11,9 @@ import { RouterLink } from '@angular/router';
 
 /* services */
 import { FileService } from '@services/file.service';
-import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 type CleanCategory = 'cache' | 'trash' | 'logs' | 'packages';
 
@@ -24,16 +24,12 @@ type CleanCategory = 'cache' | 'trash' | 'logs' | 'packages';
   imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, RouterLink],
   templateUrl: './clean.view.html',
 })
-export class CleanView implements OnInit {
+export class CleanView extends LoadingErrorMixin implements OnInit {
   private fileService = inject(FileService);
-  private notification = inject(NotificationService);
-  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
   activeCategory = signal<CleanCategory>('cache');
-  isScanning = signal(false);
-  isCleaning = signal(false);
 
   cacheSize = signal(0);
   cacheCount = signal(0);
@@ -43,8 +39,6 @@ export class CleanView implements OnInit {
   logCount = signal(0);
   packageCacheSize = signal(0);
   packageManagerCount = signal(0);
-
-  selectedItems = signal<string[]>([]);
 
   categories = [
     { id: 'cache' as CleanCategory, label: 'Cache', icon: 'cached', color: 'cyan' },
@@ -58,8 +52,7 @@ export class CleanView implements OnInit {
   }
 
   async loadStats() {
-    this.isScanning.set(true);
-    try {
+    await this.runWithLoading(async () => {
       const [cache, trash, logs] = await Promise.all([
         this.fileService.getCacheSummary(),
         this.fileService.getTrashSummary(),
@@ -74,11 +67,7 @@ export class CleanView implements OnInit {
       this.logCount.set(logs.fileCount);
       this.packageCacheSize.set(0);
       this.packageManagerCount.set(0);
-    } catch (e) {
-      console.error('Failed to load stats:', e);
-    } finally {
-      this.isScanning.set(false);
-    }
+    }, { errorMessage: 'Failed to load stats' });
   }
 
   getCategorySize(category: CleanCategory): number {
@@ -120,8 +109,7 @@ export class CleanView implements OnInit {
     });
     if (!confirmed) return;
 
-    this.isCleaning.set(true);
-    try {
+    await this.runWithLoading(async () => {
       switch (category) {
         case 'cache':
           await this.fileService.clearCache();
@@ -139,14 +127,10 @@ export class CleanView implements OnInit {
           this.logCount.set(0);
           break;
         case 'packages':
+          this.notification.alert('Package cleaning is not yet implemented');
           break;
       }
-    } catch (e) {
-      console.error('Clean failed:', e);
-      this.notification.error('Clean operation failed', e as Error);
-    } finally {
-      this.isCleaning.set(false);
-    }
+    }, { errorMessage: 'Clean operation failed', notificationMessage: 'Clean operation failed' });
   }
 
   async onCleanAll() {
@@ -160,8 +144,7 @@ export class CleanView implements OnInit {
     });
     if (!confirmed) return;
 
-    this.isCleaning.set(true);
-    try {
+    await this.runWithLoading(async () => {
       await Promise.all([
         this.fileService.clearCache(),
         this.fileService.clearTrash(),
@@ -174,12 +157,7 @@ export class CleanView implements OnInit {
       this.trashCount.set(0);
       this.logSize.set(0);
       this.logCount.set(0);
-    } catch (e) {
-      console.error('Clean all failed:', e);
-      this.notification.error('Clean operation failed', e as Error);
-    } finally {
-      this.isCleaning.set(false);
-    }
+    }, { errorMessage: 'Clean all failed', notificationMessage: 'Clean operation failed' });
   }
 
   get totalCleanableSize(): number {

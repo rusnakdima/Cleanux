@@ -4,7 +4,7 @@
     <p>Free up disk space by removing unnecessary files</p>
   </div>
 
-  @if (isScanning()) {
+  @if (loading()) {
     <div class="flex items-center justify-center py-12">
       <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
       <span class="ml-3 text-zinc-500 dark:text-zinc-400">Scanning...</span>
@@ -19,10 +19,10 @@
         </div>
         <button
           (click)="onCleanAll()"
-          [disabled]="isCleaning() || totalCleanableSize === 0"
+          [disabled]="loading() || totalCleanableSize === 0"
           class="clean-button"
         >
-          @if (isCleaning()) {
+          @if (loading()) {
             <mat-icon class="icon-sm animate-spin" fontIcon="refresh" />
             Cleaning...
           } @else {
@@ -87,7 +87,7 @@
       </div>
 <button
           (click)="onCleanCategory(activeCategory())"
-          [disabled]="isCleaning() || getCategorySize(activeCategory()) === 0"
+          [disabled]="loading() || getCategorySize(activeCategory()) === 0"
           class="btn btn-danger"
         >
           <mat-icon class="icon-sm" fontIcon="delete" />

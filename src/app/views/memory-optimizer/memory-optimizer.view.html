@@ -125,8 +125,8 @@
   </div>
 
   <div class="flex justify-end mb-6">
-    <button (click)="optimizeMemory()" [disabled]="optimizing()" class="btn btn-primary">
-      @if (optimizing()) {
+    <button (click)="optimizeMemory()" [disabled]="loading()" class="btn btn-primary">
+      @if (loading()) {
         <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
         Optimizing...
       } @else {

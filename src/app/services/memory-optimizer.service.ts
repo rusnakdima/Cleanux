@@ -1,49 +1,29 @@
 /* sys lib */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { BaseApiService } from '@services/base-api.service';
 
 /* models */
-export interface MemoryInfo {
-  total: number;
-  used: number;
-  available: number;
-  cached: number;
-  buffers: number;
-}
-
-export interface SwapInfo {
-  total: number;
-  used: number;
-}
-
-export interface ProcessMemory {
-  pid: number;
-  name: string;
-  memory_mb: number;
-  cpu_percent: number;
-}
+import { MemoryInfo, SwapInfo, ProcessMemory } from '@models/memory.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class MemoryOptimizerService {
-  private api = inject(ApiService);
-
+export class MemoryOptimizerService extends BaseApiService {
   async getMemoryInfo(): Promise<MemoryInfo> {
-    return await this.api.invoke<MemoryInfo>('get_memory_info');
+    return this.call<MemoryInfo>('get_memory_info');
   }
 
   async getSwapInfo(): Promise<SwapInfo> {
-    return await this.api.invoke<SwapInfo>('get_swap_info');
+    return this.call<SwapInfo>('get_swap_info');
   }
 
   async getProcessMemory(): Promise<ProcessMemory[]> {
-    return await this.api.invoke<ProcessMemory[]>('get_process_memory');
+    return this.call<ProcessMemory[]>('get_process_memory');
   }
 
   async optimizeMemory(): Promise<boolean> {
-    return await this.api.invoke<boolean>('optimize_memory');
+    return this.call<boolean>('optimize_memory');
   }
 }

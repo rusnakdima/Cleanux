@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   templateUrl: './toggle.component.html',
-  styleUrl: './toggle.component.css',
 })
 export class ToggleComponent {
   checked = input(false);

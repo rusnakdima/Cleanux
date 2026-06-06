@@ -1,0 +1,44 @@
+<div class="pagination-controls">
+  <div class="flex items-center gap-4">
+    <div class="text-sm font-medium text-zinc-400 dark:text-zinc-600 whitespace-nowrap">
+      Showing {{ (p() - 1) * pageSize() + 1 }}-{{
+        p() * pageSize() > totalItems() ? totalItems() : p() * pageSize()
+      }}
+      of {{ totalItems() }}
+    </div>
+
+    <select
+      [value]="pageSize()"
+      (change)="onPageSizeChange($any($event.target).value)"
+      class="h-8 px-2 text-sm rounded-lg border border-zinc-700 dark:border-zinc-200 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
+    >
+      @for (size of pageSizeOptions(); track size) {
+        <option [value]="size">{{ size }} per page</option>
+      }
+    </select>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <button
+      mat-icon-button
+      (click)="goToPrevious()"
+      [disabled]="!canGoPrevious()"
+      class="!w-8 !h-8 !min-w-8 !p-0 !rounded-lg text-zinc-400 dark:text-zinc-600 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <mat-icon class="icon-sm">chevron_left</mat-icon>
+    </button>
+
+    <span class="text-sm text-zinc-400 dark:text-zinc-600 px-2">
+      {{ p() }} / {{ totalPages() }}
+    </span>
+
+    <button
+      mat-icon-button
+      (click)="goToNext()"
+      [disabled]="!canGoNext()"
+      class="!w-8 !h-8 !min-w-8 !p-0 !rounded-lg text-zinc-400 dark:text-zinc-600 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <mat-icon class="icon-sm">chevron_right</mat-icon>
+    </button>
+  </div>
+</div>

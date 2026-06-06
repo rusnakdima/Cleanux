@@ -4,7 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { DevCacheService, DevCacheItem, DevCacheSummary } from '@services/dev-cache.service';
+import { DevCacheService } from '@services/dev-cache.service';
+import { DevCacheItem, DevCacheSummary } from '@models/dev-cache.model';
 import { formatSize } from '@shared/utils/format.util';
 import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 

@@ -1,8 +1,8 @@
 /* sys lib */
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { BaseApiService } from './base-api.service';
 
 /* models */
 import { PackageCacheInfo } from '@models/package-manager.model';
@@ -10,16 +10,14 @@ import { PackageCacheInfo } from '@models/package-manager.model';
 @Injectable({
   providedIn: 'root',
 })
-export class PackageManagerService {
-  private api = inject(ApiService);
-
+export class PackageManagerService extends BaseApiService {
   readonly cacheInfo = signal<PackageCacheInfo[]>([]);
   readonly loading = signal(false);
 
   async getPackageCacheInfo(): Promise<PackageCacheInfo[]> {
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{
+      const response = await this.call<{
         status: string;
         message: string;
         data: PackageCacheInfo[];
@@ -35,7 +33,7 @@ export class PackageManagerService {
   async cleanPackageCache(manager: string): Promise<string> {
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{ status: string; message: string }>(
+      const response = await this.call<{ status: string; message: string }>(
         'clean_package_cache',
         { manager }
       );

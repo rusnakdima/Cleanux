@@ -18,8 +18,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 /* services */
 import { FileService, LargeFileItem } from '@services/file.service';
 import { ThemeService } from '@services/theme.service';
-import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -43,22 +43,17 @@ import { formatSize } from '@shared/utils/format.util';
   ],
   templateUrl: './large-files.view.html',
 })
-export class LargeFilesView implements OnInit {
+export class LargeFilesView extends LoadingErrorMixin implements OnInit {
   private fileService = inject(FileService);
   private themeService = inject(ThemeService);
-  private notification = inject(NotificationService);
-  private confirmDialogService = inject(ConfirmDialogService);
 
   formatSize = formatSize;
 
   largeFiles = signal<LargeFileItem[]>([]);
-  loading = signal(false);
   selectedFiles = signal<Set<string>>(new Set());
 
   previewData = signal<FilePreviewData | null>(null);
-
   isLoadingPreview = signal(false);
-
   errorPreview = signal<string | null>(null);
 
   hasMore = signal(false);
@@ -100,34 +95,24 @@ export class LargeFilesView implements OnInit {
   }
 
   async loadData() {
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       const result = await this.fileService.getLargeFiles(50, 0);
       this.largeFiles.set(result.data);
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
-    } catch (error) {
-      console.error('Failed to load large files:', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to load large files' });
   }
 
   async loadMore() {
     if (!this.hasMore() || this.loading()) return;
 
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       const offset = this.largeFiles().length;
       const result = await this.fileService.getLargeFiles(50, offset);
       this.largeFiles.update((current) => [...current, ...result.data]);
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
-    } catch (error) {
-      console.error('Failed to load more large files:', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to load more large files' });
   }
 
   onSelectionChange(keys: Set<string>): void {
@@ -146,16 +131,11 @@ export class LargeFilesView implements OnInit {
     });
     if (!confirmed) return;
 
-    try {
-      this.loading.set(true);
+    await this.runWithLoading(async () => {
       await this.fileService.clearSelectedLargeFiles(filesToClear);
       this.selectedFiles.set(new Set());
       await this.loadData();
-    } catch (error) {
-      this.notification.error('Failed to clear files', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to clear files', notificationMessage: 'Failed to clear files' });
   }
 
   onRowAction(event: { action: string; item: LargeFileItem }): void {

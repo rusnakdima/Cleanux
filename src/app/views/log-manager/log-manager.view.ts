@@ -26,8 +26,7 @@ import {
   LogFileInfo,
   VarLogUsage,
 } from '@services/log-manager.service';
-import { NotificationService } from '@services/notification.service';
-import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 import { formatSize } from '@shared/utils/format.util';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { PaginationComponent } from '@components/pagination/pagination.component';
@@ -55,12 +54,8 @@ type TabType = 'journal' | 'rotated' | 'logrotate';
   ],
   templateUrl: './log-manager.view.html',
 })
-export class LogManagerView implements OnInit {
+export class LogManagerView extends LoadingErrorMixin implements OnInit {
   private logManagerService = inject(LogManagerService);
-  private notification = inject(NotificationService);
-  private confirmDialogService = inject(ConfirmDialogService);
-
-  loading = signal(false);
   activeTab = signal<TabType>('journal');
 
   summary = signal<LogManagerSummary | null>(null);
@@ -128,8 +123,7 @@ export class LogManagerView implements OnInit {
   }
 
   async loadData() {
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       const [summary, journalInfo, rotatedSize, rotatedLogs, analysis, varLogUsage, largestLogs] =
         await Promise.all([
           this.logManagerService.getLogManagerSummary(),
@@ -148,11 +142,7 @@ export class LogManagerView implements OnInit {
       this.logrotateAnalysis.set(analysis);
       this.varLogUsage.set(varLogUsage);
       this.largestLogs.set(largestLogs);
-    } catch (error) {
-      console.error('Failed to load log manager data:', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to load log manager data' });
   }
 
   async vacuumJournal() {
@@ -160,16 +150,10 @@ export class LogManagerView implements OnInit {
       title: 'Vacuum Journal',
       message: `Vacuum journal to retain ${this.vacuumSizeMb()}MB?`,
     })) return;
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       await this.logManagerService.vacuumJournal(this.vacuumSizeMb());
       await this.loadData();
-    } catch (error) {
-      console.error('Failed to vacuum journal:', error);
-      this.notification.error('Failed to vacuum journal', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to vacuum journal', notificationKey: 'vacuum' });
   }
 
   async vacuumJournalByDays() {
@@ -177,16 +161,10 @@ export class LogManagerView implements OnInit {
       title: 'Vacuum Journal',
       message: `Vacuum journal to retain last ${this.vacuumDays()} days?`,
     })) return;
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       await this.logManagerService.vacuumJournalByDays(this.vacuumDays());
       await this.loadData();
-    } catch (error) {
-      console.error('Failed to vacuum journal:', error);
-      this.notification.error('Failed to vacuum journal', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to vacuum journal', notificationKey: 'vacuum' });
   }
 
   async cleanRotatedLogs() {
@@ -194,16 +172,10 @@ export class LogManagerView implements OnInit {
       title: 'Clean Rotated Logs',
       message: `Clean rotated logs older than ${this.cleanRotatedDays()} days?`,
     })) return;
-    this.loading.set(true);
-    try {
+    await this.runWithLoading(async () => {
       await this.logManagerService.cleanRotatedLogs(this.cleanRotatedDays());
       await this.loadData();
-    } catch (error) {
-      console.error('Failed to clean rotated logs:', error);
-      this.notification.error('Failed to clean rotated logs', error);
-    } finally {
-      this.loading.set(false);
-    }
+    }, { errorMessage: 'Failed to clean rotated logs', notificationKey: 'clean' });
   }
 
   getLogrotateStatusColor(enabled: boolean): string {

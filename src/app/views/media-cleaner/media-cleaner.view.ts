@@ -11,7 +11,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 
 /* services */
-import { MediaCacheService, MediaCacheSummary } from '@services/media-cache.service';
+import { MediaCacheService } from '@services/media-cache.service';
+import { MediaCacheSummary } from '@models/media-cache.model';
 
 /* models */
 import { formatSize } from '@shared/utils/format.util';
