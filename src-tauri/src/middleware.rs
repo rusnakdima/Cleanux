@@ -12,9 +12,9 @@ impl LoggingMiddleware {
     pub fn log_command(name: &str, start: Instant) {
         let elapsed = start.elapsed();
         if elapsed > Duration::from_millis(100) {
-            eprintln!("[SLOW] Command '{}' took {:?}", name, elapsed);
+            log::warn!("[SLOW] Command '{}' took {:?}", name, elapsed);
         } else {
-            eprintln!("[CMD] {} took {:?}", name, elapsed);
+            log::info!("[CMD] {} took {:?}", name, elapsed);
         }
     }
 }
