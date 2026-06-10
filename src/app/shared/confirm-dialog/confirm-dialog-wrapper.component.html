@@ -1,0 +1,7 @@
+@if (dialogService.dialogOpen()) {
+  <app-confirm-dialog
+    [config]="dialogService.dialogConfig()"
+    (confirm)="dialogService.resolve(true)"
+    (cancel)="dialogService.resolve(false)"
+  />
+}
