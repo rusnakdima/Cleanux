@@ -1,10 +1,10 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { TauriApiService } from '@api/tauri-api.service';
+import { ApiService } from '@services/api.service';
 import { SystemServiceItem, ProcessItem } from '@models/system.model';
 
 @Injectable()
 export class SystemStore {
-  private api = inject(TauriApiService);
+  private api = inject(ApiService);
 
   readonly services = signal<SystemServiceItem[]>([]);
   readonly processes = signal<ProcessItem[]>([]);

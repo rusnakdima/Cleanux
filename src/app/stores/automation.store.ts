@@ -1,5 +1,5 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { TauriApiService } from '@api/tauri-api.service';
+import { ApiService } from '@services/api.service';
 import {
   QuickAction,
   ActionStep,
@@ -11,7 +11,7 @@ export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry }
 
 @Injectable()
 export class AutomationStore {
-  private api = inject(TauriApiService);
+  private api = inject(ApiService);
 
   readonly quickActions = signal<QuickAction[]>([]);
   readonly recipes = signal<AutomationRecipe[]>([]);

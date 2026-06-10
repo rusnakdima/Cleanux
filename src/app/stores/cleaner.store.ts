@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { TauriApiService } from '@api/tauri-api.service';
+import { ApiService } from '@services/api.service';
 import { FileService } from '@services/file.service';
 import {
   CacheFileItem,
@@ -14,7 +14,7 @@ import { CleanerTabId } from '@models/cleaner.model';
 
 @Injectable()
 export class CleanerStore {
-  private api = inject(TauriApiService);
+  private api = inject(ApiService);
   private fileService = inject(FileService);
 
   readonly cacheData = signal<CacheFileItem[]>([]);
