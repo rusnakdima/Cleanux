@@ -1,15 +1,14 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { TauriApiService } from '@api/tauri-api.service';
+import { ApiService } from '@services/api.service';
 import { CleaningProfile } from '@models/profile.model';
 
 export const profilesResolver: ResolveFn<CleaningProfile[]> = async () => {
-  const api = inject(TauriApiService);
+  const api = inject(ApiService);
 
   try {
     return await api.invoke<CleaningProfile[]>('list_profiles');
   } catch (error) {
-    console.error('Failed to resolve profiles:', error);
-    return [];
+    throw error;
   }
 };

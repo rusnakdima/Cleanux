@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { TauriApiService } from '@api/tauri-api.service';
+import { ApiService } from '@services/api.service';
 import { QuickAction, AutomationRecipe, ExecutionHistoryEntry } from '@stores/automation.store';
 
 interface AutomationData {
@@ -10,7 +10,7 @@ interface AutomationData {
 }
 
 export const automationResolver: ResolveFn<AutomationData> = async () => {
-  const api = inject(TauriApiService);
+  const api = inject(ApiService);
 
   try {
     const [quickActions, recipes, history] = await Promise.all([
@@ -20,29 +20,26 @@ export const automationResolver: ResolveFn<AutomationData> = async () => {
     ]);
     return { quickActions, recipes, history };
   } catch (error) {
-    console.error('Failed to resolve automation data:', error);
-    return { quickActions: [], recipes: [], history: [] };
+    throw error;
   }
 };
 
 export const quickActionsResolver: ResolveFn<QuickAction[]> = async () => {
-  const api = inject(TauriApiService);
+  const api = inject(ApiService);
 
   try {
     return await api.invoke<QuickAction[]>('get_quick_actions');
   } catch (error) {
-    console.error('Failed to resolve quick actions:', error);
-    return [];
+    throw error;
   }
 };
 
 export const recipesResolver: ResolveFn<AutomationRecipe[]> = async () => {
-  const api = inject(TauriApiService);
+  const api = inject(ApiService);
 
   try {
     return await api.invoke<AutomationRecipe[]>('get_recipes');
   } catch (error) {
-    console.error('Failed to resolve recipes:', error);
-    return [];
+    throw error;
   }
 };
