@@ -1,5 +1,8 @@
 /* models */
-use crate::helpers::validation_helper::{is_allowed_path, validate_path};
+use crate::helpers::{
+  home_dir,
+  validation_helper::{is_allowed_path, validate_path},
+};
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 /* sys lib */
 use sha2::{Digest, Sha256};
@@ -32,9 +35,9 @@ impl ScannerService {
     path: &str,
     extension_filter: Option<String>,
   ) -> Result<ResponseModel, ResponseModel> {
-    let home = match dirs::home_dir() {
-      Some(h) => h,
-      None => {
+    let home = match home_dir() {
+      Ok(h) => h,
+      Err(_) => {
         return Err(ResponseModel {
           status: ResponseStatus::Error,
           message: "Home directory not found".to_string(),
@@ -118,7 +121,7 @@ impl ScannerService {
       hash_map
         .entry(hash)
         .or_default()
-        .push((file_path.to_string_lossy().to_string(), file_size));
+        .push((file_path.to_string_lossy().into_owned(), file_size));
     }
 
     let mut duplicate_groups: Vec<DuplicateGroup> = Vec::new();
@@ -135,7 +138,7 @@ impl ScannerService {
           .map(|(path, size)| {
             let name = Path::new(&path)
               .file_name()
-              .map(|n| n.to_string_lossy().to_string())
+              .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
             DuplicateFile { name, path, size }
           })

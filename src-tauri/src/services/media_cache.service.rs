@@ -1,4 +1,5 @@
 /* helpers */
+use crate::helpers::common_paths::CommonPath;
 use crate::helpers::{
   data_empty_string, format_size, get_dir_size, remove_dir_contents, success_response,
 };
@@ -34,9 +35,7 @@ type MediaResult<T> = Result<T, AppError>;
 #[allow(non_snake_case)]
 impl MediaCacheService {
   pub fn get_steam_info(&self) -> SteamInfo {
-    let steam_root = dirs::home_dir()
-      .map(|h| h.join(".steam/steam"))
-      .unwrap_or_default();
+    let steam_root = CommonPath::SteamRoot.path().unwrap_or_default();
     let game_count = if steam_root.exists() {
       fs::read_dir(&steam_root)
         .ok()
@@ -60,12 +59,8 @@ impl MediaCacheService {
       0
     };
 
-    let shader_path = dirs::home_dir()
-      .map(|h| h.join(".steam/steam/steamapps/shader"))
-      .unwrap_or_default();
-    let download_path = dirs::home_dir()
-      .map(|h| h.join(".local/share/Steam"))
-      .unwrap_or_default();
+    let shader_path = CommonPath::SteamShaderCache.path().unwrap_or_default();
+    let download_path = CommonPath::SteamDownloadCache.path().unwrap_or_default();
 
     SteamInfo {
       game_count,
@@ -81,9 +76,9 @@ impl MediaCacheService {
   }
 
   fn clean_steam_shader_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let shader_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".steam/steam/steamapps/shader");
+    let shader_path = CommonPath::SteamShaderCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !shader_path.exists() {
       return Ok(success_response(
@@ -106,9 +101,9 @@ impl MediaCacheService {
   }
 
   fn clean_steam_download_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let download_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".local/share/Steam");
+    let download_path = CommonPath::SteamDownloadCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !download_path.exists() {
       return Ok(success_response(
@@ -125,12 +120,8 @@ impl MediaCacheService {
   }
 
   pub fn get_spotify_cache_size(&self) -> u64 {
-    let cache_path = dirs::home_dir()
-      .map(|h| h.join(".cache/spotify"))
-      .unwrap_or_default();
-    let local_share = dirs::home_dir()
-      .map(|h| h.join(".local/share/spotify"))
-      .unwrap_or_default();
+    let cache_path = CommonPath::SpotifyCache.path().unwrap_or_default();
+    let local_share = CommonPath::SpotifyLocalShare.path().unwrap_or_default();
     get_dir_size(&cache_path) + get_dir_size(&local_share)
   }
 
@@ -141,12 +132,12 @@ impl MediaCacheService {
   }
 
   fn clean_spotify_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let cache_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/spotify");
-    let local_share = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".local/share/spotify");
+    let cache_path = CommonPath::SpotifyCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let local_share = CommonPath::SpotifyLocalShare
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     let mut cleared: u64 = 0;
     if cache_path.exists() {
@@ -163,12 +154,8 @@ impl MediaCacheService {
   }
 
   pub fn get_vlc_cache_size(&self) -> u64 {
-    let cache_path = dirs::home_dir()
-      .map(|h| h.join(".cache/vlc"))
-      .unwrap_or_default();
-    let config_path = dirs::home_dir()
-      .map(|h| h.join(".config/vlc"))
-      .unwrap_or_default();
+    let cache_path = CommonPath::VlcCache.path().unwrap_or_default();
+    let config_path = CommonPath::VlcConfig.path().unwrap_or_default();
     get_dir_size(&cache_path) + get_dir_size(&config_path)
   }
 
@@ -177,12 +164,12 @@ impl MediaCacheService {
   }
 
   fn clean_vlc_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let cache_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/vlc");
-    let config_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".config/vlc");
+    let cache_path = CommonPath::VlcCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let config_path = CommonPath::VlcConfig
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     let mut cleared: u64 = 0;
     if cache_path.exists() {
@@ -199,9 +186,7 @@ impl MediaCacheService {
   }
 
   pub fn get_thumbnail_cache_size(&self) -> u64 {
-    let thumb_path = dirs::home_dir()
-      .map(|h| h.join(".cache/thumbnails"))
-      .unwrap_or_default();
+    let thumb_path = CommonPath::Thumbnails.path().unwrap_or_default();
     get_dir_size(&thumb_path)
   }
 
@@ -212,9 +197,9 @@ impl MediaCacheService {
   }
 
   fn clean_thumbnail_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let thumb_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/thumbnails");
+    let thumb_path = CommonPath::Thumbnails
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !thumb_path.exists() {
       return Ok(success_response(
@@ -231,9 +216,7 @@ impl MediaCacheService {
   }
 
   pub fn get_icon_cache_size(&self) -> u64 {
-    let icon_path = dirs::home_dir()
-      .map(|h| h.join(".cache/icons"))
-      .unwrap_or_default();
+    let icon_path = CommonPath::IconCache.path().unwrap_or_default();
     get_dir_size(&icon_path)
   }
 
@@ -242,9 +225,9 @@ impl MediaCacheService {
   }
 
   fn clean_icon_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let icon_path = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?
-      .join(".cache/icons");
+    let icon_path = CommonPath::IconCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !icon_path.exists() {
       return Ok(success_response("No icon cache found", data_empty_string()));

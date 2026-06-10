@@ -3,8 +3,10 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::helpers::get_dir_size;
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::helpers::{
+  get_dir_size, home_dir, models_into_data_array, stdout_string, success_response,
+};
+use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct AppResidue {
@@ -47,7 +49,7 @@ impl AppResidueService {
 
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         for line in stdout.lines().skip(5) {
           let parts: Vec<&str> = line.split_whitespace().collect();
           if parts.len() >= 4 {
@@ -67,7 +69,7 @@ impl AppResidueService {
 
     if let Ok(output) = Command::new("snap").arg("list").output() {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         for line in stdout.lines().skip(1) {
           let parts: Vec<&str> = line.split_whitespace().collect();
           if !parts.is_empty() {
@@ -79,7 +81,7 @@ impl AppResidueService {
 
     if let Ok(output) = Command::new("flatpak").arg("list").output() {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         for line in stdout.lines() {
           let parts: Vec<&str> = line.split('\t').collect();
           if !parts.is_empty() {
@@ -207,9 +209,9 @@ impl AppResidueService {
   }
 
   pub fn scan_user_configs(&self) -> Vec<AppResidue> {
-    let config_dir = match dirs::home_dir() {
-      Some(h) => h.join(".config"),
-      None => return Vec::new(),
+    let config_dir = match home_dir() {
+      Ok(h) => h.join(".config"),
+      Err(_) => return Vec::new(),
     };
 
     if !config_dir.exists() {
@@ -224,7 +226,7 @@ impl AppResidueService {
         let path = entry.path();
         let app_name = path
           .file_name()
-          .map(|n| n.to_string_lossy().to_string())
+          .map(|n| n.to_string_lossy().into_owned())
           .unwrap_or_default();
 
         if app_name.starts_with('.') || app_name.starts_with('#') {
@@ -239,7 +241,7 @@ impl AppResidueService {
         }
 
         residues.push(AppResidue {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           app_name: app_name.clone(),
           size,
           residue_type: ResidueType::Config,
@@ -253,9 +255,9 @@ impl AppResidueService {
   }
 
   pub fn scan_user_data(&self) -> Vec<AppResidue> {
-    let data_dir = match dirs::home_dir() {
-      Some(h) => h.join(".local/share"),
-      None => return Vec::new(),
+    let data_dir = match home_dir() {
+      Ok(h) => h.join(".local/share"),
+      Err(_) => return Vec::new(),
     };
 
     if !data_dir.exists() {
@@ -286,7 +288,7 @@ impl AppResidueService {
         let path = entry.path();
         let app_name = path
           .file_name()
-          .map(|n| n.to_string_lossy().to_string())
+          .map(|n| n.to_string_lossy().into_owned())
           .unwrap_or_default();
 
         if known_data_dirs.contains(&app_name.as_str()) {
@@ -307,7 +309,7 @@ impl AppResidueService {
         }
 
         residues.push(AppResidue {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           app_name: app_name.clone(),
           size,
           residue_type: ResidueType::Data,
@@ -321,9 +323,9 @@ impl AppResidueService {
   }
 
   pub fn scan_user_caches(&self) -> Vec<AppResidue> {
-    let cache_dir = match dirs::home_dir() {
-      Some(h) => h.join(".cache"),
-      None => return Vec::new(),
+    let cache_dir = match home_dir() {
+      Ok(h) => h.join(".cache"),
+      Err(_) => return Vec::new(),
     };
 
     if !cache_dir.exists() {
@@ -338,7 +340,7 @@ impl AppResidueService {
         let path = entry.path();
         let app_name = path
           .file_name()
-          .map(|n| n.to_string_lossy().to_string())
+          .map(|n| n.to_string_lossy().into_owned())
           .unwrap_or_default();
 
         if app_name == "fontconfig" || app_name == "icon-cache" || app_name == "plasma_icon_cache" {
@@ -357,7 +359,7 @@ impl AppResidueService {
         }
 
         residues.push(AppResidue {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           app_name: app_name.clone(),
           size,
           residue_type: ResidueType::Cache,
@@ -375,7 +377,7 @@ impl AppResidueService {
 
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         for line in stdout.lines().skip(5) {
           let parts: Vec<&str> = line.split_whitespace().collect();
           if parts.len() >= 4 {
@@ -401,7 +403,7 @@ impl AppResidueService {
           if path.is_dir() {
             let pkg_name = path
               .file_name()
-              .map(|n| n.to_string_lossy().to_string())
+              .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
             if !pkg_name.is_empty()
               && pkg_name
@@ -411,7 +413,7 @@ impl AppResidueService {
               let installed = Self::get_installed_apps();
               if !Self::matches_installed_app(&pkg_name, &installed) {
                 orphaned.push(OrphanedConfig {
-                  path: path.to_string_lossy().to_string(),
+                  path: path.to_string_lossy().into_owned(),
                   package_name: pkg_name,
                   config_type: "etc_config".to_string(),
                 });
@@ -426,9 +428,9 @@ impl AppResidueService {
   }
 
   pub fn scan_home_residues(&self) -> Vec<AppResidue> {
-    let home = match dirs::home_dir() {
-      Some(h) => h,
-      None => return Vec::new(),
+    let home = match home_dir() {
+      Ok(h) => h,
+      Err(_) => return Vec::new(),
     };
 
     let mut residues: Vec<AppResidue> = Vec::new();
@@ -443,7 +445,7 @@ impl AppResidueService {
             let path = entry.path();
             let app_name = path
               .file_name()
-              .map(|n| n.to_string_lossy().to_string())
+              .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
 
             if app_name.starts_with('.') {
@@ -458,7 +460,7 @@ impl AppResidueService {
             }
 
             residues.push(AppResidue {
-              path: path.to_string_lossy().to_string(),
+              path: path.to_string_lossy().into_owned(),
               app_name,
               size,
               residue_type: ResidueType::Both,
@@ -574,5 +576,55 @@ impl AppResidueService {
       total_size,
       found_uninstalled,
     }
+  }
+
+  pub fn scan_user_configs_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let residues = self.scan_user_configs();
+    let count = residues.len();
+    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response(
+      format!("Found {} config residues", count),
+      data,
+    ))
+  }
+
+  pub fn scan_user_data_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let residues = self.scan_user_data();
+    let count = residues.len();
+    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response(
+      format!("Found {} data residues", count),
+      data,
+    ))
+  }
+
+  pub fn scan_user_caches_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let residues = self.scan_user_caches();
+    let count = residues.len();
+    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response(
+      format!("Found {} cache residues", count),
+      data,
+    ))
+  }
+
+  pub fn scan_home_residues_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let residues = self.scan_home_residues();
+    let count = residues.len();
+    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response(
+      format!("Found {} home residues", count),
+      data,
+    ))
+  }
+
+  pub fn get_orphaned_configs_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let orphaned = self.get_orphaned_configs();
+    let count = orphaned.len();
+    let data = models_into_data_array(orphaned).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response(
+      format!("Found {} orphaned configs", count),
+      data,
+    ))
   }
 }

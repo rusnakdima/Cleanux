@@ -56,7 +56,6 @@ impl LogAnalysisCache {
     }
   }
 
-  #[allow(dead_code)]
   fn invalidate(&self, path: &Path) {
     if let Ok(mut guard) = self.data.lock() {
       guard.remove(path);
@@ -315,7 +314,7 @@ impl LogAnalyzerService {
           let (severity, count) = self.analyze_logs_with_cache(&path, modified);
 
           entries.push(LogEntry {
-            path: path.to_string_lossy().to_string(),
+            path: path.to_string_lossy().into_owned(),
             severity,
             count,
             last_modified: modified_datetime.format("%Y-%m-%d %H:%M:%S").to_string(),
@@ -421,18 +420,6 @@ impl LogAnalyzerService {
         total_lines.saturating_sub(error_warn_count)
       }
     }
-  }
-
-  #[allow(dead_code)]
-  fn get_log_severity(&self, path: &str) -> LogSeverity {
-    let content = fs::read_to_string(path).unwrap_or_default();
-    Self::determine_severity(&content)
-  }
-
-  #[allow(dead_code)]
-  fn count_log_entries(&self, path: &str, severity: &LogSeverity) -> u32 {
-    let content = fs::read_to_string(path).unwrap_or_default();
-    Self::count_entries_for_severity(&content, severity)
   }
 
   fn categorize_log(&self, path: &str) -> LogCategory {

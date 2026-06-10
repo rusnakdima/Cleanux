@@ -84,7 +84,8 @@ impl SchedulerService {
       .map_err(|e| AppError::message(format!("Failed to serialize schedule: {}", e)))?;
     Ok(success_response(
       "Schedule retrieved successfully",
-      serde_json::from_value(json).unwrap(),
+      serde_json::from_value(json)
+        .map_err(|e| AppError::message(format!("Failed to deserialize schedule: {}", e)))?,
     ))
   }
 

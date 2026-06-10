@@ -105,7 +105,7 @@ impl MemoryService {
       .iter()
       .map(|(pid, process)| ProcessMemory {
         pid: pid.as_u32(),
-        name: process.name().to_string_lossy().to_string(),
+        name: process.name().to_string_lossy().into_owned(),
         memory_mb: process.memory() as f64 / 1024.0 / 1024.0,
         cpu_percent: process.cpu_usage(),
       })

@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::helpers::home_dir;
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 
 pub struct StartupService;
@@ -15,7 +16,7 @@ pub struct StartupItem {
 
 fn get_autostart_dirs() -> Vec<PathBuf> {
   let mut dirs = Vec::new();
-  if let Some(home) = dirs::home_dir() {
+  if let Ok(home) = home_dir() {
     dirs.push(home.join(".config/autostart"));
   }
   dirs.push(PathBuf::from("/etc/xdg/autostart"));
@@ -36,9 +37,15 @@ fn parse_desktop_file(path: &PathBuf) -> Option<StartupItem> {
   for line in content.lines() {
     let line = line.trim();
     if line.starts_with("Name=") {
-      name = line.strip_prefix("Name=").unwrap().to_string();
+      name = line
+        .strip_prefix("Name=")
+        .map(String::from)
+        .unwrap_or_default();
     } else if line.starts_with("Exec=") {
-      command = line.strip_prefix("Exec=").unwrap().to_string();
+      command = line
+        .strip_prefix("Exec=")
+        .map(String::from)
+        .unwrap_or_default();
     } else if line.starts_with("Hidden=true") || line.starts_with("Hidden=false") {
       enabled = line != "Hidden=true";
     } else if line.starts_with("X-GNOME-Autostart-enabled=") {
@@ -52,7 +59,7 @@ fn parse_desktop_file(path: &PathBuf) -> Option<StartupItem> {
 
   Some(StartupItem {
     name,
-    path: path.to_string_lossy().to_string(),
+    path: path.to_string_lossy().into_owned(),
     command,
     enabled,
   })
@@ -132,7 +139,7 @@ impl StartupService {
     Ok(ResponseModel {
       status: ResponseStatus::Success,
       message: format!("Disabled startup item: {}", path),
-      data: DataValue::String(disabled_path.to_string_lossy().to_string()),
+      data: DataValue::String(disabled_path.to_string_lossy().into_owned()),
     })
   }
 
@@ -148,7 +155,12 @@ impl StartupService {
     }
 
     let enabled_path = if path.ends_with(".disabled") {
-      PathBuf::from(path.strip_suffix(".disabled").unwrap())
+      PathBuf::from(
+        path
+          .strip_suffix(".disabled")
+          .map(String::from)
+          .unwrap_or_default(),
+      )
     } else {
       path_buf.clone()
     };
@@ -182,7 +194,7 @@ impl StartupService {
     Ok(ResponseModel {
       status: ResponseStatus::Success,
       message: format!("Enabled startup item: {}", enabled_path.display()),
-      data: DataValue::String(enabled_path.to_string_lossy().to_string()),
+      data: DataValue::String(enabled_path.to_string_lossy().into_owned()),
     })
   }
 }

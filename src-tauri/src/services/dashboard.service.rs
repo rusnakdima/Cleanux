@@ -16,7 +16,7 @@ fn is_cache_file(name: &OsStr) -> bool {
 use crate::models::{DataValue, ResponseModel, ScanSummaryModel, SystemServiceModel};
 
 /* helpers */
-use crate::helpers::ResponseBuilder;
+use crate::helpers::{home_dir, stderr_string, stdout_string, ResponseBuilder};
 use rayon::prelude::*;
 use walkdir::WalkDir;
 
@@ -41,12 +41,12 @@ impl DashboardService {
       if !output.status.success() {
         return Err(
           ResponseBuilder::new()
-            .error(String::from_utf8_lossy(&output.stderr).as_ref())
+            .error(&stderr_string(&output))
             .build(),
         );
       }
 
-      let stdout = String::from_utf8_lossy(&output.stdout);
+      let stdout = stdout_string(&output);
       let mut services = Vec::new();
 
       for line in stdout.lines().skip(1) {
@@ -128,7 +128,7 @@ impl DashboardService {
   }
 
   pub fn getTrashSummary(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
+    let home = home_dir().map_err(|_| "Home directory not found")?;
     let trashDir = home.join(".local/share/Trash/files");
     let mut totalSize = 0;
     let mut fileCount = 0;
@@ -197,7 +197,7 @@ impl DashboardService {
   }
 
   pub fn getLargeFilesSummary(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir().ok_or("Home directory not found")?;
+    let home = home_dir().map_err(|_| "Home directory not found")?;
     let threshold = 100 * 1024 * 1024;
 
     let dirsToScan = vec![

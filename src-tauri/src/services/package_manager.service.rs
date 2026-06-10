@@ -1,5 +1,8 @@
 /* helpers */
-use crate::helpers::{data_string, info_response, success_response};
+use crate::helpers::{
+  calculate_dir_size, data_string, home_dir, info_response, stderr_string, stdout_string,
+  success_response,
+};
 /* models */
 use crate::models::{AppError, DataValue, ResponseModel};
 /* sys lib */
@@ -93,7 +96,7 @@ impl PackageManagerService {
   }
 
   fn get_snap_cache_info() -> Option<PackageCacheInfo> {
-    let home = dirs::home_dir()?;
+    let home = home_dir().ok()?;
     let snap_path = home.join("snap");
     let path = Path::new(&snap_path);
 
@@ -101,17 +104,17 @@ impl PackageManagerService {
       return None;
     }
 
-    let size = Self::calculate_directory_size(path);
+    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
     Some(PackageCacheInfo {
       name: "snap".to_string(),
-      cachePath: snap_path.to_string_lossy().to_string(),
+      cachePath: snap_path.to_string_lossy().into_owned(),
       size,
       description: "Snap package manager cache".to_string(),
     })
   }
 
   fn get_flatpak_cache_info() -> Option<PackageCacheInfo> {
-    let home = dirs::home_dir()?;
+    let home = home_dir().ok()?;
     let flatpak_path = home.join(".local/share/flatpak/app");
     let path = Path::new(&flatpak_path);
 
@@ -119,10 +122,10 @@ impl PackageManagerService {
       return None;
     }
 
-    let size = Self::calculate_directory_size(path);
+    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
     Some(PackageCacheInfo {
       name: "flatpak".to_string(),
-      cachePath: flatpak_path.to_string_lossy().to_string(),
+      cachePath: flatpak_path.to_string_lossy().into_owned(),
       size,
       description: "Flatpak application cache".to_string(),
     })
@@ -136,33 +139,13 @@ impl PackageManagerService {
       return None;
     }
 
-    let size = Self::calculate_directory_size(path);
+    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
     Some(PackageCacheInfo {
       name: "yum".to_string(),
       cachePath: cache_path.to_string(),
       size,
       description: "YUM package manager cache".to_string(),
     })
-  }
-
-  fn calculate_directory_size(path: &Path) -> u64 {
-    fs::read_dir(path)
-      .map(|entries| {
-        entries
-          .filter_map(|e| e.ok())
-          .filter_map(|e| {
-            let metadata = e.metadata().ok()?;
-            if metadata.is_file() {
-              Some(metadata.len())
-            } else if metadata.is_dir() {
-              Some(Self::calculate_directory_size(&e.path()))
-            } else {
-              None
-            }
-          })
-          .sum()
-      })
-      .unwrap_or(0)
   }
 
   pub fn clean_package_cache(manager: &str) -> Result<ResponseModel, ResponseModel> {
@@ -194,7 +177,7 @@ impl PackageManagerService {
         data_string("apt"),
       ))
     } else {
-      let stderr = String::from_utf8_lossy(&output.stderr);
+      let stderr = stderr_string(&output);
       Err(AppError::message(format!(
         "Failed to clean APT cache: {}",
         stderr
@@ -209,14 +192,14 @@ impl PackageManagerService {
       .map_err(|e| AppError::message(format!("Failed to run snap list: {}", e)))?;
 
     if !output.status.success() {
-      let stderr = String::from_utf8_lossy(&output.stderr);
+      let stderr = stderr_string(&output);
       return Err(AppError::message(format!(
         "Failed to list snaps: {}",
         stderr
       )));
     }
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout_string(&output);
     let mut revision_counts: std::collections::HashMap<String, u32> =
       std::collections::HashMap::new();
 
@@ -268,7 +251,7 @@ impl PackageManagerService {
         data_string("flatpak"),
       ))
     } else {
-      let stderr = String::from_utf8_lossy(&output.stderr);
+      let stderr = stderr_string(&output);
       Ok(info_response(
         format!("Flatpak cleanup: {}", stderr),
         data_string("flatpak"),
@@ -288,7 +271,7 @@ impl PackageManagerService {
         data_string("yum"),
       ))
     } else {
-      let stderr = String::from_utf8_lossy(&output.stderr);
+      let stderr = stderr_string(&output);
       Err(AppError::message(format!(
         "Failed to clean YUM cache: {}",
         stderr

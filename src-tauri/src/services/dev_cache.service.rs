@@ -1,5 +1,7 @@
 /* helpers */
-use crate::helpers::{calculate_dir_size, data_string, remove_dir_contents, success_response};
+use crate::helpers::{
+  calculate_dir_size, data_string, home_dir, remove_dir_contents, success_response,
+};
 /* models */
 use crate::models::{AppError, ResponseModel};
 /* sys lib */
@@ -35,8 +37,7 @@ impl DevCacheService {
   }
 
   fn get_all_dev_caches_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
 
     let npm = self.scan_npm_cache_inner(&home);
     let pip = self.scan_pip_cache_inner(&home);
@@ -71,7 +72,7 @@ impl DevCacheService {
         if size > 0 {
           total_size += size;
           if cache_path.is_empty() {
-            cache_path = path.to_string_lossy().to_string();
+            cache_path = path.to_string_lossy().into_owned();
           }
         }
       }
@@ -99,13 +100,13 @@ impl DevCacheService {
     if pip_cache_path.exists() {
       let (size, _) = calculate_dir_size(&pip_cache_path).unwrap_or((0, 0));
       total_size += size;
-      cache_path = pip_cache_path.to_string_lossy().to_string();
+      cache_path = pip_cache_path.to_string_lossy().into_owned();
     }
     if root_pip_cache.exists() && root_pip_cache != pip_cache_path {
       let (size, _) = calculate_dir_size(&root_pip_cache).unwrap_or((0, 0));
       total_size += size;
       if cache_path.is_empty() {
-        cache_path = root_pip_cache.to_string_lossy().to_string();
+        cache_path = root_pip_cache.to_string_lossy().into_owned();
       }
     }
 
@@ -131,13 +132,13 @@ impl DevCacheService {
     if registry.exists() {
       let (size, _) = calculate_dir_size(&registry).unwrap_or((0, 0));
       total_size += size;
-      cache_path = registry.to_string_lossy().to_string();
+      cache_path = registry.to_string_lossy().into_owned();
     }
     if git.exists() {
       let (size, _) = calculate_dir_size(&git).unwrap_or((0, 0));
       total_size += size;
       if cache_path.is_empty() {
-        cache_path = git.to_string_lossy().to_string();
+        cache_path = git.to_string_lossy().into_owned();
       }
     }
 
@@ -160,7 +161,7 @@ impl DevCacheService {
     let cache_path = if go_path.exists() {
       let (size, _) = calculate_dir_size(&go_path).unwrap_or((0, 0));
       total_size = size;
-      go_path.to_string_lossy().to_string()
+      go_path.to_string_lossy().into_owned()
     } else {
       "~/go/pkg/mod".to_string()
     };
@@ -180,7 +181,7 @@ impl DevCacheService {
     let cache_path = if maven_path.exists() {
       let (size, _) = calculate_dir_size(&maven_path).unwrap_or((0, 0));
       total_size = size;
-      maven_path.to_string_lossy().to_string()
+      maven_path.to_string_lossy().into_owned()
     } else {
       "~/.m2/repository".to_string()
     };
@@ -200,7 +201,7 @@ impl DevCacheService {
     let cache_path = if gradle_path.exists() {
       let (size, _) = calculate_dir_size(&gradle_path).unwrap_or((0, 0));
       total_size = size;
-      gradle_path.to_string_lossy().to_string()
+      gradle_path.to_string_lossy().into_owned()
     } else {
       "~/.gradle/caches".to_string()
     };
@@ -218,8 +219,7 @@ impl DevCacheService {
   }
 
   fn clean_npm_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
     let npm_path = home.join(".npm");
 
     if !npm_path.exists() {
@@ -246,8 +246,7 @@ impl DevCacheService {
   }
 
   fn clean_pip_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
     let pip_path = home.join(".cache/pip");
 
     if !pip_path.exists() {
@@ -276,8 +275,7 @@ impl DevCacheService {
   }
 
   fn clean_cargo_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
     let registry = home.join(".cargo/registry");
     let git = home.join(".cargo/git");
 
@@ -316,8 +314,7 @@ impl DevCacheService {
   }
 
   fn clean_go_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
     let go_path = home.join("go/pkg/mod");
 
     if !go_path.exists() {
@@ -343,8 +340,7 @@ impl DevCacheService {
   }
 
   fn clean_maven_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
     let maven_path = home.join(".m2/repository");
 
     if !maven_path.exists() {
@@ -373,8 +369,7 @@ impl DevCacheService {
   }
 
   fn clean_gradle_cache_inner(&self) -> DevCacheResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir()?;
     let gradle_path = home.join(".gradle/caches");
 
     if !gradle_path.exists() {

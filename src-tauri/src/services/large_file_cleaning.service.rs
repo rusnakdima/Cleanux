@@ -1,6 +1,6 @@
 /* helpers */
 use crate::helpers::{
-  data_empty_string, data_string, remove_paths_with_errors, scan_large_file_models,
+  data_empty_string, data_string, home_dir, remove_paths_with_errors, scan_large_file_models,
   success_response,
 };
 /* models */
@@ -29,8 +29,7 @@ impl LargeFileCleaningService {
     limit: Option<usize>,
     offset: Option<usize>,
   ) -> CleanResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir().map_err(|e| e.into_response())?;
     let (files, has_more, total) = scan_large_file_models(&home, 3, 50, Some(200), offset, limit);
     let paginated = PaginatedData::new(files, has_more, total);
     let data = serde_json::to_value(paginated)
@@ -68,8 +67,7 @@ impl LargeFileCleaningService {
   }
 
   fn clear_all_large_files_inner(&self) -> CleanResult<ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let home = home_dir().map_err(|e| e.into_response())?;
     let (files, _, _) = scan_large_file_models(&home, 3, 50, None, None, None);
     let mut cleared_count = 0;
     for file in files {

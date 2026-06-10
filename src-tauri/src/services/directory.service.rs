@@ -87,12 +87,12 @@ impl DirectoryService {
   fn build_directory_tree(path: &Path, max_depth: u32) -> Result<DirectoryNode, ResponseModel> {
     let name = path
       .file_name()
-      .map(|n| n.to_string_lossy().to_string())
-      .unwrap_or_else(|| path.to_string_lossy().to_string());
+      .map(|n| n.to_string_lossy().into_owned())
+      .unwrap_or_else(|| path.to_string_lossy().into_owned());
 
     let mut node = DirectoryNode {
       name,
-      path: path.to_string_lossy().to_string(),
+      path: path.to_string_lossy().into_owned(),
       size: 0,
       children: vec![],
     };
@@ -117,12 +117,12 @@ impl DirectoryService {
 
             let file_name = entry_path
               .file_name()
-              .map(|n| n.to_string_lossy().to_string())
+              .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
 
             children.push(DirectoryNode {
               name: file_name,
-              path: entry_path.to_string_lossy().to_string(),
+              path: entry_path.to_string_lossy().into_owned(),
               size: file_size,
               children: vec![],
             });
@@ -170,7 +170,7 @@ impl DirectoryService {
   }
 
   fn collect_empty_directories(path: &Path, depth: u32, empty_dirs: &mut Vec<EmptyDirectory>) {
-    let parent = path.parent().map(|p| p.to_string_lossy().to_string());
+    let parent = path.parent().map(|p| p.to_string_lossy().into_owned());
 
     if let Ok(entries) = fs::read_dir(path) {
       let mut has_content = false;
@@ -186,7 +186,7 @@ impl DirectoryService {
 
       if !has_content {
         empty_dirs.push(EmptyDirectory {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           depth,
           parent,
         });
@@ -230,7 +230,7 @@ impl DirectoryService {
     depth: u32,
     nested_empty_dirs: &mut Vec<EmptyDirectory>,
   ) {
-    let parent = path.parent().map(|p| p.to_string_lossy().to_string());
+    let parent = path.parent().map(|p| p.to_string_lossy().into_owned());
 
     if let Ok(entries) = fs::read_dir(path) {
       let entries: Vec<_> = entries.filter_map(|e| e.ok()).collect();
@@ -250,7 +250,7 @@ impl DirectoryService {
 
       if all_subdirs_empty && !entries.is_empty() {
         nested_empty_dirs.push(EmptyDirectory {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           depth,
           parent,
         });

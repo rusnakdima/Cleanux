@@ -1,9 +1,10 @@
-use crate::helpers::{data_string, success_response};
+use crate::helpers::{
+  calculate_dir_size, data_string, get_command_output, run_command, success_response,
+};
 use crate::models::{AppError, DataValue, ResponseModel};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use std::process::Command;
 
 pub struct PackageDeepCleanService;
 
@@ -40,59 +41,12 @@ pub struct CleanResult {
 }
 
 impl PackageDeepCleanService {
-  fn calculate_directory_size(path: &Path) -> u64 {
-    fs::read_dir(path)
-      .map(|entries| {
-        entries
-          .filter_map(|e| e.ok())
-          .filter_map(|e| {
-            let metadata = e.metadata().ok()?;
-            if metadata.is_file() {
-              Some(metadata.len())
-            } else if metadata.is_dir() {
-              Some(Self::calculate_directory_size(&e.path()))
-            } else {
-              None
-            }
-          })
-          .sum()
-      })
-      .unwrap_or(0)
-  }
-
-  fn run_command(cmd: &str, args: &[&str]) -> std::result::Result<(bool, String, u64), AppError> {
-    let output = Command::new(cmd)
-      .args(args)
-      .output()
-      .map_err(|e| AppError::message(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))?;
-
-    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-    Ok((
-      output.status.success(),
-      stderr,
-      output.status.code().unwrap_or(-1) as u64,
-    ))
-  }
-
-  fn get_command_output(cmd: &str, args: &[&str]) -> std::result::Result<String, AppError> {
-    let output = Command::new(cmd)
-      .args(args)
-      .output()
-      .map_err(|e| AppError::message(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))?;
-
-    if output.status.success() {
-      Ok(String::from_utf8_lossy(&output.stdout).to_string())
-    } else {
-      Err(AppError::message(
-        String::from_utf8_lossy(&output.stderr).to_string(),
-      ))
-    }
-  }
-
   pub fn get_apt_cache_size(&self) -> u64 {
     let cache_path = Path::new("/var/cache/apt/archives/");
     if cache_path.exists() {
-      Self::calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -100,7 +54,7 @@ impl PackageDeepCleanService {
 
   pub fn apt_clean(&self) -> Result<ResponseModel> {
     let before_size = self.get_apt_cache_size();
-    let (success, stderr, _) = Self::run_command("apt-get", &["clean"])?;
+    let (success, stderr, _) = run_command("apt-get", &["clean"])?;
 
     if success {
       let after_size = self.get_apt_cache_size();
@@ -120,7 +74,7 @@ impl PackageDeepCleanService {
   }
 
   pub fn apt_autoremove(&self) -> Result<ResponseModel> {
-    let (success, stderr, _) = Self::run_command("apt-get", &["autoremove", "-y"])?;
+    let (success, stderr, _) = run_command("apt-get", &["autoremove", "-y"])?;
 
     if success {
       Ok(success_response(
@@ -139,7 +93,7 @@ impl PackageDeepCleanService {
 
   pub fn apt_autoclean(&self) -> Result<ResponseModel> {
     let before_size = self.get_apt_cache_size();
-    let (success, stderr, _) = Self::run_command("apt-get", &["autoclean"])?;
+    let (success, stderr, _) = run_command("apt-get", &["autoclean"])?;
 
     if success {
       let after_size = self.get_apt_cache_size();
@@ -159,9 +113,9 @@ impl PackageDeepCleanService {
   }
 
   pub fn get_orphaned_packages(&self) -> Vec<OrphanedPackage> {
-    let output = match Self::run_command("dpkg", &["--get-selections"]) {
+    let output = match run_command("dpkg", &["--get-selections"]) {
       Ok((success, _, _)) if success => {
-        Self::get_command_output("dpkg", &["--get-selections"]).unwrap_or_default()
+        get_command_output("dpkg", &["--get-selections"]).unwrap_or_default()
       }
       _ => return Vec::new(),
     };
@@ -188,7 +142,7 @@ impl PackageDeepCleanService {
   }
 
   pub fn remove_orphaned_package(&self, name: &str) -> Result<ResponseModel> {
-    let (success, stderr, _) = Self::run_command("dpkg", &["--remove", name])?;
+    let (success, stderr, _) = run_command("dpkg", &["--remove", name])?;
 
     if success {
       Ok(success_response(
@@ -226,7 +180,9 @@ impl PackageDeepCleanService {
   pub fn get_dnf_cache_size(&self) -> u64 {
     let cache_path = Path::new("/var/cache/dnf/");
     if cache_path.exists() {
-      Self::calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -234,7 +190,7 @@ impl PackageDeepCleanService {
 
   pub fn dnf_clean_all(&self) -> Result<ResponseModel> {
     let before_size = self.get_dnf_cache_size();
-    let (success, stderr, _) = Self::run_command("dnf", &["clean", "all"])?;
+    let (success, stderr, _) = run_command("dnf", &["clean", "all"])?;
 
     if success {
       let after_size = self.get_dnf_cache_size();
@@ -256,7 +212,9 @@ impl PackageDeepCleanService {
   pub fn get_pacman_cache_size(&self) -> u64 {
     let cache_path = Path::new("/var/cache/pacman/pkg/");
     if cache_path.exists() {
-      Self::calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -265,7 +223,7 @@ impl PackageDeepCleanService {
   pub fn pacman_clean(&self, keep_recent: u32) -> Result<ResponseModel> {
     let before_size = self.get_pacman_cache_size();
 
-    let output = Self::get_command_output(
+    let output = get_command_output(
       "sh",
       &[
         "-c",
@@ -287,7 +245,7 @@ impl PackageDeepCleanService {
       if let Ok(metadata) = fs::metadata(&path) {
         _freed += metadata.len();
       }
-      let _ = Self::run_command("rm", &["-f", &path.to_string_lossy()]);
+      let _ = run_command("rm", &["-f", &path.to_string_lossy()]);
     }
 
     let after_size = self.get_pacman_cache_size();
@@ -309,7 +267,7 @@ impl PackageDeepCleanService {
 
   pub fn pacman_full_clean(&self) -> Result<ResponseModel> {
     let before_size = self.get_pacman_cache_size();
-    let (success, stderr, _) = Self::run_command("pacman", &["-Scc", "--noconfirm"])?;
+    let (success, stderr, _) = run_command("pacman", &["-Scc", "--noconfirm"])?;
 
     if success {
       let after_size = self.get_pacman_cache_size();
@@ -331,7 +289,9 @@ impl PackageDeepCleanService {
   pub fn get_zypper_cache_size(&self) -> u64 {
     let cache_path = Path::new("/var/cache/zypp/");
     if cache_path.exists() {
-      Self::calculate_directory_size(cache_path)
+      calculate_dir_size(cache_path)
+        .map(|(size, _)| size)
+        .unwrap_or(0)
     } else {
       0
     }
@@ -339,7 +299,7 @@ impl PackageDeepCleanService {
 
   pub fn zypper_clean(&self) -> Result<ResponseModel> {
     let before_size = self.get_zypper_cache_size();
-    let (success, stderr, _) = Self::run_command("zypper", &["clean"])?;
+    let (success, stderr, _) = run_command("zypper", &["clean"])?;
 
     if success {
       let after_size = self.get_zypper_cache_size();
@@ -377,12 +337,23 @@ impl PackageDeepCleanService {
     }
   }
 
+  pub fn get_package_summary_response(&self) -> Result<ResponseModel> {
+    let summary = self.get_package_summary();
+    Ok(success_response(
+      "Package manager summary retrieved",
+      DataValue::Object(
+        serde_json::to_value(summary)
+          .map_err(|e| AppError::message(format!("Serialization error: {}", e)))?,
+      ),
+    ))
+  }
+
   pub fn deep_clean_all(&self) -> Result<ResponseModel> {
     let mut results: Vec<CleanResult> = Vec::new();
 
     if Path::new("/var/cache/apt/archives/").exists() {
       let before_size = self.get_apt_cache_size();
-      if let Ok((success, stderr, _)) = Self::run_command("apt-get", &["clean"]) {
+      if let Ok((success, stderr, _)) = run_command("apt-get", &["clean"]) {
         if success {
           let freed = before_size.saturating_sub(self.get_apt_cache_size());
           results.push(CleanResult {
@@ -398,7 +369,7 @@ impl PackageDeepCleanService {
           });
         }
       }
-      if let Ok((success, stderr, _)) = Self::run_command("apt-get", &["autoclean"]) {
+      if let Ok((success, stderr, _)) = run_command("apt-get", &["autoclean"]) {
         if !success {
           results.push(CleanResult {
             command: "apt-get autoclean".to_string(),
@@ -411,7 +382,7 @@ impl PackageDeepCleanService {
 
     if Path::new("/var/cache/dnf/").exists() || Path::new("/var/cache/yum/").exists() {
       let before_size = self.get_dnf_cache_size();
-      if let Ok((success, stderr, _)) = Self::run_command("dnf", &["clean", "all"]) {
+      if let Ok((success, stderr, _)) = run_command("dnf", &["clean", "all"]) {
         if success {
           let freed = before_size.saturating_sub(self.get_dnf_cache_size());
           results.push(CleanResult {
@@ -431,7 +402,7 @@ impl PackageDeepCleanService {
 
     if Path::new("/var/cache/pacman/pkg/").exists() {
       let before_size = self.get_pacman_cache_size();
-      if let Ok((success, stderr, _)) = Self::run_command("pacman", &["-Sc", "--noconfirm"]) {
+      if let Ok((success, stderr, _)) = run_command("pacman", &["-Sc", "--noconfirm"]) {
         if success {
           let freed = before_size.saturating_sub(self.get_pacman_cache_size());
           results.push(CleanResult {
@@ -451,7 +422,7 @@ impl PackageDeepCleanService {
 
     if Path::new("/var/cache/zypp/").exists() {
       let before_size = self.get_zypper_cache_size();
-      if let Ok((success, stderr, _)) = Self::run_command("zypper", &["clean"]) {
+      if let Ok((success, stderr, _)) = run_command("zypper", &["clean"]) {
         if success {
           let freed = before_size.saturating_sub(self.get_zypper_cache_size());
           results.push(CleanResult {

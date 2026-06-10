@@ -1,4 +1,5 @@
 /* helpers */
+use crate::helpers::common_paths::CommonPath;
 use crate::helpers::{
   collect_trash_file_models, data_empty_string, models_into_data_array, remove_paths_with_errors,
   success_response,
@@ -21,9 +22,9 @@ impl TrashCleaningService {
   }
 
   fn get_trash_files_inner(&self) -> CleanResult<ResponseModel> {
-    let home = dirs::home_dir()
+    let trash_dir = CommonPath::TrashFiles
+      .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
-    let trash_dir = home.join(".local/share/Trash/files");
     let trash_files: Vec<TrashFileModel> = collect_trash_file_models(&trash_dir);
     let data = models_into_data_array(trash_files)?;
     Ok(success_response("Trash files retrieved successfully", data))
@@ -52,10 +53,9 @@ impl TrashCleaningService {
   }
 
   pub fn clearTrash(&self) -> Result<ResponseModel, ResponseModel> {
-    let home = dirs::home_dir()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))
-      .map_err(|e| e.into_response())?;
-    let trash_dir = home.join(".local/share/Trash/files");
+    let trash_dir = CommonPath::TrashFiles
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     match fs::read_dir(&trash_dir) {
       Ok(entries) => {
         for entry in entries.flatten() {

@@ -46,7 +46,7 @@ impl LogAnalysisCache {
     }
   }
 
-  fn set(&self, path: PathBuf, mtime: SystemTime, severity: LogSeverity, count: u32) {
+fn set(&self, path: PathBuf, mtime: SystemTime, severity: LogSeverity, count: u32) {
     if let Ok(mut guard) = self.data.lock() {
       guard.insert(
         path,
@@ -58,25 +58,5 @@ impl LogAnalysisCache {
         },
       );
     }
-  }
-
-fn categorize_log(&self, path: &str) -> LogCategory {
-    let path_lower = path.to_lowercase();
-    if path_lower.contains("auth") || path_lower.contains("secure") {
-      LogCategory::Security
-    } else if path_lower.contains("kern")
-      || path_lower.contains("dmesg")
-      || path_lower.contains("kmsg")
-    {
-      LogCategory::Hardware
-    } else if path_lower.contains("application") {
-      LogCategory::Application
-    } else {
-      LogCategory::System
-    }
-  }
-
-  pub fn clear_log_cache() {
-    get_log_cache().clear();
   }
 }
