@@ -2,17 +2,22 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  effect,
   Input,
   Output,
   EventEmitter,
   signal,
   OnChanges,
+  OnDestroy,
   SimpleChanges,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormControl } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 /* materials */
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -44,7 +49,6 @@ import { formatSize } from '@shared/utils/format.util';
     PaginationComponent,
   ],
   templateUrl: './data-list.component.html',
-  styleUrl: './data-list.component.css',
 })
 export class DataListComponent<T extends object = object> implements OnChanges {
   @Input() columns: ListColumn[] = [];
@@ -82,12 +86,30 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   sortDirection = signal<'asc' | 'desc'>('asc');
   searchQuery = signal<string>('');
 
-  private destroy$ = new Subject<void>();
   searchControl = new FormControl('');
+  private destroy$ = new Subject<void>();
 
   formatSize = formatSize;
 
   p = 1;
+
+  constructor(private destroyRef: DestroyRef) {
+    effect(() => {
+      this.searchControl.valueChanges
+        .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+        .subscribe((value: string | null) => {
+          const query = value ?? '';
+          this.searchQuery.set(query);
+          untracked(() => this.onSearch());
+          this.searchChange.emit(query);
+        });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentPage']) {
@@ -107,22 +129,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
       this.searchQuery.set(changes['searchQuery'].currentValue);
       this.searchControl.setValue(changes['searchQuery'].currentValue);
     }
-  }
-
-  ngOnInit(): void {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((value) => {
-        const query = value ?? '';
-        this.searchQuery.set(query);
-        this.onSearch();
-        this.searchChange.emit(query);
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private rowRecord(item: T): Record<string, unknown> {

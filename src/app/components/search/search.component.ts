@@ -2,6 +2,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  effect,
   EventEmitter,
   Input,
   Output,
@@ -9,10 +11,12 @@ import {
   OnChanges,
   OnDestroy,
   SimpleChanges,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 /* materials */
 import { MatIconModule } from '@angular/material/icon';
@@ -32,16 +36,23 @@ export class SearchComponent implements OnChanges, OnDestroy {
   searchQuery = signal('');
   isVisible = signal(false);
   private _originalData: object[] = [];
-  private destroy$ = new Subject<void>();
   searchControl = new FormControl('');
+  private destroy$ = new Subject<void>();
 
-  constructor() {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((value) => {
-        this.searchQuery.set(value ?? '');
-        this.onSearch();
-      });
+  constructor(private destroyRef: DestroyRef) {
+    effect(() => {
+      this.searchControl.valueChanges
+        .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+        .subscribe((value: string | null) => {
+          this.searchQuery.set(value ?? '');
+          untracked(() => this.onSearch());
+        });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private rowRecord(item: object): Record<string, unknown> {
@@ -58,11 +69,6 @@ export class SearchComponent implements OnChanges, OnDestroy {
         this.onSearch();
       }
     }
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   show(): void {

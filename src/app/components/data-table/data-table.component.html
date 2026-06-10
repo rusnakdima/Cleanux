@@ -31,7 +31,7 @@
                 <input
                   type="checkbox"
                   [checked]="allSelected()"
-                  (change)="toggleSelectAll($any($event.target).checked)"
+                  (change)="toggleSelectAll($event.target.checked)"
                 />
                 <span class="checkmark" [class.indeterminate]="indeterminate()"></span>
               </label>
@@ -96,7 +96,7 @@
                   <input
                     type="checkbox"
                     [checked]="isSelected(item)"
-                    (change)="toggleSelectItem(item, $any($event.target).checked)"
+                    (change)="toggleSelectItem(item, $event.target.checked)"
                     (click)="$event.stopPropagation()"
                   />
                   <span class="checkmark"></span>
@@ -181,7 +181,7 @@
                     <input
                       type="checkbox"
                       [checked]="isSelected(item)"
-                      (change)="toggleSelectItem(item, $any($event.target).checked)"
+                      (change)="toggleSelectItem(item, $event.target.checked)"
                       (click)="$event.stopPropagation()"
                     />
                     <span class="checkmark"></span>

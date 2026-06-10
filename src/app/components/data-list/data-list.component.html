@@ -1,17 +1,24 @@
-<div class="data-list-container">
+<div class="flex flex-col">
   @if (showSearch) {
-    <div class="data-list-search">
-      <div class="search-input-wrapper">
-        <mat-icon class="search-icon">search</mat-icon>
+    <div
+      class="flex items-center gap-3 p-3 border-b border-[var(--border-color)] bg-[var(--bg-surface)]"
+    >
+      <div class="relative flex-1 flex items-center">
+        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm"
+          >search</mat-icon
+        >
         <input
           type="text"
-          class="search-input"
+          class="w-full px-10 py-2 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] focus:border-[var(--accent-primary)]"
           placeholder="{{ options.searchPlaceholder ?? 'Search...' }}"
           [formControl]="searchControl"
         />
         @if (searchControl.value) {
-          <button (click)="clearSearch()" class="search-clear-btn">
-            <mat-icon class="clear-icon">close</mat-icon>
+          <button
+            (click)="clearSearch()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 flex items-center justify-center"
+          >
+            <mat-icon class="text-sm">close</mat-icon>
           </button>
         }
       </div>
@@ -24,96 +31,117 @@
   }
 
   @if (loading) {
-    <div class="data-list-loading">
+    <div class="flex items-center justify-center h-48">
       <mat-spinner diameter="48"></mat-spinner>
     </div>
   } @else if (data.length === 0) {
-    <div class="data-list-empty">
-      <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">inbox</mat-icon>
-      <p class="text-[var(--text-secondary)]">{{ options.emptyMessage ?? 'No items found' }}</p>
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <mat-icon class="text-5xl text-[var(--text-muted)] mb-4">inbox</mat-icon>
+      <p class="text-[var(--text-secondary)]">{{ options.emptyMessage ?? "No items found" }}</p>
     </div>
   } @else {
-    <div class="data-list-items">
+    <div class="flex flex-col gap-2 max-h-[calc(100vh-400px)] overflow-y-auto p-2">
       @for (item of paginatedData; track trackByFn($index, item)) {
         <div
-          class="data-list-item {{ getRowClass(item) }}"
-          [class.hoverable]="options.hoverable !== false"
-          [class.selected]="isSelected(item)"
+          class="flex items-center gap-3 p-4 rounded-lg bg-[var(--bg-elevated)] transition-colors duration-150 cursor-pointer {{
+            getRowClass(item)
+          }}"
+          [class.hover:bg-[var(--bg-hover)]="options.hoverable !== false"
+          [class.bg-[color-mix(in_srgb,var(--accent-primary)_10%,transparent)]]="isSelected(item)"
+          [class.border]="isSelected(item)"
+          [class.border-[var(--accent-primary)]]="isSelected(item)"
           (click)="onRowClick(item, $event)"
           (dblclick)="onRowDoubleClick(item)"
         >
           @if (showCheckbox) {
-            <div class="item-checkbox">
-              <label class="custom-checkbox">
+            <div class="flex-shrink-0">
+              <label class="relative flex items-center justify-center w-5 h-5 cursor-pointer">
                 <input
                   type="checkbox"
+                  class="absolute opacity-0 w-0 h-0"
                   [checked]="isSelected(item)"
-                  (change)="toggleSelectItem(item, $any($event.target).checked)"
+                  (change)="toggleSelectItem(item, $event.target.checked)"
                   (click)="$event.stopPropagation()"
                 />
-                <span class="checkmark"></span>
+                <span
+                  class="w-5 h-5 border-2 border-[var(--border-color)] rounded transition-all duration-150"
+                  [class.bg-[var(--accent-primary)]]="isSelected(item)"
+                  [class.border-[var(--accent-primary)]]="isSelected(item)"
+                ></span>
               </label>
             </div>
           }
 
-          @if (hasRowActions && actionsPosition === 'right') {
-            <div class="item-icon">
-              <mat-icon class="mat-icon">{{ getItemIcon(item) }}</mat-icon>
+          @if (hasRowActions && actionsPosition === "right") {
+            <div
+              class="w-10 h-10 rounded-lg bg-[var(--bg-hover)] flex items-center justify-center flex-shrink-0"
+            >
+              <mat-icon class="text-xl w-5 h-5 text-[var(--text-muted)]">{{
+                getItemIcon(item)
+              }}</mat-icon>
             </div>
           }
 
-          <div class="item-content">
+          <div class="flex-1 min-w-0">
             @if (primaryColumn) {
-              <div class="item-primary">
-                <span class="primary-text" [class.truncate]="primaryColumn.truncate !== false">
+              <div class="flex items-center gap-2">
+                <span
+                  class="text-sm font-medium text-[var(--text-primary)] whitespace-nowrap overflow-hidden text-ellipsis"
+                  [class.truncate]="primaryColumn.truncate !== false"
+                >
                   {{ formatCell(primaryColumn.key, item) }}
                 </span>
                 @if (primaryColumn.badge) {
-                  <span class="badge" [class]="getBadgeClass(primaryColumn.badge, item)">
+                  <span
+                    class="badge inline-flex items-center text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                    [class]="getBadgeClass(primaryColumn.badge, item)"
+                  >
                     {{ formatCell(primaryColumn.badge, item) }}
                   </span>
                 }
-                @if (primaryColumn.format === 'size') {
-                  <span class="secondary-text size-value">
+                @if (primaryColumn.format === "size") {
+                  <span class="text-[var(--text-secondary)] font-mono text-sm">
                     {{ getFormattedValue(primaryColumn, item) }}
                   </span>
                 }
               </div>
 
               @if (hasSecondaryContent) {
-                <div class="item-secondary">
+                <div class="flex items-center gap-2 text-xs text-[var(--text-muted)] mt-0.5">
                   @if (getSecondaryValue(item)) {
-                    <span class="truncate">{{ getSecondaryValue(item) }}</span>
+                    <span class="overflow-hidden text-ellipsis whitespace-nowrap flex-1">{{
+                      getSecondaryValue(item)
+                    }}</span>
                   }
                   @if (getTimestamp(item)) {
-                    <span class="timestamp">{{ getTimestamp(item) }}</span>
+                    <span class="flex-shrink-0 opacity-70">{{ getTimestamp(item) }}</span>
                   }
                 </div>
               }
             }
           </div>
 
-          @if (showActions && actionsPosition === 'right' && hasRowActions) {
-            <div class="item-actions">
+          @if (showActions && actionsPosition === "right" && hasRowActions) {
+            <div class="flex items-center gap-1 flex-shrink-0">
               @for (action of rowActions; track action.id) {
                 @if (action.toggle) {
                   <button
-                    [class]="getActionClass({ action: action.id, item }, item)"
-                    [class.text-success]="getActionToggleState(action.id, item)"
+                    class="flex items-center justify-center p-2 rounded-lg bg-transparent border-none cursor-pointer text-[var(--text-muted)] transition-all duration-150 hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                    [class.text-[var(--success)]]="getActionToggleState(action.id, item)"
                     [disabled]="isActionDisabled(action.id, item)"
                     [matTooltip]="action.tooltip ?? action.label ?? ''"
                     (click)="onRowAction({ action: action.id, item }); $event.stopPropagation()"
                   >
-                    <mat-icon>{{ action.icon }}</mat-icon>
+                    <mat-icon class="text-xl w-5 h-5">{{ action.icon }}</mat-icon>
                   </button>
                 } @else {
                   <button
-                    [class]="getActionClass({ action: action.id, item }, item)"
+                    class="flex items-center justify-center p-2 rounded-lg bg-transparent border-none cursor-pointer text-[var(--text-muted)] transition-all duration-150 hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
                     [disabled]="isActionDisabled(action.id, item)"
                     [matTooltip]="action.tooltip ?? action.label ?? ''"
                     (click)="onRowAction({ action: action.id, item }); $event.stopPropagation()"
                   >
-                    <mat-icon>{{ action.icon }}</mat-icon>
+                    <mat-icon class="text-xl w-5 h-5">{{ action.icon }}</mat-icon>
                   </button>
                 }
               }
@@ -121,9 +149,9 @@
           }
         </div>
       } @empty {
-        <div class="data-list-empty">
-          <mat-icon class="icon-4xl text-[var(--text-muted)] mb-4">inbox</mat-icon>
-          <p class="text-[var(--text-secondary)]">{{ options.emptyMessage ?? 'No items found' }}</p>
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+          <mat-icon class="text-5xl text-[var(--text-muted)] mb-4">inbox</mat-icon>
+          <p class="text-[var(--text-secondary)]">{{ options.emptyMessage ?? "No items found" }}</p>
         </div>
       }
     </div>

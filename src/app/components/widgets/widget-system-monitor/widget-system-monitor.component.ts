@@ -6,7 +6,7 @@ import { SystemMonitorComponent } from '../../system-monitor/system-monitor.comp
   selector: 'app-widget-system-monitor',
   standalone: true,
   imports: [CommonModule, SystemMonitorComponent],
-  template: `<app-system-monitor></app-system-monitor>`,
+  templateUrl: './widget-system-monitor.component.html',
 })
 export class WidgetSystemMonitorComponent {
   enabled = input(true);

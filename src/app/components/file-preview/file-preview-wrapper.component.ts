@@ -7,15 +7,7 @@ import { FilePreviewComponent } from './file-preview.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FilePreviewComponent],
-  template: `
-    @if (previewService.isOpen()) {
-      <app-file-preview
-        [fileData]="previewService.previewData()"
-        (close)="previewService.close()"
-        (openInEditor)="previewService.openInEditor($event.path, $event.command)"
-      />
-    }
-  `,
+  templateUrl: './file-preview-wrapper.component.html',
 })
 export class FilePreviewWrapperComponent {
   previewService = inject(FilePreviewService);

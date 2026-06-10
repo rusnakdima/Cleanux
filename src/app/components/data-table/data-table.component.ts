@@ -2,19 +2,24 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
+  effect,
   Input,
   Output,
   EventEmitter,
   signal,
   OnChanges,
+  OnDestroy,
   SimpleChanges,
   ElementRef,
   NgZone,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormControl } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 /* materials */
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
@@ -88,7 +93,6 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   lastSelectedIndex = signal<number | null>(null);
 
-  private destroy$ = new Subject<void>();
   searchControl = new FormControl('');
 
   formatSize = formatSize;
@@ -102,6 +106,25 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   readonly VIRTUAL_SCROLL_THRESHOLD = 100;
   readonly DEFAULT_ROW_HEIGHT = 48;
+  private destroy$ = new Subject<void>();
+
+  constructor(private destroyRef: DestroyRef) {
+    effect(() => {
+      this.searchControl.valueChanges
+        .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+        .subscribe((value: string | null) => {
+          const query = value ?? '';
+          this.searchQuery.set(query);
+          untracked(() => this.onSearch());
+          this.searchChange.emit(query);
+        });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   get rowHeight(): number {
     return this.options.rowHeight ?? this.DEFAULT_ROW_HEIGHT;
@@ -147,22 +170,6 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   private _originalData: T[] = [];
   private _filteredData: T[] = [];
-
-  ngOnInit(): void {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((value) => {
-        const query = value ?? '';
-        this.searchQuery.set(query);
-        this.onSearch();
-        this.searchChange.emit(query);
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 
   private initColumnWidths(): void {
     const widths: Record<string, string> = {};
