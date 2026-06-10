@@ -11,6 +11,10 @@ use walkdir::WalkDir;
 
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 
+pub fn home_dir() -> Result<PathBuf, AppError> {
+  dirs::home_dir().ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))
+}
+
 pub fn home_scan_dirs(home: &Path) -> Vec<PathBuf> {
   vec![
     home.join("Downloads"),
@@ -59,7 +63,7 @@ pub fn collect_cache_file_models(
   let all_files: Vec<CacheFileModel> = collect_file_models(cache_dir.as_path(), 4, 10000, |path| {
     let metadata = fs::metadata(path).ok()?;
     Some(CacheFileModel {
-      path: path.to_string_lossy().to_string(),
+      path: path.to_string_lossy().into_owned(),
       size: metadata.len(),
       modified: modified_string(&metadata),
     })
@@ -97,7 +101,7 @@ pub fn collect_trash_file_models(trash_dir: &Path) -> Vec<TrashFileModel> {
         .unwrap_or_default()
         .to_string_lossy()
         .to_string(),
-      path: path.to_string_lossy().to_string(),
+      path: path.to_string_lossy().into_owned(),
       size: metadata.len(),
       deletedDate: deleted_date.format("%Y-%m-%d %H:%M:%S").to_string(),
     })
@@ -108,7 +112,7 @@ pub fn collect_log_file_models(log_dir: &Path, max_depth: usize, take: usize) ->
   collect_file_models(log_dir, max_depth as u32, take, |path| {
     let metadata = fs::metadata(path).ok()?;
     Some(LogFileModel {
-      path: path.to_string_lossy().to_string(),
+      path: path.to_string_lossy().into_owned(),
       size: metadata.len(),
       modified: modified_string(&metadata),
     })
@@ -140,8 +144,8 @@ pub fn scan_large_file_models(
           let metadata = entry.metadata().ok()?;
           if metadata.len() > LARGE_FILE_THRESHOLD_BYTES {
             Some(LargeFileModel {
-              name: entry.file_name().to_string_lossy().to_string(),
-              path: entry.path().to_string_lossy().to_string(),
+              name: entry.file_name().to_string_lossy().into_owned(),
+              path: entry.path().to_string_lossy().into_owned(),
               size: metadata.len(),
               modified: modified_string(&metadata),
             })
@@ -192,9 +196,9 @@ pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
   let mut cleared = 0usize;
   let mut errors = Vec::new();
 
-  let home = match dirs::home_dir() {
-    Some(h) => h,
-    None => {
+  let home = match home_dir() {
+    Ok(h) => h,
+    Err(_) => {
       return BulkRemoveOutcome {
         cleared: 0,
         errors: vec!["Home directory not found".to_string()],
