@@ -17,6 +17,20 @@ pub struct PathValidator;
 
 impl PathValidator {
   pub fn validate(path: &str) -> Result<PathBuf, AppError> {
+    if path.is_empty() {
+      return Err(AppError::InvalidPath("Path cannot be empty".to_string()));
+    }
+
+    if path.contains('\0') {
+      return Err(AppError::InvalidPath("Path contains null byte".to_string()));
+    }
+
+    if path.contains("..") {
+      return Err(AppError::InvalidPath(
+        "Path traversal not allowed".to_string(),
+      ));
+    }
+
     let path_buf = PathBuf::from(path);
 
     let canonical = path_buf

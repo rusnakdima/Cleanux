@@ -8,8 +8,6 @@ use std::process::{Command, Output};
 use crate::models::AppError;
 
 const PRIVILEGE_LOG_PATH: &str = "/var/log/cleanux_privilege.log";
-#[allow(dead_code)]
-const PKEXEC_TIMEOUT_SECS: u64 = 30;
 
 #[derive(Debug, Clone)]
 pub struct PrivilegeOperation {
