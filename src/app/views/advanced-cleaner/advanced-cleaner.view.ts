@@ -22,6 +22,7 @@ import {
   JunkCategoryKey,
 } from '@models/junk-cleaner.model';
 import { formatSize } from '@shared/utils/format.util';
+import { getErrorMessage } from '@shared/utils/error.util';
 
 @Component({
   selector: 'app-advanced-cleaner-view',
@@ -62,7 +63,7 @@ export class AdvancedCleanerView implements OnInit {
       const summary = await this.junkCleanerService.getJunkSummary();
       this.junkSummary.set(summary);
     } catch (error) {
-      console.error('Failed to load junk summary:', error);
+      this.notification.error('Failed to load junk summary', error);
     } finally {
       this.loading.set(false);
     }
@@ -103,7 +104,7 @@ export class AdvancedCleanerView implements OnInit {
       }
       await this.loadJunkSummary();
     } catch (error) {
-      console.error(`Failed to scan ${category}:`, error);
+      this.notification.error(`Failed to scan ${category}`, error);
     } finally {
       this.scanningCategory.set(null);
     }
@@ -122,10 +123,7 @@ export class AdvancedCleanerView implements OnInit {
       this.saveLastCleaned(category);
       await this.loadJunkSummary();
     } catch (error) {
-      this.notification.error(
-        `Failed to clean ${categoryLabel}`,
-        error instanceof Error ? error.message : String(error)
-      );
+      this.notification.error(`Failed to clean ${categoryLabel}`, getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }

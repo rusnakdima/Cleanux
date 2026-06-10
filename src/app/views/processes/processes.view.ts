@@ -101,7 +101,7 @@ export class ProcessesView implements OnInit {
       this.processesData.set(data);
       this.currentPage.set(1);
     } catch (error: unknown) {
-      console.error('Failed to load processes:', error);
+      this.notification.error('Failed to load processes', error);
     } finally {
       this.loading.set(false);
     }
@@ -146,7 +146,6 @@ export class ProcessesView implements OnInit {
   }
 
   async flushRamCaches() {
-    console.log('Flushing RAM caches...');
     this.notification.success('RAM caches flushed successfully!');
   }
 }

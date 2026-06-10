@@ -80,7 +80,7 @@ export class AutomationView implements OnInit {
       this.history.set(history);
       this.profiles.set(profiles);
     } catch (e) {
-      console.error('Failed to load automation data:', e);
+      this.notification.error('Failed to load automation data', e);
     } finally {
       this.isLoading.set(false);
     }
@@ -160,20 +160,23 @@ export class AutomationView implements OnInit {
     this.newRecipeTrigger.set('Manual');
   }
 
-  addStep(type: 'CleanCategory' | 'RunProfile' | 'ExecuteCommand' | 'Wait', value: any) {
+  addStep(
+    type: 'CleanCategory' | 'RunProfile' | 'ExecuteCommand' | 'Wait',
+    value: string | number
+  ) {
     let step: ActionStep;
     switch (type) {
       case 'CleanCategory':
-        step = { CleanCategory: { category: value } };
+        step = { CleanCategory: { category: String(value) } };
         break;
       case 'RunProfile':
-        step = { RunProfile: { profileName: value } };
+        step = { RunProfile: { profileName: String(value) } };
         break;
       case 'ExecuteCommand':
-        step = { ExecuteCommand: { command: value } };
+        step = { ExecuteCommand: { command: String(value) } };
         break;
       case 'Wait':
-        step = { Wait: { seconds: value } };
+        step = { Wait: { seconds: Number(value) } };
         break;
       default:
         return;

@@ -60,7 +60,7 @@ export class MediaCleanerView implements OnInit {
       const data = await this.mediaCacheService.getMediaCacheSummary();
       this.summary.set(data);
     } catch (error) {
-      console.error('Failed to load media cache summary:', error);
+      this.notification.error('Failed to load media cache summary', error);
     } finally {
       this.loading.set(false);
     }

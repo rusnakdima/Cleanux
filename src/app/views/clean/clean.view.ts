@@ -75,7 +75,7 @@ export class CleanView implements OnInit {
       this.packageCacheSize.set(0);
       this.packageManagerCount.set(0);
     } catch (e) {
-      console.error('Failed to load stats:', e);
+      this.notification.error('Failed to load stats', e as Error);
     } finally {
       this.isScanning.set(false);
     }
@@ -138,7 +138,6 @@ export class CleanView implements OnInit {
           break;
       }
     } catch (e) {
-      console.error('Clean failed:', e);
       this.notification.error('Clean operation failed', e as Error);
     } finally {
       this.isCleaning.set(false);
@@ -169,7 +168,6 @@ export class CleanView implements OnInit {
       this.logSize.set(0);
       this.logCount.set(0);
     } catch (e) {
-      console.error('Clean all failed:', e);
       this.notification.error('Clean operation failed', e as Error);
     } finally {
       this.isCleaning.set(false);

@@ -46,7 +46,7 @@ export class SystemRepairView {
       const data = await this.repairService.findBrokenSymlinks();
       this.symlinksData.set(data);
     } catch (error: unknown) {
-      console.error('Failed to load symlinks:', error);
+      this.notification.error('Failed to load symlinks', error);
     } finally {
       this.loading.set(false);
     }
@@ -58,7 +58,7 @@ export class SystemRepairView {
       const data = await this.repairService.findOrphanedPackages();
       this.packagesData.set(data);
     } catch (error: unknown) {
-      console.error('Failed to load packages:', error);
+      this.notification.error('Failed to load packages', error);
     } finally {
       this.loading.set(false);
     }
@@ -120,7 +120,7 @@ export class SystemRepairView {
       try {
         await this.repairService.removeBrokenSymlink(item.path);
       } catch (error) {
-        console.error('Failed to remove:', item.path, error);
+        // Continue processing other items
       }
     }
     await this.loadSymlinks();
@@ -146,7 +146,7 @@ export class SystemRepairView {
       try {
         await this.repairService.removeOrphanedPackage(item.path);
       } catch (error) {
-        console.error('Failed to remove:', item.path, error);
+        // Continue processing other items
       }
     }
     await this.loadPackages();

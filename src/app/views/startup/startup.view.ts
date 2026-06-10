@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { StartupService } from '@services/startup.service';
 import { NotificationService } from '@services/notification.service';
+import { getErrorMessage } from '@shared/utils/error.util';
 import { StartupItem } from '@models/startup.model';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
@@ -93,7 +94,7 @@ export class StartupView implements OnInit {
       const data = await this.startupService.getStartupItems();
       this.startupData.set(data);
     } catch (error: unknown) {
-      console.error('Failed to load startup items:', error);
+      this.notification.error('Failed to load startup items', error);
     } finally {
       this.loading.set(false);
     }
@@ -108,11 +109,7 @@ export class StartupView implements OnInit {
         await this.startupService.disableStartupItem(item.path);
         await this.loadData();
       } catch (error: unknown) {
-        this.notification.error(
-          'Failed to disable startup item: ' +
-            (error instanceof Error ? error.message : String(error)),
-          error
-        );
+        this.notification.error('Failed to disable startup item: ' + getErrorMessage(error), error);
       } finally {
         this.loading.set(false);
       }
@@ -122,11 +119,7 @@ export class StartupView implements OnInit {
         await this.startupService.enableStartupItem(item.path);
         await this.loadData();
       } catch (error: unknown) {
-        this.notification.error(
-          'Failed to enable startup item: ' +
-            (error instanceof Error ? error.message : String(error)),
-          error
-        );
+        this.notification.error('Failed to enable startup item: ' + getErrorMessage(error), error);
       } finally {
         this.loading.set(false);
       }

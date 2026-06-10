@@ -59,7 +59,7 @@ export class DevCleanerView implements OnInit {
       this.summary.set(summary);
       this.updateDevTools(summary);
     } catch (error) {
-      console.error('Failed to load dev cache summary:', error);
+      this.notification.error('Failed to load dev cache summary', error);
     } finally {
       this.loading.set(false);
     }

@@ -146,7 +146,7 @@ export class DashboardView implements OnInit, OnDestroy {
         this.recentActivities.set(activities.slice(0, 10));
       }
     } catch (e) {
-      console.error('Failed to load recent activities:', e);
+      this.monitorStore.error.set('Failed to load recent activities');
     }
   }
 
@@ -163,7 +163,7 @@ export class DashboardView implements OnInit, OnDestroy {
     try {
       localStorage.setItem('cleanux_recent_activities', JSON.stringify(updated));
     } catch (e) {
-      console.error('Failed to save recent activities:', e);
+      this.monitorStore.error.set('Failed to save recent activities');
     }
   }
 
@@ -204,7 +204,7 @@ export class DashboardView implements OnInit, OnDestroy {
       );
       this.healthTrend.set({ trend: trend.trend, change_percent: trend.change_percent });
     } catch (e) {
-      console.error('Failed to load health history:', e);
+      this.monitorStore.error.set('Failed to load health history');
     }
   }
 
@@ -218,7 +218,7 @@ export class DashboardView implements OnInit, OnDestroy {
         this.largeFilesCount()
       );
     } catch (e) {
-      console.error('Failed to save health snapshot:', e);
+      this.monitorStore.error.set('Failed to save health snapshot');
     }
   }
 
@@ -231,7 +231,7 @@ export class DashboardView implements OnInit, OnDestroy {
           this.cacheCount.set(res.fileCount);
           return res;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => this.monitorStore.error.set('Failed to get cache summary'));
       const p2 = this.fileService
         .getTrashSummary()
         .then((res) => {
@@ -239,7 +239,7 @@ export class DashboardView implements OnInit, OnDestroy {
           this.trashCount.set(res.fileCount);
           return res;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => this.monitorStore.error.set('Failed to get trash summary'));
       const p3 = this.fileService
         .getLogSummary()
         .then((res) => {
@@ -247,7 +247,7 @@ export class DashboardView implements OnInit, OnDestroy {
           this.logCount.set(res.fileCount);
           return res;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => this.monitorStore.error.set('Failed to get log summary'));
       const p4 = this.fileService
         .getLargeFilesSummary()
         .then((res) => {
@@ -255,11 +255,11 @@ export class DashboardView implements OnInit, OnDestroy {
           this.largeFilesCount.set(res.fileCount);
           return res;
         })
-        .catch((e) => console.error(e));
+        .catch((e) => this.monitorStore.error.set('Failed to get large files summary'));
 
       return Promise.all([p1, p2, p3, p4]);
     } catch (error) {
-      console.error('Failed to calculate junk size:', error);
+      this.monitorStore.error.set('Failed to calculate junk size');
       return Promise.resolve();
     }
   }
@@ -313,7 +313,7 @@ export class DashboardView implements OnInit, OnDestroy {
       this.loadHealthHistory();
       this.addRecentActivity('clean', `Cleaned ${this.formatSize(cleanedSize)}`, cleanedSize);
     } catch (error) {
-      console.error('Failed to clean system:', error);
+      this.monitorStore.error.set('Failed to clean system');
     } finally {
       this.isCleaning.set(false);
     }

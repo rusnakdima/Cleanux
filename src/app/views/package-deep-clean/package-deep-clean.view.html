@@ -217,7 +217,7 @@
                 min="0"
                 max="10"
                 [value]="pacmanKeepRecent()"
-                (change)="pacmanKeepRecent.set(+$any($event.target).value)"
+                (change)="pacmanKeepRecent.set(+$event.target.value)"
                 class="w-20 px-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-elevated)] text-[var(--text-primary)] text-sm text-center"
               />
               <span class="text-sm text-[var(--text-muted)]">packages</span>

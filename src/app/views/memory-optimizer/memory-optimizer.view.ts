@@ -108,7 +108,7 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
       this.swapInfo.set(swap);
       this.processes.set(procData);
     } catch (error) {
-      console.error('Failed to load memory data:', error);
+      throw error;
     }
   }
 
@@ -127,7 +127,7 @@ export class MemoryOptimizerView implements OnInit, OnDestroy {
       await this.memoryService.optimizeMemory();
       await this.loadData();
     } catch (error) {
-      console.error('Failed to optimize memory:', error);
+      throw error;
     } finally {
       this.optimizing.set(false);
     }

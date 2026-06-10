@@ -47,15 +47,19 @@
 
         <div class="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
           <div class="flex items-center justify-between">
-            <label class="block text-sm font-semibold text-[var(--text-muted)]">Element Accents</label>
+            <label class="block text-sm font-semibold text-[var(--text-muted)]"
+              >Element Accents</label
+            >
             <button (click)="resetAllAccents()" class="btn btn-secondary text-xs">
               <mat-icon class="icon-xs">refresh</mat-icon>
               Reset All
             </button>
           </div>
           @for (cat of accentCategories; track cat.key) {
-           <div class="space-y-2">
-              <label class="block text-xs font-medium text-[var(--text-muted)]">{{ cat.label }}</label>
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-[var(--text-muted)]">{{
+                cat.label
+              }}</label>
               <div class="flex flex-wrap gap-2">
                 @for (color of themeService.accentColors(); track color) {
                   <button
@@ -63,7 +67,9 @@
                     class="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 flex items-center justify-center"
                     [style.background]="color"
                     [class.ring-2]="themeService.currentTheme().accentConfig[cat.key] === color"
-                    [class.ring-offset-1]="themeService.currentTheme().accentConfig[cat.key] === color"
+                    [class.ring-offset-1]="
+                      themeService.currentTheme().accentConfig[cat.key] === color
+                    "
                     [class.ring-offset-[var(--bg-surface)]]="true"
                     [class.ring-white]="themeService.currentTheme().accentConfig[cat.key] === color"
                   >
@@ -89,7 +95,7 @@
           <input
             type="range"
             [value]="themeService.currentTheme().glassOpacity * 100"
-            (input)="setGlassOpacity(+$any($event.target).value / 100)"
+            (input)="setGlassOpacity(+$event.target.value / 100)"
             min="0"
             max="100"
             step="5"

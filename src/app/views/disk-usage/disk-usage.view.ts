@@ -69,7 +69,7 @@ export class DiskUsageView implements OnInit {
       this.breadcrumbs.set([{ name: result.tree.name, path: result.tree.path }]);
       this.calculateTreemap(result.tree);
     } catch (error) {
-      console.error('Failed to scan directory:', error);
+      throw error;
     } finally {
       this.loading.set(false);
     }

@@ -13,6 +13,7 @@ import {
   AppResidueSummary,
 } from '@services/app-residue.service';
 import { formatSize } from '@shared/utils/format.util';
+import { getErrorMessage } from '@shared/utils/error.util';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
 type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
@@ -224,7 +225,7 @@ export class AppResidueCleanerView {
       case 'caches':
         return this.cachesData();
     }
-    return null as any;
+    return [];
   }
 
   getSelectedCount(): number {
@@ -247,7 +248,7 @@ export class AppResidueCleanerView {
       const summary = await this.residueService.getResidueSummary();
       this.summary.set(summary);
     } catch (error) {
-      console.error('Failed to load summary:', error);
+      this.notification.error('Failed to load summary', error);
     }
   }
 
@@ -257,7 +258,7 @@ export class AppResidueCleanerView {
       const data = await this.residueService.scanUserConfigs();
       this.configsData.set(data);
     } catch (error) {
-      console.error('Failed to load configs:', error);
+      this.notification.error('Failed to load configs', error);
     } finally {
       this.loading.set(false);
     }
@@ -269,7 +270,7 @@ export class AppResidueCleanerView {
       const data = await this.residueService.scanUserData();
       this.dataData.set(data);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      this.notification.error('Failed to load data', error);
     } finally {
       this.loading.set(false);
     }
@@ -281,7 +282,7 @@ export class AppResidueCleanerView {
       const data = await this.residueService.scanUserCaches();
       this.cachesData.set(data);
     } catch (error) {
-      console.error('Failed to load caches:', error);
+      this.notification.error('Failed to load caches', error);
     } finally {
       this.loading.set(false);
     }
@@ -293,7 +294,7 @@ export class AppResidueCleanerView {
       const data = await this.residueService.getOrphanedConfigs();
       this.orphanedData.set(data);
     } catch (error) {
-      console.error('Failed to load orphaned configs:', error);
+      this.notification.error('Failed to load orphaned configs', error);
     } finally {
       this.loading.set(false);
     }
@@ -332,10 +333,7 @@ export class AppResidueCleanerView {
       );
       await this.refreshCurrentTab();
     } catch (error) {
-      this.notification.error(
-        'Failed to clean residues: ' + (error instanceof Error ? error.message : String(error)),
-        error
-      );
+      this.notification.error('Failed to clean residues: ' + getErrorMessage(error), error);
     } finally {
       this.loading.set(false);
     }

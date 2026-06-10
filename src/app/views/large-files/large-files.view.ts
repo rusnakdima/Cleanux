@@ -102,7 +102,7 @@ export class LargeFilesView implements OnInit {
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
     } catch (error) {
-      console.error('Failed to load large files:', error);
+      this.notification.error('Failed to load large files', error);
     } finally {
       this.loading.set(false);
     }
@@ -119,7 +119,7 @@ export class LargeFilesView implements OnInit {
       this.hasMore.set(result.has_more);
       this.total.set(result.total);
     } catch (error) {
-      console.error('Failed to load more large files:', error);
+      this.notification.error('Failed to load more large files', error);
     } finally {
       this.loading.set(false);
     }

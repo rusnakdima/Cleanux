@@ -147,7 +147,7 @@ export class LogManagerView implements OnInit {
       this.varLogUsage.set(varLogUsage);
       this.largestLogs.set(largestLogs);
     } catch (error) {
-      console.error('Failed to load log manager data:', error);
+      this.notification.error('Failed to load log manager data', error);
     } finally {
       this.loading.set(false);
     }
@@ -160,7 +160,6 @@ export class LogManagerView implements OnInit {
       await this.logManagerService.vacuumJournal(this.vacuumSizeMb());
       await this.loadData();
     } catch (error) {
-      console.error('Failed to vacuum journal:', error);
       this.notification.error('Failed to vacuum journal', error);
     } finally {
       this.loading.set(false);
@@ -174,7 +173,6 @@ export class LogManagerView implements OnInit {
       await this.logManagerService.vacuumJournalByDays(this.vacuumDays());
       await this.loadData();
     } catch (error) {
-      console.error('Failed to vacuum journal:', error);
       this.notification.error('Failed to vacuum journal', error);
     } finally {
       this.loading.set(false);
@@ -188,7 +186,6 @@ export class LogManagerView implements OnInit {
       await this.logManagerService.cleanRotatedLogs(this.cleanRotatedDays());
       await this.loadData();
     } catch (error) {
-      console.error('Failed to clean rotated logs:', error);
       this.notification.error('Failed to clean rotated logs', error);
     } finally {
       this.loading.set(false);
