@@ -18,35 +18,13 @@ pub fn get_current_kernel() -> Result<ResponseModel, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_installed_kernels() -> Result<ResponseModel, ResponseModel> {
-  let kernels = KernelCleanerService {}.get_installed_kernels();
-  let values: Vec<serde_json::Value> = kernels
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Installed kernels retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  KernelCleanerService {}.get_installed_kernels_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_old_kernels() -> Result<ResponseModel, ResponseModel> {
-  let kernels = KernelCleanerService {}.get_old_kernels();
-  let values: Vec<serde_json::Value> = kernels
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Old kernels retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  KernelCleanerService {}.get_old_kernels_response()
 }
 
 #[tauri::command]
@@ -71,18 +49,7 @@ pub fn remove_kernel(version: String) -> Result<ResponseModel, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_old_initramfs() -> Result<ResponseModel, ResponseModel> {
-  let initramfs = KernelCleanerService {}.get_old_initramfs();
-  let values: Vec<serde_json::Value> = initramfs
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Old initramfs retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  KernelCleanerService {}.get_old_initramfs_response()
 }
 
 #[tauri::command]
@@ -94,15 +61,7 @@ pub fn remove_initramfs(version: String) -> Result<ResponseModel, ResponseModel>
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_boot_space_info() -> Result<ResponseModel, ResponseModel> {
-  let info = KernelCleanerService {}.get_boot_space_info();
-  Ok(
-    ResponseBuilder::new()
-      .success("Boot space info retrieved")
-      .data(DataValue::Object(
-        serde_json::to_value(info).map_err(|e| format!("Serialization error: {}", e))?,
-      ))
-      .build(),
-  )
+  KernelCleanerService {}.get_boot_space_info_response()
 }
 
 #[tauri::command]

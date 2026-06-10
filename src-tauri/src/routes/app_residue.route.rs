@@ -10,86 +10,31 @@ pub fn get_residue_summary() -> Result<AppResidueSummary, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_user_configs() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_user_configs();
-  Ok(ResponseModel {
-    status: crate::models::ResponseStatus::Success,
-    message: format!("Found {} config residues", residues.len()),
-    data: crate::models::DataValue::Array(
-      residues
-        .into_iter()
-        .map(serde_json::to_value)
-        .filter_map(|r| r.ok())
-        .collect(),
-    ),
-  })
+  AppResidueService.scan_user_configs_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_user_data() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_user_data();
-  Ok(ResponseModel {
-    status: crate::models::ResponseStatus::Success,
-    message: format!("Found {} data residues", residues.len()),
-    data: crate::models::DataValue::Array(
-      residues
-        .into_iter()
-        .map(serde_json::to_value)
-        .filter_map(|r| r.ok())
-        .collect(),
-    ),
-  })
+  AppResidueService.scan_user_data_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_user_caches() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_user_caches();
-  Ok(ResponseModel {
-    status: crate::models::ResponseStatus::Success,
-    message: format!("Found {} cache residues", residues.len()),
-    data: crate::models::DataValue::Array(
-      residues
-        .into_iter()
-        .map(serde_json::to_value)
-        .filter_map(|r| r.ok())
-        .collect(),
-    ),
-  })
+  AppResidueService.scan_user_caches_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_home_residues() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_home_residues();
-  Ok(ResponseModel {
-    status: crate::models::ResponseStatus::Success,
-    message: format!("Found {} home residues", residues.len()),
-    data: crate::models::DataValue::Array(
-      residues
-        .into_iter()
-        .map(serde_json::to_value)
-        .filter_map(|r| r.ok())
-        .collect(),
-    ),
-  })
+  AppResidueService.scan_home_residues_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_orphaned_configs() -> Result<ResponseModel, ResponseModel> {
-  let orphaned = AppResidueService.get_orphaned_configs();
-  Ok(ResponseModel {
-    status: crate::models::ResponseStatus::Success,
-    message: format!("Found {} orphaned configs", orphaned.len()),
-    data: crate::models::DataValue::Array(
-      orphaned
-        .into_iter()
-        .map(serde_json::to_value)
-        .filter_map(|r| r.ok())
-        .collect(),
-    ),
-  })
+  AppResidueService.get_orphaned_configs_response()
 }
 
 #[tauri::command]
