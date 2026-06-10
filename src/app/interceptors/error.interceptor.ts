@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { ApiException } from '@models/error.model';
+import { getErrorMessage } from '@shared/utils/error.util';
 
 export interface ErrorContext {
   command: string;
@@ -39,7 +40,7 @@ export class ErrorInterceptorService {
     const apiError =
       error instanceof ApiException
         ? error
-        : new ApiException(error instanceof Error ? error.message : String(error), command, error);
+        : new ApiException(getErrorMessage(error), command, error);
     this.handleError(apiError, { command, args, timestamp: new Date() });
   }
 }

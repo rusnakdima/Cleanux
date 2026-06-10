@@ -43,7 +43,7 @@ export class LoggingInterceptorService {
     if (success) {
       console.debug(`[API] Completed: ${id} (${duration}ms)`);
     } else {
-      console.warn(`[API] Failed: ${id} - ${error}`);
+      console.error(`[API] Failed: ${id} - ${error}`);
     }
   }
 

@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { Response, getData } from '@models/response.model';
 import { ApiException } from '@models/error.model';
+import { getErrorMessage } from '@shared/utils/error.util';
 
 export interface InvokeOptions {
   suppressError?: boolean;
@@ -45,7 +46,7 @@ export class TauriApiService {
       if (error instanceof ApiException) {
         throw error;
       }
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
       throw new ApiException(message, command, error);
     }
   }
