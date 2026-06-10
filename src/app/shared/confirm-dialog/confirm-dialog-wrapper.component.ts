@@ -7,15 +7,7 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ConfirmDialogComponent],
-  template: `
-    @if (dialogService.dialogOpen()) {
-      <app-confirm-dialog
-        [config]="dialogService.dialogConfig()"
-        (confirm)="dialogService.resolve(true)"
-        (cancel)="dialogService.resolve(false)"
-      />
-    }
-  `,
+  templateUrl: './confirm-dialog-wrapper.component.html',
 })
 export class ConfirmDialogWrapperComponent {
   dialogService = inject(ConfirmDialogService);

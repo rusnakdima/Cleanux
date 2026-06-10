@@ -6,23 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
-  template: `
-    <div
-      [class]="getClasses()"
-      [style.width]="width() !== '100%' ? width() : variant() === 'circle' ? '40px' : '100%'"
-      [style.height]="
-        height() ||
-        (variant() === 'text'
-          ? '1em'
-          : variant() === 'circle'
-            ? '40px'
-            : variant() === 'rect'
-              ? '100px'
-              : '120px')
-      "
-      [style.border-radius]="rounded() ? '50%' : variant() === 'card' ? '8px' : '4px'"
-    ></div>
-  `,
+  templateUrl: './loading-skeleton.component.html',
 })
 export class LoadingSkeletonComponent {
   variant = input<'text' | 'circle' | 'rect' | 'card'>('text');
@@ -47,18 +31,7 @@ export class LoadingSkeletonComponent {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, LoadingSkeletonComponent],
-  template: `
-    <div class="flex flex-col" [style.gap]="gap()">
-      @for (item of items(); track trackByIndex($index)) {
-        <app-loading-skeleton
-          [variant]="variant()"
-          [width]="width()"
-          [height]="height()"
-          [rounded]="rounded()"
-        />
-      }
-    </div>
-  `,
+  templateUrl: './loading-placeholder.component.html',
 })
 export class LoadingPlaceholderComponent {
   count = input<number>(3);

@@ -18,7 +18,6 @@ import { ConfirmDialogConfig, DEFAULT_DIALOG_CONFIG } from './confirm-dialog.con
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   templateUrl: './confirm-dialog.component.html',
-  styleUrl: './confirm-dialog.component.css',
 })
 export class ConfirmDialogComponent {
   @Input() config: ConfirmDialogConfig = {
