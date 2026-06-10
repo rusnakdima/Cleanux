@@ -74,7 +74,6 @@ export class I18nService {
   async setLanguage(lang: string): Promise<void> {
     const langInfo = availableLanguages.find((l) => l.code === lang);
     if (!langInfo) {
-      console.warn(`Language '${lang}' is not available, falling back to 'en'`);
       lang = 'en';
     }
 
@@ -97,7 +96,6 @@ export class I18nService {
       }));
       this.loadedLanguages.add(lang);
     } catch (error) {
-      console.error(`Failed to load translations for '${lang}':`, error);
       if (lang !== 'en') {
         await this.loadLanguage('en');
       }

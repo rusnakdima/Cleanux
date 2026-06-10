@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { getErrorMessage } from '@shared/utils/error.util';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class NotificationService {
   }
 
   error(title: string, error: unknown): void {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = getErrorMessage(error);
     this.alert(`${title}: ${message}`);
   }
 
