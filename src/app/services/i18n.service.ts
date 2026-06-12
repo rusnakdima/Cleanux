@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, inject, LOCALE_ID, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { LoggerService } from '@services/logger.service';
 
 export interface Language {
   code: string;
@@ -29,6 +30,7 @@ type TranslationData = Record<string, unknown>;
 })
 export class I18nService {
   private http = inject(HttpClient);
+  private logger = inject(LoggerService);
   @Inject(LOCALE_ID) private localeId: string = 'en';
 
   private translations = signal<TranslationData>({});
@@ -48,10 +50,12 @@ export class I18nService {
   readonly isRTL = computed(() => this.direction() === 'rtl');
 
   constructor() {
+    this.logger.logInfo('service', 'I18nService', 'init', 'I18nService initialized');
     this.initLanguage();
   }
 
   private async initLanguage(): Promise<void> {
+    this.logger.logDebug('service', 'I18nService', 'initLanguage', 'Initializing language');
     const savedLang = localStorage.getItem('language');
     const browserLang = navigator.language.split('-')[0];
     const browserVariant = navigator.language;
@@ -72,6 +76,7 @@ export class I18nService {
   }
 
   async setLanguage(lang: string): Promise<void> {
+    this.logger.logInfo('service', 'I18nService', 'setLanguage', 'Setting language', { lang });
     const langInfo = availableLanguages.find((l) => l.code === lang);
     if (!langInfo) {
       lang = 'en';
@@ -86,6 +91,7 @@ export class I18nService {
   }
 
   private async loadLanguage(lang: string): Promise<void> {
+    this.logger.logDebug('service', 'I18nService', 'loadLanguage', 'Loading language', { lang });
     try {
       const translations = await firstValueFrom(
         this.http.get<TranslationData>(`/app/i18n/${lang}.json?t=${Date.now()}`)
@@ -95,7 +101,16 @@ export class I18nService {
         [lang]: translations,
       }));
       this.loadedLanguages.add(lang);
+      this.logger.logInfo('service', 'I18nService', 'loadLanguage', 'Language loaded', { lang });
     } catch (error) {
+      this.logger.logError(
+        'service',
+        'I18nService',
+        'loadLanguage',
+        'Operation failed',
+        error as Error,
+        { lang }
+      );
       if (lang !== 'en') {
         await this.loadLanguage('en');
       }
