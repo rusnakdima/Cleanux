@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { LoggerService } from '@services/logger.service';
 import { ApiException } from '@models/error.model';
 import { getErrorMessage } from '@shared/utils/error.util';
 
@@ -18,6 +19,8 @@ export class ErrorInterceptorService {
   private errorLog = signal<Array<{ error: ApiException; context: ErrorContext }>>([]);
 
   readonly errors = this.errorLog.asReadonly();
+
+  constructor(private logger: LoggerService) {}
 
   registerHandler(handler: ErrorHandler): void {
     this.handlers.push(handler);
@@ -42,5 +45,10 @@ export class ErrorInterceptorService {
         ? error
         : new ApiException(getErrorMessage(error), command, error);
     this.handleError(apiError, { command, args, timestamp: new Date() });
+    this.logger.log('error', 'api', 'ErrorInterceptor', 'handle', apiError.message, {
+      command,
+      args,
+      error: apiError,
+    });
   }
 }
