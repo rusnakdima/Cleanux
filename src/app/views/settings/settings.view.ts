@@ -13,6 +13,7 @@ import { environment } from '@env/environment';
 
 /* services */
 import { AboutService } from '@services/about.service';
+import { LoggerService } from '@services/logger.service';
 import { SchedulerService } from '@services/scheduler.service';
 import { ThemeService, ThemeMode, AccentCategory } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
@@ -31,6 +32,7 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
 export class SettingsView {
   themeService = inject(ThemeService);
   private notification = inject(NotificationService);
+  private logger = inject(LoggerService);
 
   constructor(
     private aboutService: AboutService,
@@ -206,5 +208,25 @@ export class SettingsView {
         this.notification.error('Failed to check for updates', new Error('Update check failed'));
       },
     });
+  }
+
+  get loggingEnabled() {
+    return this.logger.isGlobalEnabled();
+  }
+  get loggingLevel() {
+    return this.logger.getMinLevel();
+  }
+  get levelConfig(): Record<string, boolean> {
+    return this.logger.getLevelsConfig();
+  }
+  get sourceConfig(): Record<string, boolean> {
+    return this.logger.getSourcesConfig();
+  }
+  get logStats() {
+    return this.logger.getLogStats();
+  }
+
+  clearLogs(): void {
+    this.logger.clearLogs();
   }
 }
