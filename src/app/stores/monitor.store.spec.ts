@@ -68,8 +68,8 @@ describe('MonitorStore', () => {
     const { MonitorStore } = await import('./monitor.store');
     const store = runInInjectionContext(injector, () => new MonitorStore());
 
-    expect(store.getUsageColor(50)).toBe('var(--success)');
-    expect(store.getUsageColor(69)).toBe('var(--success)');
+    expect(store.getUsageColor(50)).toBe('var(--color-success)');
+    expect(store.getUsageColor(69)).toBe('var(--color-success)');
 
     store.ngOnDestroy();
   });
@@ -78,8 +78,8 @@ describe('MonitorStore', () => {
     const { MonitorStore } = await import('./monitor.store');
     const store = runInInjectionContext(injector, () => new MonitorStore());
 
-    expect(store.getUsageColor(70)).toBe('var(--warning)');
-    expect(store.getUsageColor(89)).toBe('var(--warning)');
+    expect(store.getUsageColor(70)).toBe('var(--color-warning)');
+    expect(store.getUsageColor(89)).toBe('var(--color-warning)');
 
     store.ngOnDestroy();
   });
@@ -88,8 +88,8 @@ describe('MonitorStore', () => {
     const { MonitorStore } = await import('./monitor.store');
     const store = runInInjectionContext(injector, () => new MonitorStore());
 
-    expect(store.getUsageColor(90)).toBe('var(--error)');
-    expect(store.getUsageColor(100)).toBe('var(--error)');
+    expect(store.getUsageColor(90)).toBe('var(--color-error)');
+    expect(store.getUsageColor(100)).toBe('var(--color-error)');
 
     store.ngOnDestroy();
   });
