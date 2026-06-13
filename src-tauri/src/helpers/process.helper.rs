@@ -3,12 +3,8 @@ use std::process::{Command, Output};
 
 use crate::models::AppError;
 
-pub fn stderr_message(output: &Output) -> String {
-  String::from_utf8_lossy(&output.stderr).trim().to_string()
-}
-
 pub fn stderr_string(output: &Output) -> String {
-  String::from_utf8_lossy(&output.stderr).into_owned()
+  String::from_utf8_lossy(&output.stderr).trim().to_string()
 }
 
 pub fn stdout_string(output: &Output) -> String {
@@ -88,12 +84,5 @@ pub fn pkexec(command: &str, args: &[&str]) -> Result<Output, AppError> {
 }
 
 pub fn pkexec_with_args(program: &str, args: Vec<&str>) -> Result<Output, AppError> {
-  let mut cmd = Command::new("pkexec");
-  cmd.arg(program);
-  for arg in args {
-    cmd.arg(arg);
-  }
-  cmd
-    .output()
-    .map_err(|e| AppError::message(format!("Failed to run pkexec {}: {}", program, e)))
+  pkexec(program, &args)
 }

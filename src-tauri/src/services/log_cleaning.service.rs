@@ -1,7 +1,7 @@
 /* helpers */
 use crate::helpers::{
   collect_log_file_models, data_empty_string, data_string, models_into_data_array, pkexec_rm_paths,
-  service_method_full, stderr_message, success_response,
+  service_method_full, stderr_string, success_response,
 };
 /* models */
 use crate::models::{LogFileModel, ResponseModel};
@@ -43,7 +43,7 @@ impl LogCleaningService {
       Err(
         AppError::Unknown(format!(
           "Failed to clear log files: {}",
-          stderr_message(&output)
+          stderr_string(&output)
         ))
         .into_response(),
       )
@@ -69,7 +69,7 @@ impl LogCleaningService {
       ))
     } else {
       Err(
-        AppError::Unknown(format!("Failed to clear logs: {}", stderr_message(&output)))
+        AppError::Unknown(format!("Failed to clear logs: {}", stderr_string(&output)))
           .into_response(),
       )
     }

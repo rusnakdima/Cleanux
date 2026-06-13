@@ -1,0 +1,2 @@
+pub const DEFAULT_TIMEOUT_MS: u64 = 10000;
+pub const REQUEST_TIMEOUT_MS: u64 = 30000;
