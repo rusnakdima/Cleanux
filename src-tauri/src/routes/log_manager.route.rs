@@ -1,5 +1,5 @@
 /* models */
-use crate::helpers::ResponseBuilder;
+use crate::helpers::{array_response, ResponseBuilder};
 use crate::models::{DataValue, ResponseModel};
 /* services */
 use crate::services::log_manager_service::LogManagerService;
@@ -60,17 +60,7 @@ pub fn get_rotated_logs_size() -> Result<ResponseModel, ResponseModel> {
 #[allow(non_snake_case)]
 pub fn get_rotated_logs() -> Result<ResponseModel, ResponseModel> {
   let logs = LogManagerService::get_rotated_logs();
-  let values: Vec<serde_json::Value> = logs
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Rotated logs retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  array_response("Rotated logs retrieved", logs)
 }
 
 #[tauri::command]
@@ -83,17 +73,7 @@ pub fn clean_rotated_logs(days: u32) -> Result<ResponseModel, ResponseModel> {
 #[allow(non_snake_case)]
 pub fn get_logrotate_configs() -> Result<ResponseModel, ResponseModel> {
   let configs = LogManagerService::get_logrotate_configs();
-  let values: Vec<serde_json::Value> = configs
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Logrotate configs retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  array_response("Logrotate configs retrieved", configs)
 }
 
 #[tauri::command]
@@ -128,17 +108,7 @@ pub fn get_var_log_usage() -> Result<ResponseModel, ResponseModel> {
 #[allow(non_snake_case)]
 pub fn get_largest_log_files(limit: usize) -> Result<ResponseModel, ResponseModel> {
   let files = LogManagerService::get_largest_log_files(limit);
-  let values: Vec<serde_json::Value> = files
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Largest log files retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  array_response("Largest log files retrieved", files)
 }
 
 #[tauri::command]

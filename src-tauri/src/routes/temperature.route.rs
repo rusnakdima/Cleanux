@@ -17,8 +17,3 @@ pub fn get_cpu_temperature() -> Result<ResponseModel, ResponseModel> {
 pub fn get_gpu_temperature() -> Result<ResponseModel, ResponseModel> {
   TemperatureService::get_gpu_temperature()
 }
-
-#[tauri::command]
-pub fn clear_temperature_cache() {
-  TemperatureService::clear_cache();
-}

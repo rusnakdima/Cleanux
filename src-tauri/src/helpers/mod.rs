@@ -27,13 +27,17 @@ pub use filesystem_helper::{
 };
 pub use process_helper::{pkexec_rm_paths, stderr_message};
 pub use response_helper::{
-  data_empty_string, data_string, error_response, info_response, models_into_data_array,
-  success_response, ResponseBuilder,
+  array_response, data_empty_string, data_string, error_response, info_response,
+  models_into_data_array, success_response, ResponseBuilder,
 };
 
 #[path = "service_macro.rs"]
 pub mod service_macro;
 pub use crate::service_method_full;
+
+#[path = "singleton_macro.rs"]
+pub mod singleton_macro;
+pub use crate::define_singleton_service;
 
 #[path = "cache.helper.rs"]
 pub mod cache_helper;

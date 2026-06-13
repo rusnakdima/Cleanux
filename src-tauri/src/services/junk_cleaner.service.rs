@@ -6,7 +6,7 @@ use crate::helpers::{
 use crate::models::{AppError, DataValue, ResponseModel};
 /* sys lib */
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 type CleanerResult<T> = Result<T, AppError>;
 
@@ -464,30 +464,26 @@ impl JunkCleanerService {
     }
   }
 
-  fn clean_browser_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = home!();
-    let browser_paths = [
-      home.join(".cache/mozilla"),
-      home.join(".cache/google-chrome"),
-      home.join(".cache/Brave"),
-      home.join(".cache/microsoft-edge"),
-    ];
-
+  fn clean_paths(
+    &self,
+    paths: &[(PathBuf, &str)],
+    description: &str,
+  ) -> CleanerResult<ResponseModel> {
     let mut cleaned_count = 0u32;
     let mut errors: Vec<String> = Vec::new();
 
-    for path in browser_paths {
+    for (path, name) in paths {
       if path.exists() {
-        match remove_dir_contents(&path) {
+        match remove_dir_contents(path) {
           Ok(count) => cleaned_count += count as u32,
-          Err(e) => errors.push(format!("{}: {}", path.display(), e)),
+          Err(e) => errors.push(format!("{}: {}", name, e)),
         }
       }
     }
 
     if errors.is_empty() {
       Ok(success_response(
-        format!("Cleaned {} browser cache directories", cleaned_count),
+        format!("Cleaned {} {}", cleaned_count, description),
         data_string(cleaned_count.to_string()),
       ))
     } else {
@@ -497,6 +493,18 @@ impl JunkCleanerService {
         errors.join("; ")
       )))
     }
+  }
+
+  fn clean_browser_caches(&self) -> CleanerResult<ResponseModel> {
+    let home = home!();
+    let browser_paths = [
+      (home.join(".cache/mozilla"), "mozilla"),
+      (home.join(".cache/google-chrome"), "google-chrome"),
+      (home.join(".cache/Brave"), "Brave"),
+      (home.join(".cache/microsoft-edge"), "microsoft-edge"),
+    ];
+
+    self.clean_paths(&browser_paths, "browser cache directories")
   }
 
   fn clean_thumbnail_caches(&self) -> CleanerResult<ResponseModel> {
@@ -532,61 +540,16 @@ impl JunkCleanerService {
       (home.join(".cache/appimage"), "AppImage"),
     ];
 
-    let mut cleaned_count = 0u32;
-    let mut errors: Vec<String> = Vec::new();
-
-    for (path, name) in paths {
-      if path.exists() {
-        match remove_dir_contents(&path) {
-          Ok(count) => {
-            cleaned_count += count as u32;
-          }
-          Err(e) => errors.push(format!("{}: {}", name, e)),
-        }
-      }
-    }
-
-    if errors.is_empty() {
-      Ok(success_response(
-        format!("Cleaned {} application cache directories", cleaned_count),
-        data_string(cleaned_count.to_string()),
-      ))
-    } else {
-      Err(AppError::message(format!(
-        "Cleaned {}, errors: {}",
-        cleaned_count,
-        errors.join("; ")
-      )))
-    }
+    self.clean_paths(&paths, "application cache directories")
   }
 
   fn clean_system_temp(&self) -> CleanerResult<ResponseModel> {
-    let temp_paths = ["/tmp", "/var/tmp"];
-    let mut cleaned_count = 0u32;
-    let mut errors: Vec<String> = Vec::new();
+    let temp_paths: Vec<(PathBuf, &str)> = ["/tmp", "/var/tmp"]
+      .iter()
+      .map(|p| (PathBuf::from(p), *p))
+      .collect();
 
-    for path_str in temp_paths {
-      let path = Path::new(path_str);
-      if path.exists() {
-        match remove_dir_contents(path) {
-          Ok(count) => cleaned_count += count as u32,
-          Err(e) => errors.push(format!("{}: {}", path_str, e)),
-        }
-      }
-    }
-
-    if errors.is_empty() {
-      Ok(success_response(
-        format!("Cleaned {} temporary directories", cleaned_count),
-        data_string(cleaned_count.to_string()),
-      ))
-    } else {
-      Err(AppError::message(format!(
-        "Cleaned {}, errors: {}",
-        cleaned_count,
-        errors.join("; ")
-      )))
-    }
+    self.clean_paths(&temp_paths, "temporary directories")
   }
 
   fn clean_log_rotations(&self) -> CleanerResult<ResponseModel> {

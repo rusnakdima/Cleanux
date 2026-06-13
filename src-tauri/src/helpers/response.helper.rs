@@ -88,6 +88,18 @@ pub fn data_string(value: impl Into<String>) -> DataValue {
   DataValue::String(value.into())
 }
 
+pub fn array_response<T: Serialize>(
+  message: impl Into<String>,
+  items: Vec<T>,
+) -> Result<ResponseModel, ResponseModel> {
+  let data = models_into_data_array(items).map_err(|e| format!("Serialization error: {}", e))?;
+  Ok(ResponseModel {
+    status: ResponseStatus::Success,
+    message: message.into(),
+    data,
+  })
+}
+
 /// Serialize models to JSON values; propagates first serialization failure instead of swallowing it.
 pub fn models_into_data_array<T: Serialize>(items: Vec<T>) -> Result<DataValue, serde_json::Error> {
   let values: Vec<serde_json::Value> = items

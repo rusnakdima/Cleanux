@@ -1,6 +1,12 @@
-use crate::helpers::ResponseBuilder;
+use crate::helpers::{array_response, ResponseBuilder};
 use crate::models::{DataValue, ResponseModel};
 use crate::services::kernel_cleaner_service::KernelCleanerService;
+
+static SERVICE: std::sync::OnceLock<KernelCleanerService> = std::sync::OnceLock::new();
+
+fn get_service() -> &'static KernelCleanerService {
+  SERVICE.get_or_init(|| KernelCleanerService)
+}
 
 #[tauri::command]
 #[allow(non_snake_case)]
@@ -8,9 +14,7 @@ pub fn get_current_kernel() -> Result<ResponseModel, ResponseModel> {
   Ok(
     ResponseBuilder::new()
       .success("Current kernel retrieved")
-      .data(DataValue::String(
-        KernelCleanerService {}.get_current_kernel(),
-      ))
+      .data(DataValue::String(get_service().get_current_kernel()))
       .build(),
   )
 }
@@ -18,35 +22,15 @@ pub fn get_current_kernel() -> Result<ResponseModel, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_installed_kernels() -> Result<ResponseModel, ResponseModel> {
-  let kernels = KernelCleanerService {}.get_installed_kernels();
-  let values: Vec<serde_json::Value> = kernels
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Installed kernels retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  let kernels = get_service().get_installed_kernels();
+  array_response("Installed kernels retrieved", kernels)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_old_kernels() -> Result<ResponseModel, ResponseModel> {
-  let kernels = KernelCleanerService {}.get_old_kernels();
-  let values: Vec<serde_json::Value> = kernels
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Old kernels retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  let kernels = get_service().get_old_kernels();
+  array_response("Old kernels retrieved", kernels)
 }
 
 #[tauri::command]
@@ -56,7 +40,7 @@ pub fn get_old_kernels_size() -> Result<ResponseModel, ResponseModel> {
     ResponseBuilder::new()
       .success("Old kernels size retrieved")
       .data(DataValue::Number(
-        KernelCleanerService {}.get_old_kernels_size() as f64,
+        get_service().get_old_kernels_size() as f64
       ))
       .build(),
   )
@@ -65,36 +49,26 @@ pub fn get_old_kernels_size() -> Result<ResponseModel, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn remove_kernel(version: String) -> Result<ResponseModel, ResponseModel> {
-  KernelCleanerService {}.remove_kernel(&version)
+  get_service().remove_kernel(&version)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_old_initramfs() -> Result<ResponseModel, ResponseModel> {
-  let initramfs = KernelCleanerService {}.get_old_initramfs();
-  let values: Vec<serde_json::Value> = initramfs
-    .into_iter()
-    .map(serde_json::to_value)
-    .collect::<Result<_, _>>()
-    .map_err(|e| format!("Serialization error: {}", e))?;
-  Ok(
-    ResponseBuilder::new()
-      .success("Old initramfs retrieved")
-      .data(DataValue::Array(values))
-      .build(),
-  )
+  let initramfs = get_service().get_old_initramfs();
+  array_response("Old initramfs retrieved", initramfs)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn remove_initramfs(version: String) -> Result<ResponseModel, ResponseModel> {
-  KernelCleanerService {}.remove_initramfs(&version)
+  get_service().remove_initramfs(&version)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_boot_space_info() -> Result<ResponseModel, ResponseModel> {
-  let info = KernelCleanerService {}.get_boot_space_info();
+  let info = get_service().get_boot_space_info();
   Ok(
     ResponseBuilder::new()
       .success("Boot space info retrieved")
@@ -108,5 +82,5 @@ pub fn get_boot_space_info() -> Result<ResponseModel, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn update_grub() -> Result<ResponseModel, ResponseModel> {
-  KernelCleanerService {}.update_grub()
+  get_service().update_grub()
 }

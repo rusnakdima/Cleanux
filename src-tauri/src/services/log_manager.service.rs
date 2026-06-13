@@ -175,44 +175,16 @@ impl LogManagerService {
     }
   }
 
-  pub fn vacuum_journal(size_mb: u32) -> Result<ResponseModel, ResponseModel> {
-    let mut warnings = Vec::new();
-
-    if let Err(e) = Command::new("journalctl")
+  fn prepare_journal_vacuum() {
+    let _ = Command::new("journalctl")
       .args(["--rotate", "--vacuum-time=1s"])
-      .output()
-      .map_err(|e| format!("Failed to rotate journal: {}", e))
-      .and_then(|output| {
-        if !output.status.success() {
-          Err(format!(
-            "Rotate failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-          ))
-        } else {
-          Ok(output)
-        }
-      })
-    {
-      warnings.push(e);
-    }
+      .output();
 
-    if let Err(e) = Command::new("journalctl")
-      .args(["--flush"])
-      .output()
-      .map_err(|e| format!("Failed to flush journal: {}", e))
-      .and_then(|output| {
-        if !output.status.success() {
-          Err(format!(
-            "Flush failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-          ))
-        } else {
-          Ok(output)
-        }
-      })
-    {
-      warnings.push(e);
-    }
+    let _ = Command::new("journalctl").args(["--flush"]).output();
+  }
+
+  pub fn vacuum_journal(size_mb: u32) -> Result<ResponseModel, ResponseModel> {
+    Self::prepare_journal_vacuum();
 
     let vacuum_output = Command::new("journalctl")
       .args(&[format!("--vacuum-size={}M", size_mb)])
@@ -238,43 +210,7 @@ impl LogManagerService {
   }
 
   pub fn vacuum_journal_by_days(days: u32) -> Result<ResponseModel, ResponseModel> {
-    let mut warnings = Vec::new();
-
-    if let Err(e) = Command::new("journalctl")
-      .args(["--rotate", "--vacuum-time=1s"])
-      .output()
-      .map_err(|e| format!("Failed to rotate journal: {}", e))
-      .and_then(|output| {
-        if !output.status.success() {
-          Err(format!(
-            "Rotate failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-          ))
-        } else {
-          Ok(output)
-        }
-      })
-    {
-      warnings.push(e);
-    }
-
-    if let Err(e) = Command::new("journalctl")
-      .args(["--flush"])
-      .output()
-      .map_err(|e| format!("Failed to flush journal: {}", e))
-      .and_then(|output| {
-        if !output.status.success() {
-          Err(format!(
-            "Flush failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-          ))
-        } else {
-          Ok(output)
-        }
-      })
-    {
-      warnings.push(e);
-    }
+    Self::prepare_journal_vacuum();
 
     let vacuum_output = Command::new("journalctl")
       .args(&[format!("--vacuum-time={}d", days)])

@@ -1,18 +1,9 @@
-use crate::helpers::ResponseBuilder;
+use crate::helpers::{array_response, define_singleton_service, ResponseBuilder};
 use crate::models::DataValue;
 use crate::models::ResponseModel;
-use crate::services::report_service::ReportCategories;
+use crate::services::report_service::{ReportCategories, ReportService};
 
-static SERVICE: std::sync::OnceLock<crate::services::report_service::ReportService> =
-  std::sync::OnceLock::new();
-
-fn get_service() -> &'static crate::services::report_service::ReportService {
-  SERVICE.get_or_init(|| {
-    let svc = crate::services::report_service::ReportService::new();
-    svc.init_database().ok();
-    svc
-  })
-}
+define_singleton_service!(REPORT_SERVICE, ReportService, init_database);
 
 #[tauri::command]
 #[allow(non_snake_case)]
@@ -55,17 +46,7 @@ pub fn generate_cleaning_report(
 #[allow(non_snake_case)]
 pub fn get_cleaning_history(limit: Option<i64>) -> Result<ResponseModel, ResponseModel> {
   match get_service().get_cleaning_history(limit) {
-    Ok(reports) => Ok(
-      ResponseBuilder::new()
-        .success("Cleaning history retrieved successfully")
-        .data(DataValue::Array(
-          reports
-            .into_iter()
-            .map(|r| serde_json::to_value(r).map_err(|e| format!("Serialization error: {}", e)))
-            .collect::<Result<Vec<_>, _>>()?,
-        ))
-        .build(),
-    ),
+    Ok(reports) => array_response("Cleaning history retrieved successfully", reports),
     Err(e) => Err(
       ResponseBuilder::new()
         .error(&format!("Failed to get cleaning history: {}", e))

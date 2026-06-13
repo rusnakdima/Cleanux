@@ -81,16 +81,6 @@ impl DashboardService {
           .build(),
       )
     }
-
-    #[cfg(not(target_os = "linux"))]
-    {
-      Ok(
-        ResponseBuilder::new()
-          .error("Service listing not available on dieses Plattform")
-          .data(DataValue::Array(vec![]))
-          .build(),
-      )
-    }
   }
 
   pub fn getCacheSummary(&self) -> Result<ResponseModel, ResponseModel> {

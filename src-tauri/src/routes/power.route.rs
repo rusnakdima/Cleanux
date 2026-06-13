@@ -22,8 +22,3 @@ pub fn set_power_profile(profile: String) -> Result<ResponseModel, ResponseModel
 pub fn get_thermal_info() -> Result<ResponseModel, ResponseModel> {
   PowerService::get_thermal_info()
 }
-
-#[tauri::command]
-pub fn clear_power_cache() {
-  PowerService::clear_cache();
-}

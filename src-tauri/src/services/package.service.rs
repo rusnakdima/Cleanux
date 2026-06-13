@@ -85,17 +85,21 @@ impl PackageService {
   fn get_package_cache_info_inner() -> Result<ResponseModel, AppError> {
     let mut cache_infos: Vec<PackageCacheInfo> = Vec::new();
 
-    if let Some(info) = Self::get_apt_cache_info() {
-      cache_infos.push(info);
-    }
-    if let Some(info) = Self::get_snap_cache_info() {
-      cache_infos.push(info);
-    }
-    if let Some(info) = Self::get_flatpak_cache_info() {
-      cache_infos.push(info);
-    }
-    if let Some(info) = Self::get_yum_cache_info() {
-      cache_infos.push(info);
+    let configs = Self::get_cache_info_configs();
+    for (name, path, description) in configs {
+      if path.exists() {
+        let size = if name == "apt" {
+          Self::calculate_deb_size(&path)
+        } else {
+          Self::get_cache_size(&path)
+        };
+        cache_infos.push(PackageCacheInfo {
+          name: name.to_string(),
+          cachePath: path.to_string_lossy().to_string(),
+          size,
+          description: description.to_string(),
+        });
+      }
     }
 
     let data: Vec<serde_json::Value> = cache_infos
@@ -116,23 +120,6 @@ impl PackageService {
     ))
   }
 
-  fn get_apt_cache_info() -> Option<PackageCacheInfo> {
-    let cache_path = "/var/cache/apt/archives/";
-    let path = Path::new(cache_path);
-
-    if !path.exists() {
-      return None;
-    }
-
-    let size = Self::calculate_deb_size(path);
-    Some(PackageCacheInfo {
-      name: "apt".to_string(),
-      cachePath: cache_path.to_string(),
-      size,
-      description: "APT package manager cache".to_string(),
-    })
-  }
-
   fn calculate_deb_size(path: &Path) -> u64 {
     fs::read_dir(path)
       .map(|entries| {
@@ -151,57 +138,26 @@ impl PackageService {
       .unwrap_or(0)
   }
 
-  fn get_snap_cache_info() -> Option<PackageCacheInfo> {
-    let home = dirs::home_dir()?;
-    let snap_path = home.join("snap");
-    let path = Path::new(&snap_path);
-
-    if !path.exists() {
-      return None;
-    }
-
-    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
-    Some(PackageCacheInfo {
-      name: "snap".to_string(),
-      cachePath: snap_path.to_string_lossy().to_string(),
-      size,
-      description: "Snap package manager cache".to_string(),
-    })
-  }
-
-  fn get_flatpak_cache_info() -> Option<PackageCacheInfo> {
-    let home = dirs::home_dir()?;
-    let flatpak_path = home.join(".local/share/flatpak/app");
-    let path = Path::new(&flatpak_path);
-
-    if !path.exists() {
-      return None;
-    }
-
-    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
-    Some(PackageCacheInfo {
-      name: "flatpak".to_string(),
-      cachePath: flatpak_path.to_string_lossy().to_string(),
-      size,
-      description: "Flatpak application cache".to_string(),
-    })
-  }
-
-  fn get_yum_cache_info() -> Option<PackageCacheInfo> {
-    let cache_path = "/var/cache/yum/";
-    let path = Path::new(cache_path);
-
-    if !path.exists() {
-      return None;
-    }
-
-    let size = calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0);
-    Some(PackageCacheInfo {
-      name: "yum".to_string(),
-      cachePath: cache_path.to_string(),
-      size,
-      description: "YUM package manager cache".to_string(),
-    })
+  fn get_cache_info_configs() -> Vec<(&'static str, std::path::PathBuf, &'static str)> {
+    let home = dirs::home_dir().unwrap_or_default();
+    vec![
+      (
+        "apt",
+        std::path::PathBuf::from("/var/cache/apt/archives/"),
+        "APT package manager cache",
+      ),
+      ("snap", home.join("snap"), "Snap package manager cache"),
+      (
+        "flatpak",
+        home.join(".local/share/flatpak/app"),
+        "Flatpak application cache",
+      ),
+      (
+        "yum",
+        std::path::PathBuf::from("/var/cache/yum/"),
+        "YUM package manager cache",
+      ),
+    ]
   }
 
   pub fn clean_package_cache(manager: &str) -> Result<ResponseModel, ResponseModel> {
@@ -335,15 +291,16 @@ impl PackageService {
     }
   }
 
-  pub fn get_apt_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/apt/archives/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
+  fn get_cache_size(path: &Path) -> u64 {
+    if path.exists() {
+      calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0)
     } else {
       0
     }
+  }
+
+  pub fn get_apt_cache_size_internal(&self) -> u64 {
+    Self::get_cache_size(Path::new("/var/cache/apt/archives/"))
   }
 
   pub fn apt_clean(&self) -> Result<ResponseModel, AppError> {
@@ -472,14 +429,7 @@ impl PackageService {
   }
 
   pub fn get_dnf_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/dnf/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    Self::get_cache_size(Path::new("/var/cache/dnf/"))
   }
 
   pub fn dnf_clean_all(&self) -> Result<ResponseModel, AppError> {
@@ -504,14 +454,7 @@ impl PackageService {
   }
 
   pub fn get_pacman_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/pacman/pkg/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    Self::get_cache_size(Path::new("/var/cache/pacman/pkg/"))
   }
 
   pub fn pacman_clean(&self, keep_recent: u32) -> Result<ResponseModel, AppError> {
@@ -581,14 +524,7 @@ impl PackageService {
   }
 
   pub fn get_zypper_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/zypp/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    Self::get_cache_size(Path::new("/var/cache/zypp/"))
   }
 
   pub fn zypper_clean(&self) -> Result<ResponseModel, AppError> {

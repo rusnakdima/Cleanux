@@ -1,17 +1,9 @@
-use crate::helpers::ResponseBuilder;
+use crate::helpers::{array_response, define_singleton_service, ResponseBuilder};
 use crate::models::DataValue;
 use crate::models::ResponseModel;
 use crate::services::health_history_service::{HealthHistoryService, HealthSnapshot};
 
-static SERVICE: std::sync::OnceLock<HealthHistoryService> = std::sync::OnceLock::new();
-
-fn get_service() -> &'static HealthHistoryService {
-  SERVICE.get_or_init(|| {
-    let svc = HealthHistoryService::new();
-    svc.init_database().ok();
-    svc
-  })
-}
+define_singleton_service!(HEALTH_SERVICE, HealthHistoryService, init_database);
 
 #[tauri::command]
 #[allow(non_snake_case)]
@@ -51,17 +43,7 @@ pub fn save_health_snapshot(
 #[allow(non_snake_case)]
 pub fn get_health_history(days: u32) -> Result<ResponseModel, ResponseModel> {
   match get_service().get_health_history(days) {
-    Ok(history) => Ok(
-      ResponseBuilder::new()
-        .success("Health history retrieved successfully")
-        .data(DataValue::Array(
-          history
-            .into_iter()
-            .map(|s| serde_json::to_value(s).map_err(|e| format!("Serialization error: {}", e)))
-            .collect::<Result<Vec<_>, _>>()?,
-        ))
-        .build(),
-    ),
+    Ok(history) => array_response("Health history retrieved successfully", history),
     Err(e) => Err(
       ResponseBuilder::new()
         .error(&format!("Failed to get health history: {}", e))
