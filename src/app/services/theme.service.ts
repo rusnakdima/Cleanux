@@ -6,6 +6,7 @@ export type ThemeMode = 'dark' | 'light' | 'system';
 export type AccentCategory = 'general' | 'buttons' | 'navigation' | 'borders' | 'icons';
 
 export interface AccentConfig {
+  [key: string]: string;
   general: string;
   buttons: string;
   navigation: string;
