@@ -1,7 +1,7 @@
 /* models */
 use crate::models::{AppError, CleaningProfile, DataValue, ResponseModel};
 /* helpers */
-use crate::helpers::{data_empty_string, data_string, success_response};
+use crate::helpers::{data_empty_string, data_string, home_dir, success_response};
 /* sys lib */
 use std::fs;
 use std::path::PathBuf;
@@ -154,7 +154,7 @@ impl ProfileService {
     }
 
     if profile.clean_trash {
-      if let Some(home) = dirs::home_dir() {
+      if let Ok(home) = home_dir() {
         let trash_dir = home.join(".local/share/Trash/files");
         if trash_dir.exists() {
           if let Ok(entries) = fs::read_dir(&trash_dir) {
@@ -181,7 +181,7 @@ impl ProfileService {
     }
 
     if profile.min_large_file_size > 0 {
-      if let Some(_home) = dirs::home_dir() {
+      if let Ok(_home) = home_dir() {
         results.push(format!(
           "Large file cleaning with threshold {} bytes",
           profile.min_large_file_size

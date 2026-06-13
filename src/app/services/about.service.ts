@@ -8,6 +8,7 @@ import { environment } from '@env/environment';
 
 /* models */
 import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
+import { LoggerService } from '@services/logger.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -20,11 +21,17 @@ const httpOptions = {
 })
 export class AboutService {
   private http = inject(HttpClient);
+  private logger = inject(LoggerService);
 
   gitRepoName: string = environment.gitRepoName;
   githubUser: string = environment.githubUser;
 
+  constructor() {
+    this.logger.logInfo('service', 'AboutService', 'init', 'AboutService initialized');
+  }
+
   getDate(version: string): Observable<GitHubReleaseByTag> {
+    this.logger.logInfo('service', 'AboutService', 'getDate', 'Getting release date', { version });
     return this.http.get<GitHubReleaseByTag>(
       `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/tags/v${version}`,
       httpOptions
@@ -32,6 +39,7 @@ export class AboutService {
   }
 
   checkUpdate(): Observable<GitHubReleaseLatest> {
+    this.logger.logInfo('service', 'AboutService', 'checkUpdate', 'Checking for updates');
     return this.http.get<GitHubReleaseLatest>(
       `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/latest`,
       httpOptions

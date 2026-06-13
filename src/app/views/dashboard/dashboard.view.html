@@ -64,12 +64,11 @@
     </a>
 
     <a
-      routerLink="/cleaner"
-      [queryParams]="{ tab: 'trash' }"
-      class="stat-card matte-surface border-trace no-underline"
+      routerLink="/clean"
+      class="stat-card matte-surface border-trace"
     >
-      <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base" fontIcon="delete_outline" />
+      <div class="stat-icon error">
+        <mat-icon class="icon-base">delete_outline</mat-icon>
       </div>
       <div class="stat-content">
         <span class="stat-label">Trash</span>
@@ -79,12 +78,11 @@
     </a>
 
     <a
-      routerLink="/cleaner"
-      [queryParams]="{ tab: 'logs' }"
-      class="stat-card matte-surface border-trace no-underline"
+      routerLink="/clean"
+      class="stat-card matte-surface border-trace"
     >
-      <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base" fontIcon="description" />
+      <div class="stat-icon info">
+        <mat-icon class="icon-base">description</mat-icon>
       </div>
       <div class="stat-content">
         <span class="stat-label">Logs</span>
@@ -93,9 +91,12 @@
       <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="chevron_right" />
     </a>
 
-    <a routerLink="/large-files" class="stat-card matte-surface border-trace no-underline">
-      <div class="stat-icon" [style.background]="getAccentGradient()">
-        <mat-icon class="icon-base" fontIcon="file_present" />
+    <a
+      routerLink="/clean"
+      class="stat-card matte-surface border-trace"
+    >
+      <div class="stat-icon warning">
+        <mat-icon class="icon-base">file_present</mat-icon>
       </div>
       <div class="stat-content">
         <span class="stat-label">Large Files</span>

@@ -1,9 +1,10 @@
 /* sys lib */
 use std::path::PathBuf;
-use std::process::Command;
 
 /* models */
 use crate::helpers::service_method_full;
+use crate::helpers::{pkexec, pkexec_with_args, run_command_raw};
+use crate::helpers::{stderr_string, stdout_string};
 use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 use crate::security::allowlist::is_path_allowed;
 
@@ -20,9 +21,7 @@ impl SystemService {
   }
 
   fn stop_service_inner(&self, service: &str) -> ServiceResult<ResponseModel> {
-    let output = Command::new("pkexec")
-      .args(["systemctl", "stop", service])
-      .output()?;
+    let output = pkexec("systemctl", &["stop", service])?;
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -33,7 +32,7 @@ impl SystemService {
       Err(AppError::ServiceNotFound(format!(
         "Failed to stop service {}: {}",
         service,
-        String::from_utf8_lossy(&output.stderr)
+        stderr_string(&output)
       )))
     }
   }
@@ -56,18 +55,15 @@ impl SystemService {
       });
     }
 
-    let mut cmd = std::process::Command::new("pkexec");
-    cmd.arg("systemctl").arg("stop");
-    for service in &services {
-      cmd.arg(service);
-    }
-
-    let output = cmd.output()?;
+    let service_count = services.len();
+    let mut args = vec!["stop"];
+    args.extend(services.iter().map(|s| s.as_str()));
+    let output = pkexec_with_args("systemctl", args)?;
 
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
-        message: format!("Stopped {} services successfully", services.len()),
+        message: format!("Stopped {} services successfully", service_count),
         data: DataValue::Array(
           services
             .into_iter()
@@ -78,7 +74,7 @@ impl SystemService {
     } else {
       Err(AppError::ServiceNotFound(format!(
         "Failed to stop services: {}",
-        String::from_utf8_lossy(&output.stderr).trim()
+        stderr_string(&output).trim()
       )))
     }
   }
@@ -118,23 +114,22 @@ impl SystemService {
   service_method_full!(getAllServices => get_all_services_inner);
 
   fn get_all_services_inner(&self) -> ServiceResult<ResponseModel> {
-    let output = Command::new("systemctl")
-      .args([
+    let output = run_command_raw(
+      "systemctl",
+      &[
         "list-units",
         "--type=service",
         "--all",
         "--no-pager",
         "--no-legend",
-      ])
-      .output()?;
+      ],
+    )?;
 
     if !output.status.success() {
-      return Err(AppError::Unknown(
-        String::from_utf8_lossy(&output.stderr).to_string(),
-      ));
+      return Err(AppError::Unknown(stderr_string(&output)));
     }
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout_string(&output);
     let services: Vec<serde_json::Value> = stdout
       .lines()
       .filter_map(|line| {
@@ -172,9 +167,7 @@ impl SystemService {
   }
 
   fn enable_service_inner(&self, service: &str) -> ServiceResult<ResponseModel> {
-    let output = Command::new("pkexec")
-      .args(["systemctl", "enable", service])
-      .output()?;
+    let output = pkexec("systemctl", &["enable", service])?;
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -182,9 +175,7 @@ impl SystemService {
         data: DataValue::String(service.to_string()),
       })
     } else {
-      Err(AppError::ServiceNotFound(
-        String::from_utf8_lossy(&output.stderr).to_string(),
-      ))
+      Err(AppError::ServiceNotFound(stderr_string(&output)))
     }
   }
 
@@ -195,9 +186,7 @@ impl SystemService {
   }
 
   fn start_service_inner(&self, service: &str) -> ServiceResult<ResponseModel> {
-    let output = Command::new("pkexec")
-      .args(["systemctl", "start", service])
-      .output()?;
+    let output = pkexec("systemctl", &["start", service])?;
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -205,9 +194,7 @@ impl SystemService {
         data: DataValue::String(service.to_string()),
       })
     } else {
-      Err(AppError::ServiceNotFound(
-        String::from_utf8_lossy(&output.stderr).to_string(),
-      ))
+      Err(AppError::ServiceNotFound(stderr_string(&output)))
     }
   }
 
@@ -229,18 +216,15 @@ impl SystemService {
       });
     }
 
-    let mut cmd = std::process::Command::new("pkexec");
-    cmd.arg("systemctl").arg("enable");
-    for service in &services {
-      cmd.arg(service);
-    }
-
-    let output = cmd.output()?;
+    let service_count = services.len();
+    let mut args = vec!["enable"];
+    args.extend(services.iter().map(|s| s.as_str()));
+    let output = pkexec_with_args("systemctl", args)?;
 
     if output.status.success() {
       Ok(ResponseModel {
         status: ResponseStatus::Success,
-        message: format!("Enabled {} services successfully", services.len()),
+        message: format!("Enabled {} services successfully", service_count),
         data: DataValue::Array(
           services
             .into_iter()
@@ -251,7 +235,7 @@ impl SystemService {
     } else {
       Err(AppError::ServiceNotFound(format!(
         "Failed to enable services: {}",
-        String::from_utf8_lossy(&output.stderr).trim()
+        stderr_string(&output).trim()
       )))
     }
   }

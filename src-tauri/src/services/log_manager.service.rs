@@ -1,5 +1,7 @@
 /* helpers */
-use crate::helpers::{data_string, format_size, get_dir_size, success_response};
+use crate::helpers::{
+  data_string, format_size, get_dir_size, stderr_string, stdout_string, success_response,
+};
 /* models */
 use crate::models::{AppError, ResponseModel};
 /* sys lib */
@@ -103,7 +105,7 @@ impl LogManagerService {
       .output()
       .ok()?;
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout_string(&output);
     stdout.lines().last().map(|s| s.to_string())
   }
 
@@ -113,7 +115,7 @@ impl LogManagerService {
       .output()
       .ok()?;
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout_string(&output);
     stdout.lines().next().map(|s| s.to_string())
   }
 
@@ -199,7 +201,7 @@ impl LogManagerService {
             data_string(format!("before:{}", before)),
           ))
         } else {
-          let stderr = String::from_utf8_lossy(&output.stderr);
+          let stderr = stderr_string(&output);
           Err(AppError::message(format!("Failed to vacuum journal: {}", stderr)).into_response())
         }
       }
@@ -225,7 +227,7 @@ impl LogManagerService {
             data_string(format!("before:{}", before)),
           ))
         } else {
-          let stderr = String::from_utf8_lossy(&output.stderr);
+          let stderr = stderr_string(&output);
           Err(AppError::message(format!("Failed to vacuum journal: {}", stderr)).into_response())
         }
       }
@@ -322,7 +324,7 @@ impl LogManagerService {
                     meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
 
                   logs.push(RotatedLogInfo {
-                    path: path.to_string_lossy().to_string(),
+                    path: path.to_string_lossy().into_owned(),
                     size_bytes: meta.len(),
                     size_human: format_size(meta.len()),
                     modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
@@ -554,7 +556,7 @@ impl LogManagerService {
               .to_string();
 
             files.push(LogFileInfo {
-              path: entry_path.to_string_lossy().to_string(),
+              path: entry_path.to_string_lossy().into_owned(),
               size_bytes: meta.len(),
               size_human: format_size(meta.len()),
               modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),

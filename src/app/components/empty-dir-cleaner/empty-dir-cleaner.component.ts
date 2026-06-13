@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ApiService } from '@services/api.service';
+import { EmptyDirCleanerService } from '@services/empty-dir-cleaner.service';
 import { DataTableComponent } from '@components/data-table/data-table.component';
 import { TableColumn, TableOptions } from '@models/data-table.model';
 
@@ -42,6 +42,8 @@ export interface FlattenedDir extends EmptyDirectory {
 export class EmptyDirCleanerComponent {
   @Input() rootPath = '';
   @Output() close = new EventEmitter<void>();
+
+  private service = inject(EmptyDirCleanerService);
 
   emptyDirs = signal<FlattenedDir[]>([]);
   selectedPaths = signal<Set<string>>(new Set());
@@ -77,10 +79,7 @@ export class EmptyDirCleanerComponent {
     rowHeight: 48,
   };
 
-  constructor(
-    private api: ApiService,
-    private dialog: MatDialog
-  ) {}
+  constructor(private dialog: MatDialog) {}
 
   async scan(): Promise<void> {
     if (!this.rootPath) {
@@ -93,9 +92,7 @@ export class EmptyDirCleanerComponent {
     this.selectedPaths.set(new Set());
 
     try {
-      const dirs = await this.api.invoke<EmptyDirectory[]>('find_empty_directories', {
-        path: this.rootPath,
-      });
+      const dirs = await this.service.scan(this.rootPath);
       const flattened: FlattenedDir[] = dirs.map((d) => ({
         ...d,
         name: this.getDirName(d.path),
@@ -119,9 +116,7 @@ export class EmptyDirCleanerComponent {
     this.selectedPaths.set(new Set());
 
     try {
-      const dirs = await this.api.invoke<EmptyDirectory[]>('find_nested_empty_directories', {
-        path: this.rootPath,
-      });
+      const dirs = await this.service.scanNested(this.rootPath);
       const flattened: FlattenedDir[] = dirs.map((d) => ({
         ...d,
         name: this.getDirName(d.path),
@@ -164,10 +159,7 @@ export class EmptyDirCleanerComponent {
     const paths = Array.from(this.selectedPaths());
 
     try {
-      const result = await this.api.invoke<{ removed: number; failed: string[]; total: number }>(
-        'remove_empty_directories',
-        { paths }
-      );
+      const result = await this.service.removeEmptyDirectories(paths);
 
       const remaining = this.emptyDirs().filter((d) => !paths.includes(d.path));
       this.emptyDirs.set(remaining);

@@ -1,7 +1,8 @@
 /* helpers */
+use crate::helpers::common_paths::CommonPath;
 use crate::helpers::{
-  clean_cache_dir, data_empty_string, format_size, get_dir_size, home, remove_dir_contents,
-  service_method_full, success_response,
+  data_empty_string, format_size, get_dir_size, remove_dir_contents, service_method_full,
+  success_response,
 };
 /* models */
 use crate::models::{DataValue, ResponseModel};
@@ -35,9 +36,7 @@ type MediaResult<T> = Result<T, AppError>;
 #[allow(non_snake_case)]
 impl MediaCacheService {
   pub fn get_steam_info(&self) -> SteamInfo {
-    let steam_root = dirs::home_dir()
-      .map(|h| h.join(".steam/steam"))
-      .unwrap_or_default();
+    let steam_root = CommonPath::SteamRoot.path().unwrap_or_default();
     let game_count = if steam_root.exists() {
       fs::read_dir(&steam_root)
         .ok()
@@ -61,12 +60,8 @@ impl MediaCacheService {
       0
     };
 
-    let shader_path = dirs::home_dir()
-      .map(|h| h.join(".steam/steam/steamapps/shader"))
-      .unwrap_or_default();
-    let download_path = dirs::home_dir()
-      .map(|h| h.join(".local/share/Steam"))
-      .unwrap_or_default();
+    let shader_path = CommonPath::SteamShaderCache.path().unwrap_or_default();
+    let download_path = CommonPath::SteamDownloadCache.path().unwrap_or_default();
 
     SteamInfo {
       game_count,
@@ -78,14 +73,30 @@ impl MediaCacheService {
   service_method_full!(clean_steam_shader_cache => clean_steam_shader_cache_inner);
 
   fn clean_steam_shader_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let shader_path = home!().join(".steam/steam/steamapps/shader");
-    clean_cache_dir(&shader_path, "Steam shader")
+    let shader_path = CommonPath::SteamShaderCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+
+    if !shader_path.exists() {
+      return Ok(success_response(
+        "No Steam shader cache found",
+        data_empty_string(),
+      ));
+    }
+
+    let cleared = remove_dir_contents(&shader_path)?;
+    Ok(success_response(
+      format!("Steam shader cache cleared: {}", format_size(cleared)),
+      data_empty_string(),
+    ))
   }
 
   service_method_full!(clean_steam_download_cache => clean_steam_download_cache_inner);
 
   fn clean_steam_download_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let download_path = home!().join(".local/share/Steam");
+    let download_path = CommonPath::SteamDownloadCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !download_path.exists() {
       return Ok(success_response(
@@ -102,20 +113,20 @@ impl MediaCacheService {
   }
 
   pub fn get_spotify_cache_size(&self) -> u64 {
-    let cache_path = dirs::home_dir()
-      .map(|h| h.join(".cache/spotify"))
-      .unwrap_or_default();
-    let local_share = dirs::home_dir()
-      .map(|h| h.join(".local/share/spotify"))
-      .unwrap_or_default();
+    let cache_path = CommonPath::SpotifyCache.path().unwrap_or_default();
+    let local_share = CommonPath::SpotifyLocalShare.path().unwrap_or_default();
     get_dir_size(&cache_path) + get_dir_size(&local_share)
   }
 
   service_method_full!(clean_spotify_cache => clean_spotify_cache_inner);
 
   fn clean_spotify_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let cache_path = home!().join(".cache/spotify");
-    let local_share = home!().join(".local/share/spotify");
+    let cache_path = CommonPath::SpotifyCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let local_share = CommonPath::SpotifyLocalShare
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     let mut cleared: u64 = 0;
     if cache_path.exists() {
@@ -132,20 +143,20 @@ impl MediaCacheService {
   }
 
   pub fn get_vlc_cache_size(&self) -> u64 {
-    let cache_path = dirs::home_dir()
-      .map(|h| h.join(".cache/vlc"))
-      .unwrap_or_default();
-    let config_path = dirs::home_dir()
-      .map(|h| h.join(".config/vlc"))
-      .unwrap_or_default();
+    let cache_path = CommonPath::VlcCache.path().unwrap_or_default();
+    let config_path = CommonPath::VlcConfig.path().unwrap_or_default();
     get_dir_size(&cache_path) + get_dir_size(&config_path)
   }
 
   service_method_full!(clean_vlc_cache => clean_vlc_cache_inner);
 
   fn clean_vlc_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let cache_path = home!().join(".cache/vlc");
-    let config_path = home!().join(".config/vlc");
+    let cache_path = CommonPath::VlcCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let config_path = CommonPath::VlcConfig
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     let mut cleared: u64 = 0;
     if cache_path.exists() {
@@ -162,31 +173,52 @@ impl MediaCacheService {
   }
 
   pub fn get_thumbnail_cache_size(&self) -> u64 {
-    let thumb_path = dirs::home_dir()
-      .map(|h| h.join(".cache/thumbnails"))
-      .unwrap_or_default();
+    let thumb_path = CommonPath::Thumbnails.path().unwrap_or_default();
     get_dir_size(&thumb_path)
   }
 
   service_method_full!(clean_thumbnail_cache => clean_thumbnail_cache_inner);
 
   fn clean_thumbnail_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let thumb_path = home!().join(".cache/thumbnails");
-    clean_cache_dir(&thumb_path, "Thumbnail")
+    let thumb_path = CommonPath::Thumbnails
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+
+    if !thumb_path.exists() {
+      return Ok(success_response(
+        "No thumbnail cache found",
+        data_empty_string(),
+      ));
+    }
+
+    let cleared = remove_dir_contents(&thumb_path)?;
+    Ok(success_response(
+      format!("Thumbnail cache cleared: {}", format_size(cleared)),
+      data_empty_string(),
+    ))
   }
 
   pub fn get_icon_cache_size(&self) -> u64 {
-    let icon_path = dirs::home_dir()
-      .map(|h| h.join(".cache/icons"))
-      .unwrap_or_default();
+    let icon_path = CommonPath::IconCache.path().unwrap_or_default();
     get_dir_size(&icon_path)
   }
 
   service_method_full!(clean_icon_cache => clean_icon_cache_inner);
 
   fn clean_icon_cache_inner(&self) -> MediaResult<ResponseModel> {
-    let icon_path = home!().join(".cache/icons");
-    clean_cache_dir(&icon_path, "Icon")
+    let icon_path = CommonPath::IconCache
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+
+    if !icon_path.exists() {
+      return Ok(success_response("No icon cache found", data_empty_string()));
+    }
+
+    let cleared = remove_dir_contents(&icon_path)?;
+    Ok(success_response(
+      format!("Icon cache cleared: {}", format_size(cleared)),
+      data_empty_string(),
+    ))
   }
 
   pub fn get_media_cache_summary(&self) -> ResponseModel {

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Injectable, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Injectable, signal, effect, inject } from '@angular/core';
+import { LoggerService } from '@services/logger.service';
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 
@@ -48,11 +49,13 @@ const ACCENT_COLORS = [
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly STORAGE_KEY = 'cleanux_theme';
+  private logger = inject(LoggerService);
 
   currentTheme = signal<ThemeConfig>(this.loadTheme());
   accentColors = signal<string[]>(ACCENT_COLORS);
 
   constructor() {
+    this.logger.logInfo('service', 'ThemeService', 'init', 'ThemeService initialized');
     effect(() => {
       this.applyTheme(this.currentTheme());
     });
@@ -78,11 +81,15 @@ export class ThemeService {
   }
 
   setMode(mode: ThemeMode) {
+    this.logger.logDebug('service', 'ThemeService', 'setMode', 'Setting theme mode', { mode });
     this.currentTheme.update((t) => ({ ...t, mode }));
     this.saveTheme(this.currentTheme());
   }
 
   setAccentColor(color: string) {
+    this.logger.logDebug('service', 'ThemeService', 'setAccentColor', 'Setting accent color', {
+      color,
+    });
     this.currentTheme.update((t) => ({
       ...t,
       accentConfig: {
@@ -98,6 +105,13 @@ export class ThemeService {
   }
 
   setAccentForCategory(category: AccentCategory, color: string) {
+    this.logger.logDebug(
+      'service',
+      'ThemeService',
+      'setAccentForCategory',
+      'Setting accent for category',
+      { category, color }
+    );
     this.currentTheme.update((t) => ({
       ...t,
       accentConfig: { ...t.accentConfig, [category]: color },
@@ -106,10 +120,18 @@ export class ThemeService {
   }
 
   resetAccentToDefault(category: AccentCategory) {
+    this.logger.logDebug(
+      'service',
+      'ThemeService',
+      'resetAccentToDefault',
+      'Resetting accent to default',
+      { category }
+    );
     this.setAccentForCategory(category, DEFAULT_ACCENT_CONFIG[category]);
   }
 
   resetAllAccents() {
+    this.logger.logDebug('service', 'ThemeService', 'resetAllAccents', 'Resetting all accents');
     this.currentTheme.update((t) => ({
       ...t,
       accentConfig: { ...DEFAULT_ACCENT_CONFIG },
@@ -118,11 +140,17 @@ export class ThemeService {
   }
 
   setGlassOpacity(opacity: number) {
+    this.logger.logDebug('service', 'ThemeService', 'setGlassOpacity', 'Setting glass opacity', {
+      opacity,
+    });
     this.currentTheme.update((t) => ({ ...t, glassOpacity: Math.max(0, Math.min(1, opacity)) }));
     this.saveTheme(this.currentTheme());
   }
 
   applyTheme(config: ThemeConfig) {
+    this.logger.logDebug('service', 'ThemeService', 'applyTheme', 'Applying theme', {
+      mode: config.mode,
+    });
     const root = document.documentElement;
     const body = document.body;
 

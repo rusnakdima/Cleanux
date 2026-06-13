@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 /* services */
 import { SystemService, SystemServiceItem } from '@services/system.service';
 import { NotificationService } from '@services/notification.service';
+import { getErrorMessage } from '@shared/utils/error.util';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 /* components */
@@ -108,7 +109,7 @@ export class SystemView implements OnInit {
       const data = await this.systemService.getAllServices();
       this.servicesData.set(data);
     } catch (error: unknown) {
-      console.error('Failed to load system services:', error);
+      this.notification.cleanError('load system services', error);
     } finally {
       this.loading.set(false);
     }
@@ -134,10 +135,7 @@ export class SystemView implements OnInit {
       this.selectedServices.set(new Set());
       await this.loadData();
     } catch (error: unknown) {
-      this.notification.error(
-        'Failed to stop services: ' + (error instanceof Error ? error.message : String(error)),
-        error
-      );
+      this.notification.error('Failed to stop services: ' + getErrorMessage(error), error);
     } finally {
       this.loading.set(false);
     }
@@ -159,10 +157,7 @@ export class SystemView implements OnInit {
       this.selectedServices.set(new Set());
       await this.loadData();
     } catch (error: unknown) {
-      this.notification.error(
-        'Failed to start services: ' + (error instanceof Error ? error.message : String(error)),
-        error
-      );
+      this.notification.error('Failed to start services: ' + getErrorMessage(error), error);
     } finally {
       this.loading.set(false);
     }
@@ -180,10 +175,7 @@ export class SystemView implements OnInit {
       await this.systemService.startService(name);
       await this.loadData();
     } catch (error: unknown) {
-      this.notification.error(
-        'Failed to start service: ' + (error instanceof Error ? error.message : String(error)),
-        error
-      );
+      this.notification.error('Failed to start service: ' + getErrorMessage(error), error);
     } finally {
       this.loading.set(false);
     }

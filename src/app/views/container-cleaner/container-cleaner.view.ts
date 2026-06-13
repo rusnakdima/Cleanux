@@ -8,8 +8,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ContainerService } from '@services/container.service';
 import { ContainerSummary } from '@models/container.model';
 import { formatSize } from '@shared/utils/format.util';
-import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { getErrorMessage } from '@shared/utils/error.util';
 import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
+import { ConfirmDialogService } from '@shared/confirm-dialog';
 
 type ContainerTab = 'docker' | 'podman';
 
@@ -56,7 +57,7 @@ export class ContainerCleanerView implements OnInit {
       const data = await this.containerService.getContainerSummary();
       this.summary.set(data);
     } catch (error: unknown) {
-      console.error('Failed to load container summary:', error);
+      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -68,9 +69,7 @@ export class ContainerCleanerView implements OnInit {
       const preview = await this.containerService.dockerPreviewPrune(all);
       this.dockerPreview.set(preview);
     } catch (error: unknown) {
-      this.dockerPreview.set(
-        'Failed to preview: ' + (error instanceof Error ? error.message : String(error))
-      );
+      this.dockerPreview.set('Failed to preview: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -94,7 +93,7 @@ export class ContainerCleanerView implements OnInit {
       this.dockerResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.dockerResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.dockerResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -118,7 +117,7 @@ export class ContainerCleanerView implements OnInit {
       this.dockerResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.dockerResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.dockerResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -138,7 +137,7 @@ export class ContainerCleanerView implements OnInit {
       this.dockerResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.dockerResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.dockerResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -159,7 +158,7 @@ export class ContainerCleanerView implements OnInit {
       this.dockerResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.dockerResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.dockerResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -183,7 +182,7 @@ export class ContainerCleanerView implements OnInit {
       this.podmanResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.podmanResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.podmanResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -207,7 +206,7 @@ export class ContainerCleanerView implements OnInit {
       this.podmanResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.podmanResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.podmanResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -230,7 +229,7 @@ export class ContainerCleanerView implements OnInit {
       this.dockerResult.set(result);
       await this.loadSummary();
     } catch (error: unknown) {
-      this.dockerResult.set('Failed: ' + (error instanceof Error ? error.message : String(error)));
+      this.dockerResult.set('Failed: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }

@@ -52,151 +52,248 @@
     </div>
   </div>
 
-  <div class="glass-card matte-surface">
+  <div class="glass-card matte-surface border-trace">
     <div class="glass-card-header">
       <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm" fontIcon="palette" />
-        Appearance
+        <mat-icon class="text-[var(--accent-icons)] icon-sm">palette</mat-icon>
+        Theme
       </h3>
     </div>
-    <div class="glass-card-body space-y-6">
-      <div class="space-y-3">
-        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
-          >Theme Mode</label
-        >
-        <div class="flex gap-2">
-          @for (mode of themeModes; track mode) {
-            <button
-              (click)="setThemeMode(mode)"
-              class="btn flex-1 capitalize"
-              [class.btn-primary]="themeService.currentTheme().mode === mode"
-              [class.btn-secondary]="themeService.currentTheme().mode !== mode"
-            >
-              {{ mode }}
-            </button>
-          }
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
-          >Accent Color</label
-        >
-        <div class="flex flex-wrap gap-3">
-          @for (color of themeService.accentColors(); track color) {
-            <button
-              (click)="setAccentColor(color)"
-              class="w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
-              [style.background]="color"
-              [class.ring-2]="themeService.currentTheme().accentConfig.general === color"
-              [class.ring-offset-2]="themeService.currentTheme().accentConfig.general === color"
-              [class.ring-offset-zinc-100]="
-                themeService.currentTheme().accentConfig.general === color
-              "
-              [class.dark:ring-offset-zinc-800]="
-                themeService.currentTheme().accentConfig.general === color
-              "
-              [class.ring-white]="themeService.currentTheme().accentConfig.general === color"
-            >
-              @if (themeService.currentTheme().accentConfig.general === color) {
-                <mat-icon class="text-white icon-sm" fontIcon="check" />
-              }
-            </button>
-          }
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
-            >UI Transparency</label
+    <div class="glass-card-body space-y-3">
+      <label class="block text-sm font-semibold text-[var(--text-muted)]">Accent Color</label>
+      <div class="flex flex-wrap gap-3">
+        @for (color of themeService.accentColors(); track color) {
+          <button
+            (click)="setAccentColor(color)"
+            class="w-10 h-10 rounded-lg transition-all duration-200 hover:scale-110 flex items-center justify-center"
+            [style.background]="color"
+            [class.ring-2]="themeService.currentTheme().accentConfig.general === color"
+            [class.ring-offset-2]="themeService.currentTheme().accentConfig.general === color"
+            [class.ring-offset-[var(--bg-surface)]]="true"
+            [class.ring-white]="themeService.currentTheme().accentConfig.general === color"
           >
-          <span class="text-sm font-mono font-bold text-cyan-500 dark:text-cyan-400"
+            @if (themeService.currentTheme().accentConfig.general === color) {
+              <mat-icon class="text-white icon-sm">check</mat-icon>
+            }
+          </button>
+        }
+      </div>
+
+      <div class="space-y-4 pt-4 border-t border-[var(--border-subtle)]">
+        <div class="flex items-center justify-between">
+          <label class="block text-sm font-semibold text-[var(--text-muted)]">Element Accents</label>
+          <button (click)="resetAllAccents()" class="btn btn-secondary text-xs">
+            <mat-icon class="icon-xs">refresh</mat-icon>
+            Reset All
+          </button>
+        </div>
+        @for (cat of accentCategories; track cat.key) {
+          <div class="space-y-2">
+            <label class="block text-xs font-medium text-[var(--text-muted)]">{{ cat.label }}</label>
+            <div class="flex flex-wrap gap-2">
+              @for (color of themeService.accentColors(); track color) {
+                <button
+                  (click)="setAccentForCategory(cat.key, color)"
+                  class="w-8 h-8 rounded-md transition-all duration-200 hover:scale-110 flex items-center justify-center"
+                  [style.background]="color"
+                  [class.ring-2]="themeService.currentTheme().accentConfig[cat.key] === color"
+                  [class.ring-offset-1]="themeService.currentTheme().accentConfig[cat.key] === color"
+                  [class.ring-offset-[var(--bg-surface)]]="true"
+                  [class.ring-white]="themeService.currentTheme().accentConfig[cat.key] === color"
+                >
+                  @if (themeService.currentTheme().accentConfig[cat.key] === color) {
+                    <mat-icon class="text-white text-xs">check</mat-icon>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-[var(--text-muted)]">Glass Opacity</label>
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-mono font-bold text-[var(--accent-icons)]"
             >{{ (themeService.currentTheme().glassOpacity * 100).toFixed(0) }}%</span
           >
+          <input
+            type="range"
+            [value]="themeService.currentTheme().glassOpacity * 100"
+            (input)="setGlassOpacity(+$event.target.value / 100)"
+            min="0"
+            max="100"
+            step="5"
+            class="flex-1 h-2 bg-[var(--bg-elevated)] rounded-lg appearance-none cursor-pointer"
+          />
         </div>
-        <input
-          type="range"
-          [value]="themeService.currentTheme().glassOpacity * 100"
-          (input)="setGlassOpacity(+$any($event.target).value / 100)"
-          min="0"
-          max="100"
-          step="5"
-          class="w-full h-2 bg-zinc-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer"
-        />
       </div>
     </div>
   </div>
 
-  <div class="glass-card matte-surface">
-    <div class="glass-card-header">
-      <h3 class="text-sm font-semibold flex items-center gap-2">
-        <mat-icon class="text-cyan-500 dark:text-cyan-400 icon-sm" fontIcon="schedule" />
-        Maintenance Schedule
-      </h3>
-    </div>
-    <div class="glass-card-body space-y-4">
-      <div class="p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700 flex items-center justify-between">
-        <div>
-          <span class="font-semibold text-zinc-900 dark:text-white block">Automated Scheduler</span>
-          <p class="text-xs text-zinc-500 dark:text-zinc-400">Run cleaning on defined intervals</p>
-        </div>
-        <app-toggle
-          [checked]="scheduleConfig().enabled"
-          (changed)="scheduleConfig.update((c) => ({ ...c, enabled: $event }))"
-        />
+    <div class="glass-card matte-surface border-trace">
+      <div class="glass-card-header">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <mat-icon class="text-[var(--accent-icons)] icon-sm">schedule</mat-icon>
+          Maintenance Schedule
+        </h3>
       </div>
+      <div class="glass-card-body space-y-4">
+        <div class="p-4 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between">
+          <div>
+            <span class="font-semibold text-[var(--text-primary)] block">Automated Scheduler</span>
+            <p class="text-xs text-[var(--text-muted)]">Run cleaning on defined intervals</p>
+          </div>
+          <button
+            (click)="toggleSchedule()"
+            class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+            [class.bg-[var(--accent-buttons)]]="scheduleConfig().enabled"
+            [class.bg-[var(--bg-hover)]]]="!scheduleConfig().enabled"
+          >
+            <span
+              class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+              [class.translate-x-5]="scheduleConfig().enabled"
+              [class.translate-x-0]="!scheduleConfig().enabled"
+            ></span>
+          </button>
+        </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="space-y-2">
-          <label class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 block"
-            >Interval</label
-          >
-          <select
-            [(ngModel)]="scheduleConfig().interval_hours"
-            (change)="onIntervalChange()"
-            class="input"
-          >
-            <option [value]="24">Daily</option>
-            <option [value]="168">Weekly</option>
-            <option [value]="720">Monthly</option>
-          </select>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-[var(--text-muted)] block">Interval</label>
+            <select
+              [(ngModel)]="scheduleConfig().interval_hours"
+              (change)="onIntervalChange()"
+              class="input"
+            >
+              <option [value]="24">Daily</option>
+              <option [value]="168">Weekly</option>
+              <option [value]="720">Monthly</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-[var(--text-muted)] block"
+              >Cleaning Type</label
+            >
+            <select
+              [(ngModel)]="scheduleConfig().cleaning_type"
+              (change)="onCleaningTypeChange()"
+              class="input"
+            >
+              <option value="all">Full Clean</option>
+              <option value="cache">Cache Only</option>
+              <option value="trash">Trash Only</option>
+              <option value="logs">Logs Only</option>
+            </select>
+          </div>
         </div>
-        <div class="space-y-2">
-          <label class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 block"
-            >Cleaning Type</label
-          >
-          <select
-            [(ngModel)]="scheduleConfig().cleaning_type"
-            (change)="onCleaningTypeChange()"
-            class="input"
-          >
-            <option value="all">Full Clean</option>
-            <option value="cache">Cache Only</option>
-            <option value="trash">Trash Only</option>
-            <option value="logs">Logs Only</option>
-          </select>
+
+        <div class="flex gap-3 pt-2">
+          <button (click)="saveSchedule()" [disabled]="isSaving()" class="btn btn-secondary flex-1">
+            <mat-icon class="icon-xs" [class.animate-spin]="isSaving()">{{
+              isSaving() ? "sync" : "save"
+            }}</mat-icon>
+            <span>Save</span>
+          </button>
+          <button (click)="runNow()" [disabled]="isRunning()" class="btn btn-primary flex-1">
+            <mat-icon class="icon-xs" [class.animate-spin]="isRunning()">{{
+              isRunning() ? "sync" : "play_arrow"
+            }}</mat-icon>
+            <span>Run Now</span>
+          </button>
         </div>
       </div>
+    </div>
 
-      <div class="flex gap-3 pt-2">
-        <button (click)="saveSchedule()" [disabled]="isSaving()" class="btn btn-secondary flex-1">
-          <mat-icon
-            class="icon-xs"
-            [fontIcon]="isSaving() ? 'sync' : 'save'"
-            [class.animate-spin]="isSaving()"
-          />
-          <span>Save</span>
-        </button>
-        <button (click)="runNow()" [disabled]="isRunning()" class="btn btn-primary flex-1">
-          <mat-icon
-            class="icon-xs"
-            [fontIcon]="isRunning() ? 'sync' : 'play_arrow'"
-            [class.animate-spin]="isRunning()"
-          />
-          <span>Run Now</span>
+    <div class="glass-card matte-surface border-trace">
+      <div class="glass-card-header">
+        <h3 class="text-sm font-semibold flex items-center gap-2">
+          <mat-icon class="text-[var(--accent-icons)] icon-sm">code</mat-icon>
+          Logging Configuration
+        </h3>
+      </div>
+      <div class="glass-card-body space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-3 rounded-lg bg-[var(--bg-elevated)]">
+            <span class="text-xs text-[var(--text-muted)] block mb-1">Status</span>
+            <span
+              class="font-bold"
+              [class.text-success]="loggingEnabled"
+              [class.text-[var(--text-muted)]]="!loggingEnabled"
+            >
+              {{ loggingEnabled ? "Enabled" : "Disabled" }}
+            </span>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--bg-elevated)]">
+            <span class="text-xs text-[var(--text-muted)] block mb-1">Level</span>
+            <span class="font-bold text-[var(--accent-icons)]">{{ loggingLevel }}</span>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+            Level Toggles
+          </h4>
+          <div class="grid grid-cols-4 gap-2">
+            @for (level of ["debug", "info", "warn", "error"]; track level) {
+              <div class="p-2 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between">
+                <span class="text-xs capitalize">{{ level }}</span>
+                <span
+                  class="text-xs font-bold"
+                  [class.text-success]="levelConfig[level]"
+                  [class.text-[var(--text-muted)]]="!levelConfig[level]"
+                >
+                  {{ levelConfig[level] ? "ON" : "OFF" }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+            Source Toggles
+          </h4>
+          <div class="grid grid-cols-3 gap-2">
+            @for (source of ["view", "service", "store", "api", "user", "router"]; track source) {
+              <div class="p-2 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-between">
+                <span class="text-xs capitalize">{{ source }}</span>
+                <span
+                  class="text-xs font-bold"
+                  [class.text-success]="sourceConfig[source]"
+                  [class.text-[var(--text-muted)]]="!sourceConfig[source]"
+                >
+                  {{ sourceConfig[source] ? "ON" : "OFF" }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+            Statistics
+          </h4>
+          <div class="p-3 rounded-lg bg-[var(--bg-elevated)] space-y-2">
+            <div class="flex justify-between">
+              <span class="text-xs text-[var(--text-muted)]">Total Logs</span>
+              <span class="text-xs font-bold">{{ logStats.total }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs text-[var(--text-muted)]">By Level</span>
+              <span class="text-xs font-mono">{{ logStats.byLevel | json }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs text-[var(--text-muted)]">By Source</span>
+              <span class="text-xs font-mono">{{ logStats.bySource | json }}</span>
+            </div>
+          </div>
+        </div>
+
+        <button (click)="clearLogs()" class="btn btn-secondary w-full">
+          <mat-icon class="icon-xs">delete_outline</mat-icon>
+          <span>Clear Logs</span>
         </button>
       </div>
     </div>
-  </div>
 </div>

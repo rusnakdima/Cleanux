@@ -5,6 +5,7 @@ use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
+use crate::helpers::{stderr_string, stdout_string};
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 
 const CACHE_TTL_SECS: u64 = 10;
@@ -259,7 +260,7 @@ impl PowerService {
 
     if let Ok(output) = Command::new("powerprofilesctl").arg("list").output() {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         profiles = Self::parse_powerprofilesctl_output(&stdout);
       }
     }
@@ -352,7 +353,7 @@ impl PowerService {
             data: DataValue::Bool(true),
           })
         } else {
-          let stderr = String::from_utf8_lossy(&output.stderr);
+          let stderr = stderr_string(&output);
           if stderr.contains("Permission denied") || stderr.contains("not authorized") {
             Self::set_power_profile_systemd(&profile_lower)
           } else {

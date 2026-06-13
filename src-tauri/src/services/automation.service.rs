@@ -1,4 +1,4 @@
-use crate::helpers::{data_string, success_response};
+use crate::helpers::{data_string, stderr_string, success_response};
 use crate::models::AppError;
 use crate::models::ResponseModel;
 use crate::services::profile_service::ProfileService;
@@ -202,7 +202,7 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
       if output.status.success() {
         Ok(format!("Command executed: {}", command))
       } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
+        let stderr = stderr_string(&output);
         Err(AppError::message(format!("Command failed: {}", stderr)))
       }
     }

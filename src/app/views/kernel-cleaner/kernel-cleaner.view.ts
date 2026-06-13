@@ -16,6 +16,7 @@ import { KernelCleanerService } from '@services/kernel-cleaner.service';
 import { KernelInfo, InitramfsInfo, BootSpaceInfo } from '@models/kernel.model';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
+import { getErrorMessage } from '@shared/utils/error.util';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
 import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
@@ -154,7 +155,7 @@ export class KernelCleanerView implements OnInit {
       this.bootSpaceInfo.set(bootInfo);
       this.showGrubUpdateNotice.set(false);
     } catch (error) {
-      console.error('Failed to load kernel data:', error);
+      throw error;
     } finally {
       this.loading.set(false);
     }
@@ -208,9 +209,7 @@ export class KernelCleanerView implements OnInit {
       this.selectedKernels.set(new Set());
       await this.loadData();
     } catch (error) {
-      this.actionResult.set(
-        'Failed to remove some kernels: ' + (error instanceof Error ? error.message : String(error))
-      );
+      this.actionResult.set('Failed to remove some kernels: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -225,9 +224,7 @@ export class KernelCleanerView implements OnInit {
       this.actionResult.set('GRUB configuration updated successfully.');
       this.showGrubUpdateNotice.set(false);
     } catch (error) {
-      this.actionResult.set(
-        'Failed to update GRUB: ' + (error instanceof Error ? error.message : String(error))
-      );
+      this.actionResult.set('Failed to update GRUB: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }
@@ -265,10 +262,7 @@ export class KernelCleanerView implements OnInit {
       this.selectedInitramfs.set(new Set());
       await this.loadData();
     } catch (error) {
-      this.actionResult.set(
-        'Failed to remove some initramfs: ' +
-          (error instanceof Error ? error.message : String(error))
-      );
+      this.actionResult.set('Failed to remove some initramfs: ' + getErrorMessage(error));
     } finally {
       this.loading.set(false);
     }

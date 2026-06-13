@@ -1,6 +1,7 @@
 /* helpers */
+use crate::helpers::common_paths::CommonPath;
 use crate::helpers::{
-  calculate_dir_size, data_string, home, remove_dir_contents, service_method_full, success_response,
+  calculate_dir_size, data_string, remove_dir_contents, service_method_full, success_response,
 };
 /* models */
 use crate::models::{AppError, DataValue, ResponseModel};
@@ -165,32 +166,22 @@ impl JunkCleanerService {
 
   fn scan_browser_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
     let mut items = Vec::new();
-    let home = home!();
 
     let browser_paths = [
-      (
-        home.join(".cache/mozilla"),
-        "Firefox",
-        JunkCategory::Browser,
-      ),
-      (
-        home.join(".cache/google-chrome"),
-        "Chrome",
-        JunkCategory::Browser,
-      ),
-      (home.join(".cache/Brave"), "Brave", JunkCategory::Browser),
-      (
-        home.join(".cache/microsoft-edge"),
-        "Edge",
-        JunkCategory::Browser,
-      ),
+      (CommonPath::MozillaCache, "Firefox", JunkCategory::Browser),
+      (CommonPath::ChromeCache, "Chrome", JunkCategory::Browser),
+      (CommonPath::BraveCache, "Brave", JunkCategory::Browser),
+      (CommonPath::EdgeCache, "Edge", JunkCategory::Browser),
     ];
 
-    for (path, name, category) in browser_paths {
+    for (common_path, name, category) in browser_paths {
+      let path = common_path
+        .path()
+        .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
       if path.exists() {
         let (size, file_count) = calculate_dir_size(&path).unwrap_or((0, 0));
         items.push(JunkItem {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           size,
           category,
           description: format!("{} browser cache", name),
@@ -227,8 +218,9 @@ impl JunkCleanerService {
   }
 
   fn scan_thumbnail_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
-    let home = home!();
-    let path = home.join(".cache/thumbnails");
+    let path = CommonPath::Thumbnails
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !path.exists() {
       return Ok(Vec::new());
@@ -236,7 +228,7 @@ impl JunkCleanerService {
 
     let (size, file_count) = calculate_dir_size(&path).unwrap_or((0, 0));
     Ok(vec![JunkItem {
-      path: path.to_string_lossy().to_string(),
+      path: path.to_string_lossy().into_owned(),
       size,
       category: JunkCategory::Thumbnails,
       description: "Image thumbnail cache".to_string(),
@@ -270,32 +262,35 @@ impl JunkCleanerService {
 
   fn scan_application_caches_inner(&self) -> CleanerResult<Vec<JunkItem>> {
     let mut items = Vec::new();
-    let home = home!();
 
     let app_cache_paths = [
       (
-        home.join(".cache/flatpak"),
+        CommonPath::FlatpakCache,
         "Flatpak",
         JunkCategory::Applications,
       ),
       (
-        home.join(".var/app"),
+        CommonPath::FlatpakAlt,
         "Flatpak (alt)",
         JunkCategory::Applications,
       ),
-      (home.join("snap"), "Snap", JunkCategory::Applications),
+      (CommonPath::SnapCache, "Snap", JunkCategory::Applications),
       (
-        home.join(".cache/snap"),
+        CommonPath::SnapAlt,
         "Snap (alt)",
         JunkCategory::Applications,
       ),
     ];
 
-    for (path, name, category) in app_cache_paths {
+    for (common_path, name, category) in app_cache_paths {
+      let path = match common_path.path() {
+        Some(p) => p,
+        None => continue,
+      };
       if path.exists() {
         let (size, file_count) = calculate_dir_size(&path).unwrap_or((0, 0));
         items.push(JunkItem {
-          path: path.to_string_lossy().to_string(),
+          path: path.to_string_lossy().into_owned(),
           size,
           category,
           description: format!("{} application cache", name),
@@ -304,16 +299,17 @@ impl JunkCleanerService {
       }
     }
 
-    let app_image_cache = home.join(".cache/appimage");
-    if app_image_cache.exists() {
-      let (size, file_count) = calculate_dir_size(&app_image_cache).unwrap_or((0, 0));
-      items.push(JunkItem {
-        path: app_image_cache.to_string_lossy().to_string(),
-        size,
-        category: JunkCategory::Applications,
-        description: "AppImage cache".to_string(),
-        file_count: file_count as u32,
-      });
+    if let Some(app_image_cache) = CommonPath::AppImageCache.path() {
+      if app_image_cache.exists() {
+        let (size, file_count) = calculate_dir_size(&app_image_cache).unwrap_or((0, 0));
+        items.push(JunkItem {
+          path: app_image_cache.to_string_lossy().into_owned(),
+          size,
+          category: JunkCategory::Applications,
+          description: "AppImage cache".to_string(),
+          file_count: file_count as u32,
+        });
+      }
     }
 
     Ok(items)
@@ -496,20 +492,45 @@ impl JunkCleanerService {
   }
 
   fn clean_browser_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = home!();
     let browser_paths = [
-      (home.join(".cache/mozilla"), "mozilla"),
-      (home.join(".cache/google-chrome"), "google-chrome"),
-      (home.join(".cache/Brave"), "Brave"),
-      (home.join(".cache/microsoft-edge"), "microsoft-edge"),
+      CommonPath::MozillaCache,
+      CommonPath::ChromeCache,
+      CommonPath::BraveCache,
+      CommonPath::EdgeCache,
     ];
 
-    self.clean_paths(&browser_paths, "browser cache directories")
+    let mut cleaned_count = 0u32;
+    let mut errors: Vec<String> = Vec::new();
+
+    for common_path in browser_paths {
+      if let Some(path) = common_path.path() {
+        if path.exists() {
+          match remove_dir_contents(&path) {
+            Ok(count) => cleaned_count += count as u32,
+            Err(e) => errors.push(format!("{}: {}", path.display(), e)),
+          }
+        }
+      }
+    }
+
+    if errors.is_empty() {
+      Ok(success_response(
+        format!("Cleaned {} browser cache directories", cleaned_count),
+        data_string(cleaned_count.to_string()),
+      ))
+    } else {
+      Err(AppError::message(format!(
+        "Cleaned {}, errors: {}",
+        cleaned_count,
+        errors.join("; ")
+      )))
+    }
   }
 
   fn clean_thumbnail_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = home!();
-    let path = home.join(".cache/thumbnails");
+    let path = CommonPath::Thumbnails
+      .path()
+      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
 
     if !path.exists() {
       return Ok(success_response(
@@ -531,16 +552,42 @@ impl JunkCleanerService {
   }
 
   fn clean_application_caches(&self) -> CleanerResult<ResponseModel> {
-    let home = home!();
     let paths = [
-      (home.join(".cache/flatpak"), "Flatpak"),
-      (home.join(".var/app"), "Flatpak alt"),
-      (home.join("snap"), "Snap"),
-      (home.join(".cache/snap"), "Snap alt"),
-      (home.join(".cache/appimage"), "AppImage"),
+      (CommonPath::FlatpakCache, "Flatpak"),
+      (CommonPath::FlatpakAlt, "Flatpak alt"),
+      (CommonPath::SnapCache, "Snap"),
+      (CommonPath::SnapAlt, "Snap alt"),
+      (CommonPath::AppImageCache, "AppImage"),
     ];
 
-    self.clean_paths(&paths, "application cache directories")
+    let mut cleaned_count = 0u32;
+    let mut errors: Vec<String> = Vec::new();
+
+    for (common_path, name) in paths {
+      if let Some(path) = common_path.path() {
+        if path.exists() {
+          match remove_dir_contents(&path) {
+            Ok(count) => {
+              cleaned_count += count as u32;
+            }
+            Err(e) => errors.push(format!("{}: {}", name, e)),
+          }
+        }
+      }
+    }
+
+    if errors.is_empty() {
+      Ok(success_response(
+        format!("Cleaned {} application cache directories", cleaned_count),
+        data_string(cleaned_count.to_string()),
+      ))
+    } else {
+      Err(AppError::message(format!(
+        "Cleaned {}, errors: {}",
+        cleaned_count,
+        errors.join("; ")
+      )))
+    }
   }
 
   fn clean_system_temp(&self) -> CleanerResult<ResponseModel> {

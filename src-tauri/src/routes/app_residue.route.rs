@@ -1,4 +1,3 @@
-use crate::helpers::array_response;
 use crate::models::ResponseModel;
 use crate::services::app_residue_service::{AppResidueService, AppResidueSummary};
 
@@ -11,42 +10,31 @@ pub fn get_residue_summary() -> Result<AppResidueSummary, ResponseModel> {
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_user_configs() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_user_configs();
-  array_response(
-    format!("Found {} config residues", residues.len()),
-    residues,
-  )
+  AppResidueService.scan_user_configs_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_user_data() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_user_data();
-  array_response(format!("Found {} data residues", residues.len()), residues)
+  AppResidueService.scan_user_data_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_user_caches() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_user_caches();
-  array_response(format!("Found {} cache residues", residues.len()), residues)
+  AppResidueService.scan_user_caches_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn scan_home_residues() -> Result<ResponseModel, ResponseModel> {
-  let residues = AppResidueService.scan_home_residues();
-  array_response(format!("Found {} home residues", residues.len()), residues)
+  AppResidueService.scan_home_residues_response()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub fn get_orphaned_configs() -> Result<ResponseModel, ResponseModel> {
-  let orphaned = AppResidueService.get_orphaned_configs();
-  array_response(
-    format!("Found {} orphaned configs", orphaned.len()),
-    orphaned,
-  )
+  AppResidueService.get_orphaned_configs_response()
 }
 
 #[tauri::command]

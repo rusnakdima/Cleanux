@@ -72,7 +72,7 @@ export class PackageDeepCleanView implements OnInit {
         this.activeTabIndex.set(tabs[0].index);
       }
     } catch (error) {
-      console.error('Failed to load package data:', error);
+      this.notification.error('Failed to load package data', error);
     } finally {
       this.loading.set(false);
     }

@@ -39,7 +39,7 @@ export class ProfilesView implements OnInit {
       const profiles = await this.profileService.listProfiles();
       this.profiles.set(profiles);
     } catch (e) {
-      console.error('Failed to load profiles:', e);
+      this.notification.error('Failed to load profiles', e);
     } finally {
       this.isLoading.set(false);
     }

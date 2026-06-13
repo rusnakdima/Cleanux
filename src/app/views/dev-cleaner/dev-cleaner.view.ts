@@ -54,15 +54,16 @@ export class DevCleanerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadSummary(): Promise<void> {
-    await this.runWithLoading(
-      async () => {
-        const summary = await this.devCacheService.getDevCacheSummary();
-        this.summary.set(summary);
-        this.updateDevTools(summary);
-        return summary;
-      },
-      { errorMessage: 'Failed to load dev cache summary' }
-    );
+    this.loading.set(true);
+    try {
+      const summary = await this.devCacheService.getDevCacheSummary();
+      this.summary.set(summary);
+      this.updateDevTools(summary);
+    } catch (error) {
+      this.notification.error('Failed to load dev cache summary', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   private updateDevTools(summary: DevCacheSummary): void {

@@ -2,8 +2,10 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::helpers::get_dir_size;
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::helpers::{
+  get_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
+};
+use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KernelInfo {
@@ -39,7 +41,7 @@ impl KernelCleanerService {
     let output = Command::new("uname").arg("-r").output();
 
     match output {
-      Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
+      Ok(out) if out.status.success() => stdout_string(&out).trim().to_string(),
       _ => String::new(),
     }
   }
@@ -56,7 +58,7 @@ impl KernelCleanerService {
           if path.is_dir() {
             let version = path
               .file_name()
-              .map(|n| n.to_string_lossy().to_string())
+              .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
 
             let size = Self::calculate_kernel_size(&version);
@@ -64,7 +66,7 @@ impl KernelCleanerService {
 
             kernels.push(KernelInfo {
               version,
-              path: path.to_string_lossy().to_string(),
+              path: path.to_string_lossy().into_owned(),
               size,
               is_current,
             });
@@ -189,7 +191,7 @@ impl KernelCleanerService {
     for file_path in files_to_remove {
       if file_path.exists() {
         match fs::remove_file(&file_path) {
-          Ok(_) => removed_items.push(file_path.to_string_lossy().to_string()),
+          Ok(_) => removed_items.push(file_path.to_string_lossy().into_owned()),
           Err(e) => failed_items.push(format!("{}: {}", file_path.display(), e)),
         }
       }
@@ -198,7 +200,7 @@ impl KernelCleanerService {
     let modules_path = PathBuf::from("/lib/modules").join(version);
     if modules_path.exists() {
       match Self::remove_dir_all(&modules_path) {
-        Ok(_) => removed_items.push(modules_path.to_string_lossy().to_string()),
+        Ok(_) => removed_items.push(modules_path.to_string_lossy().into_owned()),
         Err(e) => failed_items.push(format!("{}: {}", modules_path.display(), e)),
       }
     }
@@ -213,7 +215,7 @@ impl KernelCleanerService {
           || name.starts_with(&format!("initramfs-{}-", version))
         {
           match fs::remove_file(entry.path()) {
-            Ok(_) => removed_initramfs.push(entry.path().to_string_lossy().to_string()),
+            Ok(_) => removed_initramfs.push(entry.path().to_string_lossy().into_owned()),
             Err(e) => failed_items.push(format!("{}: {}", entry.path().display(), e)),
           }
         }
@@ -277,7 +279,7 @@ impl KernelCleanerService {
         let path = entry.path();
         let file_name = path
           .file_name()
-          .map(|n| n.to_string_lossy().to_string())
+          .map(|n| n.to_string_lossy().into_owned())
           .unwrap_or_default();
 
         if (file_name.starts_with("initrd.img-") || file_name.starts_with("initramfs-"))
@@ -293,7 +295,7 @@ impl KernelCleanerService {
 
           initramfs_files.push(InitramfsInfo {
             version,
-            path: path.to_string_lossy().to_string(),
+            path: path.to_string_lossy().into_owned(),
             size,
           });
         }
@@ -318,11 +320,11 @@ impl KernelCleanerService {
 
     if let Ok(entries) = fs::read_dir(&boot_path) {
       for entry in entries.filter_map(|e| e.ok()) {
-        let file_name = entry.file_name().to_string_lossy().to_string();
+        let file_name = entry.file_name().to_string_lossy().into_owned();
         for pattern in &patterns {
           if file_name.starts_with(pattern) || file_name == *pattern {
             match fs::remove_file(entry.path()) {
-              Ok(_) => removed.push(entry.path().to_string_lossy().to_string()),
+              Ok(_) => removed.push(entry.path().to_string_lossy().into_owned()),
               Err(e) => failed.push(format!("{}: {}", entry.path().display(), e)),
             }
             break;
@@ -362,7 +364,7 @@ impl KernelCleanerService {
 
       if let Ok(out) = output {
         if out.status.success() {
-          let stdout = String::from_utf8_lossy(&out.stdout);
+          let stdout = stdout_string(&out);
           let lines: Vec<&str> = stdout.lines().collect();
 
           if lines.len() >= 2 {
@@ -432,7 +434,7 @@ impl KernelCleanerService {
             data: DataValue::Bool(true),
           })
         } else {
-          let stderr = String::from_utf8_lossy(&result.stderr);
+          let stderr = stderr_string(&result);
           Err(ResponseModel {
             status: ResponseStatus::Error,
             message: format!("GRUB update failed: {}", stderr),
@@ -446,5 +448,35 @@ impl KernelCleanerService {
         data: DataValue::Bool(false),
       }),
     }
+  }
+
+  pub fn get_installed_kernels_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let kernels = self.get_installed_kernels();
+    let data = models_into_data_array(kernels).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response("Installed kernels retrieved", data))
+  }
+
+  pub fn get_old_kernels_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let kernels = self.get_old_kernels();
+    let data = models_into_data_array(kernels).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response("Old kernels retrieved", data))
+  }
+
+  pub fn get_old_initramfs_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let initramfs = self.get_old_initramfs();
+    let data = models_into_data_array(initramfs).map_err(|e| AppError::Serde(e).into_response())?;
+    Ok(success_response("Old initramfs retrieved", data))
+  }
+
+  pub fn get_boot_space_info_response(&self) -> Result<ResponseModel, ResponseModel> {
+    let info = self.get_boot_space_info();
+    Ok(success_response(
+      "Boot space info retrieved",
+      DataValue::Object(serde_json::to_value(info).map_err(|e| ResponseModel {
+        status: ResponseStatus::Error,
+        message: format!("Serialization error: {}", e),
+        data: DataValue::Bool(false),
+      })?),
+    ))
   }
 }

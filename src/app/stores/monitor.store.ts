@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, OnDestroy, computed, NgZone } from '@angular/core';
-import { TauriApiService } from '@api/tauri-api.service';
 import { formatSize } from '@shared/utils/format.util';
+import { ApiService } from '@services/api.service';
 
 export interface SystemStats {
   cpuUsage: number;
@@ -35,12 +35,12 @@ const MAX_HISTORY_LENGTH = 20;
   providedIn: 'root',
 })
 export class MonitorStore implements OnDestroy {
-  private api = inject(TauriApiService);
+  private api = inject(ApiService);
   private ngZone = inject(NgZone);
   private unlisten: (() => void) | null = null;
   private unlistenTemps: (() => void) | null = null;
-  private statsInterval: any = null;
-  private tempInterval: any = null;
+  private statsInterval: number | null = null;
+  private tempInterval: number | null = null;
   private readonly pollIntervalMs = 2000;
   private visibilityHandler: ((this: Document, ev: Event) => void) | null = null;
 
@@ -70,6 +70,7 @@ export class MonitorStore implements OnDestroy {
 
   readonly loading = signal(false);
   readonly isMonitoring = signal(false);
+  readonly error = signal<string | null>(null);
 
   readonly memoryUsedFormatted = computed(() => formatSize(this.systemStats().memoryUsed ?? 0));
   readonly memoryTotalFormatted = computed(() => formatSize(this.systemStats().memoryTotal ?? 0));
@@ -92,8 +93,8 @@ export class MonitorStore implements OnDestroy {
     this.isMonitoring.set(true);
 
     // Fire initial fetches without awaiting - let them run in background
-    this.fetchSystemStats().catch((e) => console.error('Initial stats fetch failed:', e));
-    this.fetchTemperatures().catch((e) => console.error('Initial temp fetch failed:', e));
+    this.fetchSystemStats().catch((e) => this.error.set('Initial stats fetch failed'));
+    this.fetchTemperatures().catch((e) => this.error.set('Initial temp fetch failed'));
 
     this.ngZone.runOutsideAngular(() => {
       this.statsInterval = setInterval(() => {
@@ -159,7 +160,7 @@ export class MonitorStore implements OnDestroy {
         return newHistory.slice(-MAX_HISTORY_LENGTH);
       });
     } catch (error) {
-      console.error('Failed to fetch system stats:', error);
+      this.error.set('Failed to fetch system stats');
     }
   }
 
@@ -190,7 +191,7 @@ export class MonitorStore implements OnDestroy {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch temperatures:', error);
+      this.error.set('Failed to fetch temperatures');
     } finally {
       this.temperaturesLoading.set(false);
     }
@@ -212,7 +213,7 @@ export class MonitorStore implements OnDestroy {
         history.map((h) => ({ timestamp: h.timestamp, healthScore: h.health_score }))
       );
     } catch (error) {
-      console.error('Failed to load health history:', error);
+      this.error.set('Failed to load health history');
     }
   }
 
@@ -227,7 +228,7 @@ export class MonitorStore implements OnDestroy {
         changePercent: trend.change_percent,
       });
     } catch (error) {
-      console.error('Failed to load health trends:', error);
+      this.error.set('Failed to load health trends');
     }
   }
 
@@ -247,7 +248,7 @@ export class MonitorStore implements OnDestroy {
         large_files_count: largeFilesCount,
       });
     } catch (error) {
-      console.error('Failed to save health snapshot:', error);
+      this.error.set('Failed to save health snapshot');
     }
   }
 

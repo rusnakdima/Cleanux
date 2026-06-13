@@ -38,6 +38,9 @@ export class CleanView extends LoadingErrorMixin implements OnInit {
 
   formatSize = formatSize;
 
+  isScanning = signal(false);
+  isCleaning = signal(false);
+
   activeCategory = signal<CleanCategory>('cache');
 
   cacheSize = signal(0);
@@ -61,25 +64,27 @@ export class CleanView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadStats() {
-    await this.runWithLoading(
-      async () => {
-        const [cache, trash, logs] = await Promise.all([
-          this.fileService.getCacheSummary(),
-          this.fileService.getTrashSummary(),
-          this.fileService.getLogSummary(),
-        ]);
+    this.isScanning.set(true);
+    try {
+      const [cache, trash, logs] = await Promise.all([
+        this.fileService.getCacheSummary(),
+        this.fileService.getTrashSummary(),
+        this.fileService.getLogSummary(),
+      ]);
 
-        this.cacheSize.set(cache.totalSize);
-        this.cacheCount.set(cache.fileCount);
-        this.trashSize.set(trash.totalSize);
-        this.trashCount.set(trash.fileCount);
-        this.logSize.set(logs.totalSize);
-        this.logCount.set(logs.fileCount);
-        this.packageCacheSize.set(0);
-        this.packageManagerCount.set(0);
-      },
-      { errorMessage: 'Failed to load stats' }
-    );
+      this.cacheSize.set(cache.totalSize);
+      this.cacheCount.set(cache.fileCount);
+      this.trashSize.set(trash.totalSize);
+      this.trashCount.set(trash.fileCount);
+      this.logSize.set(logs.totalSize);
+      this.logCount.set(logs.fileCount);
+      this.packageCacheSize.set(0);
+      this.packageManagerCount.set(0);
+    } catch (e) {
+      this.notification.error('Failed to load stats', e as Error);
+    } finally {
+      this.isScanning.set(false);
+    }
   }
 
   getCategorySize(category: CleanCategory): number {
@@ -121,31 +126,32 @@ export class CleanView extends LoadingErrorMixin implements OnInit {
     });
     if (!confirmed) return;
 
-    await this.runWithLoading(
-      async () => {
-        switch (category) {
-          case 'cache':
-            await this.fileService.clearCache();
-            this.cacheSize.set(0);
-            this.cacheCount.set(0);
-            break;
-          case 'trash':
-            await this.fileService.clearTrash();
-            this.trashSize.set(0);
-            this.trashCount.set(0);
-            break;
-          case 'logs':
-            await this.fileService.clearAllLogs();
-            this.logSize.set(0);
-            this.logCount.set(0);
-            break;
-          case 'packages':
-            this.notification.alert('Package cleaning is not yet implemented');
-            break;
-        }
-      },
-      { errorMessage: 'Clean operation failed', notificationMessage: 'Clean operation failed' }
-    );
+    this.isCleaning.set(true);
+    try {
+      switch (category) {
+        case 'cache':
+          await this.fileService.clearCache();
+          this.cacheSize.set(0);
+          this.cacheCount.set(0);
+          break;
+        case 'trash':
+          await this.fileService.clearTrash();
+          this.trashSize.set(0);
+          this.trashCount.set(0);
+          break;
+        case 'logs':
+          await this.fileService.clearAllLogs();
+          this.logSize.set(0);
+          this.logCount.set(0);
+          break;
+        case 'packages':
+          break;
+      }
+    } catch (e) {
+      this.notification.error('Clean operation failed', e as Error);
+    } finally {
+      this.isCleaning.set(false);
+    }
   }
 
   async onCleanAll() {
@@ -159,23 +165,25 @@ export class CleanView extends LoadingErrorMixin implements OnInit {
     });
     if (!confirmed) return;
 
-    await this.runWithLoading(
-      async () => {
-        await Promise.all([
-          this.fileService.clearCache(),
-          this.fileService.clearTrash(),
-          this.fileService.clearAllLogs(),
-        ]);
+    this.isCleaning.set(true);
+    try {
+      await Promise.all([
+        this.fileService.clearCache(),
+        this.fileService.clearTrash(),
+        this.fileService.clearAllLogs(),
+      ]);
 
-        this.cacheSize.set(0);
-        this.cacheCount.set(0);
-        this.trashSize.set(0);
-        this.trashCount.set(0);
-        this.logSize.set(0);
-        this.logCount.set(0);
-      },
-      { errorMessage: 'Clean all failed', notificationMessage: 'Clean operation failed' }
-    );
+      this.cacheSize.set(0);
+      this.cacheCount.set(0);
+      this.trashSize.set(0);
+      this.trashCount.set(0);
+      this.logSize.set(0);
+      this.logCount.set(0);
+    } catch (e) {
+      this.notification.error('Clean operation failed', e as Error);
+    } finally {
+      this.isCleaning.set(false);
+    }
   }
 
   get totalCleanableSize(): number {

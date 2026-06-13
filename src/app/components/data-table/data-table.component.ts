@@ -2,18 +2,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
+  inject,
   Input,
   Output,
   EventEmitter,
   OnChanges,
+  OnDestroy,
   SimpleChanges,
-  ElementRef,
-  NgZone,
   signal,
   computed,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -72,27 +77,12 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
   @Output() preview = new EventEmitter<T>();
   @Output() rowAction = new EventEmitter<RowActionEvent<T>>();
-
-  formatSize = formatSize;
-
-  columnWidths = signal<Record<string, string>>({});
-  resizingColumn = signal<string | null>(null);
-  resizeStartX = signal<number>(0);
-  resizeStartWidth = signal<number>(0);
-  lastSelectedIndex = signal<number | null>(null);
-
-  private resizeColumnKey = signal<string | null>(null);
-  private _selectedKeys = new Set<string>();
-  private _data: T[] = [];
-  private _filteredData: T[] = [];
-  sortKey = signal<string | null>(null);
-  sortDirection = signal<'asc' | 'desc'>('asc');
+  @Output() searchChange = new EventEmitter<string>();
   @Output() selectionChange = new EventEmitter<Set<string>>();
-  toolbarExpanded = signal(false);
-  toolbarLocked = signal(false);
-  searchControl = new FormControl('');
 
-  public p: number = 1;
+  _selectedKeys = new Set<string>();
+  _data: T[] = [];
+  _filteredData: T[] = [];
 
   allSelected = computed(() => {
     if (this._data.length === 0) return false;
@@ -104,18 +94,38 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     return selectedCount > 0 && selectedCount < this._data.length;
   });
 
+  sortKey = signal<string | null>(null);
+  sortDirection = signal<'asc' | 'desc'>('asc');
+  searchQuery = signal<string>('');
+
+  lastSelectedIndex = signal<number | null>(null);
+
+  searchControl = new FormControl('');
+
+  formatSize = formatSize;
+
+  columnWidths = signal<Record<string, string>>({});
+  resizingColumn = signal<string | null>(null);
+  resizeStartX = signal<number>(0);
+  resizeStartWidth = signal<number>(0);
+
+  private resizeColumnKey = signal<string | null>(null);
+
+  toolbarExpanded = signal(false);
+  toolbarLocked = signal(false);
+
+  public p: number = 1;
+
   readonly VIRTUAL_SCROLL_THRESHOLD = 100;
   readonly DEFAULT_ROW_HEIGHT = 48;
+  private destroy$ = new Subject<void>();
+
+  private confirmDialogService = inject(ConfirmDialogService);
 
   @Input() set data(value: T[]) {
     this._data = value;
     this._filteredData = [...value];
   }
-
-  constructor(
-    private confirmDialogService: ConfirmDialogService,
-    private ngZone: NgZone
-  ) {}
 
   get rowHeight(): number {
     return this.options.rowHeight ?? this.DEFAULT_ROW_HEIGHT;
@@ -127,6 +137,40 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   get checkboxKey(): string {
     return this.options.checkboxKey ?? 'id';
+  }
+
+  constructor() {
+    effect(() => {
+      this.searchControl.valueChanges
+        .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+        .subscribe((value: string | null) => {
+          const query = value ?? '';
+          this.searchQuery.set(query);
+          untracked(() => this.onSearch());
+          this.searchChange.emit(query);
+        });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSearch(): void {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) {
+      this._filteredData = [...this._data];
+      return;
+    }
+
+    this._filteredData = this._data.filter((item) => {
+      const record = this.rowRecord(item);
+      return Object.values(record).some((val) => {
+        if (val === null || val === undefined) return false;
+        return String(val).toLowerCase().includes(query);
+      });
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -146,6 +190,19 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     if (changes['data'] && changes['data'].currentValue) {
       this.initColumnWidths();
     }
+
+    if (
+      changes['searchQuery'] &&
+      changes['searchQuery'].currentValue !== undefined &&
+      changes['searchQuery'].currentValue !== null
+    ) {
+      this.searchQuery.set(changes['searchQuery'].currentValue);
+      this.searchControl.setValue(changes['searchQuery'].currentValue);
+    }
+  }
+
+  rowRecord(item: T): Record<string, unknown> {
+    return item as unknown as Record<string, unknown>;
   }
 
   private initColumnWidths(): void {
@@ -176,8 +233,8 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
     this.resizeColumnKey.set(column.key);
 
-    document.addEventListener('mousemove', this.onResizeMove.bind(this));
-    document.addEventListener('mouseup', this.onResizeEnd.bind(this));
+    document.addEventListener('mousemove', this.onResizeMove);
+    document.addEventListener('mouseup', this.onResizeEnd);
   }
 
   private onResizeMove = (event: MouseEvent): void => {
@@ -208,8 +265,8 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
   private onResizeEnd = (): void => {
     this.resizingColumn.set(null);
     this.resizeColumnKey.set(null);
-    document.removeEventListener('mousemove', this.onResizeMove.bind(this));
-    document.removeEventListener('mouseup', this.onResizeEnd.bind(this));
+    document.removeEventListener('mousemove', this.onResizeMove);
+    document.removeEventListener('mouseup', this.onResizeEnd);
   };
 
   private parseWidth(width: string): number {
@@ -366,6 +423,17 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
     this.rowClick.emit(item);
   }
 
+  toggleSelectItem(item: T, checked: boolean): void {
+    const key = String(this.rowRecord(item)[this.checkboxKey]);
+    if (checked) {
+      this._selectedKeys.add(key);
+    } else {
+      this._selectedKeys.delete(key);
+    }
+    this.updateSelectionState();
+    this.selectionChange.emit(new Set(this._selectedKeys));
+  }
+
   onPreviewClick(event: MouseEvent): void {
     event.stopPropagation();
   }
@@ -459,10 +527,6 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   updateSelectionState(): void {}
 
-  rowRecord(item: T): Record<string, unknown> {
-    return item as Record<string, unknown>;
-  }
-
   cellValue(item: T, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = item;
@@ -507,18 +571,14 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   onToolbarHoverEnter(): void {
     if (!this.searchTogglable) return;
-    this.ngZone.runOutsideAngular(() => {
-      this.toolbarExpanded.set(true);
-    });
+    this.toolbarExpanded.set(true);
   }
 
   onToolbarHoverLeave(): void {
     if (!this.searchTogglable) return;
-    this.ngZone.runOutsideAngular(() => {
-      if (!this.toolbarLocked()) {
-        this.toolbarExpanded.set(false);
-      }
-    });
+    if (!this.toolbarLocked()) {
+      this.toolbarExpanded.set(false);
+    }
   }
 
   toggleSelectAll(checked: boolean): void {

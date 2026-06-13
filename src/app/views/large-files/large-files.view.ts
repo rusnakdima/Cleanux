@@ -95,30 +95,34 @@ export class LargeFilesView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadData() {
-    await this.runWithLoading(
-      async () => {
-        const result = await this.fileService.getLargeFiles(50, 0);
-        this.largeFiles.set(result.data);
-        this.hasMore.set(result.has_more);
-        this.total.set(result.total);
-      },
-      { errorMessage: 'Failed to load large files' }
-    );
+    this.loading.set(true);
+    try {
+      const result = await this.fileService.getLargeFiles(50, 0);
+      this.largeFiles.set(result.data);
+      this.hasMore.set(result.has_more);
+      this.total.set(result.total);
+    } catch (error) {
+      this.notification.error('Failed to load large files', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async loadMore() {
     if (!this.hasMore() || this.loading()) return;
 
-    await this.runWithLoading(
-      async () => {
-        const offset = this.largeFiles().length;
-        const result = await this.fileService.getLargeFiles(50, offset);
-        this.largeFiles.update((current) => [...current, ...result.data]);
-        this.hasMore.set(result.has_more);
-        this.total.set(result.total);
-      },
-      { errorMessage: 'Failed to load more large files' }
-    );
+    this.loading.set(true);
+    try {
+      const offset = this.largeFiles().length;
+      const result = await this.fileService.getLargeFiles(50, offset);
+      this.largeFiles.update((current) => [...current, ...result.data]);
+      this.hasMore.set(result.has_more);
+      this.total.set(result.total);
+    } catch (error) {
+      this.notification.error('Failed to load more large files', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   onSelectionChange(keys: Set<string>): void {

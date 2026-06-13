@@ -26,27 +26,27 @@
     @if (duplicateGroups().length > 0) {
       <div class="glass-card-body">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div class="stat-card matte-surface">
-            <div class="stat-icon" [style.background]="getAccentGradient()">
-              <mat-icon class="text-white dark:text-zinc-900" fontIcon="content_copy" />
+          <div class="stat-card">
+            <div class="stat-icon info">
+              <mat-icon class="text-white">content_copy</mat-icon>
             </div>
             <div class="stat-content">
               <span class="stat-label">Duplicate Groups</span>
               <span class="stat-value">{{ duplicateGroups().length }}</span>
             </div>
           </div>
-          <div class="stat-card matte-surface">
-            <div class="stat-icon" [style.background]="getAccentGradient()">
-              <mat-icon class="text-white dark:text-zinc-900" fontIcon="files" />
+          <div class="stat-card">
+            <div class="stat-icon warning">
+              <mat-icon class="text-white">files</mat-icon>
             </div>
             <div class="stat-content">
               <span class="stat-label">Total Files</span>
               <span class="stat-value">{{ totalFiles() }}</span>
             </div>
           </div>
-          <div class="stat-card matte-surface">
-            <div class="stat-icon" [style.background]="getAccentGradient()">
-              <mat-icon class="text-white dark:text-zinc-900" fontIcon="delete" />
+          <div class="stat-card">
+            <div class="stat-icon error">
+              <mat-icon class="text-white">delete</mat-icon>
             </div>
             <div class="stat-content">
               <span class="stat-label">Wasted Space</span>

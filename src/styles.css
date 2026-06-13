@@ -1049,6 +1049,52 @@ mat-icon {
       clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
     }
   }
+
+  .badge-primary {
+    background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    color: var(--accent-primary);
+  }
+  .badge-success {
+    background: color-mix(in srgb, var(--success) 20%, transparent);
+    color: var(--success);
+  }
+  .badge-warning {
+    background: color-mix(in srgb, var(--warning) 20%, transparent);
+    color: var(--warning);
+  }
+  .badge-error {
+    background: color-mix(in srgb, var(--error) 20%, transparent);
+    color: var(--error);
+  }
+  .badge-info {
+    background: color-mix(in srgb, var(--info) 20%, transparent);
+    color: var(--info);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.15s ease-out;
+  }
+  .animate-slide-in {
+    animation: slideIn 0.2s ease-out;
+  }
 }
 
 .segmented-control {

@@ -24,8 +24,9 @@ import { FilePreviewData } from '@models/file-preview.model';
 /* models */
 import { ListColumn, ListOptions } from '@models/data-list.model';
 import { CacheFileItem, LogFileItem, TrashFileItem } from '@services/file.service';
-import { LogSummary, LogCategorySummary } from '@models/log-analyzer.model';
+import { LogSummary, LogCategorySummary, LogEntry } from '@models/log-analyzer.model';
 import { formatSize } from '@shared/utils/format.util';
+import { getErrorMessage } from '@shared/utils/error.util';
 
 export type CleanerRow = CacheFileItem | TrashFileItem | LogFileItem;
 
@@ -166,7 +167,7 @@ export class CleanerView implements OnInit {
       const summary = await this.logAnalyzerService.getLogSummary();
       this.logSummary.set(summary);
     } catch (error) {
-      console.error('Failed to load log summary:', error);
+      this.notification.cleanError('load log summary', error);
     }
   }
 
@@ -183,14 +184,11 @@ export class CleanerView implements OnInit {
       this.notification.success(result);
       await this.loadLogSummary();
     } catch (error: unknown) {
-      this.notification.error(
-        'Failed to clean logs: ' + (error instanceof Error ? error.message : String(error)),
-        error
-      );
+      this.notification.error('Failed to clean logs: ' + getErrorMessage(error), error);
     }
   }
 
-  filteredLogEntries(): any[] {
+  filteredLogEntries(): LogEntry[] {
     const summary = this.logSummary();
     if (!summary) return [];
     if (this.selectedLogCategory() === 'all') {
@@ -243,7 +241,7 @@ export class CleanerView implements OnInit {
         imageUrl: result.imageUrl,
       });
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unable to preview file';
+      const errorMessage = getErrorMessage(error) || 'Unable to preview file';
       this.previewData.set({
         name: displayName,
         path: path,
@@ -262,10 +260,7 @@ export class CleanerView implements OnInit {
     try {
       await this.fileService.openFile(event.path, event.command);
     } catch (error: unknown) {
-      this.notification.error(
-        'Failed to open file: ' + (error instanceof Error ? error.message : String(error)),
-        error
-      );
+      this.notification.error('Failed to open file: ' + getErrorMessage(error), error);
     }
   }
 }

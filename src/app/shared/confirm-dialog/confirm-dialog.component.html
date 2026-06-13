@@ -1,18 +1,17 @@
 <div
-  class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-[fadeIn_0.15s_ease-out]"
+  class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] animate-fade-in"
   (click)="onBackdropClick($event)"
 >
   <div
-    class="relative bg-zinc-100 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 rounded-xl min-w-[360px] max-w-[480px] p-5 shadow-[0_20px_40px_rgba(0,0,0,0.4)] animate-[slideIn_0.2s_ease-out]"
-    [class.border-red-500]="config.dangerous"
-    [class.dark:border-red-500]="config.dangerous"
+    class="bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl min-w-[360px] max-w-[480px] p-5 shadow-2xl animate-slide-in"
+    [class.border-[var(--color-error)]]="config.dangerous"
     [class.shadow-[0_0_20px_rgba(239,68,68,0.2)]]="config.dangerous"
     (click)="$event.stopPropagation()"
   >
     <div class="flex items-center gap-3 mb-4">
       @if (config.dangerous) {
         <svg
-          class="w-6 h-6 text-red-500 flex-shrink-0"
+          class="w-6 h-6 text-[var(--color-error)] flex-shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -25,11 +24,11 @@
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
       }
-      <h2 class="flex-1 text-lg font-semibold text-zinc-900 dark:text-white m-0">
+      <h2 class="flex-1 text-lg font-semibold text-[var(--text-primary)] m-0">
         {{ config.title }}
       </h2>
       <button
-        class="bg-none border-none p-1 cursor-pointer text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-900 dark:hover:text-white"
+        class="bg-transparent border-none p-1 cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
         (click)="onCancel()"
         aria-label="Close"
       >
@@ -41,19 +40,17 @@
     </div>
 
     <div class="mb-5">
-      <p class="text-zinc-400 dark:text-zinc-500 text-sm leading-relaxed m-0">
-        {{ config.message }}
-      </p>
+      <p class="text-[var(--text-secondary)] text-sm leading-relaxed m-0">{{ config.message }}</p>
 
       @if (config.showCheckbox) {
         <label
-          class="flex items-center gap-2.5 mt-4 cursor-pointer text-zinc-400 dark:text-zinc-500 text-sm"
+          class="flex items-center gap-[10px] mt-4 cursor-pointer text-[var(--text-secondary)] text-sm"
         >
           <input
             type="checkbox"
+            class="w-[18px] h-[18px] accent-[var(--accent-primary)]"
             [checked]="checkboxChecked()"
             (change)="checkboxChecked.set(!checkboxChecked())"
-            class="w-4 h-4 accent-cyan-500 dark:accent-cyan-400"
           />
           <span>{{ config.checkboxLabel }}</span>
         </label>
@@ -61,14 +58,14 @@
 
       @if (config.requireYesToConfirm) {
         <div class="mt-4">
-          <label class="block text-zinc-400 dark:text-zinc-500 text-sm mb-2"
-            >Type <strong class="text-red-500">YES</strong> to confirm:</label
+          <label class="block text-[var(--text-secondary)] text-sm mb-2"
+            >Type <strong class="text-[var(--color-error)]">YES</strong> to confirm:</label
           >
           <input
             type="text"
-            class="w-full px-3 py-2.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm font-normal uppercase tracking-wider focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+            class="w-full px-3 py-[10px] bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] text-sm uppercase tracking-wider focus:outline-none focus:border-[var(--color-error)] focus:shadow-[0_0_0_2px_rgba(239,68,68,0.2)]"
             [value]="yesInput()"
-            (input)="yesInput.set($any($event.target).value)"
+            (input)="yesInput.set($event.target.value)"
             placeholder="YES"
             autocomplete="off"
           />
@@ -78,14 +75,20 @@
 
     <div class="flex justify-end gap-3">
       <button
-        class="px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all border bg-zinc-50 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white"
+        class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
         (click)="onCancel()"
       >
         {{ config.cancelText }}
       </button>
       <button
-        class="px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all border"
-        [ngClass]="getConfirmBtnClass()"
+        class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all border-none"
+        [class]="
+          config.confirmColor === 'primary' || !config.confirmColor
+            ? 'bg-[var(--accent-primary)] text-white hover:opacity-90'
+            : config.confirmColor === 'accent'
+              ? 'bg-[var(--accent-secondary)] text-white hover:opacity-90'
+              : 'bg-[var(--color-error)] text-white hover:opacity-90'
+        "
         [disabled]="!canConfirm()"
         (click)="onConfirm()"
       >

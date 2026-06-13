@@ -28,7 +28,7 @@ impl ProcessService {
       .iter()
       .map(|(pid, process)| ProcessItem {
         pid: pid.as_u32(),
-        name: process.name().to_string_lossy().to_string(),
+        name: process.name().to_string_lossy().into_owned(),
         cpu_usage: process.cpu_usage(),
         memory_usage: process.memory(),
       })

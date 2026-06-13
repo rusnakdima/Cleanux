@@ -1,0 +1,15 @@
+<div
+  [class]="getClasses()"
+  [style.width]="width() !== '100%' ? width() : variant() === 'circle' ? '40px' : '100%'"
+  [style.height]="
+    height() ||
+    (variant() === 'text'
+      ? '1em'
+      : variant() === 'circle'
+        ? '40px'
+        : variant() === 'rect'
+          ? '100px'
+          : '120px')
+  "
+  [style.border-radius]="rounded() ? '50%' : variant() === 'card' ? '8px' : '4px'"
+></div>

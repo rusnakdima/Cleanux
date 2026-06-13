@@ -53,6 +53,18 @@
         class="table-header sticky top-0 z-20 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg border-b border-zinc-200 dark:border-zinc-700 shrink-0"
       >
         <div class="flex items-center px-4">
+          @if (showCheckbox) {
+            <div class="checkbox-container w-10 shrink-0">
+              <label class="custom-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="allSelected()"
+                  (change)="toggleSelectAll($event.target.checked)"
+                />
+                <span class="checkmark" [class.indeterminate]="indeterminate()"></span>
+              </label>
+            </div>
+          }
           @if (showPreviewButton) {
             <div class="w-10 shrink-0"></div>
           }
@@ -108,6 +120,19 @@
             (click)="onRowClick(item, $event)"
             (dblclick)="onRowDoubleClick(item)"
           >
+            @if (showCheckbox) {
+              <div class="checkbox-container w-10 shrink-0">
+                <label class="custom-checkbox">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(item)"
+                    (change)="toggleSelectItem(item, $event.target.checked)"
+                    (click)="$event.stopPropagation()"
+                  />
+                  <span class="checkmark"></span>
+                </label>
+              </div>
+            }
             @if (showPreviewButton) {
               <div class="preview-btn-container">
                 <button
@@ -180,6 +205,19 @@
               (click)="onRowClick(item, $event)"
               (dblclick)="onRowDoubleClick(item)"
             >
+              @if (showCheckbox) {
+                <div class="checkbox-container w-10 shrink-0">
+                  <label class="custom-checkbox">
+                    <input
+                      type="checkbox"
+                      [checked]="isSelected(item)"
+                      (change)="toggleSelectItem(item, $event.target.checked)"
+                      (click)="$event.stopPropagation()"
+                    />
+                    <span class="checkmark"></span>
+                  </label>
+                </div>
+              }
               @if (showPreviewButton) {
                 <div class="preview-btn-container">
                   <button

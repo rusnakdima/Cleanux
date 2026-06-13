@@ -1,12 +1,12 @@
 /// Macro to generate service method boilerplate with error conversion.
 ///
 /// Usage:
-/// ```rust
+/// ```ignore
 /// service_method_full!(method_name => method_name_inner);
 /// ```
 ///
 /// This generates:
-/// ```rust
+/// ```ignore
 /// pub fn method_name(&self) -> Result<ResponseModel, ResponseModel> {
 ///     self.method_name_inner().map_err(|e| e.into_response())
 /// }

@@ -13,6 +13,9 @@ import { MatCardModule } from '@angular/material/card';
 /* services */
 import { JunkCleanerService } from '@services/junk-cleaner.service';
 
+/* mixins */
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
+
 /* components */
 import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
 
@@ -24,7 +27,7 @@ import {
   JunkCategoryKey,
 } from '@models/junk-cleaner.model';
 import { formatSize } from '@shared/utils/format.util';
-import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
+import { getErrorMessage } from '@shared/utils/error.util';
 
 @Component({
   selector: 'app-advanced-cleaner-view',
@@ -59,14 +62,15 @@ export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadJunkSummary(): Promise<void> {
-    await this.runWithLoading(
-      () =>
-        this.junkCleanerService.getJunkSummary().then((s) => {
-          this.junkSummary.set(s);
-          return s;
-        }),
-      { errorMessage: 'Failed to load junk summary' }
-    );
+    this.loading.set(true);
+    try {
+      const summary = await this.junkCleanerService.getJunkSummary();
+      this.junkSummary.set(summary);
+    } catch (error) {
+      this.notification.error('Failed to load junk summary', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   loadLastCleaned(): void {
@@ -102,16 +106,10 @@ export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
           await this.junkCleanerService.scanLogRotations();
           break;
       }
-      await this.runWithLoading(
-        () =>
-          this.junkCleanerService.getJunkSummary().then((s) => {
-            this.junkSummary.set(s);
-            return s;
-          }),
-        { errorMessage: `Failed to scan ${category}` }
-      );
+      const summary = await this.junkCleanerService.getJunkSummary();
+      this.junkSummary.set(summary);
     } catch (error) {
-      console.error(`Failed to scan ${category}:`, error);
+      this.notification.error(`Failed to scan ${category}`, error);
     } finally {
       this.scanningCategory.set(null);
     }
@@ -126,18 +124,16 @@ export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
     });
     if (!confirmed) return;
 
-    await this.runWithLoading(
-      async () => {
-        await this.junkCleanerService.cleanJunkCategory(category);
-        this.saveLastCleaned(category);
-        const summary = await this.junkCleanerService.getJunkSummary();
-        this.junkSummary.set(summary);
-      },
-      {
-        errorMessage: `Failed to clean ${categoryLabel}`,
-        notificationMessage: `Failed to clean ${categoryLabel}`,
-      }
-    );
+    this.loading.set(true);
+    try {
+      await this.junkCleanerService.cleanJunkCategory(category);
+      this.saveLastCleaned(category);
+      await this.loadJunkSummary();
+    } catch (error) {
+      this.notification.error(`Failed to clean ${categoryLabel}`, getErrorMessage(error));
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   getCategorySummary(key: JunkCategoryKey): JunkCategorySummary | undefined {

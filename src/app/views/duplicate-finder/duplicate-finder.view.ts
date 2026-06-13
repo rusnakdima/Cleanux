@@ -138,21 +138,19 @@ export class DuplicateFinderView extends LoadingErrorMixin implements OnInit {
 
     this.selectedFiles.set(new Set());
 
-    await this.runWithLoading(
-      async () => {
-        const result = await this.duplicateService.findDuplicates(
-          this.scanningPath(),
-          this.extensionFilter() || undefined
-        );
-        this.duplicateGroups.set(result.groups);
-        this.totalWastedSpace.set(result.totalWastedSpace);
-        this.totalDuplicates.set(result.totalDuplicates);
-      },
-      {
-        errorMessage: 'Failed to scan for duplicates',
-        notificationMessage: 'Failed to scan for duplicates',
-      }
-    );
+    try {
+      const result = await this.duplicateService.findDuplicates(
+        this.scanningPath(),
+        this.extensionFilter() || undefined
+      );
+      this.duplicateGroups.set(result.groups);
+      this.totalWastedSpace.set(result.totalWastedSpace);
+      this.totalDuplicates.set(result.totalDuplicates);
+    } catch (error) {
+      this.notification.error('Failed to scan for duplicates', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   onSelectionChange(keys: Set<string>): void {

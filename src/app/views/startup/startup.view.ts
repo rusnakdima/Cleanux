@@ -12,11 +12,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { StartupService } from '@services/startup.service';
+import { NotificationService } from '@services/notification.service';
 import { ThemeService } from '@services/theme.service';
-import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
+import { getErrorMessage } from '@shared/utils/error.util';
 import { StartupItem } from '@models/startup.model';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
+import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 
 @Component({
   selector: 'app-startup-view',
@@ -88,13 +90,14 @@ export class StartupView extends LoadingErrorMixin implements OnInit {
 
   async loadData() {
     this.currentPage.set(1);
-    await this.runWithLoading(
-      async () => {
-        const data = await this.startupService.getStartupItems();
-        this.startupData.set(data);
-      },
-      { errorMessage: 'Failed to load startup items' }
-    );
+    try {
+      const data = await this.startupService.getStartupItems();
+      this.startupData.set(data);
+    } catch (error: unknown) {
+      this.notification.error('Failed to load startup items', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async toggleItem(item: StartupItem) {
@@ -104,21 +107,25 @@ export class StartupView extends LoadingErrorMixin implements OnInit {
         message: `Disable "${item.name}" from starting at login?`,
       });
       if (!confirmed) return;
-      await this.runWithLoading(
-        async () => {
-          await this.startupService.disableStartupItem(item.path);
-          await this.loadData();
-        },
-        { errorMessage: 'Failed to disable startup item', notificationKey: 'disable' }
-      );
+      try {
+        this.loading.set(true);
+        await this.startupService.disableStartupItem(item.path);
+        await this.loadData();
+      } catch (error: unknown) {
+        this.notification.error('Failed to disable startup item: ' + getErrorMessage(error), error);
+      } finally {
+        this.loading.set(false);
+      }
     } else {
-      await this.runWithLoading(
-        async () => {
-          await this.startupService.enableStartupItem(item.path);
-          await this.loadData();
-        },
-        { errorMessage: 'Failed to enable startup item', notificationKey: 'enable' }
-      );
+      try {
+        this.loading.set(true);
+        await this.startupService.enableStartupItem(item.path);
+        await this.loadData();
+      } catch (error: unknown) {
+        this.notification.error('Failed to enable startup item: ' + getErrorMessage(error), error);
+      } finally {
+        this.loading.set(false);
+      }
     }
   }
 

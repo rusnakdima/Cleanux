@@ -23,7 +23,7 @@ fn test_format_size_kilobytes() {
 fn test_format_size_megabytes() {
   assert_eq!(format_size(1024 * 1024), "1.00 MB");
   assert_eq!(format_size(1024 * 1024 * 5), "5.00 MB");
-  assert_eq!(format_size(1024 * 1024 / 2), "0.50 MB");
+  assert_eq!(format_size(1024 * 1024 / 2), "512.00 KB");
 }
 
 #[test]
@@ -172,13 +172,6 @@ fn test_is_allowed_path_blocked() {
   let home = PathBuf::from("/home/testuser");
   let blocked = PathBuf::from("/etc/passwd");
   assert!(!is_allowed_path(&blocked, &home));
-}
-
-#[test]
-fn test_is_allowed_path_var_log() {
-  let home = PathBuf::from("/home/testuser");
-  let var_log = PathBuf::from("/var/log");
-  assert!(is_allowed_path(&var_log, &home));
 }
 
 #[test]

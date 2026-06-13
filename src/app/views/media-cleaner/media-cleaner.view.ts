@@ -54,14 +54,15 @@ export class MediaCleanerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadSummary(): Promise<void> {
-    await this.runWithLoading(
-      async () => {
-        const data = await this.mediaCacheService.getMediaCacheSummary();
-        this.summary.set(data);
-        return data;
-      },
-      { errorMessage: 'Failed to load media cache summary' }
-    );
+    this.loading.set(true);
+    try {
+      const data = await this.mediaCacheService.getMediaCacheSummary();
+      this.summary.set(data);
+    } catch (error) {
+      this.notification.error('Failed to load media cache summary', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async cleanSteamShaderCache(): Promise<void> {

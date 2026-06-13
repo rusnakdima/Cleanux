@@ -2,16 +2,22 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  effect,
+  inject,
   Input,
   Output,
   EventEmitter,
   OnChanges,
+  OnDestroy,
   SimpleChanges,
   signal,
-  computed,
+  untracked,
 } from '@angular/core';
-import { CommonModule, NgClass } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,7 +40,6 @@ import { ConfirmDialogService } from '@shared/confirm-dialog';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    NgClass,
     MatCheckboxModule,
     MatIconModule,
     MatButtonModule,
@@ -43,7 +48,6 @@ import { ConfirmDialogService } from '@shared/confirm-dialog';
     FormsModule,
     ReactiveFormsModule,
     PaginationComponent,
-    CheckboxComponent,
   ],
   templateUrl: './data-list.component.html',
 })
@@ -56,6 +60,8 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   @Input() pageSizeOptions: number[] = [10, 15, 25, 50, 100];
   @Input() showPageSizeSelector = true;
   @Input() actionLabel?: string;
+  @Input() checkboxKey = 'id';
+  @Input() data: T[] = [];
 
   @Input() set selectedKeys(keys: Set<string>) {
     this._selectedKeys = keys;
@@ -68,46 +74,88 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   @Output() pageChange = new EventEmitter<number>();
   @Output() newPageSize = new EventEmitter<number>();
   @Output() sortChange = new EventEmitter<{ key: string; direction: 'asc' | 'desc' }>();
+  @Output() searchChange = new EventEmitter<string>();
+  @Output() selectionChange = new EventEmitter<Set<string>>();
+
+  _selectedKeys = new Set<string>();
+  _originalData: T[] = [];
+  _filteredData: T[] = [];
+
+  allSelected = signal(false);
+  indeterminate = signal(false);
+
+  sortKey = signal<string | null>(null);
+  sortDirection = signal<'asc' | 'desc'>('asc');
+  searchQuery = signal<string>('');
+
+  toolbarExpanded = signal(false);
+  toolbarLocked = signal(false);
+
+  searchControl = new FormControl('');
+  private destroy$ = new Subject<void>();
 
   formatSize = formatSize;
 
+  private confirmDialogService = inject(ConfirmDialogService);
+
   p = 1;
 
-  private _selectedKeys = new Set<string>();
-  private _data: T[] = [];
-  private _filteredData: T[] = [];
-  sortKey = signal<string | null>(null);
-  sortDirection = signal<'asc' | 'desc'>('asc');
-  @Output() selectionChange = new EventEmitter<Set<string>>();
-  toolbarExpanded = signal(false);
-  toolbarLocked = signal(false);
-  searchControl = new FormControl('');
-
-  allSelected = computed(() => {
-    if (this._data.length === 0) return false;
-    return this._data.every((item) => this._selectedKeys.has(this.getKey(item)));
-  });
-
-  indeterminate = computed(() => {
-    const selectedCount = this._selectedKeys.size;
-    return selectedCount > 0 && selectedCount < this._data.length;
-  });
-
-  @Input() set data(value: T[]) {
-    this._data = value;
-    this._filteredData = [...value];
+  constructor() {
+    effect(() => {
+      this.searchControl.valueChanges
+        .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+        .subscribe((value: string | null) => {
+          const query = value ?? '';
+          this.searchQuery.set(query);
+          untracked(() => this.onSearch());
+          this.searchChange.emit(query);
+        });
+    });
   }
 
-  constructor(private confirmDialogService: ConfirmDialogService) {}
-
-  get checkboxKey(): string {
-    return this.options.checkboxKey ?? 'id';
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['currentPage']) {
       this.p = this.currentPage;
     }
+
+    if (changes['data'] && changes['data'].currentValue) {
+      this._originalData = [...changes['data'].currentValue];
+      this.onSearch();
+    }
+
+    if (
+      changes['searchQuery'] &&
+      changes['searchQuery'].currentValue !== undefined &&
+      changes['searchQuery'].currentValue !== null
+    ) {
+      this.searchQuery.set(changes['searchQuery'].currentValue);
+      this.searchControl.setValue(changes['searchQuery'].currentValue);
+    }
+  }
+
+  onSearch(): void {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) {
+      this._filteredData = [...this._originalData];
+      return;
+    }
+
+    this._filteredData = this._originalData.filter((item) => {
+      const record = this.rowRecord(item);
+      return Object.values(record).some((val) => {
+        if (val === null || val === undefined) return false;
+        return String(val).toLowerCase().includes(query);
+      });
+    });
+  }
+
+  rowRecord(item: T): Record<string, unknown> {
+    return item as unknown as Record<string, unknown>;
   }
 
   get paginatedData(): T[] {
@@ -268,6 +316,17 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     this.rowClick.emit(item);
   }
 
+  toggleSelectItem(item: T, checked: boolean): void {
+    const key = String(this.rowRecord(item)[this.checkboxKey]);
+    if (checked) {
+      this._selectedKeys.add(key);
+    } else {
+      this._selectedKeys.delete(key);
+    }
+    this.updateSelectionState();
+    this.selectionChange.emit(new Set(this._selectedKeys));
+  }
+
   onRowDoubleClick(item: T): void {
     this.rowDoubleClick.emit(item);
   }
@@ -366,10 +425,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
 
   updateSelectionState(): void {}
 
-  rowRecord(item: T): Record<string, unknown> {
-    return item as Record<string, unknown>;
-  }
-
   cellValue(item: T, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = item;
@@ -426,7 +481,7 @@ export class DataListComponent<T extends object = object> implements OnChanges {
 
   toggleSelectAll(checked: boolean): void {
     if (checked) {
-      this._data.forEach((item) => {
+      this._originalData.forEach((item) => {
         this._selectedKeys.add(this.getKey(item));
       });
     } else {

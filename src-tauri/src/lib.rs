@@ -1,6 +1,7 @@
 /* imports */
 pub mod errors;
 pub mod helpers;
+pub mod logger;
 pub mod models;
 pub mod routes;
 pub mod security;
@@ -83,6 +84,10 @@ use routes::{
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[allow(non_snake_case)]
 pub fn run() {
+  let logger = logger::Logger::new();
+  logger.init();
+  log::info!("Application starting...");
+
   #[cfg(target_os = "linux")]
   {
     std::env::set_var("WEBKIT_DISABLE_COMPOSITING", "1");
@@ -267,7 +272,7 @@ pub fn run() {
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {
-      eprintln!("error while running tauri application: {}", e);
+      log::error!("error while running tauri application: {}", e);
       std::process::exit(1);
     });
 }

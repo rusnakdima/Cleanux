@@ -123,80 +123,70 @@ export class LogManagerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadData() {
-    await this.runWithLoading(
-      async () => {
-        const [summary, journalInfo, rotatedSize, rotatedLogs, analysis, varLogUsage, largestLogs] =
-          await Promise.all([
-            this.logManagerService.getLogManagerSummary(),
-            this.logManagerService.getJournalUsage(),
-            this.logManagerService.getRotatedLogsSize(),
-            this.logManagerService.getRotatedLogs(),
-            this.logManagerService.analyzeLogrotate(),
-            this.logManagerService.getVarLogUsage(),
-            this.logManagerService.getLargestLogFiles(20),
-          ]);
+    this.loading.set(true);
+    try {
+      const [summary, journalInfo, rotatedSize, rotatedLogs, analysis, varLogUsage, largestLogs] =
+        await Promise.all([
+          this.logManagerService.getLogManagerSummary(),
+          this.logManagerService.getJournalUsage(),
+          this.logManagerService.getRotatedLogsSize(),
+          this.logManagerService.getRotatedLogs(),
+          this.logManagerService.analyzeLogrotate(),
+          this.logManagerService.getVarLogUsage(),
+          this.logManagerService.getLargestLogFiles(20),
+        ]);
 
-        this.summary.set(summary);
-        this.journalInfo.set(journalInfo);
-        this.rotatedLogsSize.set(rotatedSize);
-        this.rotatedLogs.set(rotatedLogs);
-        this.logrotateAnalysis.set(analysis);
-        this.varLogUsage.set(varLogUsage);
-        this.largestLogs.set(largestLogs);
-      },
-      { errorMessage: 'Failed to load log manager data' }
-    );
+      this.summary.set(summary);
+      this.journalInfo.set(journalInfo);
+      this.rotatedLogsSize.set(rotatedSize);
+      this.rotatedLogs.set(rotatedLogs);
+      this.logrotateAnalysis.set(analysis);
+      this.varLogUsage.set(varLogUsage);
+      this.largestLogs.set(largestLogs);
+    } catch (error) {
+      this.notification.error('Failed to load log manager data', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async vacuumJournal() {
-    if (
-      !(await this.confirmDialogService.confirm({
-        title: 'Vacuum Journal',
-        message: `Vacuum journal to retain ${this.vacuumSizeMb()}MB?`,
-      }))
-    )
-      return;
-    await this.runWithLoading(
-      async () => {
-        await this.logManagerService.vacuumJournal(this.vacuumSizeMb());
-        await this.loadData();
-      },
-      { errorMessage: 'Failed to vacuum journal', notificationKey: 'vacuum' }
-    );
+    if (!confirm(`Vacuum journal to retain ${this.vacuumSizeMb()}MB?`)) return;
+    this.loading.set(true);
+    try {
+      await this.logManagerService.vacuumJournal(this.vacuumSizeMb());
+      await this.loadData();
+    } catch (error) {
+      this.notification.error('Failed to vacuum journal', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async vacuumJournalByDays() {
-    if (
-      !(await this.confirmDialogService.confirm({
-        title: 'Vacuum Journal',
-        message: `Vacuum journal to retain last ${this.vacuumDays()} days?`,
-      }))
-    )
-      return;
-    await this.runWithLoading(
-      async () => {
-        await this.logManagerService.vacuumJournalByDays(this.vacuumDays());
-        await this.loadData();
-      },
-      { errorMessage: 'Failed to vacuum journal', notificationKey: 'vacuum' }
-    );
+    if (!confirm(`Vacuum journal to retain last ${this.vacuumDays()} days?`)) return;
+    this.loading.set(true);
+    try {
+      await this.logManagerService.vacuumJournalByDays(this.vacuumDays());
+      await this.loadData();
+    } catch (error) {
+      this.notification.error('Failed to vacuum journal', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async cleanRotatedLogs() {
-    if (
-      !(await this.confirmDialogService.confirm({
-        title: 'Clean Rotated Logs',
-        message: `Clean rotated logs older than ${this.cleanRotatedDays()} days?`,
-      }))
-    )
-      return;
-    await this.runWithLoading(
-      async () => {
-        await this.logManagerService.cleanRotatedLogs(this.cleanRotatedDays());
-        await this.loadData();
-      },
-      { errorMessage: 'Failed to clean rotated logs', notificationKey: 'clean' }
-    );
+    if (!confirm(`Clean rotated logs older than ${this.cleanRotatedDays()} days?`)) return;
+    this.loading.set(true);
+    try {
+      await this.logManagerService.cleanRotatedLogs(this.cleanRotatedDays());
+      await this.loadData();
+    } catch (error) {
+      this.notification.error('Failed to clean rotated logs', error);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   getLogrotateStatusColor(enabled: boolean): string {

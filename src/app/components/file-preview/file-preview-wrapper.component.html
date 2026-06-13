@@ -1,0 +1,7 @@
+@if (previewService.isOpen()) {
+  <app-file-preview
+    [fileData]="previewService.previewData()"
+    (close)="previewService.close()"
+    (openInEditor)="previewService.openInEditor($event.path, $event.command)"
+  />
+}

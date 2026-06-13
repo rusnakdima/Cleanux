@@ -1,7 +1,6 @@
 /* models */
+use crate::helpers::validation_helper::validate_path;
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
-/* security */
-use crate::security::PathValidator;
 /* sys lib */
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -33,7 +32,7 @@ impl ScannerService {
     path: &str,
     extension_filter: Option<String>,
   ) -> Result<ResponseModel, ResponseModel> {
-    let validated_path = match PathValidator::validate(path) {
+    let validated_path = match validate_path(path) {
       Ok(p) => p,
       Err(e) => {
         return Err(ResponseModel {
@@ -100,7 +99,7 @@ impl ScannerService {
       hash_map
         .entry(hash)
         .or_default()
-        .push((file_path.to_string_lossy().to_string(), file_size));
+        .push((file_path.to_string_lossy().into_owned(), file_size));
     }
 
     let mut duplicate_groups: Vec<DuplicateGroup> = Vec::new();
@@ -117,7 +116,7 @@ impl ScannerService {
           .map(|(path, size)| {
             let name = Path::new(&path)
               .file_name()
-              .map(|n| n.to_string_lossy().to_string())
+              .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
             DuplicateFile { name, path, size }
           })

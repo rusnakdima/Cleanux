@@ -5,6 +5,7 @@ use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
+use crate::helpers::stdout_string;
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 
 const CACHE_TTL_SECS: u64 = 5;
@@ -106,7 +107,7 @@ impl TemperatureService {
     gpu_temps.sort_by(|a, b| {
       b.temperature_celsius
         .partial_cmp(&a.temperature_celsius)
-        .unwrap()
+        .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     let mut result: Vec<TemperatureInfo> = Vec::new();
@@ -225,7 +226,7 @@ impl TemperatureService {
       return Vec::new();
     }
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stdout = stdout_string(&output);
     let mut temps = Vec::new();
 
     let mut current_section = String::new();
@@ -369,7 +370,7 @@ impl TemperatureService {
     gpu_temps.sort_by(|a, b| {
       b.temperature_celsius
         .partial_cmp(&a.temperature_celsius)
-        .unwrap()
+        .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     if let Some(gpu) = gpu_temps.first() {

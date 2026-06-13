@@ -3,6 +3,10 @@
 use std::fs;
 use std::path::PathBuf;
 
+use crate::helpers::home_dir;
+use crate::models::AppError;
+use crate::security::PathValidator;
+
 pub const ALLOWED_PATHS: &[&str] = &[
   "/home",
   "/tmp",
@@ -40,7 +44,7 @@ pub fn is_path_allowed(path: &PathBuf) -> bool {
     }
   }
 
-  if let Some(home) = dirs::home_dir() {
+  if let Ok(home) = home_dir() {
     if let Ok(home_canonical) = fs::canonicalize(&home) {
       if path_str.starts_with(home_canonical.to_string_lossy().as_ref()) {
         return true;
@@ -60,4 +64,8 @@ pub fn is_path_allowed(path: &PathBuf) -> bool {
   }
 
   false
+}
+
+pub fn validate_path(path: &str) -> Result<String, AppError> {
+  PathValidator::validate(path).map(|p| p.to_string_lossy().into_owned())
 }

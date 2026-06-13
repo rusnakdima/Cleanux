@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use crate::helpers::{home_dir, pkexec, run_command_ignore_error, stderr_string, stdout_string};
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 use walkdir::WalkDir;
 
@@ -17,7 +18,7 @@ pub struct RepairService;
 
 fn get_common_dirs() -> Vec<PathBuf> {
   let mut dirs = Vec::new();
-  if let Some(home) = dirs::home_dir() {
+  if let Ok(home) = home_dir() {
     dirs.push(home.join(".config"));
     dirs.push(home.join(".local/share"));
     dirs.push(home.join(".local/lib"));
@@ -48,7 +49,7 @@ impl RepairService {
           if let Ok(target_path) = target {
             if !target_path.exists() {
               broken_links.push(RepairItem {
-                path: path.to_string_lossy().to_string(),
+                path: path.to_string_lossy().into_owned(),
                 issue_type: "broken_symlink".to_string(),
                 severity: "warning".to_string(),
                 description: Some(format!(
@@ -80,7 +81,7 @@ impl RepairService {
 
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         let lines: Vec<&str> = stdout.lines().collect();
         let package_names: std::collections::HashSet<String> = lines
           .iter()
@@ -120,7 +121,7 @@ impl RepairService {
       .output()
     {
       if output.status.success() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stdout = stdout_string(&output);
         for line in stdout.lines() {
           if !line.is_empty() {
             orphaned.push(RepairItem {
@@ -151,8 +152,9 @@ impl RepairService {
   }
 
   pub fn clean_font_cache() -> Result<ResponseModel, ResponseModel> {
-    let font_cache_path = dirs::home_dir()
+    let font_cache_path = home_dir()
       .map(|h| h.join(".cache/fontconfig"))
+      .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/fontconfig"));
 
     if !font_cache_path.exists() {
@@ -171,7 +173,7 @@ impl RepairService {
         let path = entry.path();
         let file_name = path
           .file_name()
-          .map(|n| n.to_string_lossy().to_string())
+          .map(|n| n.to_string_lossy().into_owned())
           .unwrap_or_default();
 
         if file_name.ends_with(".cache") || file_name == "fonts.cache-db" {
@@ -204,12 +206,14 @@ impl RepairService {
   }
 
   pub fn clean_icon_cache() -> Result<ResponseModel, ResponseModel> {
-    let icon_cache_path = dirs::home_dir()
+    let icon_cache_path = home_dir()
       .map(|h| h.join(".cache/icon-cache"))
+      .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/icon-cache"));
 
-    let icon_cache_path_kde = dirs::home_dir()
+    let icon_cache_path_kde = home_dir()
       .map(|h| h.join(".cache/plasma_icon_cache"))
+      .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/plasma_icon_cache"));
 
     let mut removed_count = 0;
@@ -224,14 +228,14 @@ impl RepairService {
             match fs::remove_file(&path) {
               Ok(_) => {
                 removed_count += 1;
-                cleaned_paths.push(path.to_string_lossy().to_string());
+                cleaned_paths.push(path.to_string_lossy().into_owned());
               }
               Err(e) => failed.push(format!("{}: {}", path.display(), e)),
             }
           }
         }
         if let Ok(()) = fs::remove_dir(cache_path) {
-          cleaned_paths.push(cache_path.to_string_lossy().to_string());
+          cleaned_paths.push(cache_path.to_string_lossy().into_owned());
         }
       }
     }
@@ -262,14 +266,14 @@ impl RepairService {
     let mut failed: Vec<String> = Vec::new();
 
     let common_paths = vec![
-      dirs::home_dir().map(|h| h.join(".config")),
-      dirs::home_dir().map(|h| h.join(".local/share")),
-      dirs::home_dir().map(|h| h.join(".cache")),
+      home_dir().map(|h| h.join(".config")),
+      home_dir().map(|h| h.join(".local/share")),
+      home_dir().map(|h| h.join(".cache")),
     ];
 
     for path in common_paths.into_iter().flatten() {
       if path.exists() {
-        let perms_path = path.to_string_lossy().to_string();
+        let perms_path = path.to_string_lossy().into_owned();
         let output = Command::new("pkexec")
           .args(["chmod", "755", &perms_path])
           .output();
@@ -365,7 +369,7 @@ impl RepairService {
             data: DataValue::Bool(true),
           })
         } else {
-          let stderr = String::from_utf8_lossy(&result.stderr);
+          let stderr = stderr_string(&result);
           Err(ResponseModel {
             status: ResponseStatus::Error,
             message: format!("Failed to purge package {}: {}", path, stderr),

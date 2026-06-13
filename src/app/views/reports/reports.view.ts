@@ -129,7 +129,7 @@ export class ReportsView implements OnInit {
       const reports = await this.reportService.getCleaningHistory();
       this.reports.set(reports);
     } catch (e) {
-      console.error('Failed to load reports:', e);
+      throw e;
     } finally {
       this.loading.set(false);
     }
@@ -149,7 +149,7 @@ export class ReportsView implements OnInit {
       );
       await this.loadReports();
     } catch (e) {
-      console.error('Failed to generate report:', e);
+      throw e;
     }
   }
 
@@ -174,7 +174,7 @@ export class ReportsView implements OnInit {
       this.comparison.set(result);
       this.showComparison.set(true);
     } catch (e) {
-      console.error('Failed to compare snapshots:', e);
+      throw e;
     }
   }
 
@@ -183,7 +183,7 @@ export class ReportsView implements OnInit {
       const result = await this.reportService.exportToHtml(reportId);
       this.exportHtml.set(result.html);
     } catch (e) {
-      console.error('Failed to export HTML:', e);
+      throw e;
     }
   }
 
