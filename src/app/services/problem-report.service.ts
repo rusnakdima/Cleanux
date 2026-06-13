@@ -3,6 +3,7 @@ import { LoggerService, LogEntry, LogFilter } from './logger.service';
 import { LogStorageService } from './log-storage.service';
 import { LogExportService, ProblemReport } from './log-export.service';
 import { environment } from '@env/environment';
+import { TOAST_DURATION_MS } from '@shared/utils/constants';
 
 const ERROR_THRESHOLD = 5;
 const AUTO_REPORT_KEY = 'cleanux_auto_report_enabled';
@@ -21,7 +22,7 @@ export class ProblemReportService {
 
   private errorCount = 0;
   private lastErrorTime = 0;
-  private errorDebounceMs = 5000;
+  private errorDebounceMs = TOAST_DURATION_MS;
 
   enable(): void {
     this.autoReportEnabled.set(true);

@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { TOAST_DURATION_MS } from '@shared/utils/constants';
 
 export interface ToastMessage {
   id: string;
@@ -22,7 +23,7 @@ export class ToastService {
 
     setTimeout(() => {
       this.dismiss(id);
-    }, 5000);
+    }, TOAST_DURATION_MS);
 
     return id;
   }

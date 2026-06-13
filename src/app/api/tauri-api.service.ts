@@ -5,13 +5,12 @@ import { Response, getData } from '@models/response.model';
 import { ApiException } from '@models/error.model';
 import { getErrorMessage } from '@shared/utils/error.util';
 import { LoggerService } from '@services/logger.service';
+import { DEFAULT_TIMEOUT_MS } from '@shared/utils/constants';
 
 export interface InvokeOptions {
   suppressError?: boolean;
   timeoutMs?: number;
 }
-
-const DEFAULT_TIMEOUT_MS = 10000;
 
 @Injectable({
   providedIn: 'root',
