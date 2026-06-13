@@ -1,6 +1,4 @@
 /* sys lib */
-use std::process::Command;
-
 use crate::helpers::{run_command_ignore_error, run_command_raw, stderr_string, stdout_string};
 use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 

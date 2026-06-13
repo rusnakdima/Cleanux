@@ -554,7 +554,6 @@ dependencies = [
  "env_logger",
  "flate2",
  "log",
- "parking_lot",
  "rayon",
  "rusqlite",
  "serde",
@@ -567,6 +566,7 @@ dependencies = [
  "tauri-plugin-fs",
  "tauri-plugin-mcp-bridge",
  "tauri-plugin-opener",
+ "tempfile",
  "thiserror 1.0.69",
  "walkdir",
 ]

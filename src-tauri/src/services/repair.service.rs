@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::helpers::{home_dir, pkexec, run_command_ignore_error, stderr_string, stdout_string};
+use crate::helpers::{home_dir, stderr_string, stdout_string};
 use crate::models::{DataValue, ResponseModel, ResponseStatus};
 use walkdir::WalkDir;
 
