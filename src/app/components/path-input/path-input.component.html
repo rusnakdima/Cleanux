@@ -1,0 +1,17 @@
+<div class="path-input-wrapper">
+  <input
+    type="text"
+    [value]="path()"
+    [placeholder]="placeholder()"
+    class="input flex-1"
+    (keydown.enter)="scan.emit(path())"
+  />
+  <button (click)="scan.emit(path())" [disabled]="loading() || !path()" class="btn btn-primary">
+    @if (loading()) {
+      <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+    } @else {
+      <mat-icon class="icon-sm" fontIcon="search" />
+      Scan
+    }
+  </button>
+</div>

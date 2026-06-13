@@ -1,0 +1,101 @@
+.toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--bg-elevated, #3f3f46);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.light .toggle-track {
+  background: var(--bg-elevated-light, #e4e4e7);
+}
+
+.toggle-knob {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--text-muted, #a1a1aa);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.light .toggle-knob {
+  background: var(--text-muted-light, #71717a);
+}
+
+.toggle-checked {
+  background: var(--color-primary, #06b6d4);
+}
+
+.light .toggle-checked {
+  background: var(--color-primary-light, #0891b2);
+}
+
+.toggle-checked .toggle-knob {
+  background: var(--text-inverse, #ffffff);
+  transform: translateX(100%);
+}
+
+.light .toggle-checked .toggle-knob {
+  background: var(--text-inverse-light, #ffffff);
+}
+
+.toggle-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-disabled .toggle-knob {
+  background: var(--text-disabled, #71717a);
+}
+
+.light .toggle-disabled .toggle-knob {
+  background: var(--text-disabled-light, #a1a1aa);
+}
+
+.toggle-sm {
+  width: 32px;
+  height: 18px;
+  padding: 2px;
+}
+
+.toggle-sm .toggle-knob {
+  width: 14px;
+  height: 14px;
+}
+
+.toggle-sm.toggle-checked .toggle-knob {
+  transform: translateX(14px);
+}
+
+.toggle-md {
+  width: 44px;
+  height: 24px;
+  padding: 3px;
+}
+
+.toggle-md .toggle-knob {
+  width: 18px;
+  height: 18px;
+}
+
+.toggle-md.toggle-checked .toggle-knob {
+  transform: translateX(20px);
+}
+
+.toggle-lg {
+  width: 56px;
+  height: 30px;
+  padding: 4px;
+}
+
+.toggle-lg .toggle-knob {
+  width: 22px;
+  height: 22px;
+}
+
+.toggle-lg.toggle-checked .toggle-knob {
+  transform: translateX(26px);
+}

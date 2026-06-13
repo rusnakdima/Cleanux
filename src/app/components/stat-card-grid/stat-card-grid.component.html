@@ -1,0 +1,11 @@
+@for (card of cards(); track card.label) {
+  <div class="stat-card matte-surface border-trace">
+    <div class="stat-icon" [style.background]="getAccentGradient(card.color)">
+      <mat-icon class="text-white" [fontIcon]="card.icon" />
+    </div>
+    <div class="stat-content">
+      <span class="stat-label">{{ card.label }}</span>
+      <span class="stat-value">{{ card.value }}</span>
+    </div>
+  </div>
+}
