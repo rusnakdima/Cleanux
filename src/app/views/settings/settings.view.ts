@@ -91,11 +91,11 @@ export class SettingsView implements OnDestroy {
   }
 
   onIntervalChange(): void {
-    console.log('Interval changed');
+    this.logger.logDebug('view', 'settings', 'onIntervalChange', 'Interval changed');
   }
 
   onCleaningTypeChange(): void {
-    console.log('Cleaning type changed');
+    this.logger.logDebug('view', 'settings', 'onCleaningTypeChange', 'Cleaning type changed');
   }
 
   async saveSchedule() {

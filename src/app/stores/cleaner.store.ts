@@ -5,6 +5,7 @@ import { BackupService } from '@services/backup.service';
 import { PackageManagerService } from '@services/package-manager.service';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { LoggerService } from '@services/logger.service';
 import {
   CacheFileItem,
   TrashFileItem,
@@ -24,6 +25,7 @@ export class CleanerStore {
   private packageManagerService = inject(PackageManagerService);
   private notification = inject(NotificationService);
   private confirmDialogService = inject(ConfirmDialogService);
+  private logger = inject(LoggerService);
 
   readonly cacheData = signal<CacheFileItem[]>([]);
   readonly filteredCacheData = signal<CacheFileItem[]>([]);
@@ -262,7 +264,13 @@ export class CleanerStore {
         this.packageCacheData.set(packages);
       }
     } catch (error: unknown) {
-      console.error(`Failed to load ${tab} data:`, error);
+      this.logger.logError(
+        'store',
+        'CleanerStore',
+        'loadActiveTabData',
+        `Failed to load ${tab} data`,
+        error as Error
+      );
     } finally {
       this.loading.set(false);
     }
@@ -280,7 +288,13 @@ export class CleanerStore {
       this.cacheHasMore.set(result.has_more);
       this.cacheTotal.set(result.total);
     } catch (error: unknown) {
-      console.error('Failed to load more cache data:', error);
+      this.logger.logError(
+        'store',
+        'CleanerStore',
+        'loadMoreCache',
+        'Failed to load more cache data',
+        error as Error
+      );
     } finally {
       this.loading.set(false);
     }
@@ -346,7 +360,13 @@ export class CleanerStore {
       await this.backupService.createBackup(filesToClear, archivePath);
       backupCreated = true;
     } catch (error) {
-      console.warn('Failed to create backup, proceeding with deletion:', error);
+      this.logger.logWarn(
+        'store',
+        'cleaner',
+        'createBackup',
+        'Failed to create backup, proceeding with deletion',
+        error instanceof Error ? error : new Error(String(error))
+      );
     }
 
     try {

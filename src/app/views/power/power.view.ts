@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 /* services */
 import { MonitorStore } from '@stores/monitor.store';
 import { PowerService } from '@services/power.service';
+import { LoggerService } from '@services/logger.service';
 import { BatteryInfo, PowerProfile, ThermalInfo } from '@models/power.model';
 
 @Component({
@@ -23,6 +24,7 @@ import { BatteryInfo, PowerProfile, ThermalInfo } from '@models/power.model';
 export class PowerView implements OnInit {
   protected monitorStore = inject(MonitorStore);
   private powerService = inject(PowerService);
+  private logger = inject(LoggerService);
 
   batteryInfo = signal<BatteryInfo | null>(null);
   powerProfiles = signal<PowerProfile[]>([]);
@@ -75,7 +77,13 @@ export class PowerView implements OnInit {
 
       this.thermalInfo.set(thermal);
     } catch (e) {
-      console.error('Failed to load power data:', e);
+      this.logger.logError(
+        'view',
+        'PowerView',
+        'loadPowerData',
+        'Failed to load power data',
+        e as Error
+      );
     }
   }
 
@@ -89,7 +97,13 @@ export class PowerView implements OnInit {
       }));
       this.powerProfiles.set(updated);
     } catch (e) {
-      console.error('Failed to set power profile:', e);
+      this.logger.logError(
+        'view',
+        'PowerView',
+        'setProfile',
+        'Failed to set power profile',
+        e as Error
+      );
     }
   }
 
