@@ -43,6 +43,16 @@
   --accent-glow: rgba(6, 182, 212, 0.3);
   --accent-light: rgba(6, 182, 212, 0.1);
 
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --bg-surface: #18181b;
+  --bg-elevated: #222228;
+  --border-color: #3f3f46;
+
+  --scrollbar-thumb: #3f3f46;
+  --scrollbar-thumb-hover: #52525b;
+
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 400ms ease;
@@ -53,6 +63,20 @@
   --accent-secondary: #7c3aed;
   --accent-glow: rgba(8, 145, 178, 0.3);
   --accent-light: rgba(8, 145, 178, 0.1);
+
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --bg-surface: #f4f4f5;
+  --bg-elevated: #e4e4e7;
+  --border-color: #d4d4d8;
+}
+
+.dark {
+  --accent: #06b6d4;
+  --accent-secondary: #8b5cf6;
+  --accent-glow: rgba(6, 182, 212, 0.3);
+  --accent-light: rgba(6, 182, 212, 0.1);
 }
 
 html {
@@ -77,20 +101,20 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #222228;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: var(--scrollbar-thumb);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: var(--scrollbar-thumb-hover);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #71717a;
+  background: var(--scrollbar-thumb-hover);
 }
 
 mat-icon {
@@ -100,11 +124,31 @@ mat-icon {
   font-family: "Material Icons Outlined" !important;
 }
 
-.icon-xs { font-size: 1rem !important; width: 1rem !important; height: 1rem !important; }
-.icon-sm { font-size: 1.25rem !important; width: 1.25rem !important; height: 1.25rem !important; }
-.icon-base { font-size: 1.5rem !important; width: 1.5rem !important; height: 1.5rem !important; }
-.icon-lg { font-size: 2rem !important; width: 2rem !important; height: 2rem !important; }
-.icon-xl { font-size: 2.5rem !important; width: 2.5rem !important; height: 2.5rem !important; }
+.icon-xs {
+  font-size: 1rem !important;
+  width: 1rem !important;
+  height: 1rem !important;
+}
+.icon-sm {
+  font-size: 1.25rem !important;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+.icon-base {
+  font-size: 1.5rem !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+.icon-lg {
+  font-size: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+}
+.icon-xl {
+  font-size: 2.5rem !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
 
 @layer components {
   .glass-surface {
@@ -228,7 +272,7 @@ mat-icon {
 
   .btn-primary {
     background: var(--accent);
-    color: white;
+    color: var(--text-primary);
     box-shadow: 0 0 10px var(--accent-glow);
   }
 
@@ -271,8 +315,17 @@ mat-icon {
   }
 
   .btn-danger:hover:not(:disabled) {
-    @apply bg-red-500 text-white;
+    @apply bg-red-500;
+    color: var(--text-primary);
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  }
+
+  .light .btn-danger {
+    @apply bg-red-500/15 text-red-600 border-red-500/30;
+  }
+
+  .light .btn-danger:hover:not(:disabled) {
+    @apply bg-red-500 text-white;
   }
 
   .btn-icon {
@@ -314,12 +367,24 @@ mat-icon {
     @apply bg-green-500/15 text-green-500 border border-green-500/30;
   }
 
+  .light .badge-success {
+    @apply bg-green-500/15 text-green-600 border-green-500/30;
+  }
+
   .badge-warning {
     @apply bg-orange-500/15 text-orange-500 border border-orange-500/30;
   }
 
+  .light .badge-warning {
+    @apply bg-orange-500/15 text-orange-600 border-orange-500/30;
+  }
+
   .badge-error {
     @apply bg-red-500/15 text-red-500 border border-red-500/30;
+  }
+
+  .light .badge-error {
+    @apply bg-red-500/15 text-red-600 border-red-500/30;
   }
 
   .stat-card {
@@ -434,11 +499,13 @@ mat-icon {
     @apply w-full border-collapse;
   }
 
-  .table th, .table td {
+  .table th,
+  .table td {
     @apply px-4 py-3 text-left border-b border-zinc-700;
   }
 
-  .light .table th, .light .table td {
+  .light .table th,
+  .light .table td {
     @apply border-zinc-300;
   }
 
@@ -470,7 +537,7 @@ mat-icon {
   }
 
   .glow-text {
-    text-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+    text-shadow: 0 0 20px var(--accent-glow);
   }
 
   .toast {
@@ -504,8 +571,13 @@ mat-icon {
   }
 
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   .terminal-window {
@@ -554,8 +626,16 @@ mat-icon {
     @apply text-emerald-400 font-bold;
   }
 
+  .light .terminal-success {
+    @apply text-emerald-600;
+  }
+
   .terminal-exec {
     @apply text-cyan-400 font-bold;
+  }
+
+  .light .terminal-exec {
+    @apply text-cyan-600;
   }
 
   .terminal-info {
@@ -574,8 +654,16 @@ mat-icon {
     @apply bg-emerald-500/15 text-emerald-500 border border-emerald-500/30;
   }
 
+  .light .danger-low {
+    @apply bg-emerald-500/15 text-emerald-600 border-emerald-500/30;
+  }
+
   .danger-high {
     @apply bg-orange-500/15 text-orange-500 border border-orange-500/30;
+  }
+
+  .light .danger-high {
+    @apply bg-orange-500/15 text-orange-600 border-orange-500/30;
   }
 
   .command-block {
@@ -594,7 +682,7 @@ mat-icon {
     transform: translateX(-50%);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.4),
-      0 0 1px rgba(6, 182, 212, 0.3);
+      0 0 1px var(--accent-glow);
   }
 
   .light .bottom-nav {
@@ -603,21 +691,21 @@ mat-icon {
 
   .bottom-nav-item {
     @apply flex flex-col items-center justify-center gap-0.5 px-4 py-2 rounded-2xl no-underline transition-all duration-150;
-    color: #64748b;
+    color: var(--text-muted);
   }
 
   .light .bottom-nav-item {
-    color: #94a3b8;
+    color: var(--text-secondary);
   }
 
   .bottom-nav-item:hover {
-    background: #222228;
-    color: #94a3b8;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
   }
 
   .light .bottom-nav-item:hover {
-    background: #e2e8f0;
-    color: #475569;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
   }
 
   .bottom-nav-item .icon-base {
@@ -657,7 +745,8 @@ mat-icon {
     padding-right: 2.5rem;
   }
 
-  .light select.input, .light select {
+  .light select.input,
+  .light select {
     @apply bg-white text-zinc-900 border-zinc-300;
   }
 
@@ -673,7 +762,8 @@ mat-icon {
     @apply bg-zinc-950 text-white;
   }
 
-  .light select.input option, .light select option {
+  .light select.input option,
+  .light select option {
     @apply bg-white text-zinc-900;
   }
 
@@ -696,7 +786,7 @@ mat-icon {
   .hero-card::before {
     content: "";
     @apply absolute top-0 left-0 right-0 h-px;
-    background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.5), transparent);
+    background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
   }
 
   .category-card {
@@ -748,9 +838,17 @@ mat-icon {
     animation: fadeIn 0.2s ease-out;
   }
 
+  .light .modal-overlay {
+    @apply bg-black/50;
+  }
+
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .modal-content {
@@ -774,8 +872,12 @@ mat-icon {
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideIn {
@@ -790,29 +892,23 @@ mat-icon {
   }
 
   .skeleton {
-    background: linear-gradient(
-      90deg,
-      #18181c 25%,
-      #222228 50%,
-      #18181c 75%
-    );
+    background: linear-gradient(90deg, #18181c 25%, #222228 50%, #18181c 75%);
     background-size: 200% 100%;
     @apply rounded-xl;
     animation: skeleton-loading 1.5s infinite;
   }
 
   .light .skeleton {
-    background: linear-gradient(
-      90deg,
-      #f1f5f9 25%,
-      #e2e8f0 50%,
-      #f1f5f9 75%
-    );
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   }
 
   @keyframes skeleton-loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 
   .matte-surface {
@@ -825,7 +921,11 @@ mat-icon {
 
   .border-trace {
     position: relative;
-    border: none !important;
+    border: 1px solid #52525b;
+  }
+
+  .light .border-trace {
+    border-color: #d4d4d8;
   }
 
   .border-trace::before {
@@ -834,7 +934,12 @@ mat-icon {
     inset: -1px;
     border-radius: inherit;
     padding: 2px;
-    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-secondary) 50%, var(--accent) 100%);
+    background: linear-gradient(
+      90deg,
+      var(--accent) 0%,
+      var(--accent-secondary) 50%,
+      var(--accent) 100%
+    );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
@@ -850,37 +955,99 @@ mat-icon {
   }
 
   @keyframes border-draw {
-    0% { clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0); }
-    3.125% { clip-path: polygon(0 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 0 0); }
-    6.25% { clip-path: polygon(0 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 0 0); }
-    9.375% { clip-path: polygon(0 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 0 0); }
-    12.5% { clip-path: polygon(0 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 0 0); }
-    15.625% { clip-path: polygon(0 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 0 0); }
-    18.75% { clip-path: polygon(0 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 0 0); }
-    21.875% { clip-path: polygon(0 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 0 0); }
-    25% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 0 0); }
-    28.125% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 0 12.5%); }
-    31.25% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 25%, 0 25%); }
-    34.375% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 0 37.5%); }
-    37.5% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 50%, 0 50%); }
-    40.625% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 0 62.5%); }
-    43.75% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 75%, 0 75%); }
-    46.875% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 87.5%, 0 87.5%); }
-    50% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 100%, 0 100%); }
-    53.125% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 100% 12.5%, 100% 100%, 0 100%); }
-    56.25% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 25%, 100% 25%, 100% 100%, 0 100%); }
-    59.375% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 100% 37.5%, 100% 100%, 0 100%); }
-    62.5% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 50%, 100% 50%, 100% 100%, 0 100%); }
-    65.625% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 100% 62.5%, 100% 100%, 0 100%); }
-    68.75% { clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 75%, 100% 75%, 100% 100%, 0 100%); }
-    71.875% { clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%); }
-    81.25% { clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%); }
-    84.375% { clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 0, 0 0, 100% 100%, 0 100%); }
-    87.5% { clip-path: polygon(0 0, 100% 0, 100% 75%, 0 75%, 0 0, 0 0, 100% 100%, 0 100%); }
-    90.625% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
-    93.75% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
-    96.875% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
-    100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0); }
+    0% {
+      clip-path: polygon(0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0);
+    }
+    3.125% {
+      clip-path: polygon(0 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 12.5% 0, 0 0);
+    }
+    6.25% {
+      clip-path: polygon(0 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 25% 0, 0 0);
+    }
+    9.375% {
+      clip-path: polygon(0 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 37.5% 0, 0 0);
+    }
+    12.5% {
+      clip-path: polygon(0 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 50% 0, 0 0);
+    }
+    15.625% {
+      clip-path: polygon(0 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 62.5% 0, 0 0);
+    }
+    18.75% {
+      clip-path: polygon(0 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 75% 0, 0 0);
+    }
+    21.875% {
+      clip-path: polygon(0 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 87.5% 0, 0 0);
+    }
+    25% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 0 0);
+    }
+    28.125% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 0 12.5%);
+    }
+    31.25% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 25%, 0 25%);
+    }
+    34.375% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 0 37.5%);
+    }
+    37.5% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 50%, 0 50%);
+    }
+    40.625% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 0 62.5%);
+    }
+    43.75% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 75%, 0 75%);
+    }
+    46.875% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 87.5%, 0 87.5%);
+    }
+    50% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 0, 100% 100%, 0 100%);
+    }
+    53.125% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 12.5%, 100% 12.5%, 100% 100%, 0 100%);
+    }
+    56.25% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 25%, 100% 25%, 100% 100%, 0 100%);
+    }
+    59.375% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 37.5%, 100% 37.5%, 100% 100%, 0 100%);
+    }
+    62.5% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 50%, 100% 50%, 100% 100%, 0 100%);
+    }
+    65.625% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 62.5%, 100% 62.5%, 100% 100%, 0 100%);
+    }
+    68.75% {
+      clip-path: polygon(0 0, 100% 0, 100% 0, 100% 0, 100% 75%, 100% 75%, 100% 100%, 0 100%);
+    }
+    71.875% {
+      clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%);
+    }
+    81.25% {
+      clip-path: polygon(0 0, 100% 0, 100% 25%, 0 25%, 0 0, 0 0, 100% 100%, 0 100%);
+    }
+    84.375% {
+      clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%, 0 0, 0 0, 100% 100%, 0 100%);
+    }
+    87.5% {
+      clip-path: polygon(0 0, 100% 0, 100% 75%, 0 75%, 0 0, 0 0, 100% 100%, 0 100%);
+    }
+    90.625% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
+    }
+    93.75% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
+    }
+    96.875% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
+    }
+    100% {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, 0 0, 0 0, 0 0);
+    }
   }
 }
 
