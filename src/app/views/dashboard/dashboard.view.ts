@@ -162,28 +162,25 @@ export class DashboardView implements OnInit, OnDestroy {
     }
   }
 
-  handleQuickAction(action: string) {
+  async handleQuickAction(action: string) {
     switch (action) {
       case 'scan':
         this.startScan();
         break;
       case 'clean-cache':
-        this.fileService.clearCache().then(() => {
-          this.addRecentActivity('cache', 'Cache cleared', this.cacheSize());
-          this.calculateJunkSize();
-        });
+        await this.fileService.clearCache();
+        this.addRecentActivity('cache', 'Cache cleared', this.cacheSize());
+        this.calculateJunkSize();
         break;
       case 'clean-trash':
-        this.fileService.clearTrash().then(() => {
-          this.addRecentActivity('trash', 'Trash emptied', this.trashSize());
-          this.calculateJunkSize();
-        });
+        await this.fileService.clearTrash();
+        this.addRecentActivity('trash', 'Trash emptied', this.trashSize());
+        this.calculateJunkSize();
         break;
       case 'clean-logs':
-        this.fileService.clearAllLogs().then(() => {
-          this.addRecentActivity('logs', 'Logs cleared', this.logSize());
-          this.calculateJunkSize();
-        });
+        await this.fileService.clearAllLogs();
+        this.addRecentActivity('logs', 'Logs cleared', this.logSize());
+        this.calculateJunkSize();
         break;
     }
   }
@@ -219,43 +216,22 @@ export class DashboardView implements OnInit, OnDestroy {
 
   async calculateJunkSize() {
     try {
-      const p1 = this.fileService
-        .getCacheSummary()
-        .then((res) => {
-          this.cacheSize.set(res.totalSize);
-          this.cacheCount.set(res.fileCount);
-          return res;
-        })
-        .catch((e) => this.monitorStore.error.set('Failed to get cache summary'));
-      const p2 = this.fileService
-        .getTrashSummary()
-        .then((res) => {
-          this.trashSize.set(res.totalSize);
-          this.trashCount.set(res.fileCount);
-          return res;
-        })
-        .catch((e) => this.monitorStore.error.set('Failed to get trash summary'));
-      const p3 = this.fileService
-        .getLogSummary()
-        .then((res) => {
-          this.logSize.set(res.totalSize);
-          this.logCount.set(res.fileCount);
-          return res;
-        })
-        .catch((e) => this.monitorStore.error.set('Failed to get log summary'));
-      const p4 = this.fileService
-        .getLargeFilesSummary()
-        .then((res) => {
-          this.largeFileSize.set(res.totalSize);
-          this.largeFilesCount.set(res.fileCount);
-          return res;
-        })
-        .catch((e) => this.monitorStore.error.set('Failed to get large files summary'));
-
-      return Promise.all([p1, p2, p3, p4]);
+      const [cacheRes, trashRes, logRes, largeFilesRes] = await Promise.all([
+        this.fileService.getCacheSummary(),
+        this.fileService.getTrashSummary(),
+        this.fileService.getLogSummary(),
+        this.fileService.getLargeFilesSummary(),
+      ]);
+      this.cacheSize.set(cacheRes.totalSize);
+      this.cacheCount.set(cacheRes.fileCount);
+      this.trashSize.set(trashRes.totalSize);
+      this.trashCount.set(trashRes.fileCount);
+      this.logSize.set(logRes.totalSize);
+      this.logCount.set(logRes.fileCount);
+      this.largeFileSize.set(largeFilesRes.totalSize);
+      this.largeFilesCount.set(largeFilesRes.fileCount);
     } catch (error) {
       this.monitorStore.error.set('Failed to calculate junk size');
-      return Promise.resolve();
     }
   }
 

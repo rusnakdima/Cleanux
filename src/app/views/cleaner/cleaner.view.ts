@@ -12,7 +12,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 /* services */
 import { FileService } from '@services/file.service';
 import { CleanerStore } from '@stores/cleaner.store';
-import { LogAnalyzerService } from '@services/log-analyzer.service';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 
@@ -24,7 +23,6 @@ import { FilePreviewData } from '@models/file-preview.model';
 /* models */
 import { ListColumn, ListOptions } from '@models/data-list.model';
 import { CacheFileItem, LogFileItem, TrashFileItem } from '@services/file.service';
-import { LogSummary, LogCategorySummary, LogEntry } from '@models/log-analyzer.model';
 import { formatSize } from '@shared/utils/format.util';
 import { getErrorMessage } from '@shared/utils/error.util';
 
@@ -56,7 +54,6 @@ export type PackageManagerRow = {
 export class CleanerView implements OnInit {
   readonly store = inject(CleanerStore);
   private fileService = inject(FileService);
-  private logAnalyzerService = inject(LogAnalyzerService);
   private notification = inject(NotificationService);
   private confirmDialogService = inject(ConfirmDialogService);
   private route = inject(ActivatedRoute);
@@ -65,10 +62,6 @@ export class CleanerView implements OnInit {
 
   previewData = signal<FilePreviewData | null>(null);
   errorPreview = signal<string | null>(null);
-
-  logSummary = signal<LogSummary | null>(null);
-  selectedLogCategory = signal<string>('all');
-  cleanDays = signal<number>(30);
 
   cacheColumns: ListColumn[] = [
     { key: 'path', primary: true, icon: 'cached', truncate: true, sortable: true },
@@ -85,6 +78,8 @@ export class CleanerView implements OnInit {
     { key: 'path', primary: true, icon: 'description', truncate: true, sortable: true },
     { key: 'size', format: 'size', align: 'right', sortable: true },
   ];
+
+  filteredLogEntries = () => this.store.filteredLogData();
 
   packageColumns: ListColumn[] = [
     {
@@ -157,63 +152,6 @@ export class CleanerView implements OnInit {
   async onTabChange(tab: 'cache' | 'trash' | 'logs' | 'packages'): Promise<void> {
     this.store.setActiveTab(tab);
     await this.store.loadActiveTabData();
-    if (tab === 'logs') {
-      await this.loadLogSummary();
-    }
-  }
-
-  async loadLogSummary(): Promise<void> {
-    try {
-      const summary = await this.logAnalyzerService.getLogSummary();
-      this.logSummary.set(summary);
-    } catch (error) {
-      this.notification.cleanError('load log summary', error);
-    }
-  }
-
-  async cleanOldLogs(): Promise<void> {
-    const days = this.cleanDays();
-    if (days <= 0) return;
-    const confirmed = await this.confirmDialogService.confirm({
-      title: 'Clear Old Logs',
-      message: `Clear all logs older than ${days} days?`,
-    });
-    if (!confirmed) return;
-    try {
-      const result = await this.logAnalyzerService.cleanOldLogs(days);
-      this.notification.success(result);
-      await this.loadLogSummary();
-    } catch (error: unknown) {
-      this.notification.error('Failed to clean logs: ' + getErrorMessage(error), error);
-    }
-  }
-
-  filteredLogEntries(): LogEntry[] {
-    const summary = this.logSummary();
-    if (!summary) return [];
-    if (this.selectedLogCategory() === 'all') {
-      return [
-        ...summary.system.entries,
-        ...summary.application.entries,
-        ...summary.security.entries,
-        ...summary.hardware.entries,
-      ];
-    }
-    const cat = summary[this.selectedLogCategory() as keyof LogSummary];
-    return cat ? cat.entries : [];
-  }
-
-  getSeverityColor(severity: string): string {
-    switch (severity) {
-      case 'error':
-        return 'text-red-500';
-      case 'warning':
-        return 'text-yellow-500';
-      case 'info':
-        return 'text-blue-500';
-      default:
-        return 'text-gray-500';
-    }
   }
 
   onPackageAction(event: { action: string; item: PackageManagerRow }): void {

@@ -21,513 +21,75 @@
 
   <mat-tab-group (selectedIndexChange)="onTabChange($event)" class="residue-tabs">
     <mat-tab label="User Configs ({{ configsCount() }})">
-      <div class="pt-4">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
-            <div
-              class="search-controls-bar"
-              (mouseenter)="onSearchHoverEnter()"
-              (mouseleave)="onSearchHoverLeave()"
-            >
-              @if (!searchVisible()) {
-                <button class="search-toggle-btn" (click)="showSearchInput()">
-                  <mat-icon class="toggle-icon" fontIcon="search" />
-                </button>
-              } @else {
-                <div class="search-input-wrapper">
-                  <mat-icon class="search-icon" fontIcon="search" />
-                  <input
-                    type="text"
-                    class="search-input"
-                    placeholder="Search configs..."
-                    [value]="searchQuery()"
-                    (input)="onSearchChange($any($event.target).value)"
-                    (focus)="onSearchFocus()"
-                    (blur)="onSearchBlur()"
-                  />
-                  @if (searchQuery()) {
-                    <button (click)="clearSearch()" class="search-clear-btn">
-                      <mat-icon class="clear-icon" fontIcon="close" />
-                    </button>
-                  }
-                  <button (click)="hideSearchInput()" class="search-close-btn">
-                    <mat-icon class="close-icon" fontIcon="close" />
-                  </button>
-                </div>
-              }
-            </div>
-
-            @if (configsData().length > 0) {
-              <label
-                class="custom-checkbox select-all-checkbox"
-                [matTooltip]="configsAllSelected() ? 'Deselect All' : 'Select All'"
-              >
-                <input
-                  type="checkbox"
-                  [checked]="configsAllSelected()"
-                  (change)="selectAll(configsData(), $any($event.target).checked)"
-                />
-                <span class="checkmark" [class.indeterminate]="configsIndeterminate()">
-                  @if (configsIndeterminate()) {
-                    <mat-icon class="check-icon" fontIcon="remove" />
-                  } @else {
-                    <mat-icon class="check-icon" fontIcon="check" />
-                  }
-                </span>
-              </label>
-            }
-
-            <button (click)="loadConfigs()" class="btn btn-ghost" matTooltip="Refresh">
-              <mat-icon fontIcon="refresh" />
-            </button>
-          </div>
-          @if (getSelectedCount() > 0) {
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-zinc-400 dark:text-zinc-500"
-                >{{ getSelectedCount() }} selected ({{
-                  formatSize(getSelectedSize(configsData()))
-                }})</span
-              >
-              <button (click)="onPreviewClean()" class="btn btn-primary">Preview Clean</button>
-              <button (click)="onCleanSelected()" class="btn btn-danger">Clean Selected</button>
-            </div>
-          }
-        </div>
-
-        @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          </div>
-        } @else if (configsData().length === 0) {
-          <div
-            class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400"
-          >
-            <mat-icon class="icon-4xl mb-4" fontIcon="folder_open" />
-            <p class="text-lg font-medium">No config residues found</p>
-          </div>
-        } @else {
-          <div class="max-h-[calc(100vh-500px)] overflow-auto">
-            <div class="space-y-2">
-              @for (item of paginatedConfigs(); track item.path) {
-                <div
-                  class="glass-card p-4 flex items-center justify-between hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
-                  [class.bg-indigo-500/20]="isSelected(item.path)"
-                  (click)="toggleSelection(item.path)"
-                >
-                  <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="folder" />
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="font-medium text-white dark:text-zinc-900 truncate"
-                        [matTooltip]="item.app_name"
-                        >{{ item.app_name }}</span
-                      >
-                      <span
-                        class="text-xs text-zinc-400 dark:text-zinc-500 truncate"
-                        [matTooltip]="item.path"
-                        >{{ item.path }}</span
-                      >
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <span
-                      class="px-2 py-1 rounded text-xs font-medium"
-                      [class]="getResidueTypeColor(item)"
-                    >
-                      {{ getResidueTypeLabel(item.residue_type) }}
-                    </span>
-                    @if (item.detected_as_uninstalled) {
-                      <span class="px-2 py-1 rounded text-xs bg-error/10 text-error"
-                        >Uninstalled</span
-                      >
-                    }
-                    <span class="text-sm font-medium text-zinc-400 dark:text-zinc-500">{{
-                      formatSize(item.size)
-                    }}</span>
-                    <mat-icon
-                      class="text-success"
-                      [class.opacity-0]="!isSelected(item.path)"
-                      fontIcon="check_circle"
-                    />
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-          <app-pagination
-            [totalItems]="configsData().length"
-            [currentPage]="configsPage()"
-            [pageSize]="configsPageSize()"
-            (pageChange)="onConfigsPageChange($event)"
-            (pageSizeChange)="onConfigsPageSizeChange($event)"
-          />
-        }
-      </div>
+      <app-residue-tab
+        tabType="configs"
+        [data]="configs()"
+        [loading]="loading()"
+        [selectedKeys]="selectedConfigs()"
+        [currentPage]="configsPage()"
+        [pageSize]="configsPageSize()"
+        [totalItems]="configs().length"
+        (refresh)="loadConfigs()"
+        (previewClean)="onPreviewClean()"
+        (cleanSelected)="onCleanSelected()"
+        (pageChange)="onConfigsPageChange($event)"
+        (pageSizeChange)="onConfigsPageSizeChange($event)"
+        (toggleSelectionEvent)="onConfigsToggle($event)"
+        (selectAllEvent)="onConfigsSelectAll($event)"
+      />
     </mat-tab>
 
     <mat-tab label="User Data ({{ dataCount() }})">
-      <div class="pt-4">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
-            <div
-              class="search-controls-bar"
-              (mouseenter)="onSearchHoverEnter()"
-              (mouseleave)="onSearchHoverLeave()"
-            >
-              @if (!searchVisible()) {
-                <button class="search-toggle-btn" (click)="showSearchInput()">
-                  <mat-icon class="toggle-icon" fontIcon="search" />
-                </button>
-              } @else {
-                <div class="search-input-wrapper">
-                  <mat-icon class="search-icon" fontIcon="search" />
-                  <input
-                    type="text"
-                    class="search-input"
-                    placeholder="Search data..."
-                    [value]="searchQuery()"
-                    (input)="onSearchChange($any($event.target).value)"
-                    (focus)="onSearchFocus()"
-                    (blur)="onSearchBlur()"
-                  />
-                  @if (searchQuery()) {
-                    <button (click)="clearSearch()" class="search-clear-btn">
-                      <mat-icon class="clear-icon" fontIcon="close" />
-                    </button>
-                  }
-                  <button (click)="hideSearchInput()" class="search-close-btn">
-                    <mat-icon class="close-icon" fontIcon="close" />
-                  </button>
-                </div>
-              }
-            </div>
-
-            @if (dataData().length > 0) {
-              <label
-                class="custom-checkbox select-all-checkbox"
-                [matTooltip]="dataAllSelected() ? 'Deselect All' : 'Select All'"
-              >
-                <input
-                  type="checkbox"
-                  [checked]="dataAllSelected()"
-                  (change)="selectAll(dataData(), $any($event.target).checked)"
-                />
-                <span class="checkmark" [class.indeterminate]="dataIndeterminate()">
-                  @if (dataIndeterminate()) {
-                    <mat-icon class="check-icon" fontIcon="remove" />
-                  } @else {
-                    <mat-icon class="check-icon" fontIcon="check" />
-                  }
-                </span>
-              </label>
-            }
-
-            <button (click)="loadData()" class="btn btn-ghost" matTooltip="Refresh">
-              <mat-icon fontIcon="refresh" />
-            </button>
-          </div>
-          @if (getSelectedCount() > 0) {
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-zinc-400 dark:text-zinc-500"
-                >{{ getSelectedCount() }} selected ({{
-                  formatSize(getSelectedSize(dataData()))
-                }})</span
-              >
-              <button (click)="onPreviewClean()" class="btn btn-primary">Preview Clean</button>
-              <button (click)="onCleanSelected()" class="btn btn-danger">Clean Selected</button>
-            </div>
-          }
-        </div>
-
-        @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          </div>
-        } @else if (dataData().length === 0) {
-          <div
-            class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400"
-          >
-            <mat-icon class="icon-4xl mb-4" fontIcon="storage" />
-            <p class="text-lg font-medium">No data residues found</p>
-          </div>
-        } @else {
-          <div class="max-h-[calc(100vh-500px)] overflow-auto">
-            <div class="space-y-2">
-              @for (item of paginatedData(); track item.path) {
-                <div
-                  class="glass-card p-4 flex items-center justify-between hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
-                  [class.bg-indigo-500/20]="isSelected(item.path)"
-                  (click)="toggleSelection(item.path)"
-                >
-                  <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="folder" />
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="font-medium text-white dark:text-zinc-900 truncate"
-                        [matTooltip]="item.app_name"
-                        >{{ item.app_name }}</span
-                      >
-                      <span
-                        class="text-xs text-zinc-400 dark:text-zinc-500 truncate"
-                        [matTooltip]="item.path"
-                        >{{ item.path }}</span
-                      >
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <span
-                      class="px-2 py-1 rounded text-xs font-medium"
-                      [class]="getResidueTypeColor(item)"
-                    >
-                      {{ getResidueTypeLabel(item.residue_type) }}
-                    </span>
-                    @if (item.detected_as_uninstalled) {
-                      <span class="px-2 py-1 rounded text-xs bg-error/10 text-error"
-                        >Uninstalled</span
-                      >
-                    }
-                    <span class="text-sm font-medium text-zinc-400 dark:text-zinc-500">{{
-                      formatSize(item.size)
-                    }}</span>
-                    <mat-icon
-                      class="text-success"
-                      [class.opacity-0]="!isSelected(item.path)"
-                      fontIcon="check_circle"
-                    />
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-          <app-pagination
-            [totalItems]="dataData().length"
-            [currentPage]="dataPage()"
-            [pageSize]="dataPageSize()"
-            (pageChange)="onDataPageChange($event)"
-            (pageSizeChange)="onDataPageSizeChange($event)"
-          />
-        }
-      </div>
+      <app-residue-tab
+        tabType="data"
+        [data]="data()"
+        [loading]="loading()"
+        [selectedKeys]="selectedData()"
+        [currentPage]="dataPage()"
+        [pageSize]="dataPageSize()"
+        [totalItems]="data().length"
+        (refresh)="loadData()"
+        (previewClean)="onPreviewClean()"
+        (cleanSelected)="onCleanSelected()"
+        (pageChange)="onDataPageChange($event)"
+        (pageSizeChange)="onDataPageSizeChange($event)"
+        (toggleSelectionEvent)="onDataToggle($event)"
+        (selectAllEvent)="onDataSelectAll($event)"
+      />
     </mat-tab>
 
     <mat-tab label="User Caches ({{ cachesCount() }})">
-      <div class="pt-4">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
-            <div
-              class="search-controls-bar"
-              (mouseenter)="onSearchHoverEnter()"
-              (mouseleave)="onSearchHoverLeave()"
-            >
-              @if (!searchVisible()) {
-                <button class="search-toggle-btn" (click)="showSearchInput()">
-                  <mat-icon class="toggle-icon" fontIcon="search" />
-                </button>
-              } @else {
-                <div class="search-input-wrapper">
-                  <mat-icon class="search-icon" fontIcon="search" />
-                  <input
-                    type="text"
-                    class="search-input"
-                    placeholder="Search caches..."
-                    [value]="searchQuery()"
-                    (input)="onSearchChange($any($event.target).value)"
-                    (focus)="onSearchFocus()"
-                    (blur)="onSearchBlur()"
-                  />
-                  @if (searchQuery()) {
-                    <button (click)="clearSearch()" class="search-clear-btn">
-                      <mat-icon class="clear-icon" fontIcon="close" />
-                    </button>
-                  }
-                  <button (click)="hideSearchInput()" class="search-close-btn">
-                    <mat-icon class="close-icon" fontIcon="close" />
-                  </button>
-                </div>
-              }
-            </div>
-
-            @if (cachesData().length > 0) {
-              <label
-                class="custom-checkbox select-all-checkbox"
-                [matTooltip]="cachesAllSelected() ? 'Deselect All' : 'Select All'"
-              >
-                <input
-                  type="checkbox"
-                  [checked]="cachesAllSelected()"
-                  (change)="selectAll(cachesData(), $any($event.target).checked)"
-                />
-                <span class="checkmark" [class.indeterminate]="cachesIndeterminate()">
-                  @if (cachesIndeterminate()) {
-                    <mat-icon class="check-icon" fontIcon="remove" />
-                  } @else {
-                    <mat-icon class="check-icon" fontIcon="check" />
-                  }
-                </span>
-              </label>
-            }
-
-            <button (click)="loadCaches()" class="btn btn-ghost" matTooltip="Refresh">
-              <mat-icon fontIcon="refresh" />
-            </button>
-          </div>
-          @if (getSelectedCount() > 0) {
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-zinc-400 dark:text-zinc-500"
-                >{{ getSelectedCount() }} selected ({{
-                  formatSize(getSelectedSize(cachesData()))
-                }})</span
-              >
-              <button (click)="onPreviewClean()" class="btn btn-primary">Preview Clean</button>
-              <button (click)="onCleanSelected()" class="btn btn-danger">Clean Selected</button>
-            </div>
-          }
-        </div>
-
-        @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          </div>
-        } @else if (cachesData().length === 0) {
-          <div
-            class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400"
-          >
-            <mat-icon class="icon-4xl mb-4" fontIcon="cached" />
-            <p class="text-lg font-medium">No cache residues found</p>
-          </div>
-        } @else {
-          <div class="max-h-[calc(100vh-500px)] overflow-auto">
-            <div class="space-y-2">
-              @for (item of paginatedCaches(); track item.path) {
-                <div
-                  class="glass-card p-4 flex items-center justify-between hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
-                  [class.bg-indigo-500/20]="isSelected(item.path)"
-                  (click)="toggleSelection(item.path)"
-                >
-                  <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="folder" />
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="font-medium text-white dark:text-zinc-900 truncate"
-                        [matTooltip]="item.app_name"
-                        >{{ item.app_name }}</span
-                      >
-                      <span
-                        class="text-xs text-zinc-400 dark:text-zinc-500 truncate"
-                        [matTooltip]="item.path"
-                        >{{ item.path }}</span
-                      >
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <span
-                      class="px-2 py-1 rounded text-xs font-medium"
-                      [class]="getResidueTypeColor(item)"
-                    >
-                      {{ getResidueTypeLabel(item.residue_type) }}
-                    </span>
-                    @if (item.detected_as_uninstalled) {
-                      <span class="px-2 py-1 rounded text-xs bg-error/10 text-error"
-                        >Uninstalled</span
-                      >
-                    }
-                    <span class="text-sm font-medium text-zinc-400 dark:text-zinc-500">{{
-                      formatSize(item.size)
-                    }}</span>
-                    <mat-icon
-                      class="text-success"
-                      [class.opacity-0]="!isSelected(item.path)"
-                      fontIcon="check_circle"
-                    />
-                  </div>
-                </div>
-              }
-            </div>
-          </div>
-          <app-pagination
-            [totalItems]="cachesData().length"
-            [currentPage]="cachesPage()"
-            [pageSize]="cachesPageSize()"
-            (pageChange)="onCachesPageChange($event)"
-            (pageSizeChange)="onCachesPageSizeChange($event)"
-          />
-        }
-      </div>
+      <app-residue-tab
+        tabType="caches"
+        [data]="caches()"
+        [loading]="loading()"
+        [selectedKeys]="selectedCaches()"
+        [currentPage]="cachesPage()"
+        [pageSize]="cachesPageSize()"
+        [totalItems]="caches().length"
+        (refresh)="loadCaches()"
+        (previewClean)="onPreviewClean()"
+        (cleanSelected)="onCleanSelected()"
+        (pageChange)="onCachesPageChange($event)"
+        (pageSizeChange)="onCachesPageSizeChange($event)"
+        (toggleSelectionEvent)="onCachesToggle($event)"
+        (selectAllEvent)="onCachesSelectAll($event)"
+      />
     </mat-tab>
 
     <mat-tab label="System Orphans ({{ orphanedCount() }})">
-      <div class="pt-4">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-4">
-            <button (click)="loadOrphaned()" class="btn btn-ghost" matTooltip="Refresh">
-              <mat-icon fontIcon="refresh" />
-            </button>
-          </div>
-          @if (getSelectedCount() > 0) {
-            <button (click)="onCleanSelected()" class="btn btn-danger">Clean Selected</button>
-          }
-        </div>
-
-        @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          </div>
-        } @else if (orphanedData().length === 0) {
-          <div
-            class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400"
-          >
-            <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2" />
-            <p class="text-lg font-medium">No orphaned configs found</p>
-          </div>
-        } @else {
-          <div class="max-h-[calc(100vh-500px)] overflow-auto">
-            <div class="space-y-2">
-              @for (item of paginatedOrphaned(); track item.path) {
-                <div
-                  class="glass-card p-4 flex items-center justify-between hover:bg-zinc-700 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
-                  [class.bg-indigo-500/20]="isSelected(item.path)"
-                  (click)="toggleSelection(item.path)"
-                >
-                  <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <mat-icon class="text-zinc-500 dark:text-zinc-400" fontIcon="settings" />
-                    <div class="flex flex-col min-w-0 flex-1">
-                      <span
-                        class="font-medium text-zinc-900 dark:text-white truncate"
-                        [matTooltip]="item.package_name"
-                        >{{ item.package_name }}</span
-                      >
-                      <span
-                        class="text-xs text-zinc-400 dark:text-zinc-500 truncate"
-                        [matTooltip]="item.path"
-                        >{{ item.path }}</span
-                      >
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-4">
-                    <span
-                      class="px-2 py-1 rounded text-xs bg-slate-500/10 text-zinc-400 dark:text-zinc-500"
-                    >
-                      {{ item.config_type }}
-                    </span>
-                    <mat-icon
-                      class="text-success"
-                      [class.opacity-0]="!isSelected(item.path)"
-                      fontIcon="check_circle"
-                    />
-                  </div>
-                </div>
-              }
-            </div>
-            <app-pagination
-              [totalItems]="orphanedData().length"
-              [currentPage]="orphanedPage()"
-              [pageSize]="orphanedPageSize()"
-              (pageChange)="onOrphanedPageChange($event)"
-              (pageSizeChange)="onOrphanedPageSizeChange($event)"
-            />
-          </div>
-        }
-      </div>
+      <app-orphaned-tab
+        [data]="orphanedData()"
+        [loading]="loading()"
+        [selectedKeys]="selectedOrphaned()"
+        [currentPage]="orphanedPage()"
+        [pageSize]="orphanedPageSize()"
+        (refresh)="loadOrphaned()"
+        (cleanSelected)="onCleanSelected()"
+        (pageChange)="onOrphanedPageChange($event)"
+        (pageSizeChange)="onOrphanedPageSizeChange($event)"
+        (toggleSelectionEvent)="onOrphanedToggle($event)"
+      />
     </mat-tab>
   </mat-tab-group>
 </div>

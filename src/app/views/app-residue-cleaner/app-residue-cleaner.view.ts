@@ -1,13 +1,6 @@
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  signal,
-  inject,
-  computed,
-  WritableSignal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +15,8 @@ import {
 } from '@services/app-residue.service';
 import { formatSize } from '@shared/utils/format.util';
 import { getErrorMessage } from '@shared/utils/error.util';
-import { PaginationComponent } from '@components/pagination/pagination.component';
+import { ResidueTabComponent } from './residue-tab.component';
+import { OrphanedTabComponent } from './orphaned-tab.component';
 
 type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
 
@@ -37,7 +31,8 @@ type ResidueTab = 'configs' | 'data' | 'caches' | 'orphaned';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatTabsModule,
-    PaginationComponent,
+    ResidueTabComponent,
+    OrphanedTabComponent,
   ],
   templateUrl: './app-residue-cleaner.view.html',
 })
@@ -52,22 +47,15 @@ export class AppResidueCleanerView {
   loading = signal(false);
   showBackupWarning = signal(true);
 
-  configsData = signal<AppResidue[]>([]);
-  dataData = signal<AppResidue[]>([]);
-  cachesData = signal<AppResidue[]>([]);
+  configs = signal<AppResidue[]>([]);
+  data = signal<AppResidue[]>([]);
+  caches = signal<AppResidue[]>([]);
   orphanedData = signal<OrphanedConfig[]>([]);
 
   selectedConfigs = signal<Set<string>>(new Set());
   selectedData = signal<Set<string>>(new Set());
   selectedCaches = signal<Set<string>>(new Set());
   selectedOrphaned = signal<Set<string>>(new Set());
-
-  private selectionMap = new Map<ResidueTab, WritableSignal<Set<string>>>([
-    ['configs', this.selectedConfigs],
-    ['data', this.selectedData],
-    ['caches', this.selectedCaches],
-    ['orphaned', this.selectedOrphaned],
-  ]);
 
   previewMode = signal(false);
   previewItems = signal<AppResidue[]>([]);
@@ -83,82 +71,10 @@ export class AppResidueCleanerView {
   orphanedPage = signal(1);
   orphanedPageSize = signal(15);
 
-  searchVisible = signal(false);
-  searchQuery = signal('');
-  searchFocused = signal(false);
-
-  configsCount = () => this.configsData().length;
-  dataCount = () => this.dataData().length;
-  cachesCount = () => this.cachesData().length;
+  configsCount = () => this.configs().length;
+  dataCount = () => this.data().length;
+  cachesCount = () => this.caches().length;
   orphanedCount = () => this.orphanedData().length;
-
-  paginatedConfigs = computed(() => {
-    const start = (this.configsPage() - 1) * this.configsPageSize();
-    return this.configsData().slice(start, start + this.configsPageSize());
-  });
-
-  paginatedData = computed(() => {
-    const start = (this.dataPage() - 1) * this.dataPageSize();
-    return this.dataData().slice(start, start + this.dataPageSize());
-  });
-
-  paginatedCaches = computed(() => {
-    const start = (this.cachesPage() - 1) * this.cachesPageSize();
-    return this.cachesData().slice(start, start + this.cachesPageSize());
-  });
-
-  paginatedOrphaned = computed(() => {
-    const start = (this.orphanedPage() - 1) * this.orphanedPageSize();
-    return this.orphanedData().slice(start, start + this.orphanedPageSize());
-  });
-
-  configsAllSelected = computed(() => {
-    const total = this.configsData().length;
-    const selected = this.selectedConfigs().size;
-    return total > 0 && selected === total;
-  });
-
-  configsIndeterminate = computed(() => {
-    const total = this.configsData().length;
-    const selected = this.selectedConfigs().size;
-    return selected > 0 && selected < total;
-  });
-
-  dataAllSelected = computed(() => {
-    const total = this.dataData().length;
-    const selected = this.selectedData().size;
-    return total > 0 && selected === total;
-  });
-
-  dataIndeterminate = computed(() => {
-    const total = this.dataData().length;
-    const selected = this.selectedData().size;
-    return selected > 0 && selected < total;
-  });
-
-  cachesAllSelected = computed(() => {
-    const total = this.cachesData().length;
-    const selected = this.selectedCaches().size;
-    return total > 0 && selected === total;
-  });
-
-  cachesIndeterminate = computed(() => {
-    const total = this.cachesData().length;
-    const selected = this.selectedCaches().size;
-    return selected > 0 && selected < total;
-  });
-
-  orphanedAllSelected = computed(() => {
-    const total = this.orphanedData().length;
-    const selected = this.selectedOrphaned().size;
-    return total > 0 && selected === total;
-  });
-
-  orphanedIndeterminate = computed(() => {
-    const total = this.orphanedData().length;
-    const selected = this.selectedOrphaned().size;
-    return selected > 0 && selected < total;
-  });
 
   onConfigsPageChange(page: number) {
     this.configsPage.set(page);
@@ -196,52 +112,60 @@ export class AppResidueCleanerView {
     this.orphanedPage.set(1);
   }
 
+  onConfigsToggle(path: string) {
+    const current = new Set(this.selectedConfigs());
+    current.has(path) ? current.delete(path) : current.add(path);
+    this.selectedConfigs.set(current);
+  }
+
+  onConfigsSelectAll(checked: boolean) {
+    this.selectedConfigs.set(checked ? new Set(this.configs().map((i) => i.path)) : new Set());
+  }
+
+  onDataToggle(path: string) {
+    const current = new Set(this.selectedData());
+    current.has(path) ? current.delete(path) : current.add(path);
+    this.selectedData.set(current);
+  }
+
+  onDataSelectAll(checked: boolean) {
+    this.selectedData.set(checked ? new Set(this.data().map((i) => i.path)) : new Set());
+  }
+
+  onCachesToggle(path: string) {
+    const current = new Set(this.selectedCaches());
+    current.has(path) ? current.delete(path) : current.add(path);
+    this.selectedCaches.set(current);
+  }
+
+  onCachesSelectAll(checked: boolean) {
+    this.selectedCaches.set(checked ? new Set(this.caches().map((i) => i.path)) : new Set());
+  }
+
+  onOrphanedToggle(path: string) {
+    const current = new Set(this.selectedOrphaned());
+    current.has(path) ? current.delete(path) : current.add(path);
+    this.selectedOrphaned.set(current);
+  }
+
   getSelectedSize(items: AppResidue[]): number {
     return items
       .filter((item) => this.isSelected(item.path))
       .reduce((sum, item) => sum + item.size, 0);
   }
 
-  private getSelectionSignal(): WritableSignal<Set<string>> {
-    return this.selectionMap.get(this.activeTab()) ?? this.selectedConfigs;
-  }
-
   isSelected(path: string): boolean {
-    const sel = this.getSelectionSignal();
-    return sel().has(path);
-  }
-
-  toggleSelection(path: string): void {
-    const selection = this.getSelectionSignal();
-    const current = new Set(selection());
-    current.has(path) ? current.delete(path) : current.add(path);
-    selection.set(current);
-  }
-
-  selectAll(items: AppResidue[], checked = true): void {
-    const selection = this.getSelectionSignal();
-    selection.set(checked ? new Set(items.map((i) => i.path)) : new Set());
-  }
-
-  deselectAll(): void {
-    this.getSelectionSignal().set(new Set());
-  }
-
-  getCurrentItems(): AppResidue[] {
     const tab = this.activeTab();
     switch (tab) {
       case 'configs':
-        return this.configsData();
+        return this.selectedConfigs().has(path);
       case 'data':
-        return this.dataData();
+        return this.selectedData().has(path);
       case 'caches':
-        return this.cachesData();
+        return this.selectedCaches().has(path);
+      case 'orphaned':
+        return this.selectedOrphaned().has(path);
     }
-    return [];
-  }
-
-  getSelectedCount(): number {
-    return this.getSelectionSignal()().size;
   }
 
   async loadSummary(): Promise<void> {
@@ -257,7 +181,7 @@ export class AppResidueCleanerView {
     this.loading.set(true);
     try {
       const data = await this.residueService.scanUserConfigs();
-      this.configsData.set(data);
+      this.configs.set(data);
     } catch (error) {
       this.notification.error('Failed to load configs', error);
     } finally {
@@ -269,7 +193,7 @@ export class AppResidueCleanerView {
     this.loading.set(true);
     try {
       const data = await this.residueService.scanUserData();
-      this.dataData.set(data);
+      this.data.set(data);
     } catch (error) {
       this.notification.error('Failed to load data', error);
     } finally {
@@ -281,7 +205,7 @@ export class AppResidueCleanerView {
     this.loading.set(true);
     try {
       const data = await this.residueService.scanUserCaches();
-      this.cachesData.set(data);
+      this.caches.set(data);
     } catch (error) {
       this.notification.error('Failed to load caches', error);
     } finally {
@@ -369,13 +293,13 @@ export class AppResidueCleanerView {
 
     switch (tabs[index]) {
       case 'configs':
-        if (this.configsData().length === 0) await this.loadConfigs();
+        if (this.configs().length === 0) await this.loadConfigs();
         break;
       case 'data':
-        if (this.dataData().length === 0) await this.loadData();
+        if (this.data().length === 0) await this.loadData();
         break;
       case 'caches':
-        if (this.cachesData().length === 0) await this.loadCaches();
+        if (this.caches().length === 0) await this.loadCaches();
         break;
       case 'orphaned':
         if (this.orphanedData().length === 0) await this.loadOrphaned();
@@ -387,69 +311,23 @@ export class AppResidueCleanerView {
     this.showBackupWarning.set(false);
   }
 
-  getResidueTypeLabel(type: string): string {
-    switch (type) {
-      case 'Config':
-        return 'Config';
-      case 'Data':
-        return 'Data';
-      case 'Cache':
-        return 'Cache';
-      case 'Both':
-        return 'Config/Data';
-      default:
-        return type;
+  private deselectAll(): void {
+    this.selectedConfigs.set(new Set());
+    this.selectedData.set(new Set());
+    this.selectedCaches.set(new Set());
+    this.selectedOrphaned.set(new Set());
+  }
+
+  private getCurrentItems(): AppResidue[] {
+    const tab = this.activeTab();
+    switch (tab) {
+      case 'configs':
+        return this.configs();
+      case 'data':
+        return this.data();
+      case 'caches':
+        return this.caches();
     }
-  }
-
-  getResidueTypeColor(residue: AppResidue): string {
-    switch (residue.residue_type) {
-      case 'Config':
-        return 'bg-blue-500/10 text-blue-600';
-      case 'Data':
-        return 'bg-green-500/10 text-green-600';
-      case 'Cache':
-        return 'bg-orange-500/10 text-orange-600';
-      case 'Both':
-        return 'bg-purple-500/10 text-purple-600';
-      default:
-        return 'bg-slate-500/10 text-slate-600';
-    }
-  }
-
-  showSearchInput(): void {
-    this.searchVisible.set(true);
-  }
-
-  hideSearchInput(): void {
-    if (!this.searchFocused()) {
-      this.searchVisible.set(false);
-    }
-  }
-
-  onSearchHoverEnter(): void {
-    if (!this.searchVisible()) {
-      this.searchVisible.set(true);
-    }
-  }
-
-  onSearchHoverLeave(): void {
-    this.hideSearchInput();
-  }
-
-  onSearchFocus(): void {
-    this.searchFocused.set(true);
-  }
-
-  onSearchBlur(): void {
-    this.searchFocused.set(false);
-  }
-
-  clearSearch(): void {
-    this.searchQuery.set('');
-  }
-
-  onSearchChange(query: string): void {
-    this.searchQuery.set(query.toLowerCase());
+    return [];
   }
 }

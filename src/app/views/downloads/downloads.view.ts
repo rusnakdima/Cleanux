@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { formatSize } from '@shared/utils/format.util';
+import { DOWNLOAD_DELAY_MS } from '@shared/utils/constants';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -58,7 +59,7 @@ export class DownloadsView {
     this.files.set([]);
     this.selectedFiles.set(new Set());
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_DELAY_MS));
 
     this.files.set([
       {
