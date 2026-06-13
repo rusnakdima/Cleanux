@@ -213,7 +213,9 @@ export class PackageDeepCleanService {
     );
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{ spaceFreed: number; message: string }>('apt_autoclean');
+      const response = await this.api.invoke<{ spaceFreed: number; message: string }>(
+        'apt_autoclean'
+      );
       await this.getPackageSummary();
       this.logger.logInfo(
         'service',
@@ -369,7 +371,9 @@ export class PackageDeepCleanService {
     );
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{ spaceFreed: number; message: string }>('dnf_clean_all');
+      const response = await this.api.invoke<{ spaceFreed: number; message: string }>(
+        'dnf_clean_all'
+      );
       await this.getPackageSummary();
       this.logger.logInfo(
         'service',
@@ -432,9 +436,12 @@ export class PackageDeepCleanService {
     );
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{ spaceFreed: number; message: string }>('pacman_clean', {
-        keepRecent,
-      });
+      const response = await this.api.invoke<{ spaceFreed: number; message: string }>(
+        'pacman_clean',
+        {
+          keepRecent,
+        }
+      );
       await this.getPackageSummary();
       this.logger.logInfo('service', 'PackageDeepCleanService', 'pacmanClean', 'Pacman cleaned', {
         spaceFreed: response.spaceFreed,
@@ -528,7 +535,9 @@ export class PackageDeepCleanService {
     );
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{ spaceFreed: number; message: string }>('zypper_clean');
+      const response = await this.api.invoke<{ spaceFreed: number; message: string }>(
+        'zypper_clean'
+      );
       await this.getPackageSummary();
       this.logger.logInfo('service', 'PackageDeepCleanService', 'zypperClean', 'Zypper cleaned', {
         spaceFreed: response.spaceFreed,

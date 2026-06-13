@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { LoggerService, LogEntry } from './logger.service';
+import { LoggerService, LogEntry, LogFilter } from './logger.service';
 import { LogStorageService } from './log-storage.service';
 import { LogExportService, ProblemReport } from './log-export.service';
 import { environment } from '@env/environment';
@@ -109,9 +109,9 @@ export class ProblemReportService {
       case 'json':
         return JSON.stringify(report, null, 2);
       case 'csv':
-        return this.exporter.exportToCsv({ level: 'error' } as any);
+        return this.exporter.exportToCsv({ level: 'error' } as LogFilter);
       case 'html':
-        return this.exporter.exportToHtml({ level: 'error' } as any);
+        return this.exporter.exportToHtml({ level: 'error' } as LogFilter);
     }
   }
 

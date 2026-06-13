@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LogEntry, LogFilter } from './logger.service';
+import { LogEntry, LogFilter, LoggerService } from './logger.service';
 import { LogStorageService } from './log-storage.service';
 
 export interface LogStats {
@@ -38,7 +38,10 @@ export interface ProblemEntry {
   providedIn: 'root',
 })
 export class LogExportService {
-  constructor(private storage: LogStorageService) {}
+  constructor(
+    private storage: LogStorageService,
+    private logger: LoggerService
+  ) {}
 
   async exportToJson(filter?: LogFilter): Promise<string> {
     const logs = await this.storage.getLogs(filter, 10000);
@@ -151,7 +154,13 @@ export class LogExportService {
       const data = this.decompress(compressed);
       return JSON.parse(data);
     } catch {
-      console.error('[LogExport] Failed to parse shareable link');
+      this.logger.logError(
+        'service',
+        'LogExportService',
+        'parseShareableLink',
+        '[LogExport] Failed to parse shareable link',
+        new Error('parse error')
+      );
       return null;
     }
   }

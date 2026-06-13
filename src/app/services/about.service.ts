@@ -1,7 +1,7 @@
 /* sys lib */
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 /* env */
 import { environment } from '@env/environment';
@@ -30,19 +30,23 @@ export class AboutService {
     this.logger.logInfo('service', 'AboutService', 'init', 'AboutService initialized');
   }
 
-  getDate(version: string): Observable<GitHubReleaseByTag> {
+  getDate(version: string) {
     this.logger.logInfo('service', 'AboutService', 'getDate', 'Getting release date', { version });
-    return this.http.get<GitHubReleaseByTag>(
-      `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/tags/v${version}`,
-      httpOptions
+    return toSignal(
+      this.http.get<GitHubReleaseByTag>(
+        `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/tags/v${version}`,
+        httpOptions
+      )
     );
   }
 
-  checkUpdate(): Observable<GitHubReleaseLatest> {
+  checkUpdate() {
     this.logger.logInfo('service', 'AboutService', 'checkUpdate', 'Checking for updates');
-    return this.http.get<GitHubReleaseLatest>(
-      `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/latest`,
-      httpOptions
+    return toSignal(
+      this.http.get<GitHubReleaseLatest>(
+        `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/latest`,
+        httpOptions
+      )
     );
   }
 }

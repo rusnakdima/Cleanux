@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { LogEntry, LogFilter } from './logger.service';
+import { Injectable, inject } from '@angular/core';
+import { LogEntry, LogFilter, LoggerService } from './logger.service';
 
 const DB_NAME = 'cleanux_logs';
 const DB_VERSION = 1;
@@ -24,6 +24,7 @@ interface StoredLog {
 export class LogStorageService {
   private db: IDBDatabase | null = null;
   private initPromise: Promise<void> | null = null;
+  private logger = inject(LoggerService);
 
   async init(): Promise<void> {
     if (this.db) return;
@@ -33,7 +34,13 @@ export class LogStorageService {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        console.error('[LogStorage] Failed to open IndexedDB:', request.error);
+        this.logger.logError(
+          'service',
+          undefined,
+          'init',
+          '[LogStorage] Failed to open IndexedDB',
+          request.error as Error
+        );
         reject(request.error);
       };
 

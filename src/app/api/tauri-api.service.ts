@@ -4,6 +4,7 @@ import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { Response, getData } from '@models/response.model';
 import { ApiException } from '@models/error.model';
 import { getErrorMessage } from '@shared/utils/error.util';
+import { LoggerService } from '@services/logger.service';
 
 export interface InvokeOptions {
   suppressError?: boolean;
@@ -16,6 +17,8 @@ const DEFAULT_TIMEOUT_MS = 10000;
   providedIn: 'root',
 })
 export class TauriApiService {
+  private logger = inject(LoggerService);
+
   async invoke<T>(
     command: string,
     args?: Record<string, unknown>,
@@ -41,7 +44,15 @@ export class TauriApiService {
       }
     } catch (error: unknown) {
       if (!options.suppressError) {
-        console.error(`Error invoking command "${command}":`, error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.logger.logError(
+          'api',
+          undefined,
+          command,
+          `Error invoking command "${command}"`,
+          err,
+          { args }
+        );
       }
       if (error instanceof ApiException) {
         throw error;

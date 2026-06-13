@@ -1,6 +1,5 @@
 /* sys lib */
-import { Injectable, signal, inject,
-} from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from './api.service';
@@ -76,9 +75,12 @@ export class PackageManagerService {
     );
     this.loading.set(true);
     try {
-      const response = await this.api.invoke<{ status: string; message: string }>('clean_package_cache', {
-        manager,
-      });
+      const response = await this.api.invoke<{ status: string; message: string }>(
+        'clean_package_cache',
+        {
+          manager,
+        }
+      );
       if (response.status === 'success') {
         await this.getPackageCacheInfo();
       }
