@@ -48,9 +48,6 @@ pub mod profile_service;
 #[path = "repair.service.rs"]
 pub mod repair_service;
 
-#[path = "scheduler.service.rs"]
-pub mod scheduler_service;
-
 #[path = "scanner.service.rs"]
 pub mod scanner_service;
 

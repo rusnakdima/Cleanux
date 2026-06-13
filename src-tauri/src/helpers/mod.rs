@@ -36,10 +36,6 @@ pub use response_helper::{
 pub mod service_macro;
 pub use crate::service_method_full;
 
-#[path = "singleton_macro.rs"]
-pub mod singleton_macro;
-pub use crate::define_singleton_service;
-
 #[path = "cache.helper.rs"]
 pub mod cache_helper;
 pub use cache_helper::TimedCache;

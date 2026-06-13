@@ -1,9 +1,16 @@
-use crate::helpers::{array_response, define_singleton_service, ResponseBuilder};
+use crate::helpers::{array_response, ResponseBuilder};
 use crate::models::DataValue;
 use crate::models::ResponseModel;
 use crate::services::health_history_service::{HealthHistoryService, HealthSnapshot};
 
-define_singleton_service!(HEALTH_SERVICE, HealthHistoryService, init_database);
+static HEALTH_SERVICE: std::sync::OnceLock<HealthHistoryService> = std::sync::OnceLock::new();
+fn get_service() -> &'static HealthHistoryService {
+  HEALTH_SERVICE.get_or_init(|| {
+    let svc = HealthHistoryService::new();
+    svc.init_database().ok();
+    svc
+  })
+}
 
 #[tauri::command]
 #[allow(non_snake_case)]

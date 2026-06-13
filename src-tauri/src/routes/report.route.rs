@@ -1,9 +1,16 @@
-use crate::helpers::{array_response, define_singleton_service, ResponseBuilder};
+use crate::helpers::{array_response, ResponseBuilder};
 use crate::models::DataValue;
 use crate::models::ResponseModel;
 use crate::services::report_service::{ReportCategories, ReportService};
 
-define_singleton_service!(REPORT_SERVICE, ReportService, init_database);
+static REPORT_SERVICE: std::sync::OnceLock<ReportService> = std::sync::OnceLock::new();
+fn get_service() -> &'static ReportService {
+  REPORT_SERVICE.get_or_init(|| {
+    let svc = ReportService::new();
+    svc.init_database().ok();
+    svc
+  })
+}
 
 #[tauri::command]
 #[allow(non_snake_case)]

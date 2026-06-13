@@ -16,7 +16,6 @@ pub fn home_dir() -> Result<PathBuf, AppError> {
   dirs::home_dir().ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))
 }
 
-
 pub fn home_scan_dirs(home: &Path) -> Vec<PathBuf> {
   vec![
     home.join("Downloads"),

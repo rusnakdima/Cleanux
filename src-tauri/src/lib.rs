@@ -1,7 +1,6 @@
 /* imports */
 pub mod errors;
 pub mod helpers;
-pub mod logger;
 pub mod models;
 pub mod routes;
 pub mod security;
@@ -70,9 +69,6 @@ use routes::{
   report_route::{
     compare_snapshots, export_to_html, generate_cleaning_report, get_cleaning_history,
   },
-  scheduler_route::{
-    delete_schedule_config, get_schedule_config, run_cleaning_now, save_schedule_config,
-  },
   startup_route::{disable_startup_item, enable_startup_item, get_startup_items},
   system_route::{
     enableSelectedServices, enableService, getAllServices, openFile, startService,
@@ -84,8 +80,7 @@ use routes::{
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[allow(non_snake_case)]
 pub fn run() {
-  let logger = logger::Logger::new();
-  logger.init();
+  env_logger::init();
   log::info!("Application starting...");
 
   #[cfg(target_os = "linux")]
@@ -265,10 +260,6 @@ pub fn run() {
       get_gpu_temperature,
       clean_package_cache,
       get_package_cache_info,
-      get_schedule_config,
-      save_schedule_config,
-      delete_schedule_config,
-      run_cleaning_now,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {

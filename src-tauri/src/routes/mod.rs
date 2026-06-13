@@ -33,9 +33,6 @@ pub mod directory_route;
 #[path = "startup.route.rs"]
 pub mod startup_route;
 
-#[path = "scheduler.route.rs"]
-pub mod scheduler_route;
-
 #[path = "memory.route.rs"]
 pub mod memory_route;
 
