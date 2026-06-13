@@ -1,6 +1,7 @@
 import { Injectable, signal, inject, OnDestroy, computed, NgZone } from '@angular/core';
 import { formatSize } from '@shared/utils/format.util';
 import { ApiService } from '@services/api.service';
+import { POLL_INTERVAL_MS } from '@shared/utils/constants';
 
 export interface SystemStats {
   cpuUsage: number;
@@ -41,7 +42,7 @@ export class MonitorStore implements OnDestroy {
   private unlistenTemps: (() => void) | null = null;
   private statsInterval: number | null = null;
   private tempInterval: number | null = null;
-  private readonly pollIntervalMs = 2000;
+  private readonly pollIntervalMs = POLL_INTERVAL_MS;
   private visibilityHandler: ((this: Document, ev: Event) => void) | null = null;
 
   readonly systemStats = signal<SystemStats>({
