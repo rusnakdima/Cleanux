@@ -7,7 +7,10 @@
         (mouseleave)="onToolbarHoverLeave()"
       >
         <button class="search-toggle-btn" (click)="toggleToolbar()">
-          <mat-icon class="icon-sm" [fontIcon]="toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search'" />
+          <mat-icon
+            class="icon-sm"
+            [fontIcon]="toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search'"
+          />
         </button>
 
         <div class="controls-bar" [class.toolbar-visible]="toolbarExpanded() || toolbarLocked()">
@@ -37,9 +40,9 @@
             }
 
             @if (showReloadButton) {
-<button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
-              <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="refresh" />
-            </button>
+              <button (click)="onReload()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
+                <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="refresh" />
+              </button>
             }
           </div>
         </div>
@@ -47,7 +50,7 @@
     }
     @if (options.showHeader && columns.length > 0) {
       <div
-        class="table-header sticky top-0 z-20 w-full bg-zinc-900/95 dark:bg-white/95 backdrop-blur-lg border-b border-zinc-700 dark:border-zinc-200 shrink-0"
+        class="table-header sticky top-0 z-20 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg border-b border-zinc-200 dark:border-zinc-700 shrink-0"
       >
         <div class="flex items-center px-4">
           @if (showPreviewButton) {
@@ -66,7 +69,11 @@
                 @if (column.sortable) {
                   <span class="flex items-center gap-1">
                     {{ column.label }}
-                    <mat-icon class="sort-icon" [class.active]="isSortActive(column)" [fontIcon]="getSortIcon(column)" />
+                    <mat-icon
+                      class="sort-icon"
+                      [class.active]="isSortActive(column)"
+                      [fontIcon]="getSortIcon(column)"
+                    />
                   </span>
                 } @else {
                   {{ column.label }}
@@ -238,7 +245,10 @@
             </div>
           } @empty {
             <div class="no-data-msg">
-              <mat-icon class="w-15! h-15! text-5xl! mt-4 opacity-20 block mx-auto" fontIcon="inbox" />
+              <mat-icon
+                class="w-15! h-15! text-5xl! mt-4 opacity-20 block mx-auto"
+                fontIcon="inbox"
+              />
               {{ options.emptyMessage ?? "No items found to display" }}
             </div>
           }

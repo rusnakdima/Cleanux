@@ -20,7 +20,10 @@ export function createPaginationState<T>(initialData: T[] = []): PaginatedState<
 
 export function createPaginatedLoader<T>(
   state: PaginatedState<T>,
-  fetcher: (limit: number, offset: number) => Promise<{ data: T[]; has_more: boolean; total: number }>
+  fetcher: (
+    limit: number,
+    offset: number
+  ) => Promise<{ data: T[]; has_more: boolean; total: number }>
 ) {
   return async (limit = 50, offset = 0, reset = false) => {
     if (state.loading()) return { data: [], has_more: false, total: state.total() };
@@ -32,7 +35,7 @@ export function createPaginatedLoader<T>(
     state.loading.set(true);
     try {
       const result = await fetcher(limit, offset);
-      state.data.update(current => reset ? result.data : [...current, ...result.data]);
+      state.data.update((current) => (reset ? result.data : [...current, ...result.data]));
       state.hasMore.set(result.has_more);
       state.offset.set(offset + result.data.length);
       state.total.set(result.total);

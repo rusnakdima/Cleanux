@@ -1,4 +1,4 @@
-<div class="spinner-container">
+<div class="spinner-container" [class]="'size-' + size()">
   <div class="spinner"></div>
   @if (message()) {
     <span class="spinner-message">{{ message() }}</span>

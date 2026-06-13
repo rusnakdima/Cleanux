@@ -154,6 +154,6 @@ export class ProcessesView implements OnInit {
   }
 
   async flushRamCaches(): Promise<void> {
-    console.log('flushRamCaches called - implementation pending');
+    this.notification.alert('RAM cache flushing is not available on this platform');
   }
 }

@@ -8,6 +8,7 @@ import { DevCacheService } from '@services/dev-cache.service';
 import { DevCacheItem, DevCacheSummary } from '@models/dev-cache.model';
 import { formatSize } from '@shared/utils/format.util';
 import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
+import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
 
 interface DevToolCard {
   name: string;
@@ -27,6 +28,7 @@ interface DevToolCard {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './dev-cleaner.view.html',
 })
@@ -52,24 +54,22 @@ export class DevCleanerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadSummary(): Promise<void> {
-    await this.runWithLoading(async () => {
-      const summary = await this.devCacheService.getDevCacheSummary();
-      this.summary.set(summary);
-      this.updateDevTools(summary);
-      return summary;
-    }, { errorMessage: 'Failed to load dev cache summary' });
+    await this.runWithLoading(
+      async () => {
+        const summary = await this.devCacheService.getDevCacheSummary();
+        this.summary.set(summary);
+        this.updateDevTools(summary);
+        return summary;
+      },
+      { errorMessage: 'Failed to load dev cache summary' }
+    );
   }
 
   private updateDevTools(summary: DevCacheSummary): void {
     const tools = this.devTools();
-    const cacheMap: Record<string, DevCacheItem> = {
-      npm: summary.npm,
-      pip: summary.pip,
-      cargo: summary.cargo,
-      go: summary.go,
-      maven: summary.maven,
-      gradle: summary.gradle,
-    };
+    const cacheMap = Object.fromEntries(
+      Object.keys(summary).map((key) => [key, summary[key as keyof DevCacheSummary]])
+    );
 
     this.devTools.set(
       tools.map((tool) => ({
@@ -114,7 +114,7 @@ export class DevCleanerView extends LoadingErrorMixin implements OnInit {
       this.notification.success(result);
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean cache', error);
+      this.notification.error('Failed to clean cache', error);
     } finally {
       this.cleaning.set(false);
     }
@@ -133,7 +133,7 @@ export class DevCleanerView extends LoadingErrorMixin implements OnInit {
       this.notification.success(result);
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean caches', error);
+      this.notification.error('Failed to clean caches', error);
     } finally {
       this.cleaning.set(false);
     }

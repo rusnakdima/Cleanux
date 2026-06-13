@@ -91,11 +91,13 @@ export class DownloadsView {
 
   async cleanSelected() {
     const count = this.selectedFiles().size;
-    if (await this.confirmDialogService.confirm({
-      title: 'Delete Files',
-      message: `Delete ${count} selected files? This cannot be undone.`,
-      dangerous: true,
-    })) {
+    if (
+      await this.confirmDialogService.confirm({
+        title: 'Delete Files',
+        message: `Delete ${count} selected files? This cannot be undone.`,
+        dangerous: true,
+      })
+    ) {
       this.files.set([]);
       this.selectedFiles.set(new Set());
       this.downloadsSize.set(0);

@@ -1,8 +1,9 @@
 /* sys lib */
-import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 /* components */
 import { BottomNavComponent } from '@components/bottom-nav/bottom-nav.component';
@@ -22,12 +23,13 @@ interface RouteInfo {
   imports: [CommonModule, RouterOutlet, BottomNavComponent, HeaderBarComponent],
   templateUrl: './app.html',
 })
-export class App {
+export class App implements OnDestroy {
   pageTitle = signal('Home');
   pageBreadcrumb = signal('');
   showBackButton = signal(false);
 
   private router = inject(Router);
+  private routerSubscription!: Subscription;
 
   private routeInfo: Record<string, RouteInfo> = {
     home: { title: 'Home', breadcrumb: '', parent: '', showBack: false },
@@ -85,11 +87,15 @@ export class App {
   constructor() {
     this.updateRouteInfo(this.router.url);
 
-    this.router.events
+    this.routerSubscription = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         this.updateRouteInfo(event.urlAfterRedirects);
       });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSubscription?.unsubscribe();
   }
 
   onBack() {

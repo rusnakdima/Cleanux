@@ -6,19 +6,25 @@
         About
       </h3>
       <button (click)="checkUpdate()" [disabled]="isChecking()" class="btn btn-secondary">
-        <mat-icon class="icon-xs" [fontIcon]="isChecking() ? 'sync' : 'update'" [class.animate-spin]="isChecking()" />
+        <mat-icon
+          class="icon-xs"
+          [fontIcon]="isChecking() ? 'sync' : 'update'"
+          [class.animate-spin]="isChecking()"
+        />
         <span>Check for Updates</span>
       </button>
     </div>
     <div class="glass-card-body">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-<div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
+        <div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
           <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Version</span>
           <span class="text-lg font-bold text-zinc-900 dark:text-white">{{ version }}</span>
         </div>
         <div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
           <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Release Date</span>
-          <span class="text-lg font-bold text-zinc-400 dark:text-zinc-500">{{ dateVersion() }}</span>
+          <span class="text-lg font-bold text-zinc-400 dark:text-zinc-500">{{
+            dateVersion()
+          }}</span>
         </div>
         <div class="text-center p-4 rounded-lg bg-zinc-100 dark:bg-zinc-700">
           <span class="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Last Check</span>
@@ -55,7 +61,9 @@
     </div>
     <div class="glass-card-body space-y-6">
       <div class="space-y-3">
-        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Theme Mode</label>
+        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
+          >Theme Mode</label
+        >
         <div class="flex gap-2">
           @for (mode of themeModes; track mode) {
             <button
@@ -71,7 +79,9 @@
       </div>
 
       <div class="space-y-3">
-        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Accent Color</label>
+        <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
+          >Accent Color</label
+        >
         <div class="flex flex-wrap gap-3">
           @for (color of themeService.accentColors(); track color) {
             <button
@@ -80,8 +90,12 @@
               [style.background]="color"
               [class.ring-2]="themeService.currentTheme().accentConfig.general === color"
               [class.ring-offset-2]="themeService.currentTheme().accentConfig.general === color"
-              [class.ring-offset-zinc-100]="themeService.currentTheme().accentConfig.general === color"
-              [class.dark:ring-offset-zinc-800]="themeService.currentTheme().accentConfig.general === color"
+              [class.ring-offset-zinc-100]="
+                themeService.currentTheme().accentConfig.general === color
+              "
+              [class.dark:ring-offset-zinc-800]="
+                themeService.currentTheme().accentConfig.general === color
+              "
               [class.ring-white]="themeService.currentTheme().accentConfig.general === color"
             >
               @if (themeService.currentTheme().accentConfig.general === color) {
@@ -129,13 +143,15 @@
         </div>
         <app-toggle
           [checked]="scheduleConfig().enabled"
-          (changed)="scheduleConfig.update(c => ({ ...c, enabled: $event }))"
+          (changed)="scheduleConfig.update((c) => ({ ...c, enabled: $event }))"
         />
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-2">
-          <label class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 block">Interval</label>
+          <label class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 block"
+            >Interval</label
+          >
           <select
             [(ngModel)]="scheduleConfig().interval_hours"
             (change)="onIntervalChange()"
@@ -165,11 +181,19 @@
 
       <div class="flex gap-3 pt-2">
         <button (click)="saveSchedule()" [disabled]="isSaving()" class="btn btn-secondary flex-1">
-          <mat-icon class="icon-xs" [fontIcon]="isSaving() ? 'sync' : 'save'" [class.animate-spin]="isSaving()" />
+          <mat-icon
+            class="icon-xs"
+            [fontIcon]="isSaving() ? 'sync' : 'save'"
+            [class.animate-spin]="isSaving()"
+          />
           <span>Save</span>
         </button>
         <button (click)="runNow()" [disabled]="isRunning()" class="btn btn-primary flex-1">
-          <mat-icon class="icon-xs" [fontIcon]="isRunning() ? 'sync' : 'play_arrow'" [class.animate-spin]="isRunning()" />
+          <mat-icon
+            class="icon-xs"
+            [fontIcon]="isRunning() ? 'sync' : 'play_arrow'"
+            [class.animate-spin]="isRunning()"
+          />
           <span>Run Now</span>
         </button>
       </div>

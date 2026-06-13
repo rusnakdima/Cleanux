@@ -95,24 +95,30 @@ export class LargeFilesView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadData() {
-    await this.runWithLoading(async () => {
-      const result = await this.fileService.getLargeFiles(50, 0);
-      this.largeFiles.set(result.data);
-      this.hasMore.set(result.has_more);
-      this.total.set(result.total);
-    }, { errorMessage: 'Failed to load large files' });
+    await this.runWithLoading(
+      async () => {
+        const result = await this.fileService.getLargeFiles(50, 0);
+        this.largeFiles.set(result.data);
+        this.hasMore.set(result.has_more);
+        this.total.set(result.total);
+      },
+      { errorMessage: 'Failed to load large files' }
+    );
   }
 
   async loadMore() {
     if (!this.hasMore() || this.loading()) return;
 
-    await this.runWithLoading(async () => {
-      const offset = this.largeFiles().length;
-      const result = await this.fileService.getLargeFiles(50, offset);
-      this.largeFiles.update((current) => [...current, ...result.data]);
-      this.hasMore.set(result.has_more);
-      this.total.set(result.total);
-    }, { errorMessage: 'Failed to load more large files' });
+    await this.runWithLoading(
+      async () => {
+        const offset = this.largeFiles().length;
+        const result = await this.fileService.getLargeFiles(50, offset);
+        this.largeFiles.update((current) => [...current, ...result.data]);
+        this.hasMore.set(result.has_more);
+        this.total.set(result.total);
+      },
+      { errorMessage: 'Failed to load more large files' }
+    );
   }
 
   onSelectionChange(keys: Set<string>): void {
@@ -131,11 +137,14 @@ export class LargeFilesView extends LoadingErrorMixin implements OnInit {
     });
     if (!confirmed) return;
 
-    await this.runWithLoading(async () => {
-      await this.fileService.clearSelectedLargeFiles(filesToClear);
-      this.selectedFiles.set(new Set());
-      await this.loadData();
-    }, { errorMessage: 'Failed to clear files', notificationMessage: 'Failed to clear files' });
+    await this.runWithLoading(
+      async () => {
+        await this.fileService.clearSelectedLargeFiles(filesToClear);
+        this.selectedFiles.set(new Set());
+        await this.loadData();
+      },
+      { errorMessage: 'Failed to clear files', notificationMessage: 'Failed to clear files' }
+    );
   }
 
   onRowAction(event: { action: string; item: LargeFileItem }): void {

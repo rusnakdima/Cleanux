@@ -6,7 +6,10 @@
       (mouseleave)="onToolbarHoverLeave()"
     >
       <button class="search-toggle-btn" (click)="toggleToolbar()">
-        <mat-icon class="icon-sm" [fontIcon]="toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search'" />
+        <mat-icon
+          class="icon-sm"
+          [fontIcon]="toolbarExpanded() || toolbarLocked() ? 'expand_less' : 'search'"
+        />
       </button>
 
       <div class="controls-bar" [class.toolbar-visible]="toolbarExpanded() || toolbarLocked()">
@@ -51,15 +54,15 @@
   } @else if (data.length === 0) {
     <div class="flex flex-col items-center justify-center py-12 text-center">
       <mat-icon class="!text-5xl text-zinc-500 dark:text-zinc-400 mb-4">inbox</mat-icon>
-      <p class="text-zinc-400 dark:text-zinc-500">{{ options.emptyMessage ?? 'No items found' }}</p>
+      <p class="text-zinc-400 dark:text-zinc-500">{{ options.emptyMessage ?? "No items found" }}</p>
     </div>
   } @else {
     <div class="flex flex-col gap-2 max-h-[calc(100vh-400px)] overflow-y-auto p-2">
       @for (item of paginatedData; track trackByFn($index, item)) {
         <div
-          class="flex items-center gap-3 p-4 rounded-lg bg-zinc-800 dark:bg-zinc-100 transition-colors duration-150 cursor-pointer"
+          class="flex items-center gap-3 p-4 rounded-lg bg-zinc-100 dark:bg-zinc-800 transition-colors duration-150 cursor-pointer"
           [class.hoverable]="options.hoverable !== false"
-          [class.hover:bg-zinc-700 dark:hover:bg-zinc-200]="options.hoverable !== false"
+          [class.hover:bg-zinc-200 dark:hover:bg-zinc-700]="options.hoverable !== false"
           [class.selected]="isSelected(item)"
           [class.bg-cyan-500/10]="isSelected(item)"
           [class.border]="isSelected(item)"
@@ -67,34 +70,49 @@
           (click)="onRowClick(item, $event)"
           (dblclick)="onRowDoubleClick(item)"
         >
-          @if (hasRowActions && actionsPosition === 'right') {
-            <div class="w-10 h-10 rounded-lg bg-zinc-700 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
-              <mat-icon class="!text-xl !w-5 !h-5 !text-zinc-500 dark:!text-zinc-400" [fontIcon]="getItemIcon(item)" />
+          @if (hasRowActions && actionsPosition === "right") {
+            <div
+              class="w-10 h-10 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center flex-shrink-0"
+            >
+              <mat-icon
+                class="!text-xl !w-5 !h-5 !text-zinc-500 dark:!text-zinc-400"
+                [fontIcon]="getItemIcon(item)"
+              />
             </div>
           }
 
           <div class="flex-1 min-w-0">
             @if (primaryColumn) {
               <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-white dark:text-zinc-900 whitespace-nowrap overflow-hidden text-ellipsis" [class.truncate]="primaryColumn.truncate !== false">
+                <span
+                  class="text-sm font-medium text-zinc-900 dark:text-white whitespace-nowrap overflow-hidden text-ellipsis"
+                  [class.truncate]="primaryColumn.truncate !== false"
+                >
                   {{ formatCell(primaryColumn.key, item) }}
                 </span>
                 @if (primaryColumn.badge) {
-                  <span class="inline-flex items-center text-xs px-2 py-0.5 rounded-full flex-shrink-0" [ngClass]="getBadgeClass(primaryColumn.badge, item)">
+                  <span
+                    class="inline-flex items-center text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                    [ngClass]="getBadgeClass(primaryColumn.badge, item)"
+                  >
                     {{ formatCell(primaryColumn.badge, item) }}
                   </span>
                 }
-                @if (primaryColumn.format === 'size') {
-                  <span class="text-sm text-zinc-400 dark:text-zinc-500 font-mono">
+                @if (primaryColumn.format === "size") {
+                  <span class="text-sm text-zinc-500 dark:text-zinc-400 font-mono">
                     {{ getFormattedValue(primaryColumn, item) }}
                   </span>
                 }
               </div>
 
               @if (hasSecondaryContent) {
-                <div class="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis mt-0.5 flex items-center gap-2">
+                <div
+                  class="text-xs text-zinc-500 dark:text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis mt-0.5 flex items-center gap-2"
+                >
                   @if (getSecondaryValue(item)) {
-                    <span class="overflow-hidden text-ellipsis whitespace-nowrap flex-1">{{ getSecondaryValue(item) }}</span>
+                    <span class="overflow-hidden text-ellipsis whitespace-nowrap flex-1">{{
+                      getSecondaryValue(item)
+                    }}</span>
                   }
                   @if (getTimestamp(item)) {
                     <span class="flex-shrink-0 opacity-70">{{ getTimestamp(item) }}</span>
@@ -104,7 +122,7 @@
             }
           </div>
 
-          @if (showActions && actionsPosition === 'right' && hasRowActions) {
+          @if (showActions && actionsPosition === "right" && hasRowActions) {
             <div class="flex items-center gap-1 flex-shrink-0">
               @for (action of rowActions; track action.id) {
                 @if (action.toggle) {
@@ -132,8 +150,10 @@
         </div>
       } @empty {
         <div class="flex flex-col items-center justify-center py-12 text-center">
-<mat-icon class="!text-5xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="inbox" />
-          <p class="text-zinc-400 dark:text-zinc-500">{{ options.emptyMessage ?? 'No items found' }}</p>
+          <mat-icon class="!text-5xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="inbox" />
+          <p class="text-zinc-400 dark:text-zinc-500">
+            {{ options.emptyMessage ?? "No items found" }}
+          </p>
         </div>
       }
     </div>

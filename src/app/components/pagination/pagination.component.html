@@ -1,8 +1,8 @@
 <div
-  class="flex items-center justify-between gap-4 px-4 pt-3 pb-[22px] mb-2 w-full border-t border-zinc-700 dark:border-zinc-200 bg-zinc-900/80 dark:bg-white/80 backdrop-blur-lg"
+  class="flex items-center justify-between gap-4 px-4 pt-3 pb-[22px] mb-2 w-full border-t border-zinc-200 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg"
 >
   <div class="flex items-center gap-4">
-    <div class="text-sm font-medium text-zinc-400 dark:text-zinc-600 whitespace-nowrap">
+    <div class="text-sm font-medium text-zinc-500 dark:text-zinc-400 whitespace-nowrap">
       Showing {{ (p() - 1) * pageSize() + 1 }}-{{
         p() * pageSize() > totalItems() ? totalItems() : p() * pageSize()
       }}
@@ -13,7 +13,7 @@
       <select
         [value]="pageSize()"
         (change)="onPageSizeChange($any($event.target).value)"
-        class="h-8 px-2 text-sm rounded-lg border border-zinc-700 dark:border-zinc-200 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
+        class="h-8 px-2 text-sm rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
       >
         @for (size of pageSizeOptions(); track size) {
           <option [value]="size">{{ size }} per page</option>
@@ -28,7 +28,7 @@
         mat-icon-button
         (click)="goToPage(1)"
         [disabled]="p() === 1"
-        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-400 dark:text-zinc-600 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="First page"
       >
         <mat-icon class="icon-sm">first_page</mat-icon>
@@ -38,7 +38,7 @@
         mat-icon-button
         (click)="previousPage()"
         [disabled]="p() === 1"
-        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-400 dark:text-zinc-600 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="Previous page"
       >
         <mat-icon class="icon-sm">chevron_left</mat-icon>
@@ -47,7 +47,8 @@
       <div class="flex items-center gap-1 mx-1">
         @for (page of pages(); track $index) {
           @if (page === "...") {
-            <span class="w-6 h-6 flex items-center justify-center text-zinc-500 dark:text-zinc-400 flex-shrink-0"
+            <span
+              class="w-6 h-6 flex items-center justify-center text-zinc-500 dark:text-zinc-400 flex-shrink-0"
               >...</span
             >
           } @else {
@@ -56,8 +57,8 @@
               class="w-6 h-6 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200 flex-shrink-0"
               [class.bg-cyan-500]="p() === page"
               [class.text-white]="p() === page"
-              [class.text-zinc-400 dark:text-zinc-600]="p() !== page"
-              [class.hover:bg-zinc-800 dark:hover:bg-zinc-200]="p() !== page"
+              [class.text-zinc-500 dark:text-zinc-400]="p() !== page"
+              [class.hover:bg-zinc-100 dark:hover:bg-zinc-800]="p() !== page"
               [attr.aria-current]="p() === page ? 'page' : null"
             >
               {{ page }}
@@ -70,7 +71,7 @@
         mat-icon-button
         (click)="nextPage()"
         [disabled]="p() === totalPages()"
-        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-400 dark:text-zinc-600 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="Next page"
       >
         <mat-icon class="icon-sm">chevron_right</mat-icon>
@@ -80,7 +81,7 @@
         mat-icon-button
         (click)="goToPage(totalPages())"
         [disabled]="p() === totalPages()"
-        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-400 dark:text-zinc-600 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        class="!w-6 !h-6 !min-w-6 !p-0 !rounded-lg flex-shrink-0 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         matTooltip="Last page"
       >
         <mat-icon class="icon-sm">last_page</mat-icon>

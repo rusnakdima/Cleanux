@@ -88,10 +88,13 @@ export class StartupView extends LoadingErrorMixin implements OnInit {
 
   async loadData() {
     this.currentPage.set(1);
-    await this.runWithLoading(async () => {
-      const data = await this.startupService.getStartupItems();
-      this.startupData.set(data);
-    }, { errorMessage: 'Failed to load startup items' });
+    await this.runWithLoading(
+      async () => {
+        const data = await this.startupService.getStartupItems();
+        this.startupData.set(data);
+      },
+      { errorMessage: 'Failed to load startup items' }
+    );
   }
 
   async toggleItem(item: StartupItem) {
@@ -101,15 +104,21 @@ export class StartupView extends LoadingErrorMixin implements OnInit {
         message: `Disable "${item.name}" from starting at login?`,
       });
       if (!confirmed) return;
-      await this.runWithLoading(async () => {
-        await this.startupService.disableStartupItem(item.path);
-        await this.loadData();
-      }, { errorMessage: 'Failed to disable startup item', notificationKey: 'disable' });
+      await this.runWithLoading(
+        async () => {
+          await this.startupService.disableStartupItem(item.path);
+          await this.loadData();
+        },
+        { errorMessage: 'Failed to disable startup item', notificationKey: 'disable' }
+      );
     } else {
-      await this.runWithLoading(async () => {
-        await this.startupService.enableStartupItem(item.path);
-        await this.loadData();
-      }, { errorMessage: 'Failed to enable startup item', notificationKey: 'enable' });
+      await this.runWithLoading(
+        async () => {
+          await this.startupService.enableStartupItem(item.path);
+          await this.loadData();
+        },
+        { errorMessage: 'Failed to enable startup item', notificationKey: 'enable' }
+      );
     }
   }
 

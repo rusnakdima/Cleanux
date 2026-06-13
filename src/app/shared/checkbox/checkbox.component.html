@@ -10,12 +10,7 @@
   (click)="onClick($event)"
   (keydown)="onKeydown($event)"
 >
-  <input
-    type="checkbox"
-    [checked]="checked"
-    [disabled]="disabled"
-    class="checkbox-input"
-  />
+  <input type="checkbox" [checked]="checked" [disabled]="disabled" class="checkbox-input" />
   <span class="checkbox-mark">
     @if (indeterminate) {
       <mat-icon class="checkbox-icon">remove</mat-icon>

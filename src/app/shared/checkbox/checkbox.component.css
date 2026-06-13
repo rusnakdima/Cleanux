@@ -25,9 +25,9 @@
 .checkbox-mark {
   width: 1.25rem;
   height: 1.25rem;
-  border: 2px solid #3f3f46;
+  border: 2px solid var(--border-strong);
   border-radius: 0.25rem;
-  background: #18181b;
+  background: var(--bg-secondary);
   transition: all 150ms ease;
   display: flex;
   align-items: center;
@@ -36,8 +36,8 @@
 }
 
 .light .checkbox-mark {
-  border-color: #d4d4d8;
-  background: #ffffff;
+  border-color: var(--border-default);
+  background: var(--bg-primary);
 }
 
 .checkbox-icon {
@@ -73,9 +73,9 @@
 }
 
 .checkbox-wrapper.disabled .checkbox-mark {
-  background: #27272a;
+  background: var(--bg-tertiary);
 }
 
 .light .checkbox-wrapper.disabled .checkbox-mark {
-  background: #f4f4f5;
+  background: var(--bg-secondary);
 }

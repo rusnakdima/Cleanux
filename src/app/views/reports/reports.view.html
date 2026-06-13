@@ -1,9 +1,9 @@
 <div class="view-layout max-w-4xl mx-auto">
   <div class="flex items-center justify-end mb-6">
-<button (click)="generateReport()" class="btn btn-primary">
-        <mat-icon class="icon-sm" fontIcon="add" />
-        Generate Demo Report
-      </button>
+    <button (click)="generateReport()" class="btn btn-primary">
+      <mat-icon class="icon-sm" fontIcon="add" />
+      Generate Demo Report
+    </button>
   </div>
 
   @if (reportsWithChart().length > 1) {
@@ -45,13 +45,31 @@
               class="text-zinc-500 dark:text-zinc-400"
               stroke-width="1"
             />
-            <text x="22" y="124" font-size="8" fill="currentColor" class="text-zinc-500 dark:text-zinc-400">
+            <text
+              x="22"
+              y="124"
+              font-size="8"
+              fill="currentColor"
+              class="text-zinc-500 dark:text-zinc-400"
+            >
               0
             </text>
-            <text x="22" y="64" font-size="8" fill="currentColor" class="text-zinc-500 dark:text-zinc-400">
+            <text
+              x="22"
+              y="64"
+              font-size="8"
+              fill="currentColor"
+              class="text-zinc-500 dark:text-zinc-400"
+            >
               50%
             </text>
-            <text x="22" y="14" font-size="8" fill="currentColor" class="text-zinc-500 dark:text-zinc-400">
+            <text
+              x="22"
+              y="14"
+              font-size="8"
+              fill="currentColor"
+              class="text-zinc-500 dark:text-zinc-400"
+            >
               Max
             </text>
             <path
@@ -84,10 +102,10 @@
 
   <div class="glass-card matte-surface">
     <div class="glass-card-header">
-<h3 class="text-sm font-semibold flex items-center gap-2">
-          <mat-icon class="text-[var(--accent-icons)] icon-sm" fontIcon="history" />
-          Cleaning History
-        </h3>
+      <h3 class="text-sm font-semibold flex items-center gap-2">
+        <mat-icon class="text-[var(--accent-icons)] icon-sm" fontIcon="history" />
+        Cleaning History
+      </h3>
       <button (click)="loadReports()" class="btn btn-ghost btn-icon" matTooltip="Refresh">
         <mat-icon class="text-[var(--accent-icons)]" fontIcon="refresh" />
       </button>
@@ -98,7 +116,9 @@
           <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
         </div>
       } @else if (reports().length === 0) {
-        <div class="flex flex-col items-center justify-center h-64 text-zinc-500 dark:text-zinc-400">
+        <div
+          class="flex flex-col items-center justify-center h-64 text-zinc-500 dark:text-zinc-400"
+        >
           <mat-icon class="icon-4xl mb-4" fontIcon="description" />
           <p class="text-lg font-medium">No reports yet</p>
           <p class="text-sm">Run a cleaning session to generate your first report</p>

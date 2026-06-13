@@ -18,6 +18,7 @@ import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { formatSize } from '@shared/utils/format.util';
 import { DataListComponent } from '@components/data-list/data-list.component';
 import { ListColumn, ListOptions } from '@models/data-list.model';
+import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-kernel-cleaner-view',
@@ -31,6 +32,7 @@ import { ListColumn, ListOptions } from '@models/data-list.model';
     MatTooltipModule,
     MatProgressBarModule,
     DataListComponent,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './kernel-cleaner.view.html',
 })
@@ -82,7 +84,9 @@ export class KernelCleanerView implements OnInit {
     showSearch: true,
     rowClass: (item: unknown) => {
       const kernel = item as KernelInfo;
-      return kernel.is_current ? 'bg-success/10 border-success/30' : 'border-[var(--border-color)]';
+      return kernel.is_current
+        ? 'bg-success/10 border-success/30'
+        : 'border-zinc-600 dark:border-zinc-600';
     },
   };
 

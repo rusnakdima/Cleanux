@@ -71,12 +71,8 @@ export class MonitorStore implements OnDestroy {
   readonly loading = signal(false);
   readonly isMonitoring = signal(false);
 
-  readonly memoryUsedFormatted = computed(() =>
-    formatSize(this.systemStats().memoryUsed ?? 0)
-  );
-  readonly memoryTotalFormatted = computed(() =>
-    formatSize(this.systemStats().memoryTotal ?? 0)
-  );
+  readonly memoryUsedFormatted = computed(() => formatSize(this.systemStats().memoryUsed ?? 0));
+  readonly memoryTotalFormatted = computed(() => formatSize(this.systemStats().memoryTotal ?? 0));
   readonly diskUsedFormatted = computed(() => formatSize(this.systemStats().diskUsed ?? 0));
   readonly diskTotalFormatted = computed(() => formatSize(this.systemStats().diskTotal ?? 0));
 
@@ -256,9 +252,9 @@ export class MonitorStore implements OnDestroy {
   }
 
   getUsageColor(percent: number): string {
-    if (percent >= 90) return 'var(--error)';
-    if (percent >= 70) return 'var(--warning)';
-    return 'var(--success)';
+    if (percent >= 90) return 'var(--color-error)';
+    if (percent >= 70) return 'var(--color-warning)';
+    return 'var(--color-success)';
   }
 
   ngOnDestroy(): void {

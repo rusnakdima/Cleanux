@@ -94,16 +94,19 @@ export class MemoryOptimizerView extends LoadingErrorMixin implements OnInit, On
   }
 
   async loadData() {
-    await this.runWithLoading(async () => {
-      const [memory, swap, procData] = await Promise.all([
-        this.memoryService.getMemoryInfo(),
-        this.memoryService.getSwapInfo(),
-        this.memoryService.getProcessMemory(),
-      ]);
-      this.memoryInfo.set(memory);
-      this.swapInfo.set(swap);
-      this.processes.set(procData);
-    }, { errorMessage: 'Failed to load memory data' });
+    await this.runWithLoading(
+      async () => {
+        const [memory, swap, procData] = await Promise.all([
+          this.memoryService.getMemoryInfo(),
+          this.memoryService.getSwapInfo(),
+          this.memoryService.getProcessMemory(),
+        ]);
+        this.memoryInfo.set(memory);
+        this.swapInfo.set(swap);
+        this.processes.set(procData);
+      },
+      { errorMessage: 'Failed to load memory data' }
+    );
   }
 
   onPageChange(page: number): void {
@@ -116,10 +119,16 @@ export class MemoryOptimizerView extends LoadingErrorMixin implements OnInit, On
   }
 
   async optimizeMemory() {
-    await this.runWithLoading(async () => {
-      await this.memoryService.optimizeMemory();
-      await this.loadData();
-    }, { errorMessage: 'Failed to optimize memory', notificationMessage: 'Memory optimization failed' });
+    await this.runWithLoading(
+      async () => {
+        await this.memoryService.optimizeMemory();
+        await this.loadData();
+      },
+      {
+        errorMessage: 'Failed to optimize memory',
+        notificationMessage: 'Memory optimization failed',
+      }
+    );
   }
 
   formatBytes(bytes: number): string {

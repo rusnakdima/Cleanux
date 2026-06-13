@@ -74,7 +74,7 @@ export class ConfirmDialogComponent {
   }
 
   getCancelBtnClass(): string {
-    return 'btn-cancel bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-color)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]';
+    return 'btn-cancel bg-zinc-800 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-400 border-zinc-600 dark:border-zinc-600 hover:bg-zinc-700 dark:hover:bg-zinc-700 hover:text-zinc-200 dark:hover:text-zinc-200';
   }
 
   getConfirmBtnClass(): string {

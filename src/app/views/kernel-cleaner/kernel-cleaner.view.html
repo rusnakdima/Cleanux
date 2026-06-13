@@ -14,7 +14,7 @@
 
   @if (bootSpaceInfo()) {
     <div class="glass-card matte-surface p-6">
-      <h3 class="text-lg font-semibold text-white dark:text-zinc-900 mb-4">Boot Partition Space</h3>
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Boot Partition Space</h3>
       <div class="flex items-center gap-4">
         <div class="flex-1">
           <mat-progress-bar mode="determinate" [value]="getBootUsagePercent()"> </mat-progress-bar>
@@ -26,19 +26,19 @@
       <div class="grid grid-cols-3 gap-4 mt-4 text-sm">
         <div>
           <span class="text-zinc-500 dark:text-zinc-400">Total:</span>
-          <span class="ml-2 font-medium text-white dark:text-zinc-900">{{
+          <span class="ml-2 font-medium text-zinc-900 dark:text-white">{{
             formatSize(bootSpaceInfo()!.total)
           }}</span>
         </div>
         <div>
           <span class="text-zinc-500 dark:text-zinc-400">Used:</span>
-          <span class="ml-2 font-medium text-white dark:text-zinc-900">{{
+          <span class="ml-2 font-medium text-zinc-900 dark:text-white">{{
             formatSize(bootSpaceInfo()!.used)
           }}</span>
         </div>
         <div>
           <span class="text-zinc-500 dark:text-zinc-400">Available:</span>
-          <span class="ml-2 font-medium text-white dark:text-zinc-900">{{
+          <span class="ml-2 font-medium text-zinc-900 dark:text-white">{{
             formatSize(bootSpaceInfo()!.available)
           }}</span>
         </div>
@@ -49,8 +49,10 @@
   <div class="glass-card matte-surface p-6">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Current Kernel</h3>
-        <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Running kernel - CANNOT be removed</p>
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Current Kernel</h3>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          Running kernel - CANNOT be removed
+        </p>
       </div>
     </div>
     <div class="bg-success/10 border border-success/30 rounded-lg p-4">
@@ -64,7 +66,7 @@
   <div class="glass-card matte-surface p-6">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="text-lg font-semibold text-white dark:text-zinc-900">All Installed Kernels</h3>
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">All Installed Kernels</h3>
         <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
           {{ allKernels().length }} kernel(s) installed
         </p>
@@ -72,9 +74,7 @@
     </div>
 
     @if (loading()) {
-      <div class="flex items-center justify-center py-12">
-        <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-      </div>
+      <app-loading-spinner size="lg" />
     } @else {
       <app-data-list
         [columns]="kernelColumns"
@@ -94,7 +94,7 @@
     <div class="glass-card matte-surface p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Removable Old Kernels</h3>
+          <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Removable Old Kernels</h3>
           <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
             {{ oldKernels().length }} old kernel(s) - {{ formatSize(getOldKernelsSize()) }} can be
             freed
@@ -131,7 +131,7 @@
     <div class="glass-card matte-surface p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Old Initramfs Files</h3>
+          <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Old Initramfs Files</h3>
           <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
             {{ oldInitramfs().length }} orphaned initramfs file(s)
           </p>

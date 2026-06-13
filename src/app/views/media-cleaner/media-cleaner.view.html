@@ -23,21 +23,21 @@
             <div class="glass-card matte-surface text-center p-4">
               <div class="text-4xl mb-2">🎮</div>
               <div class="text-sm text-zinc-500 dark:text-zinc-400">Games Detected</div>
-              <div class="text-white dark:text-zinc-900 text-2xl font-bold">
+              <div class="text-zinc-900 dark:text-white text-2xl font-bold">
                 {{ summary()?.steamGameCount || 0 }}
               </div>
             </div>
             <div class="glass-card matte-surface text-center p-4">
               <div class="text-4xl mb-2">💾</div>
               <div class="text-sm text-zinc-500 dark:text-zinc-400">Shader Cache</div>
-              <div class="text-white dark:text-zinc-900 text-2xl font-bold">
+              <div class="text-zinc-900 dark:text-white text-2xl font-bold">
                 {{ formatSize(summary()?.steamShaderSize || 0) }}
               </div>
             </div>
             <div class="glass-card matte-surface text-center p-4">
               <div class="text-4xl mb-2">📥</div>
               <div class="text-sm text-zinc-500 dark:text-zinc-400">Download Cache</div>
-              <div class="text-white dark:text-zinc-900 text-2xl font-bold">
+              <div class="text-zinc-900 dark:text-white text-2xl font-bold">
                 {{ formatSize(summary()?.steamDownloadSize || 0) }}
               </div>
             </div>
@@ -45,9 +45,7 @@
 
           <div class="flex gap-4">
             <button
-              mat-raised-button
-              color="warn"
-              class="flex-1"
+              class="btn btn-danger flex-1"
               [disabled]="isCleaning('steam-shader')"
               (click)="cleanSteamShaderCache()"
             >
@@ -58,9 +56,7 @@
               }
             </button>
             <button
-              mat-raised-button
-              color="warn"
-              class="flex-1"
+              class="btn btn-danger flex-1"
               [disabled]="isCleaning('steam-download')"
               (click)="cleanSteamDownloadCache()"
             >
@@ -91,15 +87,13 @@
           <div class="glass-card matte-surface text-center p-6 mb-6">
             <div class="text-6xl mb-4">🎵</div>
             <div class="text-sm text-zinc-500 dark:text-zinc-400">Spotify Cache Size</div>
-            <div class="text-white dark:text-zinc-900 text-4xl font-bold">
+            <div class="text-zinc-900 dark:text-white text-4xl font-bold">
               {{ formatSize(summary()?.spotifyCacheSize || 0) }}
             </div>
           </div>
 
           <button
-            mat-raised-button
-            color="warn"
-            class="w-full"
+            class="btn btn-danger w-full"
             [disabled]="isCleaning('spotify')"
             (click)="cleanSpotifyCache()"
           >
@@ -117,15 +111,13 @@
           <div class="glass-card matte-surface text-center p-6 mb-6">
             <div class="text-6xl mb-4">📺</div>
             <div class="text-sm text-zinc-500 dark:text-zinc-400">VLC Cache Size</div>
-            <div class="text-white dark:text-zinc-900 text-4xl font-bold">
+            <div class="text-zinc-900 dark:text-white text-4xl font-bold">
               {{ formatSize(summary()?.vlcCacheSize || 0) }}
             </div>
           </div>
 
           <button
-            mat-raised-button
-            color="warn"
-            class="w-full"
+            class="btn btn-danger w-full"
             [disabled]="isCleaning('vlc')"
             (click)="cleanVlcCache()"
           >
@@ -153,15 +145,13 @@
           <div class="glass-card matte-surface text-center p-6 mb-6">
             <div class="text-6xl mb-4">🖼️</div>
             <div class="text-sm text-zinc-500 dark:text-zinc-400">Thumbnail Cache Size</div>
-            <div class="text-white dark:text-zinc-900 text-4xl font-bold">
+            <div class="text-zinc-900 dark:text-white text-4xl font-bold">
               {{ formatSize(summary()?.thumbnailCacheSize || 0) }}
             </div>
           </div>
 
           <button
-            mat-raised-button
-            color="warn"
-            class="w-full"
+            class="btn btn-danger w-full"
             [disabled]="isCleaning('thumbnails')"
             (click)="cleanThumbnailCache()"
           >
@@ -189,15 +179,13 @@
           <div class="glass-card matte-surface text-center p-6 mb-6">
             <div class="text-6xl mb-4">🔲</div>
             <div class="text-sm text-zinc-500 dark:text-zinc-400">Icon Cache Size</div>
-            <div class="text-white dark:text-zinc-900 text-4xl font-bold">
+            <div class="text-zinc-900 dark:text-white text-4xl font-bold">
               {{ formatSize(summary()?.iconCacheSize || 0) }}
             </div>
           </div>
 
           <button
-            mat-raised-button
-            color="warn"
-            class="w-full"
+            class="btn btn-danger w-full"
             [disabled]="isCleaning('icons')"
             (click)="cleanIconCache()"
           >
@@ -212,7 +200,7 @@
     </mat-tab-group>
 
     <div class="mt-6 flex justify-end">
-      <button mat-raised-button color="primary" (click)="loadSummary()">Refresh</button>
+      <button class="btn btn-primary" (click)="loadSummary()">Refresh</button>
     </div>
   }
 </div>

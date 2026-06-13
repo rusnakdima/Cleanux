@@ -54,86 +54,89 @@ export class MediaCleanerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadSummary(): Promise<void> {
-    await this.runWithLoading(async () => {
-      const data = await this.mediaCacheService.getMediaCacheSummary();
-      this.summary.set(data);
-      return data;
-    }, { errorMessage: 'Failed to load media cache summary' });
+    await this.runWithLoading(
+      async () => {
+        const data = await this.mediaCacheService.getMediaCacheSummary();
+        this.summary.set(data);
+        return data;
+      },
+      { errorMessage: 'Failed to load media cache summary' }
+    );
   }
 
   async cleanSteamShaderCache(): Promise<void> {
-    if (!await this.confirmClean('Steam shader cache')) return;
+    if (!(await this.confirmClean('Steam shader cache'))) return;
     this.cleaning.set('steam-shader');
     try {
       await this.mediaCacheService.cleanSteamShaderCache();
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean Steam shader cache', error);
+      this.notification.error('Failed to clean Steam shader cache', error);
     } finally {
       this.cleaning.set(null);
     }
   }
 
   async cleanSteamDownloadCache(): Promise<void> {
-    if (!await this.confirmClean('Steam download cache')) return;
+    if (!(await this.confirmClean('Steam download cache'))) return;
     this.cleaning.set('steam-download');
     try {
       await this.mediaCacheService.cleanSteamDownloadCache();
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean Steam download cache', error);
+      this.notification.error('Failed to clean Steam download cache', error);
     } finally {
       this.cleaning.set(null);
     }
   }
 
   async cleanSpotifyCache(): Promise<void> {
-    if (!await this.confirmClean('Spotify cache')) return;
+    if (!(await this.confirmClean('Spotify cache'))) return;
     this.cleaning.set('spotify');
     try {
       await this.mediaCacheService.cleanSpotifyCache();
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean Spotify cache', error);
+      this.notification.error('Failed to clean Spotify cache', error);
     } finally {
       this.cleaning.set(null);
     }
   }
 
   async cleanVlcCache(): Promise<void> {
-    if (!await this.confirmClean('VLC cache')) return;
+    if (!(await this.confirmClean('VLC cache'))) return;
     this.cleaning.set('vlc');
     try {
       await this.mediaCacheService.cleanVlcCache();
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean VLC cache', error);
+      this.notification.error('Failed to clean VLC cache', error);
     } finally {
       this.cleaning.set(null);
     }
   }
 
   async cleanThumbnailCache(): Promise<void> {
-    if (!await this.confirmClean('thumbnail cache')) return;
+    if (!(await this.confirmClean('thumbnail cache'))) return;
     this.cleaning.set('thumbnails');
     try {
       await this.mediaCacheService.cleanThumbnailCache();
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean thumbnail cache', error);
+      this.notification.error('Failed to clean thumbnail cache', error);
     } finally {
       this.cleaning.set(null);
     }
   }
 
   async cleanIconCache(): Promise<void> {
-    if (!await this.confirmClean('icon cache')) return;
+    if (!(await this.confirmClean('icon cache'))) return;
     this.cleaning.set('icons');
     try {
       await this.mediaCacheService.cleanIconCache();
       await this.loadSummary();
     } catch (error) {
-      this.notification.cleanError('clean icon cache', error);
+      this.notification.error('Failed to clean icon cache', error);
     } finally {
       this.cleaning.set(null);
     }

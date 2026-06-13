@@ -83,11 +83,14 @@ export class ProfilesView implements OnInit {
   }
 
   async deleteProfile(profile: CleaningProfile) {
-    if (!await this.confirmDialogService.confirm({
-      title: 'Delete Profile',
-      message: `Delete profile "${profile.name}"?`,
-      dangerous: true,
-    })) return;
+    if (
+      !(await this.confirmDialogService.confirm({
+        title: 'Delete Profile',
+        message: `Delete profile "${profile.name}"?`,
+        dangerous: true,
+      }))
+    )
+      return;
 
     this.isLoading.set(true);
     try {
@@ -104,10 +107,13 @@ export class ProfilesView implements OnInit {
   }
 
   async applyProfile(profile: CleaningProfile) {
-    if (!await this.confirmDialogService.confirm({
-      title: 'Apply Profile',
-      message: `Apply profile "${profile.name}"?`,
-    })) return;
+    if (
+      !(await this.confirmDialogService.confirm({
+        title: 'Apply Profile',
+        message: `Apply profile "${profile.name}"?`,
+      }))
+    )
+      return;
 
     this.isLoading.set(true);
     try {

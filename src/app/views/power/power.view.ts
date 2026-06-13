@@ -30,9 +30,27 @@ export class PowerView implements OnInit {
   activeProfile = signal<string>('balanced');
 
   powerTools = [
-    { id: 'battery', label: 'Battery Manager', desc: 'Monitor and optimize battery usage', icon: 'battery_saver', route: '/power' },
-    { id: 'thermal', label: 'Thermal Monitor', desc: 'Track CPU and system temperatures', icon: 'thermostat', route: '/power' },
-    { id: 'profiles', label: 'Power Profiles', desc: 'Switch between power modes', icon: 'tune', route: '/power' },
+    {
+      id: 'battery',
+      label: 'Battery Manager',
+      desc: 'Monitor and optimize battery usage',
+      icon: 'battery_saver',
+      route: '/power',
+    },
+    {
+      id: 'thermal',
+      label: 'Thermal Monitor',
+      desc: 'Track CPU and system temperatures',
+      icon: 'thermostat',
+      route: '/power',
+    },
+    {
+      id: 'profiles',
+      label: 'Power Profiles',
+      desc: 'Switch between power modes',
+      icon: 'tune',
+      route: '/power',
+    },
   ];
 
   ngOnInit() {
@@ -78,14 +96,17 @@ export class PowerView implements OnInit {
   getProfileIcon(profileName: string): string {
     const icons: Record<string, string> = {
       'power-saver': 'battery_saver',
-      'balanced': 'dashboard',
-      'performance': 'bolt',
+      balanced: 'dashboard',
+      performance: 'bolt',
     };
     return icons[profileName] || 'settings';
   }
 
   getProfileLabel(profileName: string): string {
-    return profileName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    return profileName
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
   }
 
   getBatteryIcon(): string {

@@ -1,11 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BaseApiService } from '@services/base-api.service';
 import { OperationResult } from '@models/cleaner.models';
-import {
-  PackageManagerSummary,
-  OrphanedPackage,
-  DeepCleanResponse,
-} from '@models/package.model';
+import { PackageManagerSummary, OrphanedPackage, DeepCleanResponse } from '@models/package.model';
 
 @Injectable({
   providedIn: 'root',
@@ -67,9 +63,7 @@ export class PackageDeepCleanService extends BaseApiService {
   async aptAutoclean(): Promise<{ spaceFreed: number; message: string }> {
     this.loading.set(true);
     try {
-      const response = await this.call<{ spaceFreed: number; message: string }>(
-        'apt_autoclean'
-      );
+      const response = await this.call<{ spaceFreed: number; message: string }>('apt_autoclean');
       await this.getPackageSummary();
       return response;
     } finally {
@@ -103,9 +97,7 @@ export class PackageDeepCleanService extends BaseApiService {
   async dnfCleanAll(): Promise<{ spaceFreed: number; message: string }> {
     this.loading.set(true);
     try {
-      const response = await this.call<{ spaceFreed: number; message: string }>(
-        'dnf_clean_all'
-      );
+      const response = await this.call<{ spaceFreed: number; message: string }>('dnf_clean_all');
       await this.getPackageSummary();
       return response;
     } finally {
@@ -120,10 +112,9 @@ export class PackageDeepCleanService extends BaseApiService {
   async pacmanClean(keepRecent: number): Promise<{ spaceFreed: number; message: string }> {
     this.loading.set(true);
     try {
-      const response = await this.call<{ spaceFreed: number; message: string }>(
-        'pacman_clean',
-        { keepRecent }
-      );
+      const response = await this.call<{ spaceFreed: number; message: string }>('pacman_clean', {
+        keepRecent,
+      });
       await this.getPackageSummary();
       return response;
     } finally {
@@ -151,9 +142,7 @@ export class PackageDeepCleanService extends BaseApiService {
   async zypperClean(): Promise<{ spaceFreed: number; message: string }> {
     this.loading.set(true);
     try {
-      const response = await this.call<{ spaceFreed: number; message: string }>(
-        'zypper_clean'
-      );
+      const response = await this.call<{ spaceFreed: number; message: string }>('zypper_clean');
       await this.getPackageSummary();
       return response;
     } finally {

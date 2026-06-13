@@ -24,9 +24,11 @@
     }
   </div>
 
-  <div class="glass-surface matte-surface p-6 mb-6">
+  <div class="glass-card matte-surface p-6 mb-6">
     <div class="space-y-3">
-      <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400">Power Profiles</label>
+      <label class="block text-sm font-semibold text-zinc-500 dark:text-zinc-400"
+        >Power Profiles</label
+      >
       <div class="flex gap-2">
         @for (profile of powerProfiles(); track profile.name) {
           <button
@@ -44,7 +46,7 @@
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-    <div class="glass-surface matte-surface p-5">
+    <div class="glass-card matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
         <mat-icon class="text-cyan-500 dark:text-cyan-400" [fontIcon]="getBatteryIcon()" />
         <h3 class="text-sm font-semibold">Battery</h3>
@@ -69,7 +71,7 @@
       }
     </div>
 
-    <div class="glass-surface matte-surface p-5">
+    <div class="glass-card matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
         <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="thermal" />
         <h3 class="text-sm font-semibold">Temperature</h3>
@@ -87,7 +89,7 @@
       }
     </div>
 
-    <div class="glass-surface matte-surface p-5">
+    <div class="glass-card matte-surface p-5">
       <div class="flex items-center gap-3 mb-3">
         <mat-icon class="text-cyan-500 dark:text-cyan-400" fontIcon="memory" />
         <h3 class="text-sm font-semibold">System Status</h3>
@@ -105,10 +107,15 @@
         <div>
           <div class="flex justify-between text-xs mb-1">
             <span class="text-zinc-400 dark:text-zinc-500">Memory</span>
-            <span class="font-mono">{{ monitorStore.systemStats().memoryUsagePercent.toFixed(0) }}%</span>
+            <span class="font-mono"
+              >{{ monitorStore.systemStats().memoryUsagePercent.toFixed(0) }}%</span
+            >
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" [style.width.%]="monitorStore.systemStats().memoryUsagePercent"></div>
+            <div
+              class="progress-fill"
+              [style.width.%]="monitorStore.systemStats().memoryUsagePercent"
+            ></div>
           </div>
         </div>
         <div>

@@ -37,7 +37,6 @@ import { formatSize } from '@shared/utils/format.util';
 interface FlattenedFile {
   name: string;
   path: string;
-  size: number;
   hash: string;
   file_size: number;
   wasted_space: number;
@@ -88,7 +87,7 @@ export class DuplicateFinderView extends LoadingErrorMixin implements OnInit {
       sortable: true,
     },
     {
-      key: 'size',
+      key: 'file_size',
       format: 'size',
       align: 'right',
       sortable: true,
@@ -112,7 +111,6 @@ export class DuplicateFinderView extends LoadingErrorMixin implements OnInit {
         files.push({
           name: group.files[i].name,
           path: group.files[i].path,
-          size: group.file_size,
           hash: group.hash,
           file_size: group.file_size,
           wasted_space: group.wasted_space,
@@ -140,15 +138,21 @@ export class DuplicateFinderView extends LoadingErrorMixin implements OnInit {
 
     this.selectedFiles.set(new Set());
 
-    await this.runWithLoading(async () => {
-      const result = await this.duplicateService.findDuplicates(
-        this.scanningPath(),
-        this.extensionFilter() || undefined
-      );
-      this.duplicateGroups.set(result.groups);
-      this.totalWastedSpace.set(result.totalWastedSpace);
-      this.totalDuplicates.set(result.totalDuplicates);
-    }, { errorMessage: 'Failed to scan for duplicates', notificationMessage: 'Failed to scan for duplicates' });
+    await this.runWithLoading(
+      async () => {
+        const result = await this.duplicateService.findDuplicates(
+          this.scanningPath(),
+          this.extensionFilter() || undefined
+        );
+        this.duplicateGroups.set(result.groups);
+        this.totalWastedSpace.set(result.totalWastedSpace);
+        this.totalDuplicates.set(result.totalDuplicates);
+      },
+      {
+        errorMessage: 'Failed to scan for duplicates',
+        notificationMessage: 'Failed to scan for duplicates',
+      }
+    );
   }
 
   onSelectionChange(keys: Set<string>): void {
@@ -172,15 +176,18 @@ export class DuplicateFinderView extends LoadingErrorMixin implements OnInit {
     });
     if (!confirmed) return;
 
-    await this.runWithLoading(async () => {
-      if (this.fileService.deleteFiles) {
-        await this.fileService.deleteFiles(filesToDelete);
-      } else {
-        await this.duplicateService.deleteFiles(filesToDelete);
-      }
-      this.selectedFiles.set(new Set());
-      await this.scanForDuplicates();
-    }, { errorMessage: 'Failed to delete files', notificationMessage: 'Failed to delete files' });
+    await this.runWithLoading(
+      async () => {
+        if (this.fileService.deleteFiles) {
+          await this.fileService.deleteFiles(filesToDelete);
+        } else {
+          await this.duplicateService.deleteFiles(filesToDelete);
+        }
+        this.selectedFiles.set(new Set());
+        await this.scanForDuplicates();
+      },
+      { errorMessage: 'Failed to delete files', notificationMessage: 'Failed to delete files' }
+    );
   }
 
   async onPreview(file: DuplicateFile): Promise<void> {

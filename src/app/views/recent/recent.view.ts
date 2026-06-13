@@ -96,10 +96,13 @@ export class RecentView {
 
   async clearApp(appId: string) {
     const app = this.apps.find((a) => a.id === appId);
-    if (app && await this.confirmDialogService.confirm({
-      title: 'Clear History',
-      message: `Clear recent history for ${app.name}?`,
-    })) {
+    if (
+      app &&
+      (await this.confirmDialogService.confirm({
+        title: 'Clear History',
+        message: `Clear recent history for ${app.name}?`,
+      }))
+    ) {
       this.items.update((items) =>
         items.filter((i) => i.app.toLowerCase() !== appId.toLowerCase())
       );
@@ -107,11 +110,13 @@ export class RecentView {
   }
 
   async clearAll() {
-    if (await this.confirmDialogService.confirm({
-      title: 'Clear All History',
-      message: 'Clear all recent file history? This cannot be undone.',
-      dangerous: true,
-    })) {
+    if (
+      await this.confirmDialogService.confirm({
+        title: 'Clear All History',
+        message: 'Clear all recent file history? This cannot be undone.',
+        dangerous: true,
+      })
+    ) {
       this.items.set([]);
     }
   }

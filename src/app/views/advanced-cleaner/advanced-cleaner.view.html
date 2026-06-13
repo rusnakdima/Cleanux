@@ -1,8 +1,6 @@
 <div class="view-layout max-w-4xl mx-auto">
   @if (loading()) {
-    <div class="flex justify-center items-center py-20">
-      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-    </div>
+    <app-loading-spinner size="lg" />
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (category of junkCategories; track category.key) {
@@ -26,7 +24,7 @@
                 }}</span>
               </div>
               <div>
-                <h3 class="text-lg font-semibold text-white dark:text-zinc-900">
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">
                   {{ category.label }}
                 </h3>
                 <p class="text-sm text-zinc-400 dark:text-zinc-500">
@@ -42,7 +40,7 @@
                 <div class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
                   Total Size
                 </div>
-                <div class="text-xl font-semibold text-white dark:text-zinc-900">
+                <div class="text-xl font-semibold text-zinc-900 dark:text-white">
                   {{ formatSize(summary?.totalSize || 0) }}
                 </div>
               </div>
@@ -50,7 +48,7 @@
                 <div class="text-xs text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">
                   Files
                 </div>
-                <div class="text-xl font-semibold text-white dark:text-zinc-900">
+                <div class="text-xl font-semibold text-zinc-900 dark:text-white">
                   {{ summary?.fileCount || 0 }}
                 </div>
               </div>
@@ -69,7 +67,9 @@
 
               <div class="max-h-64 overflow-y-auto">
                 @for (item of summary?.items || []; track item.path) {
-                  <div class="py-2 px-3 border-b border-zinc-700 dark:border-zinc-300 last:border-0">
+                  <div
+                    class="py-2 px-3 border-b border-zinc-700 dark:border-zinc-300 last:border-0"
+                  >
                     <div
                       class="text-zinc-400 dark:text-zinc-500 text-sm truncate"
                       [matTooltip]="item.path"
@@ -91,9 +91,7 @@
 
           <div class="flex gap-2 p-4 pt-0">
             <button
-              mat-button
-              color="primary"
-              class="flex-1"
+              class="btn btn-secondary flex-1"
               [disabled]="scanningCategory() === category.key"
               (click)="scanCategory(category.key)"
             >
@@ -104,9 +102,7 @@
               }
             </button>
             <button
-              mat-raised-button
-              color="warn"
-              class="flex-1"
+              class="btn btn-danger flex-1"
               [disabled]="(summary?.totalSize || 0) === 0"
               (click)="cleanCategory(category.key)"
             >
@@ -118,7 +114,7 @@
     </div>
 
     <div class="mt-8 flex justify-end">
-      <button mat-raised-button color="primary" (click)="loadJunkSummary()">Refresh All</button>
+      <button class="btn btn-primary" (click)="loadJunkSummary()">Refresh All</button>
     </div>
   }
 </div>

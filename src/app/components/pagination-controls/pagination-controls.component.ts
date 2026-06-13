@@ -1,5 +1,13 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, input, output, computed, signal, effect } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+  computed,
+  signal,
+  effect,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /* materials */

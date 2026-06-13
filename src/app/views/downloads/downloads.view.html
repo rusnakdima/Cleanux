@@ -4,10 +4,12 @@
     <p>Clean up your Downloads folder</p>
   </div>
 
-  <div class="glass-surface matte-surface p-6 mb-6">
+  <div class="glass-card matte-surface p-6 mb-6">
     <div class="flex items-center justify-between mb-4">
       <div>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Downloads Size</p>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          Downloads Size
+        </p>
         <p class="text-2xl font-bold">{{ formatSize(downloadsSize()) }}</p>
       </div>
       <button (click)="scanDownloads()" [disabled]="isScanning()" class="btn btn-primary">
@@ -18,33 +20,15 @@
 
     <div class="flex gap-4 text-sm flex-wrap">
       <label class="flex items-center gap-2 cursor-pointer">
-        <input
-          type="radio"
-          name="age"
-          value="week"
-          
-          class="accent-[var(--accent-icons)]"
-        />
+        <input type="radio" name="age" value="week" class="accent-[var(--accent-icons)]" />
         <span>Older than 1 week</span>
       </label>
       <label class="flex items-center gap-2 cursor-pointer">
-        <input
-          type="radio"
-          name="age"
-          value="month"
-          
-          class="accent-[var(--accent-icons)]"
-        />
+        <input type="radio" name="age" value="month" class="accent-[var(--accent-icons)]" />
         <span>Older than 1 month</span>
       </label>
       <label class="flex items-center gap-2 cursor-pointer">
-        <input
-          type="radio"
-          name="age"
-          value="all"
-          
-          class="accent-[var(--accent-icons)]"
-        />
+        <input type="radio" name="age" value="all" class="accent-[var(--accent-icons)]" />
         <span>All files</span>
       </label>
     </div>
@@ -55,8 +39,10 @@
       <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
     </div>
   } @else if (files().length > 0) {
-    <div class="glass-surface matte-surface overflow-hidden">
-      <div class="p-4 border-b border-zinc-700 dark:border-zinc-300 flex items-center justify-between">
+    <div class="glass-card matte-surface overflow-hidden">
+      <div
+        class="p-4 border-b border-zinc-700 dark:border-zinc-300 flex items-center justify-between"
+      >
         <span class="text-sm text-zinc-400 dark:text-zinc-500">{{ files().length }} files</span>
         <button
           (click)="cleanSelected()"
@@ -76,10 +62,12 @@
       />
     </div>
   } @else {
-    <div class="glass-surface matte-surface p-8 text-center">
+    <div class="glass-card matte-surface p-8 text-center">
       <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="folder_open" />
       <p class="text-zinc-400 dark:text-zinc-500">No files found in Downloads</p>
-      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Click Scan to search for cleanable files</p>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        Click Scan to search for cleanable files
+      </p>
     </div>
   }
 </div>

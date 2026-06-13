@@ -4,10 +4,12 @@
     <p>Manage clipboard history</p>
   </div>
 
-  <div class="glass-surface matte-surface p-6 mb-6">
+  <div class="glass-card matte-surface p-6 mb-6">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Clipboard History</p>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          Clipboard History
+        </p>
         <p class="text-2xl font-bold">{{ items().length }} items</p>
       </div>
       <button (click)="clearUnpinned()" class="btn btn-danger">
@@ -17,7 +19,7 @@
     </div>
   </div>
 
-  <div class="glass-surface matte-surface overflow-hidden">
+  <div class="glass-card matte-surface overflow-hidden">
     <app-data-list
       [columns]="columns"
       [data]="items()"
@@ -31,14 +33,16 @@
   </div>
 
   @if (items().length === 0) {
-    <div class="glass-surface matte-surface p-8 text-center">
+    <div class="glass-card matte-surface p-8 text-center">
       <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="content_paste" />
       <p class="text-zinc-400 dark:text-zinc-500">Clipboard is empty</p>
-      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Copied text and images will appear here</p>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        Copied text and images will appear here
+      </p>
     </div>
   }
 
-  <div class="glass-surface matte-surface p-5 mt-6">
+  <div class="glass-card matte-surface p-5 mt-6">
     <h3 class="section-title mb-4">Clipboard Settings</h3>
     <label class="flex items-center justify-between cursor-pointer">
       <span class="text-sm">Enable clipboard history</span>

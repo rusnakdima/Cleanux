@@ -14,14 +14,17 @@ export abstract class LoadingErrorMixin {
 
   loading = signal(false);
 
-  protected async runWithLoading<T>(fn: () => Promise<T>, options?: RunWithLoadingOptions): Promise<T | undefined> {
+  protected async runWithLoading<T>(
+    fn: () => Promise<T>,
+    options?: RunWithLoadingOptions
+  ): Promise<T | undefined> {
     this.loading.set(true);
     try {
       return await fn();
     } catch (error) {
       console.error(options?.errorMessage ?? 'Operation failed:', error);
       if (options?.notificationKey) {
-        this.notification.cleanError(options.notificationKey, error);
+        this.notification.error('Failed to ' + options.notificationKey, error);
       } else if (options?.notificationMessage) {
         this.notification.error(options.notificationMessage, error);
       }

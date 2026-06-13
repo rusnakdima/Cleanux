@@ -1,10 +1,4 @@
-import {
-  Component,
-  input,
-  inject,
-  ChangeDetectionStrategy,
-  HostListener,
-} from '@angular/core';
+import { Component, input, inject, ChangeDetectionStrategy, HostListener } from '@angular/core';
 import { DialogService } from './dialog-wrapper.models';
 
 @Component({

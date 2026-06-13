@@ -17,14 +17,9 @@
         </div>
 
         @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          </div>
+          <app-loading-spinner size="lg" />
         } @else if (symlinksData().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400">
-            <mat-icon class="icon-4xl mb-4" fontIcon="link_off" />
-            <p class="text-lg font-medium">No broken symlinks found</p>
-          </div>
+          <app-empty-state icon="link_off" title="No broken symlinks found" />
         } @else {
           <div class="space-y-2">
             @for (item of symlinksData(); track item.path) {
@@ -76,14 +71,9 @@
         </div>
 
         @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-          </div>
+          <app-loading-spinner size="lg" />
         } @else if (packagesData().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-zinc-500 dark:text-zinc-400">
-            <mat-icon class="icon-4xl mb-4" fontIcon="inventory_2" />
-            <p class="text-lg font-medium">No orphaned packages found</p>
-          </div>
+          <app-empty-state icon="inventory_2" title="No orphaned packages found" />
         } @else {
           <div class="space-y-2">
             @for (item of packagesData(); track item.path) {
@@ -97,7 +87,7 @@
                   ></mat-icon>
                   <div class="flex flex-col min-w-0 flex-1">
                     <span
-                      class="font-medium text-white dark:text-zinc-900 truncate"
+                      class="font-medium text-zinc-900 dark:text-white truncate"
                       [matTooltip]="item.path"
                       >{{ item.path }}</span
                     >
@@ -123,7 +113,7 @@
         <div class="glass-card matte-surface p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Font Cache</h3>
+              <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Font Cache</h3>
               <p class="text-sm text-zinc-500 dark:text-zinc-400">
                 Clean cached font data in ~/.cache/fontconfig
               </p>
@@ -144,7 +134,7 @@
         <div class="glass-card matte-surface p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Icon Cache</h3>
+              <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">Icon Cache</h3>
               <p class="text-sm text-zinc-500 dark:text-zinc-400">
                 Clean cached icon data in ~/.cache/icon-cache
               </p>
@@ -169,7 +159,9 @@
         <div class="glass-card matte-surface p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-white dark:text-zinc-900">Repair Permissions</h3>
+              <h3 class="text-lg font-semibold text-zinc-900 dark:text-white">
+                Repair Permissions
+              </h3>
               <p class="text-sm text-zinc-500 dark:text-zinc-400">
                 Fix common permission issues in config directories
               </p>

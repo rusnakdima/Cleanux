@@ -9,6 +9,7 @@ import { ContainerService } from '@services/container.service';
 import { ContainerSummary } from '@models/container.model';
 import { formatSize } from '@shared/utils/format.util';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
 
 type ContainerTab = 'docker' | 'podman';
 
@@ -23,6 +24,7 @@ type ContainerTab = 'docker' | 'podman';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatTabsModule,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './container-cleaner.view.html',
 })
@@ -145,7 +147,8 @@ export class ContainerCleanerView implements OnInit {
   async dockerVolumePrune() {
     const confirmed = await this.confirmDialogService.confirm({
       title: 'Docker Volume Prune',
-      message: 'This will remove all unused volumes. Data in these volumes will be lost forever! Continue?',
+      message:
+        'This will remove all unused volumes. Data in these volumes will be lost forever! Continue?',
     });
     if (!confirmed) return;
 

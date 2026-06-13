@@ -1,8 +1,6 @@
 <div class="view-layout max-w-4xl mx-auto">
   @if (loading()) {
-    <div class="flex items-center justify-center h-64">
-      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-    </div>
+    <app-loading-spinner size="lg" />
   } @else {
     <div class="mb-4 flex items-center justify-between">
       <div>
@@ -10,7 +8,7 @@
           Total cache size: <span class="font-semibold">{{ getTotalSize() }}</span>
         </p>
       </div>
-      <button mat-raised-button color="primary" (click)="cleanAll()" [disabled]="cleaning()">
+      <button class="btn btn-primary" (click)="cleanAll()" [disabled]="cleaning()">
         <mat-icon fontIcon="delete_sweep" />
         Clean All
       </button>
@@ -35,7 +33,7 @@
 
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-2xl font-bold text-white dark:text-zinc-900">
+              <p class="text-2xl font-bold text-zinc-900 dark:text-white">
                 {{ getToolSize(tool.item) }}
               </p>
               @if (tool.item?.cache_path) {
@@ -47,12 +45,7 @@
                 </p>
               }
             </div>
-            <button
-              mat-raised-button
-              color="warn"
-              (click)="cleanTool(tool.name)"
-              [disabled]="cleaning()"
-            >
+            <button class="btn btn-danger" (click)="cleanTool(tool.name)" [disabled]="cleaning()">
               <mat-icon fontIcon="cleaning_services" />
               Clean
             </button>

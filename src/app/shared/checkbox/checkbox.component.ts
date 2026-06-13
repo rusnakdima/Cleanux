@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   standalone: true,
   imports: [CommonModule, MatIconModule, MatTooltipModule],
   templateUrl: './checkbox.component.html',
+  styleUrl: './checkbox.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckboxComponent {

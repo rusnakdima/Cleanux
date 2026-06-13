@@ -1,6 +1,13 @@
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
-import { ChangeDetectionStrategy, Component, signal, inject, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal,
+  inject,
+  computed,
+  WritableSignal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -53,6 +60,13 @@ export class AppResidueCleanerView {
   selectedData = signal<Set<string>>(new Set());
   selectedCaches = signal<Set<string>>(new Set());
   selectedOrphaned = signal<Set<string>>(new Set());
+
+  private selectionMap = new Map<ResidueTab, WritableSignal<Set<string>>>([
+    ['configs', this.selectedConfigs],
+    ['data', this.selectedData],
+    ['caches', this.selectedCaches],
+    ['orphaned', this.selectedOrphaned],
+  ]);
 
   previewMode = signal(false);
   previewItems = signal<AppResidue[]>([]);
@@ -187,130 +201,41 @@ export class AppResidueCleanerView {
       .reduce((sum, item) => sum + item.size, 0);
   }
 
+  private getSelectionSignal(): WritableSignal<Set<string>> {
+    return this.selectionMap.get(this.activeTab()) ?? this.selectedConfigs;
+  }
+
   isSelected(path: string): boolean {
-    const tab = this.activeTab();
-    switch (tab) {
-      case 'configs':
-        return this.selectedConfigs().has(path);
-      case 'data':
-        return this.selectedData().has(path);
-      case 'caches':
-        return this.selectedCaches().has(path);
-      case 'orphaned':
-        return this.selectedOrphaned().has(path);
-    }
+    const sel = this.getSelectionSignal();
+    return sel().has(path);
   }
 
   toggleSelection(path: string): void {
-    const tab = this.activeTab();
-    switch (tab) {
-      case 'configs': {
-        const current = new Set(this.selectedConfigs());
-        current.has(path) ? current.delete(path) : current.add(path);
-        this.selectedConfigs.set(current);
-        break;
-      }
-      case 'data': {
-        const current = new Set(this.selectedData());
-        current.has(path) ? current.delete(path) : current.add(path);
-        this.selectedData.set(current);
-        break;
-      }
-      case 'caches': {
-        const current = new Set(this.selectedCaches());
-        current.has(path) ? current.delete(path) : current.add(path);
-        this.selectedCaches.set(current);
-        break;
-      }
-      case 'orphaned': {
-        const current = new Set(this.selectedOrphaned());
-        current.has(path) ? current.delete(path) : current.add(path);
-        this.selectedOrphaned.set(current);
-        break;
-      }
-    }
+    const selection = this.getSelectionSignal();
+    const current = new Set(selection());
+    current.has(path) ? current.delete(path) : current.add(path);
+    selection.set(current);
   }
 
   selectAll(items: AppResidue[], checked = true): void {
-    const tab = this.activeTab();
-    const allPaths = new Set(items.map((i) => i.path));
-    if (!checked) {
-      switch (tab) {
-        case 'configs':
-          this.selectedConfigs.set(new Set());
-          break;
-        case 'data':
-          this.selectedData.set(new Set());
-          break;
-        case 'caches':
-          this.selectedCaches.set(new Set());
-          break;
-        case 'orphaned':
-          this.selectedOrphaned.set(new Set());
-          break;
-      }
-    } else {
-      switch (tab) {
-        case 'configs':
-          this.selectedConfigs.set(allPaths);
-          break;
-        case 'data':
-          this.selectedData.set(allPaths);
-          break;
-        case 'caches':
-          this.selectedCaches.set(allPaths);
-          break;
-        case 'orphaned':
-          this.selectedOrphaned.set(allPaths);
-          break;
-      }
-    }
+    const selection = this.getSelectionSignal();
+    selection.set(checked ? new Set(items.map((i) => i.path)) : new Set());
   }
 
   deselectAll(): void {
-    const tab = this.activeTab();
-    switch (tab) {
-      case 'configs':
-        this.selectedConfigs.set(new Set());
-        break;
-      case 'data':
-        this.selectedData.set(new Set());
-        break;
-      case 'caches':
-        this.selectedCaches.set(new Set());
-        break;
-      case 'orphaned':
-        this.selectedOrphaned.set(new Set());
-        break;
-    }
+    this.getSelectionSignal().set(new Set());
   }
 
   getCurrentItems(): AppResidue[] {
     const tab = this.activeTab();
-    switch (tab) {
-      case 'configs':
-        return this.configsData();
-      case 'data':
-        return this.dataData();
-      case 'caches':
-        return this.cachesData();
-    }
-    return null as any;
+    if (tab === 'configs') return this.configsData();
+    if (tab === 'data') return this.dataData();
+    if (tab === 'caches') return this.cachesData();
+    return [];
   }
 
   getSelectedCount(): number {
-    const tab = this.activeTab();
-    switch (tab) {
-      case 'configs':
-        return this.selectedConfigs().size;
-      case 'data':
-        return this.selectedData().size;
-      case 'caches':
-        return this.selectedCaches().size;
-      case 'orphaned':
-        return this.selectedOrphaned().size;
-    }
-    return 0;
+    return this.getSelectionSignal()().size;
   }
 
   async loadSummary(): Promise<void> {
@@ -506,6 +431,7 @@ export class AppResidueCleanerView {
   }
 
   onSearchHoverLeave(): void {
+    this.hideSearchInput();
   }
 
   onSearchFocus(): void {

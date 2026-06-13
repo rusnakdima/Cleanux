@@ -13,6 +13,9 @@ import { MatCardModule } from '@angular/material/card';
 /* services */
 import { JunkCleanerService } from '@services/junk-cleaner.service';
 
+/* components */
+import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
+
 /* models */
 import {
   JunkCategorySummary,
@@ -35,6 +38,7 @@ import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
     MatTooltipModule,
     MatExpansionModule,
     MatCardModule,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './advanced-cleaner.view.html',
 })
@@ -55,10 +59,14 @@ export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
   }
 
   async loadJunkSummary(): Promise<void> {
-    await this.runWithLoading(() => this.junkCleanerService.getJunkSummary().then(s => {
-      this.junkSummary.set(s);
-      return s;
-    }), { errorMessage: 'Failed to load junk summary' });
+    await this.runWithLoading(
+      () =>
+        this.junkCleanerService.getJunkSummary().then((s) => {
+          this.junkSummary.set(s);
+          return s;
+        }),
+      { errorMessage: 'Failed to load junk summary' }
+    );
   }
 
   loadLastCleaned(): void {
@@ -94,10 +102,14 @@ export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
           await this.junkCleanerService.scanLogRotations();
           break;
       }
-      await this.runWithLoading(() => this.junkCleanerService.getJunkSummary().then(s => {
-        this.junkSummary.set(s);
-        return s;
-      }), { errorMessage: `Failed to scan ${category}` });
+      await this.runWithLoading(
+        () =>
+          this.junkCleanerService.getJunkSummary().then((s) => {
+            this.junkSummary.set(s);
+            return s;
+          }),
+        { errorMessage: `Failed to scan ${category}` }
+      );
     } catch (error) {
       console.error(`Failed to scan ${category}:`, error);
     } finally {
@@ -114,12 +126,18 @@ export class AdvancedCleanerView extends LoadingErrorMixin implements OnInit {
     });
     if (!confirmed) return;
 
-    await this.runWithLoading(async () => {
-      await this.junkCleanerService.cleanJunkCategory(category);
-      this.saveLastCleaned(category);
-      const summary = await this.junkCleanerService.getJunkSummary();
-      this.junkSummary.set(summary);
-    }, { errorMessage: `Failed to clean ${categoryLabel}`, notificationMessage: `Failed to clean ${categoryLabel}` });
+    await this.runWithLoading(
+      async () => {
+        await this.junkCleanerService.cleanJunkCategory(category);
+        this.saveLastCleaned(category);
+        const summary = await this.junkCleanerService.getJunkSummary();
+        this.junkSummary.set(summary);
+      },
+      {
+        errorMessage: `Failed to clean ${categoryLabel}`,
+        notificationMessage: `Failed to clean ${categoryLabel}`,
+      }
+    );
   }
 
   getCategorySummary(key: JunkCategoryKey): JunkCategorySummary | undefined {

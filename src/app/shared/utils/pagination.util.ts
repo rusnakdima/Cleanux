@@ -11,7 +11,10 @@ export interface PaginatedState<T> {
 
 export function createPaginatedLoader<T>(
   state: PaginatedState<T>,
-  fetcher: (limit: number, offset: number) => Promise<{ data: T[]; has_more: boolean; total: number }>
+  fetcher: (
+    limit: number,
+    offset: number
+  ) => Promise<{ data: T[]; has_more: boolean; total: number }>
 ) {
   return async (limit = 50, offset = 0, reset = false): Promise<PaginatedData<T>> => {
     if (state.loading()) {

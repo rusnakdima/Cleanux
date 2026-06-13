@@ -5,10 +5,10 @@
         <mat-icon class="text-info icon-xl" fontIcon="settings" />
       </div>
       <div>
-        <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+        <p class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Total Services
         </p>
-        <p class="text-3xl font-bold text-[var(--text-primary)]">{{ totalServices() }}</p>
+        <p class="text-3xl font-bold text-zinc-900 dark:text-white">{{ totalServices() }}</p>
       </div>
     </div>
 
@@ -17,8 +17,10 @@
         <mat-icon class="text-success icon-xl" fontIcon="play_arrow" />
       </div>
       <div>
-        <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Active</p>
-        <p class="text-3xl font-bold text-[var(--text-primary)]">{{ runningServices() }}</p>
+        <p class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          Active
+        </p>
+        <p class="text-3xl font-bold text-zinc-900 dark:text-white">{{ runningServices() }}</p>
       </div>
     </div>
 
@@ -27,8 +29,10 @@
         <mat-icon class="text-error icon-xl" fontIcon="stop" />
       </div>
       <div>
-        <p class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Inactive</p>
-        <p class="text-3xl font-bold text-[var(--text-primary)]">{{ stoppedServices() }}</p>
+        <p class="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          Inactive
+        </p>
+        <p class="text-3xl font-bold text-zinc-900 dark:text-white">{{ stoppedServices() }}</p>
       </div>
     </div>
   </div>

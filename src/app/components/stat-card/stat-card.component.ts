@@ -14,7 +14,6 @@ import { ThemeService } from '@services/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule],
   templateUrl: './stat-card.component.html',
-  styleUrl: './stat-card.component.css',
 })
 export class StatCardComponent {
   label = input.required<string>();
@@ -22,7 +21,9 @@ export class StatCardComponent {
   icon = input.required<string>();
   accentGradient = input<string>();
 
-  protected computedGradient = computed(() => this.accentGradient() || this.themeService.getAccentGradient());
+  protected computedGradient = computed(
+    () => this.accentGradient() || this.themeService.getAccentGradient()
+  );
 
   constructor(private themeService: ThemeService) {}
 }

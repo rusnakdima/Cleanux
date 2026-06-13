@@ -1,5 +1,5 @@
 /* sys lib */
-import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /* materials */
@@ -24,6 +24,7 @@ import { ToggleComponent } from '@components/toggle/toggle.component';
 /* models */
 import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
 import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -32,16 +33,24 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
   imports: [CommonModule, MatIconModule, FormsModule, ToggleComponent],
   templateUrl: './settings.view.html',
 })
-export class SettingsView {
+export class SettingsView implements OnDestroy {
   themeService = inject(ThemeService);
   private notification = inject(NotificationService);
   private toastService = inject(ToastService);
+
+  private getDateSubscription: Subscription | null = null;
+  private checkUpdateSubscription: Subscription | null = null;
 
   constructor(
     private aboutService: AboutService,
     private schedulerService: SchedulerService
   ) {
     this.loadSchedule();
+  }
+
+  ngOnDestroy(): void {
+    this.getDateSubscription?.unsubscribe();
+    this.checkUpdateSubscription?.unsubscribe();
   }
 
   themeModes: ThemeMode[] = ['dark', 'light', 'system'];
@@ -141,7 +150,8 @@ export class SettingsView {
   }
 
   getDate() {
-    this.aboutService.getDate(this.version).subscribe({
+    this.getDateSubscription?.unsubscribe();
+    this.getDateSubscription = this.aboutService.getDate(this.version).subscribe({
       next: (res: GitHubReleaseByTag) => {
         if (res && res.published_at) {
           localStorage.setItem('dateVersion', String(this.formatDate(res.published_at)));
@@ -169,7 +179,8 @@ export class SettingsView {
     localStorage.setItem('dateCheck', String(this.formatDate(new Date().toUTCString())));
     this.dateCheck.set(localStorage.getItem('dateCheck') || '');
 
-    this.aboutService.checkUpdate().subscribe({
+    this.checkUpdateSubscription?.unsubscribe();
+    this.checkUpdateSubscription = this.aboutService.checkUpdate().subscribe({
       next: (res: GitHubReleaseLatest) => {
         if (res && res.tag_name) {
           const ver: string = res.tag_name;

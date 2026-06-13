@@ -8,8 +8,6 @@
 }
 
 .spinner {
-  width: 2.5rem;
-  height: 2.5rem;
   border: 3px solid rgb(255 255 255 / 0.1);
   border-top-color: var(--accent);
   border-radius: 50%;
@@ -17,8 +15,27 @@
 }
 
 .spinner-message {
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.875rem;
+}
+
+.light .spinner-message {
+  color: var(--text-secondary);
+}
+
+.size-sm .spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.size-md .spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.size-lg .spinner {
+  width: 4rem;
+  height: 4rem;
 }
 
 @keyframes spin {

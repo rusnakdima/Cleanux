@@ -111,7 +111,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('clean APT cache', error);
+      this.notification.error('Failed to clean APT cache', error);
     }
   }
 
@@ -126,7 +126,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('run apt autoremove', error);
+      this.notification.error('Failed to run apt autoremove', error);
     }
   }
 
@@ -136,7 +136,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('run apt autoclean', error);
+      this.notification.error('Failed to run apt autoclean', error);
     }
   }
 
@@ -151,7 +151,7 @@ export class PackageDeepCleanView implements OnInit {
       await this.service.removeOrphanedPackage(pkg.name);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('remove orphaned package', error);
+      this.notification.error('Failed to remove orphaned package', error);
     }
   }
 
@@ -161,7 +161,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('clean DNF cache', error);
+      this.notification.error('Failed to clean DNF cache', error);
     }
   }
 
@@ -171,7 +171,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('clean pacman cache', error);
+      this.notification.error('Failed to clean pacman cache', error);
     }
   }
 
@@ -186,7 +186,8 @@ export class PackageDeepCleanView implements OnInit {
 
     const doubleConfirmed = await this.confirmDialogService.confirm({
       title: 'Confirm Full Clean',
-      message: 'This will remove ALL package cache, including those for currently installed packages. Type "YES" to confirm.',
+      message:
+        'This will remove ALL package cache, including those for currently installed packages. Type "YES" to confirm.',
       requireYesToConfirm: true,
     });
     if (!doubleConfirmed) return;
@@ -196,7 +197,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('run pacman full clean', error);
+      this.notification.error('Failed to run pacman full clean', error);
     }
   }
 
@@ -206,7 +207,7 @@ export class PackageDeepCleanView implements OnInit {
       this.notification.success(result.message);
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('clean zypper cache', error);
+      this.notification.error('Failed to clean zypper cache', error);
     }
   }
 
@@ -223,7 +224,7 @@ export class PackageDeepCleanView implements OnInit {
       );
       await this.loadData();
     } catch (error) {
-      this.notification.cleanError('run deep clean', error);
+      this.notification.error('Failed to run deep clean', error);
     }
   }
 }

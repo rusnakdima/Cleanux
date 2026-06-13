@@ -33,10 +33,9 @@ export class PackageManagerService extends BaseApiService {
   async cleanPackageCache(manager: string): Promise<string> {
     this.loading.set(true);
     try {
-      const response = await this.call<{ status: string; message: string }>(
-        'clean_package_cache',
-        { manager }
-      );
+      const response = await this.call<{ status: string; message: string }>('clean_package_cache', {
+        manager,
+      });
       if (response.status === 'success') {
         await this.getPackageCacheInfo();
       }

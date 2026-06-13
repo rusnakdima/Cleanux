@@ -1,6 +1,8 @@
 <!-- Layout wrapper uses Tailwind, toggle mechanics kept in component CSS -->
-@if (label() && labelPosition() === 'left') {
-  <span class="text-sm font-medium text-white dark:text-zinc-900 select-none mr-3">{{ label() }}</span>
+@if (label() && labelPosition() === "left") {
+  <span class="text-sm font-medium text-white dark:text-zinc-900 select-none mr-3">{{
+    label()
+  }}</span>
 }
 
 <button
@@ -19,6 +21,8 @@
   <span class="toggle-knob"></span>
 </button>
 
-@if (label() && labelPosition() === 'right') {
-  <span class="text-sm font-medium text-white dark:text-zinc-900 select-none ml-3">{{ label() }}</span>
+@if (label() && labelPosition() === "right") {
+  <span class="text-sm font-medium text-white dark:text-zinc-900 select-none ml-3">{{
+    label()
+  }}</span>
 }

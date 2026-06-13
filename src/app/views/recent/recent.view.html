@@ -4,10 +4,12 @@
     <p>Clean recent file history</p>
   </div>
 
-  <div class="glass-surface matte-surface p-6 mb-6">
+  <div class="glass-card matte-surface p-6 mb-6">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Tracked Items</p>
+        <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          Tracked Items
+        </p>
         <p class="text-2xl font-bold">{{ items().length }}</p>
       </div>
       <button (click)="clearAll()" [disabled]="items().length === 0" class="btn btn-danger">
@@ -17,7 +19,7 @@
     </div>
   </div>
 
-  <div class="glass-surface matte-surface overflow-hidden">
+  <div class="glass-card matte-surface overflow-hidden">
     @if (items().length > 0) {
       <app-data-list
         [columns]="columns"
@@ -31,22 +33,24 @@
       />
     } @else {
       <div class="p-8 text-center">
-        <mat-icon class="icon-xl text-[var(--text-muted)] mb-4" fontIcon="history" />
-        <p class="text-[var(--text-secondary)]">No recent files tracked</p>
-        <p class="text-sm text-[var(--text-muted)] mt-1">Recent file activity will appear here</p>
+        <mat-icon class="icon-xl text-zinc-500 dark:text-zinc-400 mb-4" fontIcon="history" />
+        <p class="text-zinc-900 dark:text-white">No recent files tracked</p>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+          Recent file activity will appear here
+        </p>
       </div>
     }
   </div>
 
-  <div class="glass-surface matte-surface p-5 mt-6">
+  <div class="glass-card matte-surface p-5 mt-6">
     <h3 class="section-title mb-4">Apps with Recent History</h3>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
       @for (app of apps; track app.id; let i = $index) {
         <button
           (click)="clearApp(app.id)"
-          class="category-card matte-surface {{ i % 2 === 0 ? 'border-gray-light' : 'border-gray-dark' }} flex flex-col items-center justify-center p-4 no-underline"
+          class="category-card matte-surface border-trace flex flex-col items-center justify-center p-4 no-underline"
         >
-          <mat-icon class="icon-lg text-[var(--text-muted)] mb-2" [fontIcon]="app.icon" />
+          <mat-icon class="icon-lg text-zinc-500 dark:text-zinc-400 mb-2" [fontIcon]="app.icon" />
           <span class="text-xs">{{ app.name }}</span>
         </button>
       }

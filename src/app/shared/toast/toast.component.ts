@@ -15,11 +15,15 @@ export class ToastComponent {
 
   getIcon(type: string): string {
     switch (type) {
-      case 'success': return 'check_circle';
-      case 'error': return 'error';
-      case 'warning': return 'warning';
+      case 'success':
+        return 'check_circle';
+      case 'error':
+        return 'error';
+      case 'warning':
+        return 'warning';
       case 'info':
-      default: return 'info';
+      default:
+        return 'info';
     }
   }
 

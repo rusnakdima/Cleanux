@@ -9,6 +9,8 @@ import { RepairService } from '@services/repair.service';
 import { RepairItem } from '@models/repair.model';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { LoadingSpinnerComponent } from '@components/loading-spinner/loading-spinner.component';
+import { EmptyStateComponent } from '@components/empty-state/empty-state.component';
 
 type RepairTab = 'symlinks' | 'packages' | 'cache' | 'permissions';
 
@@ -23,6 +25,8 @@ type RepairTab = 'symlinks' | 'packages' | 'cache' | 'permissions';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatTabsModule,
+    LoadingSpinnerComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './system-repair.view.html',
 })
