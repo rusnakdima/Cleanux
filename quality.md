@@ -17,11 +17,11 @@ The codebase is well-structured with clear separation between Angular frontend a
 
 #### Duplicate Size Formatting Logic (HIGH)
 
-| Implementation | Location |
-|----------------|----------|
-| Angular `formatSize` | `src/app/shared/utils/format.util.ts:1-7` |
-| Angular duplicate | `src/app/stores/monitor.store.ts:260-266` |
-| Rust `format_size` | `src-tauri/src/helpers/filesystem.helper.rs:276-290` |
+| Implementation       | Location                                             |
+| -------------------- | ---------------------------------------------------- |
+| Angular `formatSize` | `src/app/shared/utils/format.util.ts:1-7`            |
+| Angular duplicate    | `src/app/stores/monitor.store.ts:260-266`            |
+| Rust `format_size`   | `src-tauri/src/helpers/filesystem.helper.rs:276-290` |
 
 **Recommendation:** Consolidate into single utility. Angular already has `format.util.ts` — remove duplicate from `monitor.store.ts`. Rust `format_size` in `filesystem.helper.rs` is appropriate.
 
@@ -29,14 +29,15 @@ The codebase is well-structured with clear separation between Angular frontend a
 
 #### Magic Numbers Not Extracted as Constants
 
-| Location | Raw Values |
-|----------|------------|
+| Location                                            | Raw Values                                    |
+| --------------------------------------------------- | --------------------------------------------- |
 | `src/app/views/dashboard/dashboard.view.ts:108-116` | `1024 * 1024 * 1024 * 2`, `1024 * 1024 * 500` |
-| `src/app/stores/monitor.store.ts:83` | `256 * 1024 * 1024` |
-| `src-tauri/src/services/dashboard.service.rs:201` | `100 * 1024 * 1024` |
-| `src-tauri/src/helpers/filesystem.helper.rs:12` | `100 * 1024 * 1024` |
+| `src/app/stores/monitor.store.ts:83`                | `256 * 1024 * 1024`                           |
+| `src-tauri/src/services/dashboard.service.rs:201`   | `100 * 1024 * 1024`                           |
+| `src-tauri/src/helpers/filesystem.helper.rs:12`     | `100 * 1024 * 1024`                           |
 
 **Recommendation:** Create constants file:
+
 ```typescript
 // src/app/shared/constants/size.constants.ts
 export const CRITICAL_JUNK_SIZE = 2 * 1024 * 1024 * 1024;
@@ -48,10 +49,10 @@ export const DEFAULT_JUNK_THRESHOLD = 256 * 1024 * 1024;
 
 #### Silent Error Suppression
 
-| File | Line | Issue |
-|------|------|-------|
+| File                                            | Line    | Issue                                                                       |
+| ----------------------------------------------- | ------- | --------------------------------------------------------------------------- |
 | `src-tauri/src/services/log_manager.service.rs` | 178-185 | `let _ = Command::new("journalctl").args(...).output();` — result discarded |
-| `src-tauri/src/services/memory.service.rs` | 134 | `/proc/sys/vm/drop_caches` write fails silently |
+| `src-tauri/src/services/memory.service.rs`      | 134     | `/proc/sys/vm/drop_caches` write fails silently                             |
 
 **Recommendation:** Log errors or return meaningful responses.
 
@@ -75,10 +76,10 @@ media_cache.service.rs — similar patterns
 
 #### Empty/Redundant Code Blocks
 
-| File | Issue |
-|------|-------|
+| File                                   | Issue                                            |
+| -------------------------------------- | ------------------------------------------------ |
 | `src-tauri/src/routes/system.route.rs` | Thin wrapper — only delegates to `SystemService` |
-| `src/app/services/api.service.ts` | Thin wrapper around `TauriApiService` |
+| `src/app/services/api.service.ts`      | Thin wrapper around `TauriApiService`            |
 
 **Recommendation:** Merge thin routes into services or remove indirection.
 
@@ -155,11 +156,13 @@ Creates structured responses. Could be expanded to include pagination, streaming
 **Location:** `src-tauri/src/services/system.service.rs:176-259`
 
 `enable_service_inner` and `stop_service_inner` share identical pattern:
+
 1. Run `pkexec systemctl <action> <target>`
 2. Check `status.success()`
 3. Return `ResponseModel`
 
 **Recommendation:** Abstract to:
+
 ```rust
 fn systemctl_action(service: &str, action: &str) -> Result<ResponseModel, AppError>
 ```
@@ -170,18 +173,19 @@ fn systemctl_action(service: &str, action: &str) -> Result<ResponseModel, AppErr
 
 ### 3.1 Anti-Patterns
 
-| Category | Count | Locations |
-|----------|-------|-----------|
-| Silent error suppression (`_ = result`) | 2 | `log_manager.service.rs` |
-| `.unwrap()` / `.expect()` | 368 | Throughout Rust code |
-| `any` type in TypeScript | 12+ | Multiple views |
-| Missing `pub` on return types | 5+ | `process.service.rs`, container types |
+| Category                                | Count | Locations                             |
+| --------------------------------------- | ----- | ------------------------------------- |
+| Silent error suppression (`_ = result`) | 2     | `log_manager.service.rs`              |
+| `.unwrap()` / `.expect()`               | 368   | Throughout Rust code                  |
+| `any` type in TypeScript                | 12+   | Multiple views                        |
+| Missing `pub` on return types           | 5+    | `process.service.rs`, container types |
 
 ---
 
 ### 3.2 Inconsistent Error Handling
 
 **Mixed patterns:**
+
 ```rust
 // Pattern A
 pub fn stopService(&self, service: &str) -> Result<ResponseModel, ResponseModel>
@@ -196,11 +200,11 @@ pub fn stopService(&self, service: &str) -> Result<ResponseModel, ResponseModel>
 
 ### 3.3 Long Methods
 
-| File | Method | Lines |
-|------|--------|-------|
-| `junk_cleaner.service.rs` | `get_junk_summary_inner` | ~100 |
-| `package_deep_clean.service.rs` | `deep_clean_all` | ~100 |
-| `dashboard.service.rs` | `getLargeFilesSummary` | 48 |
+| File                            | Method                   | Lines |
+| ------------------------------- | ------------------------ | ----- |
+| `junk_cleaner.service.rs`       | `get_junk_summary_inner` | ~100  |
+| `package_deep_clean.service.rs` | `deep_clean_all`         | ~100  |
+| `dashboard.service.rs`          | `getLargeFilesSummary`   | 48    |
 
 **Recommendation:** Split into smaller focused methods.
 
@@ -261,10 +265,10 @@ Routes in `src-tauri/src/routes/` are minimal — just delegate to services. Thi
 
 ## 5. Naming Inconsistencies
 
-| Pattern | Examples |
-|---------|----------|
+| Pattern              | Examples                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------- |
 | Rust inner functions | `get_all_services_inner` vs `get_junk_summary_inner` (some have `_inner`, some don't) |
-| Frontend vs backend | `getCacheFiles` (camelCase invoke) vs `scan_browser_caches_inner` (snake_case Rust) |
+| Frontend vs backend  | `getCacheFiles` (camelCase invoke) vs `scan_browser_caches_inner` (snake_case Rust)   |
 
 **Recommendation:** Establish naming convention document.
 
@@ -274,27 +278,27 @@ Routes in `src-tauri/src/routes/` are minimal — just delegate to services. Thi
 
 ### TypeScript
 
-| Location | Issue |
-|----------|-------|
-| `cleaner.view.ts:178` | `filteredLogEntries(): any[]` |
+| Location                | Issue                         |
+| ----------------------- | ----------------------------- |
+| `cleaner.view.ts:178`   | `filteredLogEntries(): any[]` |
 | `dashboard.view.ts:129` | `ScanProgress` defined inline |
-| Multiple views | Use `any` for error handling |
+| Multiple views          | Use `any` for error handling  |
 
 ### Rust
 
-| Location | Issue |
-|----------|-------|
-| `process.service.rs:8-14` | `ProcessItem` not marked `pub` |
-| `container.service.rs` | `DockerInfo`, `PodmanInfo` fields missing `pub` |
+| Location                  | Issue                                           |
+| ------------------------- | ----------------------------------------------- |
+| `process.service.rs:8-14` | `ProcessItem` not marked `pub`                  |
+| `container.service.rs`    | `DockerInfo`, `PodmanInfo` fields missing `pub` |
 
 ---
 
 ## 7. Performance Concerns
 
-| Issue | Impact |
-|-------|--------|
-| `dirs::home_dir()` called 61 times | Repeated syscalls |
-| No pagination at DB level | Memory pressure on large scans |
+| Issue                                  | Impact                                 |
+| -------------------------------------- | -------------------------------------- |
+| `dirs::home_dir()` called 61 times     | Repeated syscalls                      |
+| No pagination at DB level              | Memory pressure on large scans         |
 | Deep recursion in `calculate_dir_size` | Potential stack overflow on deep trees |
 
 ---
@@ -328,16 +332,16 @@ Routes in `src-tauri/src/routes/` are minimal — just delegate to services. Thi
 
 ## 9. Statistics
 
-| Metric | Count |
-|--------|-------|
-| TypeScript files | ~100 |
-| Rust service files | 39 |
-| Rust route files | 30 |
-| `dirs::home_dir()` calls | 61 |
-| Magic number occurrences | 63 |
-| `.unwrap()` / `.expect()` | 368 |
-| Files with formatSize duplication | 4 |
-| Services with identical patterns | ~8 |
+| Metric                            | Count |
+| --------------------------------- | ----- |
+| TypeScript files                  | ~100  |
+| Rust service files                | 39    |
+| Rust route files                  | 30    |
+| `dirs::home_dir()` calls          | 61    |
+| Magic number occurrences          | 63    |
+| `.unwrap()` / `.expect()`         | 368   |
+| Files with formatSize duplication | 4     |
+| Services with identical patterns  | ~8    |
 
 ---
 

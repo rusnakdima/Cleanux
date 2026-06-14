@@ -1,4 +1,5 @@
 # Agent Code Writing Guidelines
+
 ## Tauri + Angular v20 + TailwindCSS v4
 
 ---
@@ -76,13 +77,13 @@ project/
 
 ### 1.2 Core Principle: Separation of Concerns
 
-| Layer | Responsibility | Forbidden |
-|-------|---------------|-----------|
-| **Components** | UI rendering, template logic | API calls, business logic, state mutation |
-| **Services** | Business logic, API calls, data transformation | UI code, direct DOM manipulation |
-| **Stores** | Reactive state via signals | Business logic, API calls |
-| **Models** | Data shapes (interfaces/structs) | Logic |
-| **Commands** | Thin wrappers delegating to services | Business logic |
+| Layer          | Responsibility                                 | Forbidden                                 |
+| -------------- | ---------------------------------------------- | ----------------------------------------- |
+| **Components** | UI rendering, template logic                   | API calls, business logic, state mutation |
+| **Services**   | Business logic, API calls, data transformation | UI code, direct DOM manipulation          |
+| **Stores**     | Reactive state via signals                     | Business logic, API calls                 |
+| **Models**     | Data shapes (interfaces/structs)               | Logic                                     |
+| **Commands**   | Thin wrappers delegating to services           | Business logic                            |
 
 **Rule: Never mix layers in the same file.**
 
@@ -106,11 +107,9 @@ export class ItemStore {
   // Derived state
   readonly itemCount = computed(() => this.items().length);
   readonly selectedItems = computed(() =>
-    this.items().filter(item => this.selectedIds().has(item.id))
+    this.items().filter((item) => this.selectedIds().has(item.id))
   );
-  readonly totalSize = computed(() =>
-    this.items().reduce((sum, item) => sum + item.size, 0)
-  );
+  readonly totalSize = computed(() => this.items().reduce((sum, item) => sum + item.size, 0));
 
   // State mutations return void, update signals
   loadItems(): void {
@@ -119,7 +118,7 @@ export class ItemStore {
   }
 
   toggleSelection(id: string): void {
-    this.selectedIds.update(set => {
+    this.selectedIds.update((set) => {
       const next = new Set(set);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -133,7 +132,7 @@ export class ItemStore {
 @Injectable()
 export class BadStore {
   private items$ = new BehaviorSubject<Item[]>([]); // FORBIDDEN
-  private loading$ = new BehaviorSubject(false);    // FORBIDDEN
+  private loading$ = new BehaviorSubject(false); // FORBIDDEN
 }
 ```
 
@@ -142,13 +141,14 @@ export class BadStore {
 Components are **dumb** - they only render UI and emit events.
 
 **TypeScript file (.ts) - NO styling, NO business logic:**
+
 ```typescript
 // ✅ CORRECT - name.component.ts
 @Component({
-  selector: 'app-item-list',
-  templateUrl: './item-list.component.html',
+  selector: "app-item-list",
+  templateUrl: "./item-list.component.html",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemListComponent {
   @Input({ required: true }) items = input<Item[]>();
@@ -162,47 +162,41 @@ export class ItemListComponent {
 ```
 
 **HTML file (.html) - ALL TailwindCSS classes go here:**
+
 ```html
 <!-- ✅ CORRECT - TailwindCSS classes ONLY in HTML -->
 <div class="p-4 bg-card rounded-xl border border-border">
   <h2 class="text-lg font-semibold text-text-primary">Items</h2>
 
   @if (loading()) {
-    <div class="flex justify-center py-8">
-      <span class="text-text-secondary">Loading...</span>
-    </div>
-  } @else {
-    @for (item of items(); track trackByItem($index, item)) {
-      <app-item-row
-        [item]="item"
-        class="mt-2 block"
-        (select)="itemSelect.emit($event)"
-      />
-    } @empty {
-      <div class="py-8 text-center text-text-secondary">
-        No items found
-      </div>
-    }
-  }
+  <div class="flex justify-center py-8">
+    <span class="text-text-secondary">Loading...</span>
+  </div>
+  } @else { @for (item of items(); track trackByItem($index, item)) {
+  <app-item-row [item]="item" class="mt-2 block" (select)="itemSelect.emit($event)" />
+  } @empty {
+  <div class="py-8 text-center text-text-secondary">No items found</div>
+  } }
 </div>
 ```
 
 ```typescript
 // ❌ WRONG - Business logic in component
 @Component({
-  template: `<div class="bg-accent">{{ getData() }}</div>` // FORBIDDEN
+  template: `<div class="bg-accent">{{ getData() }}</div>`, // FORBIDDEN
 })
 export class BadComponent {
-  async getData() {  // FORBIDDEN - business logic in component
-    await this.api.invoke('get_data'); // FORBIDDEN
+  async getData() {
+    // FORBIDDEN - business logic in component
+    await this.api.invoke("get_data"); // FORBIDDEN
   }
 }
 
 // ❌ WRONG - Inline template instead of templateUrl
 @Component({
-  selector: 'app-bad',
+  selector: "app-bad",
   template: '<div class="p-4">Content</div>', // FORBIDDEN - use templateUrl
-  styles: ['.class { color: red }'] // FORBIDDEN - no component CSS
+  styles: [".class { color: red }"], // FORBIDDEN - no component CSS
 })
 export class BadComponent {}
 ```
@@ -213,7 +207,7 @@ Services handle ALL business logic and API communication.
 
 ```typescript
 // ✅ CORRECT - name.service.ts
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ItemService {
   private api = inject(TauriApiService);
   private store = inject(ItemStore);
@@ -221,19 +215,19 @@ export class ItemService {
 
   async loadItems(): Promise<void> {
     try {
-      const data = await this.api.invoke<Item[]>('get_items');
+      const data = await this.api.invoke<Item[]>("get_items");
       this.store.items.set(data);
     } catch (error) {
-      this.errorHandler.handleError(error, 'ItemService.loadItems');
+      this.errorHandler.handleError(error, "ItemService.loadItems");
     }
   }
 
   async deleteItem(id: string): Promise<void> {
     try {
-      await this.api.invoke('delete_item', { id });
-      this.store.items.update(items => items.filter(i => i.id !== id));
+      await this.api.invoke("delete_item", { id });
+      this.store.items.update((items) => items.filter((i) => i.id !== id));
     } catch (error) {
-      this.errorHandler.handleError(error, 'ItemService.deleteItem');
+      this.errorHandler.handleError(error, "ItemService.deleteItem");
       throw error;
     }
   }
@@ -254,11 +248,9 @@ export class ItemStore {
   // Derived state
   readonly itemCount = computed(() => this.items().length);
   readonly selectedItems = computed(() =>
-    this.items().filter(item => this.selectedIds().has(item.id))
+    this.items().filter((item) => this.selectedIds().has(item.id))
   );
-  readonly totalSize = computed(() =>
-    this.items().reduce((sum, item) => sum + item.size, 0)
-  );
+  readonly totalSize = computed(() => this.items().reduce((sum, item) => sum + item.size, 0));
 
   // State mutations return void, update signals
   loadItems(): void {
@@ -267,7 +259,7 @@ export class ItemStore {
   }
 
   toggleSelection(id: string): void {
-    this.selectedIds.update(set => {
+    this.selectedIds.update((set) => {
       const next = new Set(set);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
@@ -279,20 +271,22 @@ export class ItemStore {
 ### 2.4 Dependency Injection
 
 **Preferred: inject() function**
+
 ```typescript
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class MyService {
-  private api = inject(TauriApiService);      // ✅ PREFERRED
+  private api = inject(TauriApiService); // ✅ PREFERRED
   private errorHandler = inject(ErrorHandlerService);
 }
 ```
 
 **Acceptable: Constructor injection (for testing)**
+
 ```typescript
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class MyService {
   constructor(
-    private api: TauriApiService,             // ✅ ACCEPTABLE
+    private api: TauriApiService, // ✅ ACCEPTABLE
     private errorHandler: ErrorHandlerService
   ) {}
 }
@@ -470,7 +464,7 @@ export interface InvokeOptions {
   suppressError?: boolean;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class TauriApiService {
   async invoke<T>(
     command: string,
@@ -490,7 +484,7 @@ export class TauriApiService {
         ),
       ]);
 
-      if (response.status === 'success') {
+      if (response.status === "success") {
         return response.data as T;
       } else {
         throw new ApiException(response.message || `Operation failed: ${command}`, command);
@@ -526,8 +520,8 @@ export async function invokeWithAbortHandling<T>(
   try {
     return await invokeFn();
   } catch (e) {
-    if (e instanceof Error && e.name === 'AbortError') {
-      throw new Error('Operation cancelled');
+    if (e instanceof Error && e.name === "AbortError") {
+      throw new Error("Operation cancelled");
     }
     errorHandler.handleError(e, context);
     throw e;
@@ -546,19 +540,19 @@ export async function invokeWithAbortHandling<T>(
 ```typescript
 // ✅ CORRECT - models/error.model.ts
 export enum ErrorCode {
-  UNKNOWN = 'UNKNOWN',
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  NOT_FOUND = 'NOT_FOUND',
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  TIMEOUT = 'TIMEOUT',
-  CONNECTION_FAILED = 'CONNECTION_FAILED',
+  UNKNOWN = "UNKNOWN",
+  NETWORK_ERROR = "NETWORK_ERROR",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
+  NOT_FOUND = "NOT_FOUND",
+  UNAUTHORIZED = "UNAUTHORIZED",
+  TIMEOUT = "TIMEOUT",
+  CONNECTION_FAILED = "CONNECTION_FAILED",
 }
 
 export interface AppError {
   code: ErrorCode;
-  message: string;       // Technical message for logging
-  userMessage: string;   // User-facing message
+  message: string; // Technical message for logging
+  userMessage: string; // User-facing message
   originalError?: unknown;
   timestamp: Date;
   retryable: boolean;
@@ -652,14 +646,14 @@ try {
 try {
   await doSomething();
 } catch (error) {
-  console.error('Error:', error); // FORBIDDEN - use ErrorHandlerService
+  console.error("Error:", error); // FORBIDDEN - use ErrorHandlerService
 }
 
 // ✅ CORRECT - Handle and propagate
 try {
   await doSomething();
 } catch (error) {
-  this.errorHandler.handleError(error, 'Service.method');
+  this.errorHandler.handleError(error, "Service.method");
   throw error; // Re-throw if caller needs to handle
 }
 ```
@@ -670,13 +664,13 @@ try {
 
 ### 6.1 Core Rules
 
-| Rule | Description |
-|------|-------------|
-| **ONE global CSS file** | `styles.css` - single source for all CSS |
-| **TailwindCSS in HTML only** | All utility classes in `.html` template files |
-| **No component CSS files** | No `*.component.css`, no `styles: [...]` in @Component |
-| **No inline styles** | No `style="..."` attributes in HTML |
-| **Pure TailwindCSS** | Only TailwindCSS utility classes, no custom CSS |
+| Rule                         | Description                                            |
+| ---------------------------- | ------------------------------------------------------ |
+| **ONE global CSS file**      | `styles.css` - single source for all CSS               |
+| **TailwindCSS in HTML only** | All utility classes in `.html` template files          |
+| **No component CSS files**   | No `*.component.css`, no `styles: [...]` in @Component |
+| **No inline styles**         | No `style="..."` attributes in HTML                    |
+| **Pure TailwindCSS**         | Only TailwindCSS utility classes, no custom CSS        |
 
 ### 6.2 Global CSS File
 
@@ -722,13 +716,14 @@ try {
 ### 6.4 Component Templates - TailwindCSS Only
 
 **TypeScript file (.ts) - NO styling:**
+
 ```typescript
 // ✅ CORRECT - No styling in .ts file
 @Component({
-  selector: 'app-item-card',
-  templateUrl: './item-card.component.html',
+  selector: "app-item-card",
+  templateUrl: "./item-card.component.html",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ItemCardComponent {
   @Input({ required: true }) item = input<Item>();
@@ -737,6 +732,7 @@ export class ItemCardComponent {
 ```
 
 **HTML file (.html) - TailwindCSS utility classes ONLY:**
+
 ```html
 <!-- ✅ CORRECT - Pure TailwindCSS utility classes -->
 <div class="p-4 bg-card rounded-xl border border-border">
@@ -783,42 +779,42 @@ Always use semantic color names from theme:
 
 ### 7.1 TypeScript Files
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Services | `name.service.ts` | `item.service.ts`, `logging.service.ts` |
-| Stores | `name.store.ts` | `item.store.ts` |
-| Components | `name.component.ts` | `item-card.component.ts` |
-| HTML Templates | `name.component.html` | `item-card.component.html` |
-| Models | `name.model.ts` | `item.model.ts`, `settings.model.ts` |
-| Utils | `name.util.ts` | `format.util.ts` |
-| Pipes | `name.pipe.ts` | `format-bytes.pipe.ts` |
-| Directives | `name.directive.ts` | `auto-focus.directive.ts` |
-| Guards | `name.guard.ts` | `auth.guard.ts` |
-| Interceptors | `name.interceptor.ts` | `error.interceptor.ts` |
-| Config | `name.config.ts` | `app.config.ts` |
-| Routes | `name.routes.ts` | `app.routes.ts` |
+| Type           | Pattern               | Example                                 |
+| -------------- | --------------------- | --------------------------------------- |
+| Services       | `name.service.ts`     | `item.service.ts`, `logging.service.ts` |
+| Stores         | `name.store.ts`       | `item.store.ts`                         |
+| Components     | `name.component.ts`   | `item-card.component.ts`                |
+| HTML Templates | `name.component.html` | `item-card.component.html`              |
+| Models         | `name.model.ts`       | `item.model.ts`, `settings.model.ts`    |
+| Utils          | `name.util.ts`        | `format.util.ts`                        |
+| Pipes          | `name.pipe.ts`        | `format-bytes.pipe.ts`                  |
+| Directives     | `name.directive.ts`   | `auto-focus.directive.ts`               |
+| Guards         | `name.guard.ts`       | `auth.guard.ts`                         |
+| Interceptors   | `name.interceptor.ts` | `error.interceptor.ts`                  |
+| Config         | `name.config.ts`      | `app.config.ts`                         |
+| Routes         | `name.routes.ts`      | `app.routes.ts`                         |
 
 ### 7.2 Rust Files
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Routes | `name.route.rs` | `item.route.rs` |
-| Services | `name.service.rs` | `item.service.rs` |
-| Models | `name.model.rs` | `item.model.rs` |
-| Errors | `mod.rs` (errors/) | `errors/mod.rs` |
-| Helpers | `name.helper.rs` | `validation.helper.rs` |
-| Entities | `name.entity.rs` | `item.entity.rs` |
-| Logger | `logger.rs` | `logger.rs` |
-| State | `state.rs` | `state.rs` |
-| Lib | `lib.rs` | `lib.rs` |
-| Main | `main.rs` | `main.rs` |
+| Type     | Pattern            | Example                |
+| -------- | ------------------ | ---------------------- |
+| Routes   | `name.route.rs`    | `item.route.rs`        |
+| Services | `name.service.rs`  | `item.service.rs`      |
+| Models   | `name.model.rs`    | `item.model.rs`        |
+| Errors   | `mod.rs` (errors/) | `errors/mod.rs`        |
+| Helpers  | `name.helper.rs`   | `validation.helper.rs` |
+| Entities | `name.entity.rs`   | `item.entity.rs`       |
+| Logger   | `logger.rs`        | `logger.rs`            |
+| State    | `state.rs`         | `state.rs`             |
+| Lib      | `lib.rs`           | `lib.rs`               |
+| Main     | `main.rs`          | `main.rs`              |
 
 ### 7.3 Commands
 
-| Language | Case | Example |
-|----------|------|---------|
-| Rust | `snake_case` | `get_item_summary` |
-| TypeScript | `camelCase` | `getItemSummary` |
+| Language   | Case         | Example            |
+| ---------- | ------------ | ------------------ |
+| Rust       | `snake_case` | `get_item_summary` |
+| TypeScript | `camelCase`  | `getItemSummary`   |
 
 ---
 
@@ -846,7 +842,7 @@ function handleUnknown(value: unknown): Item {
 
 ```typescript
 // ✅ CORRECT - Using signal update
-this.selectedIds.update(set => {
+this.selectedIds.update((set) => {
   const next = new Set(set);
   next.add(id);
   return next;
@@ -894,20 +890,20 @@ setTimeout(() => doSomething(), TWENTY_FOUR_HOURS_MS);
 
 ### 9.1 Code Smells
 
-| Anti-Pattern | Problem | Solution |
-|--------------|---------|----------|
-| `console.error()` | Scattered logging | Use `logging.service.ts` |
-| `any` type | No type safety | Proper types or `unknown` |
-| Magic numbers | Unreadable | Named constants |
-| Duplicate code | Maintenance burden | Extract to shared utils |
-| Dead code | Confusion | Remove immediately |
-| Business logic in component | Testability | Move to `name.service.ts` |
-| Monolithic AppState | Coupling | Split by domain |
-| Direct `invoke()` calls | Inconsistent error handling | Use `tauri-api.service.ts` |
-| Component CSS files | Scattered styles | ONE global `styles.css` |
-| Inline styles | Violates separation | TailwindCSS in `name.component.html` |
-| Inline templates | Mixed concerns | Use `templateUrl: '.component.html'` |
-| Non-standard naming | Inconsistency | Use `name.type.ts/html/rs` pattern |
+| Anti-Pattern                | Problem                     | Solution                             |
+| --------------------------- | --------------------------- | ------------------------------------ |
+| `console.error()`           | Scattered logging           | Use `logging.service.ts`             |
+| `any` type                  | No type safety              | Proper types or `unknown`            |
+| Magic numbers               | Unreadable                  | Named constants                      |
+| Duplicate code              | Maintenance burden          | Extract to shared utils              |
+| Dead code                   | Confusion                   | Remove immediately                   |
+| Business logic in component | Testability                 | Move to `name.service.ts`            |
+| Monolithic AppState         | Coupling                    | Split by domain                      |
+| Direct `invoke()` calls     | Inconsistent error handling | Use `tauri-api.service.ts`           |
+| Component CSS files         | Scattered styles            | ONE global `styles.css`              |
+| Inline styles               | Violates separation         | TailwindCSS in `name.component.html` |
+| Inline templates            | Mixed concerns              | Use `templateUrl: '.component.html'` |
+| Non-standard naming         | Inconsistency               | Use `name.type.ts/html/rs` pattern   |
 
 ### 9.2 Structural Anti-Patterns
 
@@ -936,13 +932,13 @@ if std::env::var("SKIP_FRONTEND").is_ok() {
 
 ```typescript
 // ❌ FORBIDDEN - Unused imports
-import { Something } from './types'; // Never used
+import { Something } from "./types"; // Never used
 
 // ❌ FORBIDDEN - Non-existent imports
-import { Wrong } from './wrong-path'; // File doesn't exist
+import { Wrong } from "./wrong-path"; // File doesn't exist
 
 // ❌ FORBIDDEN - Barrel imports when not needed
-import { A, B, C } from './index'; // Import only what you need
+import { A, B, C } from "./index"; // Import only what you need
 ```
 
 ---
@@ -982,38 +978,39 @@ npm install tailwindcss @tailwindcss/postcss postcss autoprefixer
 ### 12.2 Project Configuration
 
 **1. `postcss.config.js` at project root:**
+
 ```javascript
 export default {
   plugins: {
-    '@tailwindcss/postcss': {},
+    "@tailwindcss/postcss": {},
     autoprefixer: {},
   },
-}
+};
 ```
 
 **2. `tailwind.config.js` at project root:**
+
 ```javascript
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    './src/**/*.{html,ts}',
-  ],
-  darkMode: 'class',
+  content: ["./src/**/*.{html,ts}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
         accent: {
-          DEFAULT: 'var(--color-accent)',
-          hover: 'var(--color-accent-hover)',
+          DEFAULT: "var(--color-accent)",
+          hover: "var(--color-accent-hover)",
         },
       },
     },
   },
   plugins: [],
-}
+};
 ```
 
 **3. Update `angular.json` - add global styles:**
+
 ```json
 {
   "projects": {
@@ -1021,9 +1018,7 @@ export default {
       "architect": {
         "build": {
           "options": {
-            "styles": [
-              "src/styles.css"
-            ],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }
@@ -1034,6 +1029,7 @@ export default {
 ```
 
 **4. `src/styles.css` - ONE global CSS file:**
+
 ```css
 @import "tailwindcss";
 
@@ -1073,20 +1069,22 @@ body {
 ### 12.3 Component Usage
 
 **`name.component.ts`:**
+
 ```typescript
 @Component({
-  selector: 'app-button',
-  templateUrl: './button.component.html',
+  selector: "app-button",
+  templateUrl: "./button.component.html",
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonComponent {
-  @Input() variant = input<'primary' | 'secondary'>('primary');
+  @Input() variant = input<"primary" | "secondary">("primary");
   @Output() clicked = output<void>();
 }
 ```
 
 **`name.component.html`:**
+
 ```html
 <button
   class="px-4 py-2 rounded-lg font-medium transition-colors"
@@ -1100,13 +1098,13 @@ export class ButtonComponent {
 
 ### 12.4 Key Rules
 
-| Rule | Implementation |
-|------|----------------|
-| ONE global CSS | `src/styles.css` only |
-| TailwindCSS via @import | `@import "tailwindcss";` |
-| Theme via @theme | CSS custom properties in `:root` or `.dark`/`.light` |
-| No component CSS files | Components use TailwindCSS in HTML |
-| Dark mode via class | `darkMode: 'class'` in tailwind.config.js |
+| Rule                    | Implementation                                       |
+| ----------------------- | ---------------------------------------------------- |
+| ONE global CSS          | `src/styles.css` only                                |
+| TailwindCSS via @import | `@import "tailwindcss";`                             |
+| Theme via @theme        | CSS custom properties in `:root` or `.dark`/`.light` |
+| No component CSS files  | Components use TailwindCSS in HTML                   |
+| Dark mode via class     | `darkMode: 'class'` in tailwind.config.js            |
 
 ---
 
@@ -1117,6 +1115,7 @@ export class ButtonComponent {
 **Principle: Centralized logging with configurable log levels.**
 
 **`src-tauri/src/logger.rs`:**
+
 ```rust
 use log::{LevelFilter, Logger};
 use env_logger::Builder;
@@ -1189,6 +1188,7 @@ impl Default for Logger {
 ```
 
 **Usage in Rust:**
+
 ```rust
 #[tauri::command]
 pub fn get_data(state: State<AppState>) -> Result<ResponseModel, ResponseModel> {
@@ -1199,6 +1199,7 @@ pub fn get_data(state: State<AppState>) -> Result<ResponseModel, ResponseModel> 
 ```
 
 **Configuration via environment:**
+
 ```bash
 # .env or environment variables
 LOG_LEVEL=debug   # trace, debug, info, warn, error
@@ -1210,7 +1211,7 @@ LOG_LEVEL=debug   # trace, debug, info, warn, error
 
 ```typescript
 // ✅ CORRECT - shared/services/logging.service.ts
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogEntry {
   level: LogLevel;
@@ -1220,7 +1221,7 @@ export interface LogEntry {
   data?: unknown;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class LoggingService {
   private config = inject(SettingsService);
 
@@ -1230,30 +1231,30 @@ export class LoggingService {
 
   private shouldLog(level: LogLevel): boolean {
     if (!this.isEnabled()) return false;
-    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
+    const levels: LogLevel[] = ["debug", "info", "warn", "error"];
     const currentIndex = levels.indexOf(this.minLevel());
     const messageIndex = levels.indexOf(level);
     return messageIndex >= currentIndex;
   }
 
   debug(message: string, context?: string, data?: unknown): void {
-    if (!this.shouldLog('debug')) return;
-    this.log('debug', message, context, data);
+    if (!this.shouldLog("debug")) return;
+    this.log("debug", message, context, data);
   }
 
   info(message: string, context?: string, data?: unknown): void {
-    if (!this.shouldLog('info')) return;
-    this.log('info', message, context, data);
+    if (!this.shouldLog("info")) return;
+    this.log("info", message, context, data);
   }
 
   warn(message: string, context?: string, data?: unknown): void {
-    if (!this.shouldLog('warn')) return;
-    this.log('warn', message, context, data);
+    if (!this.shouldLog("warn")) return;
+    this.log("warn", message, context, data);
   }
 
   error(message: string, context?: string, data?: unknown): void {
-    if (!this.shouldLog('error')) return;
-    this.log('error', message, context, data);
+    if (!this.shouldLog("error")) return;
+    this.log("error", message, context, data);
   }
 
   private log(level: LogLevel, message: string, context?: string, data?: unknown): void {
@@ -1266,22 +1267,22 @@ export class LoggingService {
     };
 
     // Store in memory
-    this.logs.update(logs => [entry, ...logs].slice(0, 1000));
+    this.logs.update((logs) => [entry, ...logs].slice(0, 1000));
 
     // Console output
-    const prefix = context ? `[${context}]` : '';
+    const prefix = context ? `[${context}]` : "";
     switch (level) {
-      case 'debug':
-        console.debug(`[DEBUG]${prefix} ${message}`, data ?? '');
+      case "debug":
+        console.debug(`[DEBUG]${prefix} ${message}`, data ?? "");
         break;
-      case 'info':
-        console.info(`[INFO]${prefix} ${message}`, data ?? '');
+      case "info":
+        console.info(`[INFO]${prefix} ${message}`, data ?? "");
         break;
-      case 'warn':
-        console.warn(`[WARN]${prefix} ${message}`, data ?? '');
+      case "warn":
+        console.warn(`[WARN]${prefix} ${message}`, data ?? "");
         break;
-      case 'error':
-        console.error(`[ERROR]${prefix} ${message}`, data ?? '');
+      case "error":
+        console.error(`[ERROR]${prefix} ${message}`, data ?? "");
         break;
     }
   }
@@ -1310,7 +1311,7 @@ export interface AppSettings {
 
 export const DEFAULT_LOGGING_SETTINGS: LoggingSettings = {
   enabled: true,
-  minLevel: 'info',  // debug, info, warn, error
+  minLevel: "info", // debug, info, warn, error
   consoleOutput: true,
   remoteLogging: false,
 };
@@ -1319,6 +1320,7 @@ export const DEFAULT_LOGGING_SETTINGS: LoggingSettings = {
 ### 13.4 Configuration Files
 
 **`src/config/settings.json` (or via Tauri config):**
+
 ```json
 {
   "logging": {
@@ -1331,6 +1333,7 @@ export const DEFAULT_LOGGING_SETTINGS: LoggingSettings = {
 ```
 
 **Rust `.env`:**
+
 ```bash
 LOG_LEVEL=info
 RUST_LOG=info
@@ -1390,6 +1393,7 @@ impl Default for Logger {
 ### 13.6 Usage Examples
 
 **Rust - Application startup (lib.rs):**
+
 ```rust
 fn run() {
     let logger = Logger::new();
@@ -1407,21 +1411,22 @@ fn run() {
 ```
 
 **Angular - Service logging:**
+
 ```typescript
 // ✅ CORRECT - services/dashboard.service.ts
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DashboardService {
   private logger = inject(LoggingService);
   private api = inject(TauriApiService);
 
   async loadDashboard(): Promise<void> {
-    this.logger.debug('DashboardService.loadDashboard', 'Loading dashboard data');
+    this.logger.debug("DashboardService.loadDashboard", "Loading dashboard data");
 
     try {
-      const data = await this.api.invoke<DashboardData>('get_dashboard_data');
-      this.logger.info('DashboardService.loadDashboard', 'Dashboard loaded successfully');
+      const data = await this.api.invoke<DashboardData>("get_dashboard_data");
+      this.logger.info("DashboardService.loadDashboard", "Dashboard loaded successfully");
     } catch (error) {
-      this.logger.error('DashboardService.loadDashboard', 'Failed to load dashboard', { error });
+      this.logger.error("DashboardService.loadDashboard", "Failed to load dashboard", { error });
       throw error;
     }
   }
@@ -1430,13 +1435,13 @@ export class DashboardService {
 
 ### 13.7 Toggle Logging Summary
 
-| Layer | Configuration | Toggle Method |
-|-------|---------------|---------------|
-| **Rust** | `LOG_LEVEL` env var | `RUST_LOG=debug` or `LOG_LEVEL=info` |
-| **Rust** | Code at runtime | `Logger::new()` reads env on init |
-| **Angular** | Settings service | `settings.logging.enabled` |
-| **Angular** | Min level | `settings.logging.minLevel` |
-| **Both** | Build config | Different `.env` files per environment |
+| Layer       | Configuration       | Toggle Method                          |
+| ----------- | ------------------- | -------------------------------------- |
+| **Rust**    | `LOG_LEVEL` env var | `RUST_LOG=debug` or `LOG_LEVEL=info`   |
+| **Rust**    | Code at runtime     | `Logger::new()` reads env on init      |
+| **Angular** | Settings service    | `settings.logging.enabled`             |
+| **Angular** | Min level           | `settings.logging.minLevel`            |
+| **Both**    | Build config        | Different `.env` files per environment |
 
 ---
 
@@ -1453,33 +1458,33 @@ export class DashboardService {
 
 ### Architectural Rules
 
-| Layer | Do | Never Do |
-|-------|----|----------|
+| Layer          | Do                                                 | Never Do                                  |
+| -------------- | -------------------------------------------------- | ----------------------------------------- |
 | **Components** | Render UI, emit events, use `@Input()`/`@Output()` | API calls, business logic, state mutation |
-| **Services** | API calls, business logic, data transformation | UI code, direct DOM manipulation |
-| **Stores** | Signal state, `computed()` derived state | API calls, business logic |
-| **Models** | Define data shapes | Logic |
-| **Commands** | Thin wrappers calling services | Business logic |
+| **Services**   | API calls, business logic, data transformation     | UI code, direct DOM manipulation          |
+| **Stores**     | Signal state, `computed()` derived state           | API calls, business logic                 |
+| **Models**     | Define data shapes                                 | Logic                                     |
+| **Commands**   | Thin wrappers calling services                     | Business logic                            |
 
 ### Styling Rules
 
-| Do | Never Do |
-|----|----------|
-| ONE global styles.css file | Component-specific CSS files |
-| TailwindCSS classes in .html | TailwindCSS classes in .ts |
-| CSS variables for theme tokens | Hardcoded color values |
-| Semantic color names | Arbitrary values like `bg-[#123]` |
-| `templateUrl: './file.html'` | `template: '<div>...</div>'` or `styles: ['...']` |
+| Do                             | Never Do                                          |
+| ------------------------------ | ------------------------------------------------- |
+| ONE global styles.css file     | Component-specific CSS files                      |
+| TailwindCSS classes in .html   | TailwindCSS classes in .ts                        |
+| CSS variables for theme tokens | Hardcoded color values                            |
+| Semantic color names           | Arbitrary values like `bg-[#123]`                 |
+| `templateUrl: './file.html'`   | `template: '<div>...</div>'` or `styles: ['...']` |
 
 ### Backend Rules
 
-| Do | Never Do |
-|----|----------|
-| Focused AppState by domain | Monolithic AppState |
-| Thin commands delegating to services | Commands with business logic |
-| Consistent ResponseModel<T> | Raw values as response |
-| Error propagation via `?` | `unwrap()` or `expect()` |
-| `Arc<TokioMutex<T>>` for shared state | Global mutable state |
+| Do                                    | Never Do                     |
+| ------------------------------------- | ---------------------------- |
+| Focused AppState by domain            | Monolithic AppState          |
+| Thin commands delegating to services  | Commands with business logic |
+| Consistent ResponseModel<T>           | Raw values as response       |
+| Error propagation via `?`             | `unwrap()` or `expect()`     |
+| `Arc<TokioMutex<T>>` for shared state | Global mutable state         |
 
 ### Result of Following These Rules
 
