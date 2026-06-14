@@ -1,5 +1,6 @@
 use crate::models::{DataValue, ResponseModel};
-use crate::services::package_service::{OrphanedPackage, PackageService};
+use crate::services::apt_service::OrphanedPackage;
+use crate::services::package_service::PackageService;
 
 #[tauri::command]
 pub fn get_package_summary() -> Result<ResponseModel, ResponseModel> {

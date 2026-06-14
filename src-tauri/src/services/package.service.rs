@@ -1,8 +1,11 @@
 use crate::helpers::{
-  calculate_dir_size, data_string, get_command_output, home_dir, run_command, stderr_string,
-  stdout_string, success_response,
+  calculate_dir_size, data_string, run_command, stderr_string, stdout_string, success_response,
 };
 use crate::models::{AppError, DataValue, ResponseModel};
+use crate::services::apt_service::{AptService, OrphanedPackage};
+use crate::services::dnf_service::DnfService;
+use crate::services::pacman_service::PacmanService;
+use crate::services::zypper_service::ZypperService;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
@@ -16,14 +19,6 @@ pub struct PackageCacheInfo {
   pub name: String,
   pub cachePath: String,
   pub size: u64,
-  pub description: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OrphanedPackage {
-  pub name: String,
-  pub version: String,
   pub description: String,
 }
 
@@ -138,7 +133,7 @@ impl PackageService {
 
   #[allow(dead_code)]
   fn get_snap_cache_info() -> Option<PackageCacheInfo> {
-    let home = home_dir().ok()?;
+    let home = crate::helpers::home_dir().ok()?;
     let snap_path = home.join("snap");
     let path = Path::new(&snap_path);
 
@@ -157,7 +152,7 @@ impl PackageService {
 
   #[allow(dead_code)]
   fn get_flatpak_cache_info() -> Option<PackageCacheInfo> {
-    let home = home_dir().ok()?;
+    let home = crate::helpers::home_dir().ok()?;
     let flatpak_path = home.join(".local/share/flatpak/app");
     let path = Path::new(&flatpak_path);
 
@@ -198,7 +193,7 @@ impl PackageService {
 
   fn clean_package_cache_inner(manager: &str) -> Result<ResponseModel, AppError> {
     match manager {
-      "apt" => Self::clean_apt(),
+      "apt" => AptService::clean(),
       "snap" => Self::clean_snap(),
       "flatpak" => Self::clean_flatpak(),
       "yum" => Self::clean_yum(),
@@ -206,26 +201,6 @@ impl PackageService {
         "Unknown package manager: {}",
         manager
       ))),
-    }
-  }
-
-  fn clean_apt() -> Result<ResponseModel, AppError> {
-    let output = Command::new("apt-get")
-      .args(["clean"])
-      .output()
-      .map_err(|e| AppError::message(format!("Failed to run apt-get clean: {}", e)))?;
-
-    if output.status.success() {
-      Ok(success_response(
-        "APT cache cleaned successfully",
-        data_string("apt"),
-      ))
-    } else {
-      let stderr = stderr_string(&output);
-      Err(AppError::message(format!(
-        "Failed to clean APT cache: {}",
-        stderr
-      )))
     }
   }
 
@@ -324,280 +299,59 @@ impl PackageService {
   }
 
   pub fn get_apt_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/apt/archives/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    AptService::get_cache_size_internal()
   }
 
   pub fn apt_clean(&self) -> Result<ResponseModel, AppError> {
-    let before_size = self.get_apt_cache_size_internal();
-    let (success, stderr, _) = run_command("apt-get", &["clean"])?;
-
-    if success {
-      let after_size = self.get_apt_cache_size_internal();
-      let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
-        format!("APT cache cleaned. Freed {} bytes", freed),
-        DataValue::Object(serde_json::json!({
-            "command": "apt-get clean",
-            "spaceFreed": freed,
-            "message": "APT cache cleaned successfully"
-        })),
-      ))
-    } else {
-      let err_msg = format!("Failed to clean APT cache: {}", stderr);
-      Err(AppError::message(err_msg))
-    }
+    AptService::clean()
   }
 
   pub fn apt_autoremove(&self) -> Result<ResponseModel, AppError> {
-    let (success, stderr, _) = run_command("apt-get", &["autoremove", "-y"])?;
-
-    if success {
-      Ok(success_response(
-        "APT autoremove completed successfully",
-        DataValue::Object(serde_json::json!({
-            "command": "apt-get autoremove -y",
-            "spaceFreed": 0,
-            "message": "APT autoremove completed successfully"
-        })),
-      ))
-    } else {
-      let err_msg = format!("Failed to run apt-get autoremove: {}", stderr);
-      Err(AppError::message(err_msg))
-    }
+    AptService::autoremove()
   }
 
   pub fn apt_autoclean(&self) -> Result<ResponseModel, AppError> {
-    let before_size = self.get_apt_cache_size_internal();
-    let (success, stderr, _) = run_command("apt-get", &["autoclean"])?;
-
-    if success {
-      let after_size = self.get_apt_cache_size_internal();
-      let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
-        format!("APT autoclean completed. Freed {} bytes", freed),
-        DataValue::Object(serde_json::json!({
-            "command": "apt-get autoclean",
-            "spaceFreed": freed,
-            "message": "APT autoclean completed successfully"
-        })),
-      ))
-    } else {
-      let err_msg = format!("Failed to run apt-get autoclean: {}", stderr);
-      Err(AppError::message(err_msg))
-    }
+    AptService::autoclean()
   }
 
   pub fn get_orphaned_packages(&self) -> Vec<OrphanedPackage> {
-    let output = match run_command("dpkg", &["--get-selections"]) {
-      Ok((success, _, _)) if success => {
-        get_command_output("dpkg", &["--get-selections"]).unwrap_or_default()
-      }
-      _ => return Vec::new(),
-    };
-
-    let marked_for_removal: std::collections::HashSet<String> = output
-      .lines()
-      .filter(|line| line.contains("deinstall"))
-      .filter_map(|line| line.split_whitespace().next().map(String::from))
-      .collect();
-
-    if marked_for_removal.is_empty() {
-      return Vec::new();
-    }
-
-    let mut orphans = Vec::new();
-    for name in marked_for_removal {
-      orphans.push(OrphanedPackage {
-        name: name.clone(),
-        version: String::new(),
-        description: String::new(),
-      });
-    }
-    orphans
+    AptService::get_orphaned_packages()
   }
 
   pub fn remove_orphaned_package(&self, name: &str) -> Result<ResponseModel, AppError> {
-    let (success, stderr, _) = run_command("dpkg", &["--remove", name])?;
-
-    if success {
-      Ok(success_response(
-        format!("Removed orphaned package: {}", name),
-        data_string(name),
-      ))
-    } else {
-      let err_msg = format!("Failed to remove package {}: {}", name, stderr);
-      Err(AppError::message(err_msg))
-    }
+    AptService::remove_orphaned_package(name)
   }
 
   pub fn get_partial_downloads(&self) -> Vec<String> {
-    let cache_path = Path::new("/var/cache/apt/archives/");
-    if !cache_path.exists() {
-      return Vec::new();
-    }
-
-    fs::read_dir(cache_path)
-      .map(|entries| {
-        entries
-          .filter_map(|e| e.ok())
-          .filter(|e| {
-            e.path()
-              .extension()
-              .map(|ext| ext == "part")
-              .unwrap_or(false)
-          })
-          .filter_map(|e| e.file_name().into_string().ok())
-          .collect()
-      })
-      .unwrap_or_default()
+    AptService::get_partial_downloads()
   }
 
   pub fn get_dnf_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/dnf/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    DnfService::get_cache_size_internal()
   }
 
   pub fn dnf_clean_all(&self) -> Result<ResponseModel, AppError> {
-    let before_size = self.get_dnf_cache_size_internal();
-    let (success, stderr, _) = run_command("dnf", &["clean", "all"])?;
-
-    if success {
-      let after_size = self.get_dnf_cache_size_internal();
-      let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
-        format!("DNF cache cleaned. Freed {} bytes", freed),
-        DataValue::Object(serde_json::json!({
-            "command": "dnf clean all",
-            "spaceFreed": freed,
-            "message": "DNF cache cleaned successfully"
-        })),
-      ))
-    } else {
-      let err_msg = format!("Failed to clean DNF cache: {}", stderr);
-      Err(AppError::message(err_msg))
-    }
+    DnfService::clean_all()
   }
 
   pub fn get_pacman_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/pacman/pkg/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    PacmanService::get_cache_size_internal()
   }
 
   pub fn pacman_clean(&self, keep_recent: u32) -> Result<ResponseModel, AppError> {
-    let before_size = self.get_pacman_cache_size_internal();
-
-    let output = get_command_output(
-      "sh",
-      &[
-        "-c",
-        &format!(
-          "ls -t /var/cache/pacman/pkg/ | tail -n +{}",
-          keep_recent + 1
-        ),
-      ],
-    )?;
-    let packages: Vec<String> = output
-      .lines()
-      .filter(|s| !s.is_empty())
-      .map(|s| s.to_string())
-      .collect();
-
-    let mut _freed: u64 = 0;
-    for pkg in &packages {
-      let path = Path::new("/var/cache/pacman/pkg/").join(pkg);
-      if let Ok(metadata) = fs::metadata(&path) {
-        _freed += metadata.len();
-      }
-      let _ = run_command("rm", &["-f", &path.to_string_lossy()]);
-    }
-
-    let after_size = self.get_pacman_cache_size_internal();
-    let actual_freed = before_size.saturating_sub(after_size);
-
-    Ok(success_response(
-      format!(
-        "Pacman cache cleaned. Removed {} old packages. Freed {} bytes",
-        packages.len(),
-        actual_freed
-      ),
-      DataValue::Object(serde_json::json!({
-          "command": format!("pacman cache clean (keep {})", keep_recent),
-          "spaceFreed": actual_freed,
-          "message": format!("Removed {} old packages", packages.len())
-      })),
-    ))
+    PacmanService::clean(keep_recent)
   }
 
   pub fn pacman_full_clean(&self) -> Result<ResponseModel, AppError> {
-    let before_size = self.get_pacman_cache_size_internal();
-    let (success, stderr, _) = run_command("pacman", &["-Scc", "--noconfirm"])?;
-
-    if success {
-      let after_size = self.get_pacman_cache_size_internal();
-      let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
-        format!("Pacman full cache clean completed. Freed {} bytes", freed),
-        DataValue::Object(serde_json::json!({
-            "command": "pacman -Scc --noconfirm",
-            "spaceFreed": freed,
-            "message": "Pacman full cache clean completed"
-        })),
-      ))
-    } else {
-      let err_msg = format!("Failed to run pacman -Scc: {}", stderr);
-      Err(AppError::message(err_msg))
-    }
+    PacmanService::full_clean()
   }
 
   pub fn get_zypper_cache_size_internal(&self) -> u64 {
-    let cache_path = Path::new("/var/cache/zypp/");
-    if cache_path.exists() {
-      calculate_dir_size(cache_path)
-        .map(|(size, _)| size)
-        .unwrap_or(0)
-    } else {
-      0
-    }
+    ZypperService::get_cache_size_internal()
   }
 
   pub fn zypper_clean(&self) -> Result<ResponseModel, AppError> {
-    let before_size = self.get_zypper_cache_size_internal();
-    let (success, stderr, _) = run_command("zypper", &["clean"])?;
-
-    if success {
-      let after_size = self.get_zypper_cache_size_internal();
-      let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
-        format!("Zypper cache cleaned. Freed {} bytes", freed),
-        DataValue::Object(serde_json::json!({
-            "command": "zypper clean",
-            "spaceFreed": freed,
-            "message": "Zypper cache cleaned successfully"
-        })),
-      ))
-    } else {
-      let err_msg = format!("Failed to clean Zypper cache: {}", stderr);
-      Err(AppError::message(err_msg))
-    }
+    ZypperService::clean()
   }
 
   pub fn get_package_summary(&self) -> PackageManagerSummary {

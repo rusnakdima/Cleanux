@@ -6,6 +6,9 @@ pub mod routes;
 pub mod security;
 pub mod services;
 
+use tauri::Manager;
+use tauri_logger::{init_file_logger, log_error, log_warn, FileLogger, LogFileInfo};
+
 /* routes */
 use routes::{
   app_residue_route::{
@@ -77,42 +80,64 @@ use routes::{
   temperature_route::{get_cpu_temperature, get_gpu_temperature, get_temperatures},
 };
 
+#[tauri::command]
+async fn write_log_to_file(
+  state: tauri::State<'_, AppState>,
+  level: String,
+  message: String,
+  source: String,
+) -> Result<(), String> {
+  state.file_logger.write_log(&level, &source, &message)
+}
+
+#[tauri::command]
+async fn get_log_file_info(state: tauri::State<'_, AppState>) -> Result<LogFileInfo, String> {
+  let path = state
+    .file_logger
+    .get_log_file_path()
+    .ok_or("Log file not initialized")?;
+
+  let metadata =
+    std::fs::metadata(&path).map_err(|e| format!("Failed to get log file metadata: {}", e))?;
+
+  let created_at = metadata
+    .created()
+    .ok()
+    .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+    .map(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0))
+    .flatten()
+    .map(|dt| dt.to_rfc3339())
+    .unwrap_or_default();
+
+  Ok(LogFileInfo {
+    path: path.to_string_lossy().to_string(),
+    name: path
+      .file_name()
+      .map(|n| n.to_string_lossy().to_string())
+      .unwrap_or_default(),
+    size: metadata.len(),
+    created_at,
+  })
+}
+
+pub struct AppState {
+  pub file_logger: FileLogger,
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[allow(non_snake_case)]
 pub fn run() {
-  env_logger::init();
-  log::info!("Application starting...");
-
-  #[cfg(target_os = "linux")]
-  {
-    std::env::set_var("WEBKIT_DISABLE_COMPOSITING", "1");
-    std::env::set_var("WEBKIT_FORCE_SANDBOX", "0");
-    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
-  }
-
-  #[allow(unused_mut)]
-  let mut builder = tauri::Builder::default();
-
-  #[cfg(all(feature = "mcp-bridge", debug_assertions))]
-  {
-    let bridge_addr =
-      std::env::var("CLEANUX_MCP_BRIDGE_ADDR").unwrap_or_else(|_| "127.0.0.1".to_string());
-    let bridge_port: u16 = std::env::var("CLEANUX_MCP_BRIDGE_PORT")
-      .ok()
-      .and_then(|v| v.parse().ok())
-      .unwrap_or(9223);
-
-    let bridge_plugin = tauri_plugin_mcp_bridge::Builder::new()
-      .bind_address(&bridge_addr)
-      .base_port(bridge_port)
-      .build();
-
-    builder = builder.plugin(bridge_plugin);
-  }
-
-  builder
+  tauri::Builder::default()
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_opener::init())
+    .setup(|app| {
+      let file_logger = init_file_logger(&app.handle()).unwrap_or_else(|e| {
+        log_warn!("Failed to initialize file logger: {}", e);
+        FileLogger::new()
+      });
+      app.manage(AppState { file_logger });
+      Ok(())
+    })
     .invoke_handler(tauri::generate_handler![
       getSystemServices,
       getCacheSummary,
@@ -260,10 +285,12 @@ pub fn run() {
       get_gpu_temperature,
       clean_package_cache,
       get_package_cache_info,
+      write_log_to_file,
+      get_log_file_info,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {
-      log::error!("error while running tauri application: {}", e);
+      log_error!("error while running tauri application: {}", e);
       std::process::exit(1);
     });
 }
