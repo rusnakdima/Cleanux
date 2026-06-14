@@ -18,8 +18,10 @@
       "@env/*": ["src/environments/*"],
       "@api/*": ["src/app/api/*"],
       "@stores/*": ["src/app/stores/*"],
+      "@features/*": ["src/app/features/*"],
       "@interceptors/*": ["src/app/interceptors/*"],
-      "@resolvers/*": ["src/app/resolvers/*"]
+      "@resolvers/*": ["src/app/resolvers/*"],
+      "@tauri-shared/*": ["../_shared/*"]
     },
     "strict": true,
     "noImplicitOverride": true,

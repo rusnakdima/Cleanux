@@ -15,20 +15,11 @@ export const environment = {
   ],
   logging: {
     enabled: true,
-    level: 'debug',
-    levels: {
-      debug: true,
-      info: true,
-      warn: true,
-      error: true,
-    },
-    sources: {
-      view: true,
-      service: true,
-      store: true,
-      api: true,
-      user: true,
-      router: true,
-    },
+    minLevel: 'debug',
+    consoleOutput: true,
+    memoryOutput: true,
+    fileOutput: false,
+    fileLogLevel: 'error',
+    levels: { debug: true, info: true, warn: true, error: true, success: true },
   },
 };
