@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ProfileService } from '@services/profile.service';
+import { ProfileService } from '@features/profiles/services/profile.service';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { ToastService } from '@shared/toast';

@@ -30,6 +30,7 @@ import {
   WARNING_SCORE,
   CRITICAL_SCORE,
 } from '@shared/constants/size.constants';
+import { SCAN_COMPLETE_TIMEOUT_MS } from '@shared/constants/timeout.constants';
 
 /* types */
 interface QuickAction {
@@ -258,7 +259,7 @@ export class DashboardView implements OnInit, OnDestroy {
     await this.saveHealthSnapshot();
     this.loadHealthHistory();
     this.addRecentActivity('scan', 'System scan completed', this.totalJunkSize());
-    setTimeout(() => this.isScanning.set(false), 500);
+    setTimeout(() => this.isScanning.set(false), SCAN_COMPLETE_TIMEOUT_MS);
   }
 
   async cleanAll() {

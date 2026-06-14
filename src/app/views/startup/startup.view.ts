@@ -11,7 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { StartupService } from '@services/startup.service';
+import { StartupService } from '@features/startup/services/startup.service';
 import { NotificationService } from '@services/notification.service';
 import { ThemeService } from '@services/theme.service';
 import { getErrorMessage } from '@shared/utils/error.util';

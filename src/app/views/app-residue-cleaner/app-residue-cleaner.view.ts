@@ -12,7 +12,7 @@ import {
   AppResidue,
   OrphanedConfig,
   AppResidueSummary,
-} from '@services/app-residue.service';
+} from '@features/app-residue-cleaner/services/app-residue.service';
 import { formatSize } from '@shared/utils/format.util';
 import { getErrorMessage } from '@shared/utils/error.util';
 import { ResidueTabComponent } from './residue-tab.component';

@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { ReportService } from '@services/report.service';
+import { ReportService } from '@features/reports/services/report.service';
 
 import { CleaningReport, SnapshotComparison } from '@models/report.model';
 import { formatSize } from '@shared/utils/format.util';

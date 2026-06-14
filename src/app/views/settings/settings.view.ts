@@ -20,11 +20,12 @@ import { environment } from '@env/environment';
 
 /* services */
 import { AboutService } from '@services/about.service';
-import { LoggerService } from '@services/logger.service';
+import { LoggingService, getLoggingService } from '@tauri-apps/logger';
 import { SchedulerService } from '@services/scheduler.service';
 import { ThemeService, ThemeMode } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
 import { ToastService } from '@shared/toast';
+import { UPDATE_CHECK_TIMEOUT_MS } from '@shared/constants/timeout.constants';
 
 /* components */
 import { ToggleComponent } from '@components/toggle/toggle.component';
@@ -43,7 +44,7 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
 export class SettingsView implements OnDestroy {
   themeService = inject(ThemeService);
   private notification = inject(NotificationService);
-  private logger = inject(LoggerService);
+  private loggingService = getLoggingService();
   private toastService = inject(ToastService);
   private aboutService = inject(AboutService);
   private schedulerService = inject(SchedulerService);
@@ -71,7 +72,7 @@ export class SettingsView implements OnDestroy {
           this.toastService.show('You have the latest version!', 'info');
         }
         this.isChecking.set(false);
-      }, 1000);
+      }, UPDATE_CHECK_TIMEOUT_MS);
     } else {
       this.isChecking.set(false);
     }
@@ -199,23 +200,23 @@ export class SettingsView implements OnDestroy {
   }
 
   get loggingEnabled() {
-    return this.logger.isGlobalEnabled();
+    return this.loggingService.enabled();
   }
   get loggingLevel() {
-    return this.logger.getMinLevel();
+    return this.loggingService.minLevel();
   }
   get levelConfig(): Record<string, boolean> {
-    return this.logger.getLevelsConfig();
+    return { debug: true, info: true, warn: true, error: true, success: true };
   }
   get sourceConfig(): Record<string, boolean> {
-    return this.logger.getSourcesConfig();
+    return {};
   }
   get logStats() {
-    return this.logger.getLogStats();
+    return this.loggingService.getLogStats();
   }
 
   clearLogs(): void {
-    this.logger.clearLogs();
+    this.loggingService.clearLogs();
   }
 
   accentCategories = [

@@ -8,7 +8,7 @@ import { environment } from '@env/environment';
 
 /* models */
 import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
-import { LoggerService } from '@services/logger.service';
+import { LoggingService, getLoggingService } from '@tauri-apps/logger';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -21,17 +21,17 @@ const httpOptions = {
 })
 export class AboutService {
   private http = inject(HttpClient);
-  private logger = inject(LoggerService);
+  private loggingService = getLoggingService();
 
   gitRepoName: string = environment.gitRepoName;
   githubUser: string = environment.githubUser;
 
   constructor() {
-    this.logger.logInfo('service', 'AboutService', 'init', 'AboutService initialized');
+    this.loggingService.info('AboutService initialized');
   }
 
   getDate(version: string) {
-    this.logger.logInfo('service', 'AboutService', 'getDate', 'Getting release date', { version });
+    this.loggingService.info('Getting release date', { version });
     return toSignal(
       this.http.get<GitHubReleaseByTag>(
         `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/tags/v${version}`,
@@ -41,7 +41,7 @@ export class AboutService {
   }
 
   checkUpdate() {
-    this.logger.logInfo('service', 'AboutService', 'checkUpdate', 'Checking for updates');
+    this.loggingService.info('Checking for updates');
     return toSignal(
       this.http.get<GitHubReleaseLatest>(
         `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/latest`,

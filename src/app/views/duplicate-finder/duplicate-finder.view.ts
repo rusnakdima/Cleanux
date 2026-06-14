@@ -18,7 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { DuplicateService } from '@services/duplicate.service';
+import { DuplicateService } from '@features/duplicate-finder/services/duplicate.service';
 import { ThemeService } from '@services/theme.service';
 import { FileService } from '@services/file.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';

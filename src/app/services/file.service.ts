@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from './api.service';
-import { LoggerService } from '@services/logger.service';
+import { LoggingService, getLoggingService } from '@tauri-apps/logger';
 
 /* models */
 import {
@@ -37,13 +37,13 @@ export interface FilePreviewResult {
 })
 export class FileService {
   private api = inject(ApiService);
-  private logger = inject(LoggerService);
+  private loggingService = getLoggingService();
 
   private inFlightRequests = new Map<string, Promise<unknown>>();
   private abortController: AbortController | null = null;
 
   constructor() {
-    this.logger.logInfo('service', 'FileService', 'init', 'FileService initialized');
+    this.loggingService.info('FileService initialized');
   }
 
   private getCacheKey(cmd: string, params?: Record<string, unknown>): string {
@@ -58,10 +58,7 @@ export class FileService {
   }
 
   async getCacheFiles(limit?: number, offset?: number): Promise<PaginatedData<CacheFileItem>> {
-    this.logger.logInfo('service', 'FileService', 'getCacheFiles', 'Getting cache files', {
-      limit,
-      offset,
-    });
+    this.loggingService.info('Getting cache files', { limit, offset });
     const cacheKey = this.getCacheKey('getCacheFiles', { limit, offset });
 
     if (this.inFlightRequests.has(cacheKey)) {
@@ -79,22 +76,14 @@ export class FileService {
           offset: offset ?? null,
           signal: controller.signal,
         });
-        this.logger.logInfo('service', 'FileService', 'getCacheFiles', 'Cache files retrieved', {
-          total: response.total,
-        });
+        this.loggingService.info('Cache files retrieved', { total: response.total });
         return {
           data: response.data,
           has_more: response.has_more,
           total: response.total,
         };
       } catch (error) {
-        this.logger.logError(
-          'service',
-          'FileService',
-          'getCacheFiles',
-          'Operation failed',
-          error as Error
-        );
+        this.loggingService.error('Operation failed', error as Error);
         throw error;
       } finally {
         this.inFlightRequests.delete(cacheKey);
@@ -106,62 +95,37 @@ export class FileService {
   }
 
   async getTrashFiles(limit?: number, offset?: number): Promise<TrashFileItem[]> {
-    this.logger.logInfo('service', 'FileService', 'getTrashFiles', 'Getting trash files', {
-      limit,
-      offset,
-    });
+    this.loggingService.info('Getting trash files', { limit, offset });
     try {
       const result = await this.api.invoke<TrashFileItem[]>('getTrashFiles', {
         limit: limit ?? null,
         offset: offset ?? null,
       });
-      this.logger.logInfo('service', 'FileService', 'getTrashFiles', 'Trash files retrieved', {
-        count: result.length,
-      });
+      this.loggingService.info('Trash files retrieved', { count: result.length });
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'getTrashFiles',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async getSystemLogs(limit?: number, offset?: number): Promise<LogFileItem[]> {
-    this.logger.logInfo('service', 'FileService', 'getSystemLogs', 'Getting system logs', {
-      limit,
-      offset,
-    });
+    this.loggingService.info('Getting system logs', { limit, offset });
     try {
       const result = await this.api.invoke<LogFileItem[]>('getSystemLogs', {
         limit: limit ?? null,
         offset: offset ?? null,
       });
-      this.logger.logInfo('service', 'FileService', 'getSystemLogs', 'System logs retrieved', {
-        count: result.length,
-      });
+      this.loggingService.info('System logs retrieved', { count: result.length });
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'getSystemLogs',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async getLargeFiles(limit?: number, offset?: number): Promise<PaginatedData<LargeFileItem>> {
-    this.logger.logInfo('service', 'FileService', 'getLargeFiles', 'Getting large files', {
-      limit,
-      offset,
-    });
+    this.loggingService.info('Getting large files', { limit, offset });
     const cacheKey = this.getCacheKey('getLargeFiles', { limit, offset });
 
     if (this.inFlightRequests.has(cacheKey)) {
@@ -179,22 +143,14 @@ export class FileService {
           offset: offset ?? null,
           signal: controller.signal,
         });
-        this.logger.logInfo('service', 'FileService', 'getLargeFiles', 'Large files retrieved', {
-          total: response.total,
-        });
+        this.loggingService.info('Large files retrieved', { total: response.total });
         return {
           data: response.data,
           has_more: response.has_more,
           total: response.total,
         };
       } catch (error) {
-        this.logger.logError(
-          'service',
-          'FileService',
-          'getLargeFiles',
-          'Operation failed',
-          error as Error
-        );
+        this.loggingService.error('Operation failed', error as Error);
         throw error;
       } finally {
         this.inFlightRequests.delete(cacheKey);
@@ -206,340 +162,180 @@ export class FileService {
   }
 
   async getCacheSummary(): Promise<ScanSummary> {
-    this.logger.logInfo('service', 'FileService', 'getCacheSummary', 'Getting cache summary');
+    this.loggingService.info('Getting cache summary');
     try {
       const result = await this.api.invoke<ScanSummary>('getCacheSummary');
-      this.logger.logInfo('service', 'FileService', 'getCacheSummary', 'Cache summary retrieved');
+      this.loggingService.info('Cache summary retrieved');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'getCacheSummary',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async getTrashSummary(): Promise<ScanSummary> {
-    this.logger.logInfo('service', 'FileService', 'getTrashSummary', 'Getting trash summary');
+    this.loggingService.info('Getting trash summary');
     try {
       const result = await this.api.invoke<ScanSummary>('getTrashSummary');
-      this.logger.logInfo('service', 'FileService', 'getTrashSummary', 'Trash summary retrieved');
+      this.loggingService.info('Trash summary retrieved');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'getTrashSummary',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async getLogSummary(): Promise<ScanSummary> {
-    this.logger.logInfo('service', 'FileService', 'getLogSummary', 'Getting log summary');
+    this.loggingService.info('Getting log summary');
     try {
       const result = await this.api.invoke<ScanSummary>('getLogSummary');
-      this.logger.logInfo('service', 'FileService', 'getLogSummary', 'Log summary retrieved');
+      this.loggingService.info('Log summary retrieved');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'getLogSummary',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async getLargeFilesSummary(): Promise<ScanSummary> {
-    this.logger.logInfo(
-      'service',
-      'FileService',
-      'getLargeFilesSummary',
-      'Getting large files summary'
-    );
+    this.loggingService.info('Getting large files summary');
     try {
       const result = await this.api.invoke<ScanSummary>('getLargeFilesSummary');
-      this.logger.logInfo(
-        'service',
-        'FileService',
-        'getLargeFilesSummary',
-        'Large files summary retrieved'
-      );
+      this.loggingService.info('Large files summary retrieved');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'getLargeFilesSummary',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async clearSelectedCacheFiles(paths: string[]): Promise<string> {
-    this.logger.logInfo(
-      'service',
-      'FileService',
-      'clearSelectedCacheFiles',
-      'Clearing selected cache files',
-      { count: paths.length }
-    );
+    this.loggingService.info('Clearing selected cache files', { count: paths.length });
     try {
       const result = await this.api.invoke<string>('clearSelectedCacheFiles', { paths });
-      this.logger.logInfo(
-        'service',
-        'FileService',
-        'clearSelectedCacheFiles',
-        'Selected cache files cleared'
-      );
+      this.loggingService.info('Selected cache files cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearSelectedCacheFiles',
-        'Operation failed',
-        error as Error,
-        { paths }
-      );
+      this.loggingService.error('Operation failed', error as Error, { paths });
       throw error;
     }
   }
 
   async clearSelectedTrashFiles(paths: string[]): Promise<string> {
-    this.logger.logInfo(
-      'service',
-      'FileService',
-      'clearSelectedTrashFiles',
-      'Clearing selected trash files',
-      { count: paths.length }
-    );
+    this.loggingService.info('Clearing selected trash files', { count: paths.length });
     try {
       const result = await this.api.invoke<string>('clearSelectedTrashFiles', { paths });
-      this.logger.logInfo(
-        'service',
-        'FileService',
-        'clearSelectedTrashFiles',
-        'Selected trash files cleared'
-      );
+      this.loggingService.info('Selected trash files cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearSelectedTrashFiles',
-        'Operation failed',
-        error as Error,
-        { paths }
-      );
+      this.loggingService.error('Operation failed', error as Error, { paths });
       throw error;
     }
   }
 
   async clearSelectedLogFiles(paths: string[]): Promise<string> {
-    this.logger.logInfo(
-      'service',
-      'FileService',
-      'clearSelectedLogFiles',
-      'Clearing selected log files',
-      { count: paths.length }
-    );
+    this.loggingService.info('Clearing selected log files', { count: paths.length });
     try {
       const result = await this.api.invoke<string>('clearSelectedLogFiles', { paths });
-      this.logger.logInfo(
-        'service',
-        'FileService',
-        'clearSelectedLogFiles',
-        'Selected log files cleared'
-      );
+      this.loggingService.info('Selected log files cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearSelectedLogFiles',
-        'Operation failed',
-        error as Error,
-        { paths }
-      );
+      this.loggingService.error('Operation failed', error as Error, { paths });
       throw error;
     }
   }
 
   async clearSelectedLargeFiles(paths: string[]): Promise<string> {
-    this.logger.logInfo(
-      'service',
-      'FileService',
-      'clearSelectedLargeFiles',
-      'Clearing selected large files',
-      { count: paths.length }
-    );
+    this.loggingService.info('Clearing selected large files', { count: paths.length });
     try {
       const result = await this.api.invoke<string>('clearSelectedLargeFiles', { paths });
-      this.logger.logInfo(
-        'service',
-        'FileService',
-        'clearSelectedLargeFiles',
-        'Selected large files cleared'
-      );
+      this.loggingService.info('Selected large files cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearSelectedLargeFiles',
-        'Operation failed',
-        error as Error,
-        { paths }
-      );
+      this.loggingService.error('Operation failed', error as Error, { paths });
       throw error;
     }
   }
 
   async clearTrash(): Promise<string> {
-    this.logger.logInfo('service', 'FileService', 'clearTrash', 'Clearing trash');
+    this.loggingService.info('Clearing trash');
     try {
       const result = await this.api.invoke<string>('clearTrash');
-      this.logger.logInfo('service', 'FileService', 'clearTrash', 'Trash cleared');
+      this.loggingService.info('Trash cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearTrash',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async clearCache(): Promise<string> {
-    this.logger.logInfo('service', 'FileService', 'clearCache', 'Clearing cache');
+    this.loggingService.info('Clearing cache');
     try {
       const result = await this.api.invoke<string>('clearCache');
-      this.logger.logInfo('service', 'FileService', 'clearCache', 'Cache cleared');
+      this.loggingService.info('Cache cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearCache',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async clearAllLogs(): Promise<string> {
-    this.logger.logInfo('service', 'FileService', 'clearAllLogs', 'Clearing all logs');
+    this.loggingService.info('Clearing all logs');
     try {
       const result = await this.api.invoke<string>('clearAllLogs');
-      this.logger.logInfo('service', 'FileService', 'clearAllLogs', 'All logs cleared');
+      this.loggingService.info('All logs cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearAllLogs',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async clearAllLargeFiles(): Promise<string> {
-    this.logger.logInfo('service', 'FileService', 'clearAllLargeFiles', 'Clearing all large files');
+    this.loggingService.info('Clearing all large files');
     try {
       const result = await this.api.invoke<string>('clearAllLargeFiles');
-      this.logger.logInfo(
-        'service',
-        'FileService',
-        'clearAllLargeFiles',
-        'All large files cleared'
-      );
+      this.loggingService.info('All large files cleared');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'clearAllLargeFiles',
-        'Operation failed',
-        error as Error
-      );
+      this.loggingService.error('Operation failed', error as Error);
       throw error;
     }
   }
 
   async previewFile(path: string): Promise<FilePreviewResult> {
-    this.logger.logInfo('service', 'FileService', 'previewFile', 'Previewing file', { path });
+    this.loggingService.info('Previewing file', { path });
     try {
       const result = await this.api.invoke<FilePreviewResult>('previewFile', { path });
-      this.logger.logInfo('service', 'FileService', 'previewFile', 'File previewed', {
-        type: result.type,
-      });
+      this.loggingService.info('File previewed', { type: result.type });
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'previewFile',
-        'Operation failed',
-        error as Error,
-        { path }
-      );
+      this.loggingService.error('Operation failed', error as Error, { path });
       throw error;
     }
   }
 
   async openFile(path: string, command?: string): Promise<void> {
-    this.logger.logInfo('service', 'FileService', 'openFile', 'Opening file', { path, command });
+    this.loggingService.info('Opening file', { path, command });
     try {
       await this.api.invoke<void>('openFile', { path, command: command || null });
-      this.logger.logInfo('service', 'FileService', 'openFile', 'File opened');
+      this.loggingService.info('File opened');
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'openFile',
-        'Operation failed',
-        error as Error,
-        { path, command }
-      );
+      this.loggingService.error('Operation failed', error as Error, { path, command });
       throw error;
     }
   }
 
   async deleteFiles(paths: string[]): Promise<string> {
-    this.logger.logInfo('service', 'FileService', 'deleteFiles', 'Deleting files', {
-      count: paths.length,
-    });
+    this.loggingService.info('Deleting files', { count: paths.length });
     try {
       const result = await this.api.invoke<string>('deleteFiles', { paths });
-      this.logger.logInfo('service', 'FileService', 'deleteFiles', 'Files deleted');
+      this.loggingService.info('Files deleted');
       return result;
     } catch (error) {
-      this.logger.logError(
-        'service',
-        'FileService',
-        'deleteFiles',
-        'Operation failed',
-        error as Error,
-        { paths }
-      );
+      this.loggingService.error('Operation failed', error as Error, { paths });
       throw error;
     }
   }

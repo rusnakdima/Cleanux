@@ -10,7 +10,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './path-input.component.html',
-  styleUrl: './path-input.component.css',
 })
 export class PathInputComponent {
   placeholder = input<string>('Enter directory path to scan');

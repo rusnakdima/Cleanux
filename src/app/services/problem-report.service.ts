@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { LoggerService, LogEntry, LogFilter } from './logger.service';
 import { LogStorageService } from './log-storage.service';
-import { LogExportService, ProblemReport } from './log-export.service';
+import { LogExportService, ProblemReport } from '@features/log-manager/services/log-export.service';
 import { environment } from '@env/environment';
 import { TOAST_DURATION_MS } from '@shared/utils/constants';
 
@@ -67,10 +67,13 @@ export class ProblemReportService {
     this.lastReport.set(report);
     localStorage.setItem('cleanux_last_report', JSON.stringify(report));
 
-    console.info('[ProblemReport] Auto-generated report:', {
-      errors: report.summary.errors,
-      problems: report.problems.length,
-    });
+    this.logger.logInfo(
+      'service',
+      undefined,
+      'ProblemReportService',
+      '[ProblemReport] Auto-generated report',
+      { errors: report.summary.errors, problems: report.problems.length }
+    );
 
     return report;
   }

@@ -16,7 +16,6 @@ export interface StatCard {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule],
   templateUrl: './stat-card-grid.component.html',
-  styleUrl: './stat-card-grid.component.css',
 })
 export class StatCardGridComponent {
   cards = input<StatCard[]>([]);

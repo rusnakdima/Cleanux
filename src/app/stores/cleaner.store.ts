@@ -1,11 +1,11 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
 import { FileService } from '@services/file.service';
-import { BackupService } from '@services/backup.service';
+import { BackupService } from '@features/backup/services/backup.service';
 import { PackageManagerService } from '@services/package-manager.service';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
-import { LoggerService } from '@services/logger.service';
+import { LoggingService, getLoggingService } from '@tauri-apps/logger';
 import {
   CacheFileItem,
   TrashFileItem,
@@ -25,7 +25,7 @@ export class CleanerStore {
   private packageManagerService = inject(PackageManagerService);
   private notification = inject(NotificationService);
   private confirmDialogService = inject(ConfirmDialogService);
-  private logger = inject(LoggerService);
+  private loggingService = getLoggingService();
 
   readonly cacheData = signal<CacheFileItem[]>([]);
   readonly filteredCacheData = signal<CacheFileItem[]>([]);
@@ -264,13 +264,7 @@ export class CleanerStore {
         this.packageCacheData.set(packages);
       }
     } catch (error: unknown) {
-      this.logger.logError(
-        'store',
-        'CleanerStore',
-        'loadActiveTabData',
-        `Failed to load ${tab} data`,
-        error as Error
-      );
+      this.loggingService.error(`Failed to load ${tab} data`, error as Error);
     } finally {
       this.loading.set(false);
     }
@@ -288,13 +282,7 @@ export class CleanerStore {
       this.cacheHasMore.set(result.has_more);
       this.cacheTotal.set(result.total);
     } catch (error: unknown) {
-      this.logger.logError(
-        'store',
-        'CleanerStore',
-        'loadMoreCache',
-        'Failed to load more cache data',
-        error as Error
-      );
+      this.loggingService.error('Failed to load more cache data', error as Error);
     } finally {
       this.loading.set(false);
     }
@@ -360,13 +348,7 @@ export class CleanerStore {
       await this.backupService.createBackup(filesToClear, archivePath);
       backupCreated = true;
     } catch (error) {
-      this.logger.logWarn(
-        'store',
-        'cleaner',
-        'createBackup',
-        'Failed to create backup, proceeding with deletion',
-        error instanceof Error ? error : new Error(String(error))
-      );
+      this.loggingService.warn('Failed to create backup, proceeding with deletion', { error: error instanceof Error ? error.message : String(error) });
     }
 
     try {

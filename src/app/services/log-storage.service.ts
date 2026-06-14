@@ -46,7 +46,7 @@ export class LogStorageService {
 
       request.onsuccess = () => {
         this.db = request.result;
-        console.debug('[LogStorage] IndexedDB initialized');
+        this.logger.logDebug('service', undefined, 'init', '[LogStorage] IndexedDB initialized');
         resolve();
       };
 
@@ -59,7 +59,7 @@ export class LogStorageService {
           store.createIndex('source', 'source', { unique: false });
           store.createIndex('view', 'view', { unique: false });
         }
-        console.debug('[LogStorage] IndexedDB schema created');
+        this.logger.logDebug('service', undefined, 'init', '[LogStorage] IndexedDB schema created');
       };
     });
 
@@ -138,7 +138,7 @@ export class LogStorageService {
           deleted++;
           cursor.continue();
         } else {
-          console.debug(`[LogStorage] Cleaned up ${deleted} old log entries`);
+          this.logger.logDebug('service', undefined, 'cleanup', `[LogStorage] Cleaned up ${deleted} old log entries`);
           resolve();
         }
       };
@@ -256,7 +256,7 @@ export class LogStorageService {
       const request = store.clear();
 
       request.onsuccess = () => {
-        console.debug('[LogStorage] All logs cleared');
+        this.logger.logDebug('service', undefined, 'clearLogs', '[LogStorage] All logs cleared');
         resolve();
       };
       request.onerror = () => reject(request.error);

@@ -17,7 +17,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { SystemService, ProcessItem } from '@services/system.service';
+import { SystemService, ProcessItem } from '@features/system/services/system.service';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 

@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { AppResidue } from '@services/app-residue.service';
+import { AppResidue } from '@features/app-residue-cleaner/services/app-residue.service';
 import { formatSize } from '@shared/utils/format.util';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
@@ -43,7 +43,7 @@ type ResidueTabType = 'configs' | 'data' | 'caches';
                   class="search-input"
                   [placeholder]="'Search ' + tabType() + '...'"
                   [value]="searchQuery()"
-                  (input)="onSearchChange($any($event.target).value)"
+                  (input)="onSearchChange($event)"
                   (focus)="onSearchFocus()"
                   (blur)="onSearchBlur()"
                 />
@@ -67,7 +67,7 @@ type ResidueTabType = 'configs' | 'data' | 'caches';
               <input
                 type="checkbox"
                 [checked]="allSelected()"
-                (change)="selectAllEvent.emit($any($event.target).checked)"
+                (change)="onSelectAllChange($event)"
               />
               <span class="checkmark" [class.indeterminate]="indeterminate()">
                 @if (indeterminate()) {
@@ -260,8 +260,14 @@ export class ResidueTabComponent {
     this.searchQuery.set('');
   }
 
-  onSearchChange(query: string): void {
-    this.searchQuery.set(query.toLowerCase());
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery.set(target.value.toLowerCase());
+  }
+
+  onSelectAllChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.selectAllEvent.emit(target.checked);
   }
 
   getResidueTypeLabel(type: string): string {

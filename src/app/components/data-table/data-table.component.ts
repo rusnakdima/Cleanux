@@ -35,6 +35,7 @@ import { TableColumn, TableOptions, TableAction, RowActionEvent } from '@models/
 import { formatSize } from '@shared/utils/format.util';
 import { CheckboxComponent } from '@shared/checkbox';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { SIZE_DANGER_THRESHOLD, SIZE_WARNING_THRESHOLD } from '@shared/constants/size-thresholds.constants';
 
 @Component({
   selector: 'app-data-table',
@@ -371,8 +372,8 @@ export class DataTableComponent<T extends object = object> implements OnChanges 
 
   getSizeClass(item: T): string {
     const size = this.sizeFromItem(item);
-    if (size >= 1073741824) return 'size-danger';
-    if (size >= 524288000) return 'size-warning';
+    if (size >= SIZE_DANGER_THRESHOLD) return 'size-danger';
+    if (size >= SIZE_WARNING_THRESHOLD) return 'size-warning';
     return '';
   }
 

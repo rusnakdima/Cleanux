@@ -2,6 +2,7 @@ import { Injectable, signal, inject, OnDestroy, computed, NgZone } from '@angula
 import { formatSize } from '@shared/utils/format.util';
 import { ApiService } from '@services/api.service';
 import { POLL_INTERVAL_MS } from '@shared/utils/constants';
+import { TEMPERATURE_REFRESH_INTERVAL_MS } from '@shared/constants/timeout.constants';
 
 export interface SystemStats {
   cpuUsage: number;
@@ -104,7 +105,7 @@ export class MonitorStore implements OnDestroy {
 
       this.tempInterval = setInterval(() => {
         this.ngZone.run(() => this.fetchTemperatures());
-      }, 3000);
+      }, TEMPERATURE_REFRESH_INTERVAL_MS);
     });
 
     if (this.visibilityHandler) {

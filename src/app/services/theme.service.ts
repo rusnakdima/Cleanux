@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Injectable, signal, effect, inject } from '@angular/core';
-import { LoggerService } from '@services/logger.service';
+import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import {
+  ACCENT_COLORS,
+  DEFAULT_ACCENT_COLOR,
+  GLASS_OPACITY_DEFAULT,
+} from '@shared/constants/theme.constants';
+import { THEME_TRANSITION_TIMEOUT_MS } from '@shared/constants/timeout.constants';
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 
@@ -21,42 +27,29 @@ export interface ThemeConfig {
 }
 
 const DEFAULT_ACCENT_CONFIG: AccentConfig = {
-  general: '#6366f1',
-  buttons: '#6366f1',
-  navigation: '#6366f1',
-  borders: '#6366f1',
-  icons: '#6366f1',
+  general: DEFAULT_ACCENT_COLOR,
+  buttons: DEFAULT_ACCENT_COLOR,
+  navigation: DEFAULT_ACCENT_COLOR,
+  borders: DEFAULT_ACCENT_COLOR,
+  icons: DEFAULT_ACCENT_COLOR,
 };
 
 const DEFAULT_THEME: ThemeConfig = {
   mode: 'dark',
   accentConfig: { ...DEFAULT_ACCENT_CONFIG },
-  glassOpacity: 0.7,
+  glassOpacity: GLASS_OPACITY_DEFAULT,
 };
-
-const ACCENT_COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#ef4444',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#14b8a6',
-  '#06b6d4',
-  '#3b82f6',
-];
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly STORAGE_KEY = 'cleanux_theme';
-  private logger = inject(LoggerService);
+  private loggingService = getLoggingService();
 
   currentTheme = signal<ThemeConfig>(this.loadTheme());
-  accentColors = signal<string[]>(ACCENT_COLORS);
+  accentColors = signal<string[]>([...ACCENT_COLORS]);
 
   constructor() {
-    this.logger.logInfo('service', 'ThemeService', 'init', 'ThemeService initialized');
+    this.loggingService.info('ThemeService initialized');
     effect(() => {
       this.applyTheme(this.currentTheme());
     });
@@ -82,15 +75,13 @@ export class ThemeService {
   }
 
   setMode(mode: ThemeMode) {
-    this.logger.logDebug('service', 'ThemeService', 'setMode', 'Setting theme mode', { mode });
+    this.loggingService.debug('Setting theme mode', { mode });
     this.currentTheme.update((t) => ({ ...t, mode }));
     this.saveTheme(this.currentTheme());
   }
 
   setAccentColor(color: string) {
-    this.logger.logDebug('service', 'ThemeService', 'setAccentColor', 'Setting accent color', {
-      color,
-    });
+    this.loggingService.debug('Setting accent color', { color });
     this.currentTheme.update((t) => ({
       ...t,
       accentConfig: {
@@ -106,13 +97,7 @@ export class ThemeService {
   }
 
   setAccentForCategory(category: AccentCategory, color: string) {
-    this.logger.logDebug(
-      'service',
-      'ThemeService',
-      'setAccentForCategory',
-      'Setting accent for category',
-      { category, color }
-    );
+    this.loggingService.debug('Setting accent for category', { category, color });
     this.currentTheme.update((t) => ({
       ...t,
       accentConfig: { ...t.accentConfig, [category]: color },
@@ -121,18 +106,12 @@ export class ThemeService {
   }
 
   resetAccentToDefault(category: AccentCategory) {
-    this.logger.logDebug(
-      'service',
-      'ThemeService',
-      'resetAccentToDefault',
-      'Resetting accent to default',
-      { category }
-    );
+    this.loggingService.debug('Resetting accent to default', { category });
     this.setAccentForCategory(category, DEFAULT_ACCENT_CONFIG[category]);
   }
 
   resetAllAccents() {
-    this.logger.logDebug('service', 'ThemeService', 'resetAllAccents', 'Resetting all accents');
+    this.loggingService.debug('Resetting all accents');
     this.currentTheme.update((t) => ({
       ...t,
       accentConfig: { ...DEFAULT_ACCENT_CONFIG },
@@ -141,17 +120,13 @@ export class ThemeService {
   }
 
   setGlassOpacity(opacity: number) {
-    this.logger.logDebug('service', 'ThemeService', 'setGlassOpacity', 'Setting glass opacity', {
-      opacity,
-    });
+    this.loggingService.debug('Setting glass opacity', { opacity });
     this.currentTheme.update((t) => ({ ...t, glassOpacity: Math.max(0, Math.min(1, opacity)) }));
     this.saveTheme(this.currentTheme());
   }
 
   applyTheme(config: ThemeConfig) {
-    this.logger.logDebug('service', 'ThemeService', 'applyTheme', 'Applying theme', {
-      mode: config.mode,
-    });
+    this.loggingService.debug('Applying theme', { mode: config.mode });
     const root = document.documentElement;
     const body = document.body;
 
@@ -184,7 +159,7 @@ export class ThemeService {
       root.classList.toggle('light', !isDark);
       setTimeout(() => {
         body.classList.remove('theme-transitioning');
-      }, 300);
+      }, THEME_TRANSITION_TIMEOUT_MS);
     });
   }
 

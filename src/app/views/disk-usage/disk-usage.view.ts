@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DiskUsageService } from '@services/disk-usage.service';
+import { DiskUsageService } from '@features/disk-usage/services/disk-usage.service';
 import { formatSize } from '@shared/utils/format.util';
 
 export interface DirectoryNode {

@@ -14,8 +14,8 @@ import {
   AutomationRecipe,
   ActionStep,
   ExecutionHistoryEntry,
-} from '@services/automation.service';
-import { ProfileService } from '@services/profile.service';
+} from '@features/automation/services/automation.service';
+import { ProfileService } from '@features/profiles/services/profile.service';
 import { CleaningProfile } from '@models/profile.model';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';

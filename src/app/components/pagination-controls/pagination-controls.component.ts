@@ -20,7 +20,6 @@ import { MatButtonModule } from '@angular/material/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule, MatButtonModule],
   templateUrl: './pagination-controls.component.html',
-  styleUrl: './pagination-controls.component.css',
 })
 export class PaginationControlsComponent {
   currentPage = input<number>(1);

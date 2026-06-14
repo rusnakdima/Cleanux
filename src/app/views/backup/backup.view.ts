@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { BackupService } from '@services/backup.service';
+import { BackupService } from '@features/backup/services/backup.service';
 import { NotificationService } from '@services/notification.service';
 
 /* components */

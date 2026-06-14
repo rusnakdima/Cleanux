@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { OrphanedConfig } from '@services/app-residue.service';
+import { OrphanedConfig } from '@features/app-residue-cleaner/services/app-residue.service';
 import { PaginationComponent } from '@components/pagination/pagination.component';
 
 @Component({

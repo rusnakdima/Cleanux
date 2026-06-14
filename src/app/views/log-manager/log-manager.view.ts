@@ -25,7 +25,7 @@ import {
   LogrotateConfig,
   LogFileInfo,
   VarLogUsage,
-} from '@services/log-manager.service';
+} from '@features/log-manager/services/log-manager.service';
 import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
 import { formatSize } from '@shared/utils/format.util';
 import { DataListComponent } from '@components/data-list/data-list.component';

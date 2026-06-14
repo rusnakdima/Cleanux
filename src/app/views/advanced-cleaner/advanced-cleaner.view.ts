@@ -11,7 +11,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatCardModule } from '@angular/material/card';
 
 /* services */
-import { JunkCleanerService } from '@services/junk-cleaner.service';
+import { JunkCleanerService } from '@features/advanced-cleaner/services/junk-cleaner.service';
 
 /* mixins */
 import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';

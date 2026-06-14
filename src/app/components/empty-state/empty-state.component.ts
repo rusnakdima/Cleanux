@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MatIconModule],
   templateUrl: './empty-state.component.html',
-  styleUrl: './empty-state.component.css',
 })
 export class EmptyStateComponent {
   icon = input<string>('info');

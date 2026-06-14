@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { PackageDeepCleanService } from '@services/package-deep-clean.service';
+import { PackageDeepCleanService } from '@features/package-deep-clean/services/package-deep-clean.service';
 import { PackageManagerSummary, OrphanedPackage } from '@models/package.model';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';

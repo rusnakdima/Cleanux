@@ -18,9 +18,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 /* services */
-import { MemoryOptimizerService } from '@services/memory-optimizer.service';
+import { MemoryOptimizerService } from '@features/memory-optimizer/services/memory-optimizer.service';
 import { MemoryInfo, SwapInfo, ProcessMemory } from '@models/memory.model';
 import { LoadingErrorMixin } from '@views/mixins/loading-error.mixin';
+import { MEMORY_REFRESH_INTERVAL_MS } from '@shared/constants/timeout.constants';
 
 /* components */
 import { DataListComponent } from '@components/data-list/data-list.component';
@@ -84,7 +85,7 @@ export class MemoryOptimizerView extends LoadingErrorMixin implements OnInit, On
     this.ngZone.runOutsideAngular(() => {
       this.refreshInterval = setInterval(() => {
         this.ngZone.run(() => this.loadData());
-      }, 3000);
+      }, MEMORY_REFRESH_INTERVAL_MS);
     });
   }
 

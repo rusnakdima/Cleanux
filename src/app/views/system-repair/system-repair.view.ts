@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { RepairService } from '@services/repair.service';
+import { RepairService } from '@features/system-repair/services/repair.service';
 import { RepairItem } from '@models/repair.model';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
