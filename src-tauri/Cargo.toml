@@ -32,7 +32,7 @@ tar = "0.4"
 flate2 = "1.0"
 rusqlite = { version = "0.32", features = ["bundled"] }
 log = "0.4"
-env_logger = "0.11"
+tauri-logger = { git = "https://github.com/rusnakdima/tauri-logger.git", branch = "main", features = ["tauri"] }
 
 [features]
 default = ["mcp-bridge"]
