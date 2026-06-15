@@ -53,7 +53,7 @@ export class LoggerService {
   logInfo(source: string, context?: string, operation?: string, message?: string): void {
     const msg = message || context || '';
     const ctx = operation ? { operation } : undefined;
-    this.logger.warn(source, msg, ctx);
+    this.logger.info(source, msg, ctx);
   }
 
   logError(
@@ -73,7 +73,7 @@ export class LoggerService {
     operation: string | undefined,
     message: string
   ): void {
-    this.logger.warn(source, message, { source, context, operation });
+    this.logger.debug(source, message, { source, context, operation });
   }
 
   info(message: string, context?: Record<string, unknown>, data?: unknown): void {
