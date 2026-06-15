@@ -1,4 +1,3 @@
-/* services */
 use crate::models::CleaningProfile;
 use crate::services::profile_service::ProfileService;
 

@@ -1,1 +1,0 @@
-pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;

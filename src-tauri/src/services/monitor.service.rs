@@ -92,8 +92,4 @@ impl MonitorService {
       data: DataValue::Bool(false),
     })
   }
-
-  pub fn is_monitoring() -> bool {
-    MONITORING_ACTIVE.load(Ordering::SeqCst)
-  }
 }

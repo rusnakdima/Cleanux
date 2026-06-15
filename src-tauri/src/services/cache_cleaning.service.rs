@@ -13,9 +13,8 @@ pub struct CacheCleaningService;
 
 type CleanResult<T> = Result<T, ResponseModel>;
 
-#[allow(non_snake_case)]
 impl CacheCleaningService {
-  pub fn getCacheFiles(
+  pub fn get_cache_files(
     &self,
     limit: Option<usize>,
     offset: Option<usize>,
@@ -40,7 +39,7 @@ impl CacheCleaningService {
     ))
   }
 
-  pub fn clearSelectedCacheFiles(
+  pub fn clear_selected_cache_files(
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
@@ -62,7 +61,7 @@ impl CacheCleaningService {
     }
   }
 
-  pub fn clearCache(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_cache(&self) -> Result<ResponseModel, ResponseModel> {
     self.clear_cache_inner()
   }
 

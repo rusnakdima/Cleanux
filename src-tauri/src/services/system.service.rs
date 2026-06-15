@@ -12,9 +12,8 @@ pub struct SystemService;
 
 type ServiceResult<T> = Result<T, AppError>;
 
-#[allow(non_snake_case)]
 impl SystemService {
-  pub fn stopService(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn stop_service(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
     self
       .stop_service_inner(service)
       .map_err(|e| e.into_response())
@@ -37,7 +36,7 @@ impl SystemService {
     }
   }
 
-  pub fn stopSelectedServices(
+  pub fn stop_selected_services(
     &self,
     services: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
@@ -79,7 +78,7 @@ impl SystemService {
     }
   }
 
-  pub fn openFile(
+  pub fn open_file(
     &self,
     path: &str,
     command: Option<String>,
@@ -111,7 +110,7 @@ impl SystemService {
     }
   }
 
-  service_method_full!(getAllServices => get_all_services_inner);
+  service_method_full!(get_all_services => get_all_services_inner);
 
   fn get_all_services_inner(&self) -> ServiceResult<ResponseModel> {
     let output = run_command_raw(
@@ -145,7 +144,7 @@ impl SystemService {
               "load": load,
               "active": active,
               "status": status,
-              "isRunning": active == "active"
+              "is_running": active == "active"
             }));
           }
         }
@@ -160,7 +159,7 @@ impl SystemService {
     })
   }
 
-  pub fn enableService(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn enable_service(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
     self
       .enable_service_inner(service)
       .map_err(|e| e.into_response())
@@ -179,7 +178,7 @@ impl SystemService {
     }
   }
 
-  pub fn startService(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn start_service(&self, service: &str) -> Result<ResponseModel, ResponseModel> {
     self
       .start_service_inner(service)
       .map_err(|e| e.into_response())
@@ -198,7 +197,7 @@ impl SystemService {
     }
   }
 
-  pub fn enableSelectedServices(
+  pub fn enable_selected_services(
     &self,
     services: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {

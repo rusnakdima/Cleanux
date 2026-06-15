@@ -140,28 +140,7 @@ impl ContainerService {
     if all {
       args.push("-a");
     }
-
-    let output = Self::run_command(container_type, &args)?;
-    let stderr = stderr_string(&output);
-    let stdout = stdout_string(&output);
-    let message = if stdout.is_empty() {
-      stderr.to_string()
-    } else {
-      stdout.to_string()
-    };
-
-    if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("{} system prune completed: {}", container_type, message),
-        data: DataValue::String(message.to_string()),
-      })
-    } else {
-      Err(AppError::Unknown(format!(
-        "{} prune failed: {}",
-        container_type, stderr
-      )))
-    }
+    Self::container_prune_helper(container_type, &args, "system prune")
   }
 
   fn container_image_prune(container_type: &str, all: bool) -> Result<ResponseModel, AppError> {
@@ -169,76 +148,19 @@ impl ContainerService {
     if all {
       args.push("-a");
     }
-
-    let output = Self::run_command(container_type, &args)?;
-    let stderr = stderr_string(&output);
-    let stdout = stdout_string(&output);
-    let message = if stdout.is_empty() {
-      stderr.to_string()
-    } else {
-      stdout.to_string()
-    };
-
-    if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("{} image prune completed: {}", container_type, message),
-        data: DataValue::String(message.to_string()),
-      })
-    } else {
-      Err(AppError::Unknown(format!(
-        "{} image prune failed: {}",
-        container_type, stderr
-      )))
-    }
+    Self::container_prune_helper(container_type, &args, "image prune")
   }
 
   fn container_container_prune(container_type: &str) -> Result<ResponseModel, AppError> {
-    let output = Self::run_command(container_type, &["container", "prune", "-f"])?;
-    let stderr = stderr_string(&output);
-    let stdout = stdout_string(&output);
-    let message = if stdout.is_empty() {
-      stderr.to_string()
-    } else {
-      stdout.to_string()
-    };
-
-    if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("{} container prune completed: {}", container_type, message),
-        data: DataValue::String(message.to_string()),
-      })
-    } else {
-      Err(AppError::Unknown(format!(
-        "{} container prune failed: {}",
-        container_type, stderr
-      )))
-    }
+    Self::container_prune_helper(
+      container_type,
+      &["container", "prune", "-f"],
+      "container prune",
+    )
   }
 
   fn container_volume_prune(container_type: &str) -> Result<ResponseModel, AppError> {
-    let output = Self::run_command(container_type, &["volume", "prune", "-f"])?;
-    let stderr = stderr_string(&output);
-    let stdout = stdout_string(&output);
-    let message = if stdout.is_empty() {
-      stderr.to_string()
-    } else {
-      stdout.to_string()
-    };
-
-    if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("{} volume prune completed: {}", container_type, message),
-        data: DataValue::String(message.to_string()),
-      })
-    } else {
-      Err(AppError::Unknown(format!(
-        "{} volume prune failed: {}",
-        container_type, stderr
-      )))
-    }
+    Self::container_prune_helper(container_type, &["volume", "prune", "-f"], "volume prune")
   }
 
   fn container_preview_prune(container_type: &str, all: bool) -> Result<ResponseModel, AppError> {
@@ -246,8 +168,15 @@ impl ContainerService {
     if all {
       args.push("-a");
     }
+    Self::container_prune_helper(container_type, &args, "dry-run preview")
+  }
 
-    let output = Self::run_command(container_type, &args)?;
+  fn container_prune_helper(
+    container_type: &str,
+    args: &[&str],
+    action: &str,
+  ) -> Result<ResponseModel, AppError> {
+    let output = Self::run_command(container_type, args)?;
     let stderr = stderr_string(&output);
     let stdout = stdout_string(&output);
     let message = if stdout.is_empty() {
@@ -256,16 +185,16 @@ impl ContainerService {
       stdout.to_string()
     };
 
-    if output.status.success() || stderr.contains("Would prune") {
+    if output.status.success() {
       Ok(ResponseModel {
-        status: ResponseStatus::Info,
-        message: format!("{} dry-run preview: {}", container_type, message),
+        status: ResponseStatus::Success,
+        message: format!("{} {} completed: {}", container_type, action, message),
         data: DataValue::String(message.to_string()),
       })
     } else {
       Err(AppError::Unknown(format!(
-        "{} preview failed: {}",
-        container_type, stderr
+        "{} {} failed: {}",
+        container_type, action, stderr
       )))
     }
   }

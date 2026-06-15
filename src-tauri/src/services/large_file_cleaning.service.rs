@@ -14,9 +14,8 @@ pub struct LargeFileCleaningService;
 
 type CleanResult<T> = Result<T, ResponseModel>;
 
-#[allow(non_snake_case)]
 impl LargeFileCleaningService {
-  pub fn getLargeFiles(
+  pub fn get_large_files(
     &self,
     limit: Option<usize>,
     offset: Option<usize>,
@@ -40,7 +39,7 @@ impl LargeFileCleaningService {
     ))
   }
 
-  pub fn clearSelectedLargeFiles(
+  pub fn clear_selected_large_files(
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
@@ -62,7 +61,7 @@ impl LargeFileCleaningService {
     }
   }
 
-  pub fn clearAllLargeFiles(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_all_large_files(&self) -> Result<ResponseModel, ResponseModel> {
     self.clear_all_large_files_inner()
   }
 

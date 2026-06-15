@@ -137,31 +137,6 @@ impl HealthHistoryService {
       days_analyzed: days,
     })
   }
-
-  pub fn get_latest_snapshot(&self) -> SqlResult<Option<HealthSnapshot>> {
-    let conn = Connection::open(&self.db_path)?;
-    let mut stmt = conn.prepare(
-      "SELECT id, timestamp, health_score, cache_size, trash_size, log_size, large_files_count
-             FROM health_snapshots
-             ORDER BY timestamp DESC
-             LIMIT 1",
-    )?;
-
-    let mut rows = stmt.query([])?;
-    if let Some(row) = rows.next()? {
-      Ok(Some(HealthSnapshot {
-        id: Some(row.get(0)?),
-        timestamp: row.get(1)?,
-        health_score: row.get(2)?,
-        cache_size: row.get::<_, i64>(3)? as u64,
-        trash_size: row.get::<_, i64>(4)? as u64,
-        log_size: row.get::<_, i64>(5)? as u64,
-        large_files_count: row.get(6)?,
-      }))
-    } else {
-      Ok(None)
-    }
-  }
 }
 
 impl Default for HealthHistoryService {

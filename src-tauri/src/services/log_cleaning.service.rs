@@ -14,9 +14,8 @@ pub struct LogCleaningService;
 
 type CleanResult<T> = Result<T, AppError>;
 
-#[allow(non_snake_case)]
 impl LogCleaningService {
-  service_method_full!(getSystemLogs => get_system_logs_inner);
+  service_method_full!(get_system_logs => get_system_logs_inner);
 
   fn get_system_logs_inner(&self) -> CleanResult<ResponseModel> {
     let log_dir = Path::new("/var/log");
@@ -25,7 +24,10 @@ impl LogCleaningService {
     Ok(success_response("System logs retrieved successfully", data))
   }
 
-  pub fn clearSelectedLogFiles(&self, paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_selected_log_files(
+    &self,
+    paths: Vec<String>,
+  ) -> Result<ResponseModel, ResponseModel> {
     if paths.is_empty() {
       return Ok(success_response(
         "No log files selected",
@@ -50,7 +52,7 @@ impl LogCleaningService {
     }
   }
 
-  pub fn clearAllLogs(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_all_logs(&self) -> Result<ResponseModel, ResponseModel> {
     let log_dir = Path::new("/var/log");
     let files: Vec<LogFileModel> = collect_log_file_models(log_dir, 3, 500);
     if files.is_empty() {

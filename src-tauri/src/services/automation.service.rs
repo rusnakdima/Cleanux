@@ -163,19 +163,19 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
   match step {
     ActionStep::CleanCategory { category } => match category.as_str() {
       "cache" => {
-        let _ = CacheCleaningService.clearCache();
+        let _ = CacheCleaningService.clear_cache();
         Ok("Cache cleared".to_string())
       }
       "trash" => {
-        let _ = TrashCleaningService.clearTrash();
+        let _ = TrashCleaningService.clear_trash();
         Ok("Trash cleared".to_string())
       }
       "logs" => {
-        let _ = LogCleaningService.clearAllLogs();
+        let _ = LogCleaningService.clear_all_logs();
         Ok("Logs cleared".to_string())
       }
       "largefiles" => {
-        let _ = LargeFileCleaningService.clearAllLargeFiles();
+        let _ = LargeFileCleaningService.clear_all_large_files();
         Ok("Large files cleared".to_string())
       }
       _ => Err(AppError::message(format!("Unknown category: {}", category))),
@@ -238,7 +238,6 @@ fn get_execution_history() -> Result<Vec<ExecutionHistoryEntry>, AppError> {
   Ok(history)
 }
 
-#[allow(non_snake_case)]
 impl AutomationService {
   pub fn get_quick_actions() -> Result<ResponseModel, ResponseModel> {
     Self::get_quick_actions_inner().map_err(|e| e.into_response())

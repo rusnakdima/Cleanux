@@ -1,8 +1,5 @@
 /* helpers module */
 
-#[path = "constants.helper.rs"]
-pub mod constants_helper;
-
 #[path = "response.helper.rs"]
 pub mod response_helper;
 

@@ -1,7 +1,5 @@
-/* models */
 use crate::helpers::{array_response, ResponseBuilder};
 use crate::models::{DataValue, ResponseModel};
-/* services */
 use crate::services::log_manager_service::LogManagerService;
 
 #[tauri::command]

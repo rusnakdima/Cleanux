@@ -15,9 +15,8 @@ pub struct TrashCleaningService;
 
 type CleanResult<T> = Result<T, AppError>;
 
-#[allow(non_snake_case)]
 impl TrashCleaningService {
-  service_method_full!(getTrashFiles => get_trash_files_inner);
+  service_method_full!(get_trash_files => get_trash_files_inner);
 
   fn get_trash_files_inner(&self) -> CleanResult<ResponseModel> {
     let trash_dir = CommonPath::TrashFiles
@@ -28,7 +27,7 @@ impl TrashCleaningService {
     Ok(success_response("Trash files retrieved successfully", data))
   }
 
-  pub fn clearSelectedTrashFiles(
+  pub fn clear_selected_trash_files(
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
@@ -50,7 +49,7 @@ impl TrashCleaningService {
     }
   }
 
-  pub fn clearTrash(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_trash(&self) -> Result<ResponseModel, ResponseModel> {
     let trash_dir = CommonPath::TrashFiles
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;

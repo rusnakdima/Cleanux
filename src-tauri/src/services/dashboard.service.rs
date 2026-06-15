@@ -22,9 +22,8 @@ use walkdir::WalkDir;
 
 pub struct DashboardService;
 
-#[allow(non_snake_case)]
 impl DashboardService {
-  pub fn getRunningServices(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_running_services(&self) -> Result<ResponseModel, ResponseModel> {
     #[cfg(target_os = "linux")]
     {
       let output = Command::new("systemctl")
@@ -63,7 +62,7 @@ impl DashboardService {
             name,
             description,
             status: status.clone(),
-            isRunning: status == "running",
+            is_running: status == "running",
           });
         }
       }
@@ -82,10 +81,10 @@ impl DashboardService {
     }
   }
 
-  pub fn getCacheSummary(&self) -> Result<ResponseModel, ResponseModel> {
-    let cacheDir = dirs::cache_dir().ok_or("Cache directory not found")?;
+  pub fn get_cache_summary(&self) -> Result<ResponseModel, ResponseModel> {
+    let cache_dir = dirs::cache_dir().ok_or("Cache directory not found")?;
 
-    let entries: Vec<_> = WalkDir::new(cacheDir)
+    let entries: Vec<_> = WalkDir::new(cache_dir)
       .max_depth(4)
       .into_iter()
       .filter_map(|e| e.ok())
@@ -93,7 +92,7 @@ impl DashboardService {
       .take(2000)
       .collect();
 
-    let (totalSize, fileCount) = entries
+    let (total_size, file_count) = entries
       .into_par_iter()
       .filter(|e| is_cache_file(e.file_name()))
       .map(|e| {
@@ -103,8 +102,8 @@ impl DashboardService {
       .reduce(|| (0u64, 0usize), |(a, b), (c, d)| (a + c, b + d));
 
     let summary = ScanSummaryModel {
-      fileCount,
-      totalSize,
+      file_count,
+      total_size,
     };
 
     Ok(
@@ -117,24 +116,24 @@ impl DashboardService {
     )
   }
 
-  pub fn getTrashSummary(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_trash_summary(&self) -> Result<ResponseModel, ResponseModel> {
     let home = home_dir().map_err(|_| "Home directory not found")?;
-    let trashDir = home.join(".local/share/Trash/files");
-    let mut totalSize = 0;
-    let mut fileCount = 0;
+    let trash_dir = home.join(".local/share/Trash/files");
+    let mut total_size = 0;
+    let mut file_count = 0;
 
-    if let Ok(entries) = fs::read_dir(&trashDir) {
+    if let Ok(entries) = fs::read_dir(&trash_dir) {
       for entry in entries.flatten() {
         if let Ok(meta) = fs::metadata(entry.path()) {
-          totalSize += meta.len();
-          fileCount += 1;
+          total_size += meta.len();
+          file_count += 1;
         }
       }
     }
 
     let summary = ScanSummaryModel {
-      totalSize,
-      fileCount,
+      total_size,
+      file_count,
     };
 
     Ok(
@@ -147,10 +146,10 @@ impl DashboardService {
     )
   }
 
-  pub fn getLogSummary(&self) -> Result<ResponseModel, ResponseModel> {
-    let logDir = Path::new("/var/log");
+  pub fn get_log_summary(&self) -> Result<ResponseModel, ResponseModel> {
+    let log_dir = Path::new("/var/log");
 
-    let entries: Vec<_> = WalkDir::new(logDir)
+    let entries: Vec<_> = WalkDir::new(log_dir)
       .max_depth(2)
       .into_iter()
       .filter_map(|e| e.ok())
@@ -158,7 +157,7 @@ impl DashboardService {
       .take(500)
       .collect();
 
-    let (totalSize, fileCount) = entries
+    let (total_size, file_count) = entries
       .into_par_iter()
       .filter_map(|entry| fs::metadata(entry.path()).ok())
       .fold(
@@ -172,8 +171,8 @@ impl DashboardService {
       .reduce(|| (0u64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
 
     let summary = ScanSummaryModel {
-      totalSize,
-      fileCount,
+      total_size,
+      file_count,
     };
 
     Ok(
@@ -186,11 +185,11 @@ impl DashboardService {
     )
   }
 
-  pub fn getLargeFilesSummary(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_large_files_summary(&self) -> Result<ResponseModel, ResponseModel> {
     let home = home_dir().map_err(|_| "Home directory not found")?;
     let threshold = 100 * 1024 * 1024;
 
-    let dirsToScan = vec![
+    let dirs_to_scan = vec![
       home.join("Downloads"),
       home.join("Documents"),
       home.join("Videos"),
@@ -198,7 +197,7 @@ impl DashboardService {
       home.join("Desktop"),
     ];
 
-    let (totalSize, fileCount) = dirsToScan
+    let (total_size, file_count) = dirs_to_scan
       .into_par_iter()
       .map(|dir| {
         if !dir.exists() {
@@ -222,8 +221,8 @@ impl DashboardService {
       .reduce(|| (0u64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
 
     let summary = ScanSummaryModel {
-      totalSize,
-      fileCount,
+      total_size,
+      file_count,
     };
 
     Ok(

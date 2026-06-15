@@ -1,17 +1,5 @@
 /* services module */
 
-#[path = "apt.service.rs"]
-pub mod apt_service;
-
-#[path = "dnf.service.rs"]
-pub mod dnf_service;
-
-#[path = "pacman.service.rs"]
-pub mod pacman_service;
-
-#[path = "zypper.service.rs"]
-pub mod zypper_service;
-
 #[path = "automation.service.rs"]
 pub mod automation_service;
 

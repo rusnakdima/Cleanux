@@ -4,6 +4,7 @@ use crate::models::ResponseModel;
 use crate::services::report_service::{ReportCategories, ReportService};
 
 static REPORT_SERVICE: std::sync::OnceLock<ReportService> = std::sync::OnceLock::new();
+
 fn get_service() -> &'static ReportService {
   REPORT_SERVICE.get_or_init(|| {
     let svc = ReportService::new();

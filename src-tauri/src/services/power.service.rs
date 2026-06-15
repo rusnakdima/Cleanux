@@ -44,12 +44,6 @@ impl BatteryCache {
       });
     }
   }
-
-  fn clear(&self) {
-    if let Ok(mut guard) = self.data.lock() {
-      *guard = None;
-    }
-  }
 }
 
 static BATTERY_CACHE: std::sync::OnceLock<BatteryCache> = std::sync::OnceLock::new();
@@ -451,9 +445,5 @@ impl PowerService {
     }
 
     thermals
-  }
-
-  pub fn clear_cache() {
-    get_battery_cache().clear();
   }
 }

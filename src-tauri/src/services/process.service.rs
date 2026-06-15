@@ -13,9 +13,8 @@ pub struct ProcessItem {
   pub memory_usage: u64,
 }
 
-#[allow(non_snake_case)]
 impl ProcessService {
-  pub fn getProcesses() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_processes() -> Result<ResponseModel, ResponseModel> {
     Self::get_processes_inner().map_err(|e| e.into_response())
   }
 
@@ -47,7 +46,7 @@ impl ProcessService {
     })
   }
 
-  pub fn killProcess(pid: u32) -> Result<ResponseModel, ResponseModel> {
+  pub fn kill_process(pid: u32) -> Result<ResponseModel, ResponseModel> {
     Self::kill_process_inner(pid).map_err(|e| e.into_response())
   }
 

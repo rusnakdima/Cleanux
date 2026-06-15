@@ -10,6 +10,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
+/* response helper */
+use crate::models::ResponseModel;
+
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 
 pub fn home_dir() -> Result<PathBuf, AppError> {
@@ -104,7 +107,7 @@ pub fn collect_trash_file_models(trash_dir: &Path) -> Vec<TrashFileModel> {
         .to_string(),
       path: path.to_string_lossy().into_owned(),
       size: metadata.len(),
-      deletedDate: deleted_date.format("%Y-%m-%d %H:%M:%S").to_string(),
+      deleted_date: deleted_date.format("%Y-%m-%d %H:%M:%S").to_string(),
     })
   })
 }
@@ -278,6 +281,28 @@ pub fn get_dir_size(path: &Path) -> u64 {
   calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0)
 }
 
+pub fn clean_cache_dir(path: &Path, name: &str) -> Result<ResponseModel, AppError> {
+  use crate::helpers::response_helper::{data_string, success_response};
+
+  if !path.exists() {
+    return Ok(success_response(
+      format!("{} cache is empty", name),
+      data_string("0".to_string()),
+    ));
+  }
+
+  match remove_dir_contents(path) {
+    Ok(count) => Ok(success_response(
+      format!("Cleaned {} cache ({} items)", name, count),
+      data_string(count.to_string()),
+    )),
+    Err(e) => Err(AppError::message(format!(
+      "Failed to clean {} cache: {}",
+      name, e
+    ))),
+  }
+}
+
 pub fn format_size(bytes: u64) -> String {
   const KB: u64 = 1024;
   const MB: u64 = KB * 1024;
@@ -291,29 +316,5 @@ pub fn format_size(bytes: u64) -> String {
     format!("{:.2} KB", bytes as f64 / KB as f64)
   } else {
     format!("{} B", bytes)
-  }
-}
-
-use crate::helpers::response_helper::data_string;
-use crate::helpers::response_helper::success_response;
-use crate::models::ResponseModel;
-
-pub fn clean_cache_dir(path: &Path, name: &str) -> Result<ResponseModel, AppError> {
-  if !path.exists() {
-    return Ok(success_response(
-      format!("{} cache already clean", name),
-      data_string("0"),
-    ));
-  }
-
-  match remove_dir_contents(path) {
-    Ok(count) => Ok(success_response(
-      format!("Cleaned {} cache ({} items)", name, count),
-      data_string(count.to_string()),
-    )),
-    Err(e) => Err(AppError::message(format!(
-      "Failed to clean {} cache: {}",
-      name, e
-    ))),
   }
 }

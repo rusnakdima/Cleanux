@@ -54,17 +54,15 @@ pub struct LogFileModel {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[allow(non_snake_case)]
 pub struct TrashFileModel {
   pub name: String,
   pub path: String,
   pub size: u64,
-  pub deletedDate: String,
+  pub deleted_date: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-#[allow(non_snake_case)]
 pub struct ScanSummaryModel {
-  pub fileCount: usize,
-  pub totalSize: u64,
+  pub file_count: usize,
+  pub total_size: u64,
 }
