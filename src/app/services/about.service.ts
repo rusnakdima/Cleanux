@@ -8,7 +8,7 @@ import { environment } from '@env/environment';
 
 /* models */
 import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -21,7 +21,7 @@ const httpOptions = {
 })
 export class AboutService {
   private http = inject(HttpClient);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   gitRepoName: string = environment.gitRepoName;
   githubUser: string = environment.githubUser;

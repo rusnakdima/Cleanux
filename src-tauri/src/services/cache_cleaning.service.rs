@@ -7,8 +7,8 @@ use crate::models::{PaginatedData, ResponseModel};
 /* errors */
 use crate::models::AppError;
 
-use std::fs;
 use log;
+use std::fs;
 
 pub struct CacheCleaningService;
 
@@ -28,11 +28,20 @@ impl CacheCleaningService {
     limit: Option<usize>,
     offset: Option<usize>,
   ) -> CleanResult<ResponseModel> {
-    log::info!("Fetching cache files with limit: {:?}, offset: {:?}", limit, offset);
+    log::info!(
+      "Fetching cache files with limit: {:?}, offset: {:?}",
+      limit,
+      offset
+    );
     let cache_dir = dirs::cache_dir()
       .ok_or_else(|| AppError::InvalidPath("Cache directory not found".to_string()))?;
     let (files, has_more, total) = collect_cache_file_models(cache_dir, offset, limit);
-    log::info!("Found {} cache files (total: {}, has_more: {})", files.len(), total, has_more);
+    log::info!(
+      "Found {} cache files (total: {}, has_more: {})",
+      files.len(),
+      total,
+      has_more
+    );
     let paginated = PaginatedData::new(files, has_more, total);
     let data = serde_json::to_value(paginated)
       .map_err(|e| AppError::Unknown(format!("Failed to serialize cache data: {}", e)))?;
@@ -55,7 +64,11 @@ impl CacheCleaningService {
         data_empty_string(),
       ))
     } else {
-      log::error!("Cleared {} files, failed on: {}", outcome.cleared, outcome.errors.join("; "));
+      log::error!(
+        "Cleared {} files, failed on: {}",
+        outcome.cleared,
+        outcome.errors.join("; ")
+      );
       Err(
         AppError::Unknown(format!(
           "Cleared {} files, failed on: {}",
@@ -88,7 +101,7 @@ impl CacheCleaningService {
         Err(e) => {
           log::error!("Failed to clear cache directory: {}", e);
           Err(AppError::Io(e).into())
-        },
+        }
       }
     } else {
       log::info!("No cache to clear");

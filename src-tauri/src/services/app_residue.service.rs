@@ -511,7 +511,7 @@ impl AppResidueService {
           message: format!("Failed to remove {}: {}", path, e),
           data: DataValue::Bool(false),
         })
-      },
+      }
     }
   }
 
@@ -537,11 +537,11 @@ impl AppResidueService {
         Ok(_) => {
           log::debug!("Removed: {}", path);
           removed += 1
-        },
+        }
         Err(e) => {
           log::error!("Failed to remove {}: {}", path, e);
           failed.push(format!("{}: {}", path, e))
-        },
+        }
       }
     }
 

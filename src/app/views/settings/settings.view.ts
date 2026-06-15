@@ -20,7 +20,7 @@ import { environment } from '@env/environment';
 
 /* services */
 import { AboutService } from '@services/about.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 import { SchedulerService } from '@services/scheduler.service';
 import { ThemeService, ThemeMode } from '@services/theme.service';
 import { NotificationService } from '@services/notification.service';
@@ -44,7 +44,7 @@ import { ScheduleConfig, defaultScheduleConfig } from '@models/schedule.model';
 export class SettingsView implements OnDestroy {
   themeService = inject(ThemeService);
   private notification = inject(NotificationService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
   private toastService = inject(ToastService);
   private aboutService = inject(AboutService);
   private schedulerService = inject(SchedulerService);
@@ -200,10 +200,14 @@ export class SettingsView implements OnDestroy {
   }
 
   get loggingEnabled() {
-    return this.loggingService.enabled();
+    return (
+      this.loggingService.consoleOutput ||
+      this.loggingService.memoryOutput ||
+      this.loggingService.fileOutput
+    );
   }
   get loggingLevel() {
-    return this.loggingService.minLevel();
+    return 'info';
   }
   get levelConfig(): Record<string, boolean> {
     return { debug: true, info: true, warn: true, error: true, success: true };

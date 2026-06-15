@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 export interface KernelInfo {
   version: string;
@@ -32,7 +32,7 @@ export interface RemoveResult {
 })
 export class KernelCleanerService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('KernelCleanerService initialized');
@@ -90,7 +90,10 @@ export class KernelCleanerService {
     this.loggingService.info('Removing kernel', { version });
     try {
       const result = await this.api.invoke<RemoveResult>('remove_kernel', { version });
-      this.loggingService.info('Kernel removed', { removed: result.removed.length, failed: result.failed.length });
+      this.loggingService.info('Kernel removed', {
+        removed: result.removed.length,
+        failed: result.failed.length,
+      });
       return result;
     } catch (error) {
       this.loggingService.error('Operation failed', error as Error, { version });
@@ -114,7 +117,10 @@ export class KernelCleanerService {
     this.loggingService.info('Removing initramfs', { version });
     try {
       const result = await this.api.invoke<RemoveResult>('remove_initramfs', { version });
-      this.loggingService.info('Initramfs removed', { removed: result.removed.length, failed: result.failed.length });
+      this.loggingService.info('Initramfs removed', {
+        removed: result.removed.length,
+        failed: result.failed.length,
+      });
       return result;
     } catch (error) {
       this.loggingService.error('Operation failed', error as Error, { version });

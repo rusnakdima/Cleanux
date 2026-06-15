@@ -5,7 +5,7 @@ import { BackupService } from '@features/backup/services/backup.service';
 import { PackageManagerService } from '@services/package-manager.service';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 import {
   CacheFileItem,
   TrashFileItem,
@@ -25,7 +25,7 @@ export class CleanerStore {
   private packageManagerService = inject(PackageManagerService);
   private notification = inject(NotificationService);
   private confirmDialogService = inject(ConfirmDialogService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   readonly cacheData = signal<CacheFileItem[]>([]);
   readonly filteredCacheData = signal<CacheFileItem[]>([]);
@@ -348,7 +348,9 @@ export class CleanerStore {
       await this.backupService.createBackup(filesToClear, archivePath);
       backupCreated = true;
     } catch (error) {
-      this.loggingService.warn('Failed to create backup, proceeding with deletion', { error: error instanceof Error ? error.message : String(error) });
+      this.loggingService.warn('Failed to create backup, proceeding with deletion', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     try {

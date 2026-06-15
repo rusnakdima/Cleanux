@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
 /* services */
 import { MonitorStore } from '@stores/monitor.store';
 import { PowerService } from '@features/power/services/power.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 import { BatteryInfo, PowerProfile, ThermalInfo } from '@models/power.model';
 
 @Component({
@@ -24,7 +24,7 @@ import { BatteryInfo, PowerProfile, ThermalInfo } from '@models/power.model';
 export class PowerView implements OnInit {
   protected monitorStore = inject(MonitorStore);
   private powerService = inject(PowerService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   batteryInfo = signal<BatteryInfo | null>(null);
   powerProfiles = signal<PowerProfile[]>([]);

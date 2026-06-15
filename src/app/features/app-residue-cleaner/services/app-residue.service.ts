@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 export interface AppResidue {
   path: string;
@@ -36,7 +36,7 @@ export interface AppResidueSummary {
 })
 export class AppResidueService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('AppResidueService initialized');

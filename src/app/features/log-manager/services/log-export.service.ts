@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LogEntry, LogFilter, LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LogEntry, LogFilter, LoggerService } from '@services/logger.service';
 import { LogStorageService } from '@services/log-storage.service';
 
 export interface LogStats {
@@ -38,12 +38,10 @@ export interface ProblemEntry {
   providedIn: 'root',
 })
 export class LogExportService {
-  private loggingService: LoggingService;
+  private loggingService: LoggerService;
 
-  constructor(
-    private storage: LogStorageService
-  ) {
-    this.loggingService = getLoggingService();
+  constructor(private storage: LogStorageService) {
+    this.loggingService = new LoggerService();
   }
 
   async exportToJson(filter?: LogFilter): Promise<string> {
@@ -53,14 +51,12 @@ export class LogExportService {
 
   async exportToCsv(filter?: LogFilter): Promise<string> {
     const logs = await this.storage.getLogs(filter, 10000);
-    const headers = ['timestamp', 'level', 'source', 'view', 'method', 'message', 'data', 'error'];
+    const headers = ['timestamp', 'level', 'source', 'message', 'data', 'error'];
     const rows = logs.map((log) =>
       [
         log.timestamp,
         log.level,
         log.source,
-        log.view || '',
-        log.method || '',
         `"${log.message.replace(/"/g, '""')}"`,
         log.data ? `"${JSON.stringify(log.data).replace(/"/g, '""')}"` : '',
         log.error ? `"${log.error.message.replace(/"/g, '""')}"` : '',
@@ -88,8 +84,6 @@ export class LogExportService {
                 : 'bg-gray-500 text-white'
         }">${log.level}</span></td>
         <td>${log.source}</td>
-        <td>${log.view || '-'}</td>
-        <td>${log.method || '-'}</td>
         <td>${log.message}</td>
         <td>${log.error ? `<pre class="text-red-500">${log.error.message}</pre>` : '-'}</td>
       </tr>
@@ -128,8 +122,6 @@ export class LogExportService {
         <th>Timestamp</th>
         <th>Level</th>
         <th>Source</th>
-        <th>View</th>
-        <th>Method</th>
         <th>Message</th>
         <th>Error</th>
       </tr>
@@ -157,7 +149,10 @@ export class LogExportService {
       const data = this.decompress(compressed);
       return JSON.parse(data);
     } catch {
-      this.loggingService.error('[LogExport] Failed to parse shareable link', new Error('parse error'));
+      this.loggingService.error(
+        '[LogExport] Failed to parse shareable link',
+        new Error('parse error')
+      );
       return null;
     }
   }
@@ -224,7 +219,8 @@ export class LogExportService {
     const warnings = logs.filter((l) => l.level === 'warn');
     const bySource: Record<string, number> = {};
     for (const log of logs) {
-      bySource[log.source] = (bySource[log.source] || 0) + 1;
+      const source = log.source || 'unknown';
+      bySource[source] = (bySource[source] || 0) + 1;
     }
 
     const groupedErrors = this.groupErrors(errors);
@@ -259,17 +255,18 @@ export class LogExportService {
   }
 
   private getErrorKey(error: LogEntry): string {
-    const method = error.method || 'unknown';
-    const message = error.error?.message || error.message;
+    const errorObj = error.error as { message?: string } | undefined;
+    const message = errorObj?.message || error.message;
     const firstLine = message.split('\n')[0].substring(0, 100);
-    return `${method}:${firstLine}`;
+    return `${error.source || 'unknown'}:${firstLine}`;
   }
 
   private analyzeErrorGroup(group: LogEntry[]): ProblemEntry {
     const first = group[0];
     const last = group[group.length - 1];
-    const method = first.method || 'unknown';
-    const message = first.error?.message || first.message;
+    const method = first.source || 'unknown';
+    const firstError = first.error as { message?: string } | undefined;
+    const message = firstError?.message || first.message;
 
     let severity: 'critical' | 'high' | 'medium' | 'low' = 'medium';
     if (group.length > 10) severity = 'critical';
@@ -285,8 +282,8 @@ export class LogExportService {
       operation: method,
       errorMessage: message.substring(0, 200),
       occurrences: group.length,
-      firstOccurrence: first.timestamp.toISOString(),
-      lastOccurrence: last.timestamp.toISOString(),
+      firstOccurrence: first.timestamp,
+      lastOccurrence: last.timestamp,
       possibleCause: possibleCauses[0],
       suggestedAction: suggestedActions[0],
     };

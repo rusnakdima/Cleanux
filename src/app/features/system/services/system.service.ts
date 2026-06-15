@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 /* models */
 import { SystemServiceItem, ProcessItem } from '@models/system.model';
@@ -15,7 +15,7 @@ export type { SystemServiceItem, ProcessItem } from '@models/system.model';
 })
 export class SystemService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('SystemService initialized');

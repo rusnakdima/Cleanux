@@ -125,7 +125,7 @@ export class UserInteractionService {
 
   setCurrentView(view: string): void {
     if (this.currentView() !== view) {
-      this.logger.logInfo('user', view, 'viewChange', 'View changed to: ' + view);
+      this.logger.logInfo('user', 'View changed to: ' + view);
       this.currentView.set(view);
     }
   }
@@ -150,10 +150,7 @@ export class UserInteractionService {
 
     this.logger.logInfo(
       'user',
-      action.view,
-      action.action,
-      'User ' + action.type + ': ' + action.action,
-      action.metadata
+      'User ' + action.type + ': ' + action.action + ' in ' + action.view
     );
   }
 }

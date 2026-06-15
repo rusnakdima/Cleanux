@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 /* models */
 import { ScheduleConfig } from '@models/schedule.model';
@@ -13,7 +13,7 @@ import { ScheduleConfig } from '@models/schedule.model';
 })
 export class SchedulerService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('SchedulerService initialized');

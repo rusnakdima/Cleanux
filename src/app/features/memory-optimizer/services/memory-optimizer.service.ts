@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 /* models */
 import { MemoryInfo, SwapInfo, ProcessMemory } from '@models/memory.model';
@@ -13,7 +13,7 @@ import { MemoryInfo, SwapInfo, ProcessMemory } from '@models/memory.model';
 })
 export class MemoryOptimizerService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('MemoryOptimizerService initialized');

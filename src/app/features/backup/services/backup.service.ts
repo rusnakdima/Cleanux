@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 export interface BackupItem {
   name: string;
@@ -17,7 +17,7 @@ export interface BackupItem {
 })
 export class BackupService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('BackupService initialized');

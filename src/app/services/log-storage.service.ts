@@ -11,8 +11,6 @@ interface StoredLog {
   timestamp: string;
   level: string;
   source: string;
-  view?: string;
-  method?: string;
   message: string;
   data?: unknown;
   error?: { message: string; stack?: string };
@@ -79,14 +77,12 @@ export class LogStorageService {
 
     const stored: StoredLog = {
       id: entry.id,
-      timestamp: entry.timestamp.toISOString(),
+      timestamp: entry.timestamp,
       level: entry.level,
-      source: entry.source,
-      view: entry.view,
-      method: entry.method,
+      source: entry.source || '',
       message: entry.message,
       data: entry.data,
-      error: entry.error,
+      error: entry.error as { message: string; stack?: string } | undefined,
     };
 
     return new Promise((resolve, reject) => {
@@ -138,7 +134,12 @@ export class LogStorageService {
           deleted++;
           cursor.continue();
         } else {
-          this.logger.logDebug('service', undefined, 'cleanup', `[LogStorage] Cleaned up ${deleted} old log entries`);
+          this.logger.logDebug(
+            'service',
+            undefined,
+            'cleanup',
+            `[LogStorage] Cleaned up ${deleted} old log entries`
+          );
           resolve();
         }
       };
@@ -188,8 +189,6 @@ export class LogStorageService {
 
     if (filter.level && log.level !== filter.level) return false;
     if (filter.source && log.source !== filter.source) return false;
-    if (filter.view && log.view !== filter.view) return false;
-    if (filter.method && log.method !== filter.method) return false;
 
     if (filter.search) {
       const search = filter.search.toLowerCase();

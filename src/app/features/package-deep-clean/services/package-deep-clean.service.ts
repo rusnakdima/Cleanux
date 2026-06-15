@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 export interface PackageManagerSummary {
   aptAvailable: boolean;
@@ -38,7 +38,7 @@ export interface DeepCleanResponse {
 })
 export class PackageDeepCleanService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   readonly summary = signal<PackageManagerSummary | null>(null);
   readonly orphanedPackages = signal<OrphanedPackage[]>([]);
@@ -71,7 +71,9 @@ export class PackageDeepCleanService {
     try {
       const response = await this.api.invoke<DeepCleanResponse>('deep_clean_all');
       await this.getPackageSummary();
-      this.loggingService.info('Deep clean completed', { totalSpaceFreed: response.totalSpaceFreed });
+      this.loggingService.info('Deep clean completed', {
+        totalSpaceFreed: response.totalSpaceFreed,
+      });
       return response;
     } catch (error) {
       this.loggingService.error('Operation failed', error as Error);

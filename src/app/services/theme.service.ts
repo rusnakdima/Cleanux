@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Injectable, signal, effect, inject } from '@angular/core';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 import {
   ACCENT_COLORS,
   DEFAULT_ACCENT_COLOR,
@@ -43,7 +43,7 @@ const DEFAULT_THEME: ThemeConfig = {
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly STORAGE_KEY = 'cleanux_theme';
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   currentTheme = signal<ThemeConfig>(this.loadTheme());
   accentColors = signal<string[]>([...ACCENT_COLORS]);

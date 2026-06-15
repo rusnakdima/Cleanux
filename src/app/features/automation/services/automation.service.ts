@@ -6,7 +6,7 @@ import {
   AutomationRecipe,
   ExecutionHistoryEntry,
 } from '@models/automation.model';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry };
 
@@ -15,7 +15,7 @@ export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry }
 })
 export class AutomationService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('AutomationService initialized');

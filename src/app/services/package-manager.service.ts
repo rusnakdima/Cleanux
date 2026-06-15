@@ -3,7 +3,7 @@ import { Injectable, signal, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from './api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 /* models */
 import { PackageCacheInfo } from '@models/package-manager.model';
@@ -13,7 +13,7 @@ import { PackageCacheInfo } from '@models/package-manager.model';
 })
 export class PackageManagerService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   readonly cacheInfo = signal<PackageCacheInfo[]>([]);
   readonly loading = signal(false);

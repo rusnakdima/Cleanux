@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 /* models */
 import { DuplicateGroup, DuplicateScanResult } from '@models/duplicate.model';
@@ -13,7 +13,7 @@ import { DuplicateGroup, DuplicateScanResult } from '@models/duplicate.model';
 })
 export class DuplicateService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('DuplicateService initialized');

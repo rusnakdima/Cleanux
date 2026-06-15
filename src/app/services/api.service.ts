@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* api */
 import { TauriApiService, ApiException } from '@api/tauri-api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 /* models */
 import { Response, getData } from '@models/response.model';
@@ -15,7 +15,7 @@ export { ApiException } from '@models/error.model';
 })
 export class ApiService {
   private tauriApi = inject(TauriApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('ApiService initialized');

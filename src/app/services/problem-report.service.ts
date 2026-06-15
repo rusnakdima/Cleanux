@@ -67,13 +67,7 @@ export class ProblemReportService {
     this.lastReport.set(report);
     localStorage.setItem('cleanux_last_report', JSON.stringify(report));
 
-    this.logger.logInfo(
-      'service',
-      undefined,
-      'ProblemReportService',
-      '[ProblemReport] Auto-generated report',
-      { errors: report.summary.errors, problems: report.problems.length }
-    );
+    this.logger.logInfo('service', '[ProblemReport] Auto-generated report');
 
     return report;
   }
@@ -139,7 +133,7 @@ export class ProblemReportService {
     const sources: Record<string, number> = {};
 
     for (const error of errors) {
-      const source = error.source + (error.view ? ':' + error.view : '');
+      const source = error.source || 'unknown';
       sources[source] = (sources[source] || 0) + 1;
     }
 

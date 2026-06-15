@@ -51,7 +51,7 @@ impl KernelCleanerService {
       _ => {
         log::warn!("Failed to get current kernel version");
         String::new()
-      },
+      }
     }
   }
 
@@ -239,7 +239,11 @@ impl KernelCleanerService {
 
     if failed_items.is_empty() {
       let _ = self.update_grub_internal();
-      log::info!("Successfully removed kernel {} ({} items removed)", version, removed_items.len());
+      log::info!(
+        "Successfully removed kernel {} ({} items removed)",
+        version,
+        removed_items.len()
+      );
 
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -469,7 +473,7 @@ impl KernelCleanerService {
           message: format!("Failed to execute GRUB update: {}", e),
           data: DataValue::Bool(false),
         })
-      },
+      }
     }
   }
 

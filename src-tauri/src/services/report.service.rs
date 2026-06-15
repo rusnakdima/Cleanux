@@ -57,7 +57,11 @@ impl ReportService {
 
     let db_path = cleanux_dir.join("reports.db");
 
-    log::info!("ReportService initialized with db_path: {:?}, reports_dir: {:?}", db_path, reports_dir);
+    log::info!(
+      "ReportService initialized with db_path: {:?}, reports_dir: {:?}",
+      db_path,
+      reports_dir
+    );
     Self {
       db_path,
       reports_dir,
@@ -97,7 +101,11 @@ impl ReportService {
     duration: f64,
     categories: ReportCategories,
   ) -> SqlResult<i64> {
-    log::info!("Generating cleaning report: {} items, {} bytes reclaimed", items_cleaned, space_reclaimed);
+    log::info!(
+      "Generating cleaning report: {} items, {} bytes reclaimed",
+      items_cleaned,
+      space_reclaimed
+    );
     let conn = Connection::open(&self.db_path)?;
     let date = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -221,7 +229,7 @@ impl ReportService {
         Err(rusqlite::Error::InvalidParameterName(
           "Report not found".to_string(),
         ))
-      },
+      }
     }
   }
 
@@ -325,7 +333,11 @@ impl ReportService {
   }
 
   pub fn compare_snapshots(&self, before_id: i64, after_id: i64) -> SqlResult<SnapshotComparison> {
-    log::info!("Comparing snapshots: before_id={}, after_id={}", before_id, after_id);
+    log::info!(
+      "Comparing snapshots: before_id={}, after_id={}",
+      before_id,
+      after_id
+    );
     let before = self.get_report_by_id(before_id)?;
     let after = self.get_report_by_id(after_id)?;
 
@@ -335,7 +347,11 @@ impl ReportService {
         let items_cleaned = a.items_cleaned.saturating_sub(b.items_cleaned);
         let health_improvement = 0.0;
 
-        log::info!("Snapshot comparison complete: {} bytes, {} items difference", space_reclaimed, items_cleaned);
+        log::info!(
+          "Snapshot comparison complete: {} bytes, {} items difference",
+          space_reclaimed,
+          items_cleaned
+        );
         Ok(SnapshotComparison {
           before_id,
           after_id,
@@ -351,11 +367,15 @@ impl ReportService {
         })
       }
       _ => {
-        log::error!("Failed to compare snapshots - one or both reports not found (before={}, after={})", before_id, after_id);
+        log::error!(
+          "Failed to compare snapshots - one or both reports not found (before={}, after={})",
+          before_id,
+          after_id
+        );
         Err(rusqlite::Error::InvalidParameterName(
           "One or both reports not found".to_string(),
         ))
-      },
+      }
     }
   }
 }

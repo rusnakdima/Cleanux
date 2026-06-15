@@ -32,7 +32,10 @@ impl HealthHistoryService {
     let cleanux_dir = config_dir.join("cleanux");
     std::fs::create_dir_all(&cleanux_dir).ok();
     let db_path = cleanux_dir.join("health_history.db");
-    log::info!("HealthHistoryService initialized with db_path: {:?}", db_path);
+    log::info!(
+      "HealthHistoryService initialized with db_path: {:?}",
+      db_path
+    );
     Self { db_path }
   }
 
@@ -60,7 +63,10 @@ impl HealthHistoryService {
   }
 
   pub fn save_health_snapshot(&self, snapshot: HealthSnapshot) -> SqlResult<i64> {
-    log::info!("Saving health snapshot with score: {}", snapshot.health_score);
+    log::info!(
+      "Saving health snapshot with score: {}",
+      snapshot.health_score
+    );
     let conn = Connection::open(&self.db_path)?;
     conn.execute(
             "INSERT INTO health_snapshots (timestamp, health_score, cache_size, trash_size, log_size, large_files_count)
@@ -117,7 +123,10 @@ impl HealthHistoryService {
     let history = self.get_health_history(days)?;
 
     if history.len() < 2 {
-      log::warn!("Insufficient data for trend calculation, found {} snapshots", history.len());
+      log::warn!(
+        "Insufficient data for trend calculation, found {} snapshots",
+        history.len()
+      );
       return Ok(HealthTrend {
         trend: "insufficient_data".to_string(),
         change_percent: 0.0,
@@ -142,7 +151,11 @@ impl HealthHistoryService {
       "stable"
     };
 
-    log::info!("Health trend calculated: {} ({:.2}%)", trend, change_percent);
+    log::info!(
+      "Health trend calculated: {} ({:.2}%)",
+      trend,
+      change_percent
+    );
     Ok(HealthTrend {
       trend: trend.to_string(),
       change_percent,

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from './api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 /* models */
 import { HealthSnapshot, HealthTrend } from '@models/health-history.model';
@@ -13,7 +13,7 @@ import { HealthSnapshot, HealthTrend } from '@models/health-history.model';
 })
 export class HealthHistoryService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('HealthHistoryService initialized');

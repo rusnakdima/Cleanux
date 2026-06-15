@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 /* models */
 import { JunkCategorySummary, JunkItem } from '@models/junk-cleaner.model';
@@ -13,7 +13,7 @@ import { JunkCategorySummary, JunkItem } from '@models/junk-cleaner.model';
 })
 export class JunkCleanerService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('JunkCleanerService initialized');

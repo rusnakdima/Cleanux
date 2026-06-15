@@ -389,5 +389,4 @@ impl TemperatureService {
       })
     }
   }
-
 }

@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
 import { CleaningProfile, createEmptyProfile } from '@models/profile.model';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProfileService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('ProfileService initialized');

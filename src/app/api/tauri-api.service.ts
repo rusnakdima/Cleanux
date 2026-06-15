@@ -4,7 +4,7 @@ import { listen, UnlistenFn } from '@tauri-apps/api/event';
 import { Response, getData } from '@models/response.model';
 import { ApiException } from '@models/error.model';
 import { getErrorMessage } from '@shared/utils/error.util';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 import { DEFAULT_TIMEOUT_MS } from '@shared/utils/constants';
 
 export interface InvokeOptions {
@@ -16,7 +16,7 @@ export interface InvokeOptions {
   providedIn: 'root',
 })
 export class TauriApiService {
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   async invoke<T>(
     command: string,

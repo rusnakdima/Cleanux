@@ -9,8 +9,8 @@ use crate::models::{ResponseModel, TrashFileModel};
 /* errors */
 use crate::models::AppError;
 
-use std::fs;
 use log;
+use std::fs;
 
 pub struct TrashCleaningService;
 
@@ -41,7 +41,11 @@ impl TrashCleaningService {
         data_empty_string(),
       ))
     } else {
-      log::error!("Cleared {} files, failed on: {}", outcome.cleared, outcome.errors.join("; "));
+      log::error!(
+        "Cleared {} files, failed on: {}",
+        outcome.cleared,
+        outcome.errors.join("; ")
+      );
       Err(
         AppError::Unknown(format!(
           "Cleared {} files, failed on: {}",
@@ -78,7 +82,7 @@ impl TrashCleaningService {
       Err(e) => {
         log::error!("Failed to read trash directory: {}", e);
         Err(AppError::Io(e).into_response())
-      },
+      }
     }
   }
 }

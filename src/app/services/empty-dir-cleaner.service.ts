@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 import { EmptyDirectory } from '@components/empty-dir-cleaner/empty-dir-cleaner.component';
 
 export interface RemoveResult {
@@ -14,7 +14,7 @@ export interface RemoveResult {
 })
 export class EmptyDirCleanerService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('EmptyDirCleanerService initialized');
@@ -52,7 +52,10 @@ export class EmptyDirCleanerService {
     this.loggingService.info('Removing empty directories', { count: paths.length });
     try {
       const result = await this.api.invoke<RemoveResult>('remove_empty_directories', { paths });
-      this.loggingService.info('Empty directories removed', { removed: result.removed, failed: result.failed.length });
+      this.loggingService.info('Empty directories removed', {
+        removed: result.removed,
+        failed: result.failed.length,
+      });
       return result;
     } catch (error) {
       this.loggingService.error('Operation failed', error as Error, { paths });

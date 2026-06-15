@@ -1,7 +1,7 @@
 import { signal, inject } from '@angular/core';
 import { NotificationService } from '@services/notification.service';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 export interface RunWithLoadingOptions {
   errorMessage?: string;
@@ -12,7 +12,7 @@ export interface RunWithLoadingOptions {
 export abstract class LoadingErrorMixin {
   protected notification = inject(NotificationService);
   protected confirmDialogService = inject(ConfirmDialogService);
-  protected loggingService = getLoggingService();
+  protected loggingService = new LoggerService();
 
   loading = signal(false);
 

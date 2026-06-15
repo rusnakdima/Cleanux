@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 import { StartupItem } from '@models/startup.model';
 
 @Injectable({
@@ -8,7 +8,7 @@ import { StartupItem } from '@models/startup.model';
 })
 export class StartupService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   constructor() {
     this.loggingService.info('StartupService initialized');

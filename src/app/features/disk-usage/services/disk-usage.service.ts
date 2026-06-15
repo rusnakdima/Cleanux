@@ -3,7 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 
 /* services */
 import { ApiService } from '@services/api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 
 /* models */
 import { DirectoryNode, TreemapItem } from '@views/disk-usage/disk-usage.view';
@@ -18,7 +18,7 @@ interface ScanResult {
 })
 export class DiskUsageService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   private _originalTree = signal<DirectoryNode | null>(null);
   private _currentNode = signal<DirectoryNode | null>(null);
@@ -47,7 +47,10 @@ export class DiskUsageService {
       this._breadcrumbs.set([{ name: result.tree.name, path: result.tree.path }]);
       this.calculateTreemap(result.tree);
 
-      this.loggingService.info('Directory scanned successfully', { path, totalSize: result.totalSize });
+      this.loggingService.info('Directory scanned successfully', {
+        path,
+        totalSize: result.totalSize,
+      });
       return result;
     } catch (error) {
       this.loggingService.error('Operation failed', error as Error, { path });

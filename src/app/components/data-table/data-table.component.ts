@@ -35,7 +35,10 @@ import { TableColumn, TableOptions, TableAction, RowActionEvent } from '@models/
 import { formatSize } from '@shared/utils/format.util';
 import { CheckboxComponent } from '@shared/checkbox';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
-import { SIZE_DANGER_THRESHOLD, SIZE_WARNING_THRESHOLD } from '@shared/constants/size-thresholds.constants';
+import {
+  SIZE_DANGER_THRESHOLD,
+  SIZE_WARNING_THRESHOLD,
+} from '@shared/constants/size-thresholds.constants';
 
 @Component({
   selector: 'app-data-table',

@@ -1,14 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { getErrorMessage } from '@shared/utils/error.util';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationService {
-  private loggingService = getLoggingService();
+  private loggingService: LoggerService;
 
   constructor() {
+    this.loggingService = new LoggerService();
     this.loggingService.info('NotificationService initialized');
   }
 

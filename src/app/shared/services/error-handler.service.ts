@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import { ToastService } from '@shared/toast';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from '@services/logger.service';
 import { getErrorMessage } from '@shared/utils/error.util';
 
 export enum ErrorCode {
@@ -50,7 +50,7 @@ export interface ErrorLogEntry {
 })
 export class ErrorHandlerService {
   private toastService = inject(ToastService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
   private destroyRef = inject(DestroyRef);
 
   private errorsSignal = signal<AppError[]>([]);
@@ -144,33 +144,72 @@ export class ErrorHandlerService {
           retryable: true,
         };
       case 400:
-        return this.parseErrorResponse(error, ErrorCode.VALIDATION_ERROR, 'Invalid request. Please check your input.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.VALIDATION_ERROR,
+          'Invalid request. Please check your input.'
+        );
       case 401:
-        return this.parseErrorResponse(error, ErrorCode.UNAUTHORIZED, 'Authentication required. Please log in.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.UNAUTHORIZED,
+          'Authentication required. Please log in.'
+        );
       case 403:
-        return this.parseErrorResponse(error, ErrorCode.FORBIDDEN, "You don't have permission to perform this action.");
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.FORBIDDEN,
+          "You don't have permission to perform this action."
+        );
       case 404:
-        return this.parseErrorResponse(error, ErrorCode.NOT_FOUND, 'The requested resource was not found.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.NOT_FOUND,
+          'The requested resource was not found.'
+        );
       case 408:
-        return this.parseErrorResponse(error, ErrorCode.TIMEOUT, 'Request timed out. Please try again.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.TIMEOUT,
+          'Request timed out. Please try again.'
+        );
       case 500:
-        return this.parseErrorResponse(error, ErrorCode.SERVER_ERROR, 'Server error. Please try again later.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.SERVER_ERROR,
+          'Server error. Please try again later.'
+        );
       case 502:
       case 503:
       case 504:
-        return this.parseErrorResponse(error, ErrorCode.SERVER_ERROR, 'Service temporarily unavailable. Please try again later.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.SERVER_ERROR,
+          'Service temporarily unavailable. Please try again later.'
+        );
       default:
-        return this.parseErrorResponse(error, ErrorCode.UNKNOWN, 'An error occurred. Please try again.');
+        return this.parseErrorResponse(
+          error,
+          ErrorCode.UNKNOWN,
+          'An error occurred. Please try again.'
+        );
     }
   }
 
-  private parseErrorResponse(error: HttpErrorResponse, defaultCode: ErrorCode, defaultMessage: string): AppError {
+  private parseErrorResponse(
+    error: HttpErrorResponse,
+    defaultCode: ErrorCode,
+    defaultMessage: string
+  ): AppError {
     let userMessage = defaultMessage;
     let details: string | undefined;
     let code = defaultCode;
 
     if (error.error) {
-      const errorResp = error.error as { error?: { message?: string; details?: string }; message?: string };
+      const errorResp = error.error as {
+        error?: { message?: string; details?: string };
+        message?: string;
+      };
       if (errorResp.error?.message) {
         userMessage = errorResp.error.message;
       } else if (errorResp.message) {
@@ -190,7 +229,11 @@ export class ErrorHandlerService {
     };
   }
 
-  async retry<T>(operation: () => Promise<T>, config: Partial<RetryConfig> = {}, context?: string): Promise<T> {
+  async retry<T>(
+    operation: () => Promise<T>,
+    config: Partial<RetryConfig> = {},
+    context?: string
+  ): Promise<T> {
     const { maxAttempts, delayMs, backoffMultiplier } = { ...DEFAULT_RETRY_CONFIG, ...config };
 
     let lastError: AppError | null = null;
@@ -226,6 +269,9 @@ export class ErrorHandlerService {
     this.logsSignal.update((logs) => [entry, ...logs].slice(0, 100));
     this.errorsSignal.update((errors) => [error, ...errors].slice(0, 100));
 
-    this.loggingService.error(error.message, error.originalError as Error, { code: error.code, context });
+    this.loggingService.error(error.message, error.originalError as Error, {
+      code: error.code,
+      context,
+    });
   }
 }

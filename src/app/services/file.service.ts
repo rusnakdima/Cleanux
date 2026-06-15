@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 
 /* services */
 import { ApiService } from './api.service';
-import { LoggingService, getLoggingService } from '@tauri-apps/logger';
+import { LoggerService } from './logger.service';
 
 /* models */
 import {
@@ -37,7 +37,7 @@ export interface FilePreviewResult {
 })
 export class FileService {
   private api = inject(ApiService);
-  private loggingService = getLoggingService();
+  private loggingService = new LoggerService();
 
   private inFlightRequests = new Map<string, Promise<unknown>>();
   private abortController: AbortController | null = null;
