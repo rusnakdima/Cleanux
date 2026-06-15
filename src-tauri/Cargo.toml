@@ -33,7 +33,6 @@ flate2 = "1.0"
 rusqlite = { version = "0.32", features = ["bundled"] }
 log = "0.4"
 tauri-logger = { git = "https://github.com/rusnakdima/tauri-logger.git", branch = "main", features = ["tauri"] }
-nosql_orm = { git = "https://github.com/rusnakdima/nosql_orm", branch = "main", features = ["json"] }
 tokio = { version = "1", features = ["rt"] }
 
 [features]
