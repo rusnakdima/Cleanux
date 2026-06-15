@@ -69,7 +69,7 @@ impl TrashCleaningService {
           if path.is_file() {
             if let Err(e) = fs::remove_file(&path) {
               log::error!("Failed to remove file from trash: {}", e);
-              return Err(AppError::Io(e).into_response());
+              return Err(AppError::from(e).into_response());
             }
           }
         }
@@ -81,7 +81,7 @@ impl TrashCleaningService {
       }
       Err(e) => {
         log::error!("Failed to read trash directory: {}", e);
-        Err(AppError::Io(e).into_response())
+        Err(AppError::from(e).into_response())
       }
     }
   }

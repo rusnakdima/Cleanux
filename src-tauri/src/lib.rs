@@ -2,75 +2,22 @@
 pub mod commands;
 pub mod errors;
 pub mod helpers;
+pub mod logger;
 pub mod models;
 pub mod security;
 pub mod services;
-
-use tauri::Manager;
-use tauri_logger::{init_file_logger, log_error, log_warn, FileLogger, LogFileInfo};
 
 use commands::{
   cleaner_command, dashboard_command, log_command, monitor_command, package_command,
   profile_command, report_command, storage_command, system_command,
 };
 
-#[tauri::command]
-async fn write_log_to_file(
-  state: tauri::State<'_, AppState>,
-  level: String,
-  message: String,
-  source: String,
-) -> Result<(), String> {
-  state.file_logger.write_log(&level, &source, &message)
-}
-
-#[tauri::command]
-async fn get_log_file_info(state: tauri::State<'_, AppState>) -> Result<LogFileInfo, String> {
-  let path = state
-    .file_logger
-    .get_log_file_path()
-    .ok_or("Log file not initialized")?;
-
-  let metadata =
-    std::fs::metadata(&path).map_err(|e| format!("Failed to get log file metadata: {}", e))?;
-
-  let created_at = metadata
-    .created()
-    .ok()
-    .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-    .map(|d| chrono::DateTime::from_timestamp(d.as_secs() as i64, 0))
-    .flatten()
-    .map(|dt| dt.to_rfc3339())
-    .unwrap_or_default();
-
-  Ok(LogFileInfo {
-    path: path.to_string_lossy().to_string(),
-    name: path
-      .file_name()
-      .map(|n| n.to_string_lossy().to_string())
-      .unwrap_or_default(),
-    size: metadata.len(),
-    created_at,
-  })
-}
-
-pub struct AppState {
-  pub file_logger: FileLogger,
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+  logger::init_logger();
   tauri::Builder::default()
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_opener::init())
-    .setup(|app| {
-      let file_logger = init_file_logger(&app.handle()).unwrap_or_else(|e| {
-        log_warn!("Failed to initialize file logger: {}", e);
-        FileLogger::new()
-      });
-      app.manage(AppState { file_logger });
-      Ok(())
-    })
     .invoke_handler(tauri::generate_handler![
       dashboard_command::get_system_services,
       dashboard_command::get_cache_summary,
@@ -203,12 +150,10 @@ pub fn run() {
       report_command::get_cleaning_history,
       report_command::export_to_html,
       report_command::compare_snapshots,
-      write_log_to_file,
-      get_log_file_info,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {
-      log_error!("error while running tauri application: {}", e);
+      log::error!("error while running tauri application: {}", e);
       std::process::exit(1);
     });
 }

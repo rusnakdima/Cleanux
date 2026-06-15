@@ -479,19 +479,19 @@ impl KernelCleanerService {
 
   pub fn get_installed_kernels_response(&self) -> Result<ResponseModel, ResponseModel> {
     let kernels = self.get_installed_kernels();
-    let data = models_into_data_array(kernels).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response("Installed kernels retrieved", data))
   }
 
   pub fn get_old_kernels_response(&self) -> Result<ResponseModel, ResponseModel> {
     let kernels = self.get_old_kernels();
-    let data = models_into_data_array(kernels).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response("Old kernels retrieved", data))
   }
 
   pub fn get_old_initramfs_response(&self) -> Result<ResponseModel, ResponseModel> {
     let initramfs = self.get_old_initramfs();
-    let data = models_into_data_array(initramfs).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(initramfs).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response("Old initramfs retrieved", data))
   }
 

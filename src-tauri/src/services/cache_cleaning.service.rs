@@ -100,7 +100,7 @@ impl CacheCleaningService {
         }
         Err(e) => {
           log::error!("Failed to clear cache directory: {}", e);
-          Err(AppError::Io(e).into())
+          Err(AppError::from(e).into())
         }
       }
     } else {

@@ -600,7 +600,7 @@ impl AppResidueService {
   pub fn scan_user_configs_response(&self) -> Result<ResponseModel, ResponseModel> {
     let residues = self.scan_user_configs();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
       format!("Found {} config residues", count),
       data,
@@ -610,7 +610,7 @@ impl AppResidueService {
   pub fn scan_user_data_response(&self) -> Result<ResponseModel, ResponseModel> {
     let residues = self.scan_user_data();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
       format!("Found {} data residues", count),
       data,
@@ -620,7 +620,7 @@ impl AppResidueService {
   pub fn scan_user_caches_response(&self) -> Result<ResponseModel, ResponseModel> {
     let residues = self.scan_user_caches();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
       format!("Found {} cache residues", count),
       data,
@@ -630,7 +630,7 @@ impl AppResidueService {
   pub fn scan_home_residues_response(&self) -> Result<ResponseModel, ResponseModel> {
     let residues = self.scan_home_residues();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
       format!("Found {} home residues", count),
       data,
@@ -640,7 +640,7 @@ impl AppResidueService {
   pub fn get_orphaned_configs_response(&self) -> Result<ResponseModel, ResponseModel> {
     let orphaned = self.get_orphaned_configs();
     let count = orphaned.len();
-    let data = models_into_data_array(orphaned).map_err(|e| AppError::Serde(e).into_response())?;
+    let data = models_into_data_array(orphaned).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
       format!("Found {} orphaned configs", count),
       data,
