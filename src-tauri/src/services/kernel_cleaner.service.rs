@@ -2,6 +2,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use log;
+
 use crate::helpers::{
   get_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
 };
@@ -41,12 +43,20 @@ impl KernelCleanerService {
     let output = Command::new("uname").arg("-r").output();
 
     match output {
-      Ok(out) if out.status.success() => stdout_string(&out).trim().to_string(),
-      _ => String::new(),
+      Ok(out) if out.status.success() => {
+        let kernel = stdout_string(&out).trim().to_string();
+        log::info!("Current kernel: {}", kernel);
+        kernel
+      }
+      _ => {
+        log::warn!("Failed to get current kernel version");
+        String::new()
+      },
     }
   }
 
   pub fn get_installed_kernels(&self) -> Vec<KernelInfo> {
+    log::info!("Scanning for installed kernels");
     let current = self.get_current_kernel();
     let mut kernels: Vec<KernelInfo> = Vec::new();
 
@@ -76,6 +86,7 @@ impl KernelCleanerService {
     }
 
     kernels.sort_by(|a, b| b.version.cmp(&a.version));
+    log::info!("Found {} installed kernels", kernels.len());
     kernels
   }
 
@@ -112,7 +123,6 @@ impl KernelCleanerService {
 
   pub fn get_old_kernels(&self) -> Vec<KernelInfo> {
     let all_kernels = self.get_installed_kernels();
-    let _current = self.get_current_kernel();
 
     if all_kernels.len() <= 1 {
       return Vec::new();
@@ -134,9 +144,11 @@ impl KernelCleanerService {
   }
 
   pub fn remove_kernel(&self, version: &str) -> Result<ResponseModel, ResponseModel> {
+    log::info!("Attempting to remove kernel version: {}", version);
     let current = self.get_current_kernel();
 
     if version == current {
+      log::warn!("Cannot remove currently running kernel: {}", version);
       return Err(ResponseModel {
         status: ResponseStatus::Error,
         message: "Cannot remove the currently running kernel!".to_string(),
@@ -146,6 +158,7 @@ impl KernelCleanerService {
 
     let all_kernels = self.get_installed_kernels();
     if all_kernels.len() <= 1 {
+      log::warn!("Cannot remove last remaining kernel");
       return Err(ResponseModel {
         status: ResponseStatus::Error,
         message: "Cannot remove the last remaining kernel!".to_string(),
@@ -159,6 +172,7 @@ impl KernelCleanerService {
       .unwrap_or_default();
 
     if version == latest_version {
+      log::warn!("Cannot remove latest kernel (fallback kernel): {}", version);
       return Err(ResponseModel {
         status: ResponseStatus::Error,
         message: "Cannot remove the latest kernel (fallback kernel). Remove old kernels first."
@@ -169,6 +183,7 @@ impl KernelCleanerService {
 
     let kernel_exists = all_kernels.iter().any(|k| k.version == version);
     if !kernel_exists {
+      log::error!("Kernel version {} not found", version);
       return Err(ResponseModel {
         status: ResponseStatus::Error,
         message: format!("Kernel version {} not found", version),
@@ -224,6 +239,7 @@ impl KernelCleanerService {
 
     if failed_items.is_empty() {
       let _ = self.update_grub_internal();
+      log::info!("Successfully removed kernel {} ({} items removed)", version, removed_items.len());
 
       Ok(ResponseModel {
         status: ResponseStatus::Success,
@@ -404,11 +420,13 @@ impl KernelCleanerService {
   }
 
   fn update_grub_internal(&self) -> Result<ResponseModel, ResponseModel> {
+    log::info!("Updating GRUB configuration");
     let update_cmd = if Path::new("/usr/sbin/update-grub").exists() {
       ("update-grub", vec![])
     } else if Path::new("/usr/sbin/grub-mkconfig").exists() {
       ("grub-mkconfig", vec!["-o", "/boot/grub/grub.cfg"])
     } else {
+      log::error!("No GRUB update tool found");
       return Err(ResponseModel {
         status: ResponseStatus::Error,
         message: "No GRUB update tool found".to_string(),
@@ -428,6 +446,7 @@ impl KernelCleanerService {
     match output {
       Ok(result) => {
         if result.status.success() {
+          log::info!("GRUB configuration updated successfully");
           Ok(ResponseModel {
             status: ResponseStatus::Success,
             message: "GRUB configuration updated successfully".to_string(),
@@ -435,6 +454,7 @@ impl KernelCleanerService {
           })
         } else {
           let stderr = stderr_string(&result);
+          log::error!("GRUB update failed: {}", stderr);
           Err(ResponseModel {
             status: ResponseStatus::Error,
             message: format!("GRUB update failed: {}", stderr),
@@ -442,11 +462,14 @@ impl KernelCleanerService {
           })
         }
       }
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to execute GRUB update: {}", e),
-        data: DataValue::Bool(false),
-      }),
+      Err(e) => {
+        log::error!("Failed to execute GRUB update: {}", e);
+        Err(ResponseModel {
+          status: ResponseStatus::Error,
+          message: format!("Failed to execute GRUB update: {}", e),
+          data: DataValue::Bool(false),
+        })
+      },
     }
   }
 

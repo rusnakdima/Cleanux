@@ -2,6 +2,8 @@ use rusqlite::{Connection, Result as SqlResult};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use log;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct HealthSnapshot {
   pub id: Option<i64>,
@@ -30,11 +32,12 @@ impl HealthHistoryService {
     let cleanux_dir = config_dir.join("cleanux");
     std::fs::create_dir_all(&cleanux_dir).ok();
     let db_path = cleanux_dir.join("health_history.db");
-
+    log::info!("HealthHistoryService initialized with db_path: {:?}", db_path);
     Self { db_path }
   }
 
   pub fn init_database(&self) -> SqlResult<()> {
+    log::info!("Initializing health_history database");
     let conn = Connection::open(&self.db_path)?;
     conn.execute(
       "CREATE TABLE IF NOT EXISTS health_snapshots (
@@ -52,10 +55,12 @@ impl HealthHistoryService {
       "CREATE INDEX IF NOT EXISTS idx_timestamp ON health_snapshots(timestamp)",
       [],
     )?;
+    log::info!("Health_history database initialized successfully");
     Ok(())
   }
 
   pub fn save_health_snapshot(&self, snapshot: HealthSnapshot) -> SqlResult<i64> {
+    log::info!("Saving health snapshot with score: {}", snapshot.health_score);
     let conn = Connection::open(&self.db_path)?;
     conn.execute(
             "INSERT INTO health_snapshots (timestamp, health_score, cache_size, trash_size, log_size, large_files_count)
@@ -69,10 +74,13 @@ impl HealthHistoryService {
                 snapshot.large_files_count
             ],
         )?;
-    Ok(conn.last_insert_rowid())
+    let id = conn.last_insert_rowid();
+    log::info!("Health snapshot saved with id: {}", id);
+    Ok(id)
   }
 
   pub fn get_health_history(&self, days: u32) -> SqlResult<Vec<HealthSnapshot>> {
+    log::info!("Fetching health history for last {} days", days);
     let conn = Connection::open(&self.db_path)?;
     let cutoff = chrono::Utc::now() - chrono::Duration::days(days as i64);
     let cutoff_str = cutoff.format("%Y-%m-%d %H:%M:%S").to_string();
@@ -100,13 +108,16 @@ impl HealthHistoryService {
     for snapshot in snapshots {
       result.push(snapshot?);
     }
+    log::info!("Retrieved {} health snapshots", result.len());
     Ok(result)
   }
 
   pub fn get_health_trends(&self, days: u32) -> SqlResult<HealthTrend> {
+    log::info!("Calculating health trends for last {} days", days);
     let history = self.get_health_history(days)?;
 
     if history.len() < 2 {
+      log::warn!("Insufficient data for trend calculation, found {} snapshots", history.len());
       return Ok(HealthTrend {
         trend: "insufficient_data".to_string(),
         change_percent: 0.0,
@@ -131,6 +142,7 @@ impl HealthHistoryService {
       "stable"
     };
 
+    log::info!("Health trend calculated: {} ({:.2}%)", trend, change_percent);
     Ok(HealthTrend {
       trend: trend.to_string(),
       change_percent,

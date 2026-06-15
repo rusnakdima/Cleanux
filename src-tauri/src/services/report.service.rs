@@ -2,6 +2,8 @@ use rusqlite::{Connection, Result as SqlResult};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use log;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CleaningReport {
   pub id: Option<i64>,
@@ -55,6 +57,7 @@ impl ReportService {
 
     let db_path = cleanux_dir.join("reports.db");
 
+    log::info!("ReportService initialized with db_path: {:?}, reports_dir: {:?}", db_path, reports_dir);
     Self {
       db_path,
       reports_dir,
@@ -62,6 +65,7 @@ impl ReportService {
   }
 
   pub fn init_database(&self) -> SqlResult<()> {
+    log::info!("Initializing reports database");
     let conn = Connection::open(&self.db_path)?;
     conn.execute(
       "CREATE TABLE IF NOT EXISTS cleaning_reports (
@@ -82,6 +86,7 @@ impl ReportService {
       "CREATE INDEX IF NOT EXISTS idx_report_date ON cleaning_reports(date)",
       [],
     )?;
+    log::info!("Reports database initialized successfully");
     Ok(())
   }
 
@@ -92,6 +97,7 @@ impl ReportService {
     duration: f64,
     categories: ReportCategories,
   ) -> SqlResult<i64> {
+    log::info!("Generating cleaning report: {} items, {} bytes reclaimed", items_cleaned, space_reclaimed);
     let conn = Connection::open(&self.db_path)?;
     let date = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -112,6 +118,7 @@ impl ReportService {
         )?;
 
     let report_id = conn.last_insert_rowid();
+    log::info!("Cleaning report saved with id: {}", report_id);
 
     let report = CleaningReport {
       id: Some(report_id),
@@ -122,23 +129,19 @@ impl ReportService {
       categories,
     };
 
-    self.save_report_json(report_id, &report)?;
-
-    Ok(report_id)
-  }
-
-  fn save_report_json(&self, report_id: i64, report: &CleaningReport) -> SqlResult<()> {
     let filename = format!("report_{}.json", report_id);
     let filepath = self.reports_dir.join(filename);
-    let json = serde_json::to_string_pretty(report).map_err(|e| {
+    let json = serde_json::to_string_pretty(&report).map_err(|e| {
       rusqlite::Error::InvalidParameterName(format!("JSON serialization error: {}", e))
     })?;
     std::fs::write(filepath, json)
       .map_err(|e| rusqlite::Error::InvalidParameterName(format!("File write error: {}", e)))?;
-    Ok(())
+
+    Ok(report_id)
   }
 
   pub fn get_cleaning_history(&self, limit: Option<i64>) -> SqlResult<Vec<CleaningReport>> {
+    log::info!("Fetching cleaning history with limit: {:?}", limit);
     let conn = Connection::open(&self.db_path)?;
 
     let mut result = Vec::new();
@@ -166,10 +169,12 @@ impl ReportService {
       }
     }
 
+    log::info!("Retrieved {} cleaning reports", result.len());
     Ok(result)
   }
 
   pub fn get_report_by_id(&self, report_id: i64) -> SqlResult<Option<CleaningReport>> {
+    log::info!("Fetching report with id: {}", report_id);
     let conn = Connection::open(&self.db_path)?;
     let mut stmt = conn.prepare(
             "SELECT id, date, items_cleaned, space_reclaimed, duration, cache_items, trash_items, log_items, large_file_items, duplicate_items
@@ -178,8 +183,10 @@ impl ReportService {
 
     let mut rows = stmt.query([report_id])?;
     if let Some(row) = rows.next()? {
+      log::info!("Report {} found", report_id);
       Ok(Some(self.row_to_report(row)?))
     } else {
+      log::warn!("Report {} not found", report_id);
       Ok(None)
     }
   }
@@ -202,12 +209,19 @@ impl ReportService {
   }
 
   pub fn export_to_html(&self, report_id: i64) -> SqlResult<String> {
+    log::info!("Exporting report {} to HTML", report_id);
     let report = self.get_report_by_id(report_id)?;
     match report {
-      Some(r) => Ok(self.generate_html(&r)),
-      None => Err(rusqlite::Error::InvalidParameterName(
-        "Report not found".to_string(),
-      )),
+      Some(r) => {
+        log::info!("Successfully generated HTML for report {}", report_id);
+        Ok(self.generate_html(&r))
+      }
+      None => {
+        log::error!("Failed to export report {} - not found", report_id);
+        Err(rusqlite::Error::InvalidParameterName(
+          "Report not found".to_string(),
+        ))
+      },
     }
   }
 
@@ -311,6 +325,7 @@ impl ReportService {
   }
 
   pub fn compare_snapshots(&self, before_id: i64, after_id: i64) -> SqlResult<SnapshotComparison> {
+    log::info!("Comparing snapshots: before_id={}, after_id={}", before_id, after_id);
     let before = self.get_report_by_id(before_id)?;
     let after = self.get_report_by_id(after_id)?;
 
@@ -320,6 +335,7 @@ impl ReportService {
         let items_cleaned = a.items_cleaned.saturating_sub(b.items_cleaned);
         let health_improvement = 0.0;
 
+        log::info!("Snapshot comparison complete: {} bytes, {} items difference", space_reclaimed, items_cleaned);
         Ok(SnapshotComparison {
           before_id,
           after_id,
@@ -334,9 +350,12 @@ impl ReportService {
           },
         })
       }
-      _ => Err(rusqlite::Error::InvalidParameterName(
-        "One or both reports not found".to_string(),
-      )),
+      _ => {
+        log::error!("Failed to compare snapshots - one or both reports not found (before={}, after={})", before_id, after_id);
+        Err(rusqlite::Error::InvalidParameterName(
+          "One or both reports not found".to_string(),
+        ))
+      },
     }
   }
 }

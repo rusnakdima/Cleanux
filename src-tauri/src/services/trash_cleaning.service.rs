@@ -10,6 +10,7 @@ use crate::models::{ResponseModel, TrashFileModel};
 use crate::models::AppError;
 
 use std::fs;
+use log;
 
 pub struct TrashCleaningService;
 
@@ -31,13 +32,16 @@ impl TrashCleaningService {
     &self,
     paths: Vec<String>,
   ) -> Result<ResponseModel, ResponseModel> {
+    log::info!("Clearing {} selected trash files", paths.len());
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
+      log::info!("Successfully cleared {} trash files", outcome.cleared);
       Ok(success_response(
         format!("Successfully cleared {} trash files", outcome.cleared),
         data_empty_string(),
       ))
     } else {
+      log::error!("Cleared {} files, failed on: {}", outcome.cleared, outcome.errors.join("; "));
       Err(
         AppError::Unknown(format!(
           "Cleared {} files, failed on: {}",
@@ -50,6 +54,7 @@ impl TrashCleaningService {
   }
 
   pub fn clear_trash(&self) -> Result<ResponseModel, ResponseModel> {
+    log::info!("Clearing trash directory");
     let trash_dir = CommonPath::TrashFiles
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -59,16 +64,21 @@ impl TrashCleaningService {
           let path = entry.path();
           if path.is_file() {
             if let Err(e) = fs::remove_file(&path) {
+              log::error!("Failed to remove file from trash: {}", e);
               return Err(AppError::Io(e).into_response());
             }
           }
         }
+        log::info!("Trash cleared successfully");
         Ok(success_response(
           "Trash cleared successfully",
           data_empty_string(),
         ))
       }
-      Err(e) => Err(AppError::Io(e).into_response()),
+      Err(e) => {
+        log::error!("Failed to read trash directory: {}", e);
+        Err(AppError::Io(e).into_response())
+      },
     }
   }
 }

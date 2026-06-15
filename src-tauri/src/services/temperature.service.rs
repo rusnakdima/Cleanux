@@ -44,12 +44,6 @@ impl TempCache {
       });
     }
   }
-
-  fn clear(&self) {
-    if let Ok(mut guard) = self.data.lock() {
-      *guard = None;
-    }
-  }
 }
 
 static TEMP_CACHE: std::sync::OnceLock<TempCache> = std::sync::OnceLock::new();
@@ -396,7 +390,4 @@ impl TemperatureService {
     }
   }
 
-  pub fn clear_cache() {
-    get_temp_cache().clear();
-  }
 }

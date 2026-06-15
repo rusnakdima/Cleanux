@@ -3,6 +3,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use log;
+
 use crate::helpers::{
   get_dir_size, home_dir, models_into_data_array, stdout_string, success_response,
 };
@@ -158,7 +160,6 @@ impl AppResidueService {
       "netbeans",
       "mysql",
       "postgresql",
-      "mongodb",
       "redis",
       "apache",
       "nginx",
@@ -476,9 +477,11 @@ impl AppResidueService {
   }
 
   pub fn clean_residue(&self, path: &str) -> Result<ResponseModel, ResponseModel> {
+    log::info!("Attempting to clean residue at: {}", path);
     let path_obj = Path::new(path);
 
     if !path_obj.exists() {
+      log::error!("Path does not exist: {}", path);
       return Err(ResponseModel {
         status: ResponseStatus::Error,
         message: format!("Path does not exist: {}", path),
@@ -493,26 +496,34 @@ impl AppResidueService {
     };
 
     match result {
-      Ok(_) => Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Removed residue: {}", path),
-        data: DataValue::Bool(true),
-      }),
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Failed to remove {}: {}", path, e),
-        data: DataValue::Bool(false),
-      }),
+      Ok(_) => {
+        log::info!("Successfully removed residue: {}", path);
+        Ok(ResponseModel {
+          status: ResponseStatus::Success,
+          message: format!("Removed residue: {}", path),
+          data: DataValue::Bool(true),
+        })
+      }
+      Err(e) => {
+        log::error!("Failed to remove residue {}: {}", path, e);
+        Err(ResponseModel {
+          status: ResponseStatus::Error,
+          message: format!("Failed to remove {}: {}", path, e),
+          data: DataValue::Bool(false),
+        })
+      },
     }
   }
 
   pub fn clean_multiple(&self, paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
+    log::info!("Attempting to clean {} residue items", paths.len());
     let mut removed = 0;
     let mut failed: Vec<String> = Vec::new();
 
     for path in paths {
       let path_obj = Path::new(&path);
       if !path_obj.exists() {
+        log::warn!("Path does not exist, skipping: {}", path);
         continue;
       }
 
@@ -523,8 +534,14 @@ impl AppResidueService {
       };
 
       match result {
-        Ok(_) => removed += 1,
-        Err(e) => failed.push(format!("{}: {}", path, e)),
+        Ok(_) => {
+          log::debug!("Removed: {}", path);
+          removed += 1
+        },
+        Err(e) => {
+          log::error!("Failed to remove {}: {}", path, e);
+          failed.push(format!("{}: {}", path, e))
+        },
       }
     }
 
@@ -534,12 +551,14 @@ impl AppResidueService {
     });
 
     if failed.is_empty() {
+      log::info!("Successfully cleaned all {} residue items", removed);
       Ok(ResponseModel {
         status: ResponseStatus::Success,
         message: format!("Cleaned {} residue items", removed),
         data: DataValue::Object(result),
       })
     } else {
+      log::warn!("Cleaned {} items, {} failed", removed, failed.len());
       Ok(ResponseModel {
         status: ResponseStatus::Success,
         message: format!("Cleaned {} items, {} failed", removed, failed.len()),
