@@ -8,5 +8,3 @@ pub mod cleaning_report_entity;
 pub mod execution_history_entity;
 #[path = "health-snapshot.entity.rs"]
 pub mod health_snapshot_entity;
-#[path = "response.entity.rs"]
-pub mod response_entity;
