@@ -6,7 +6,7 @@ crud_get_command!(get_cleaning_report, "cleaning_reports");
 crud_get_all_command!(get_cleaning_reports, "cleaning_reports");
 crud_create_command!(create_cleaning_report, "cleaning_reports");
 
-use crate::entities::response_entity::ResponseModel;
+use crate::models::ResponseModel;
 use crate::AppState;
 use tauri::State;
 

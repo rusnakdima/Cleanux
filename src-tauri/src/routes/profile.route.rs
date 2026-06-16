@@ -10,7 +10,7 @@ crud_create_command!(create_cleaning_profile, "cleaning_profiles");
 crud_update_command!(update_cleaning_profile, "cleaning_profiles");
 crud_delete_command!(delete_cleaning_profile, "cleaning_profiles");
 
-use crate::entities::response_entity::ResponseModel;
+use crate::models::ResponseModel;
 use crate::AppState;
 use tauri::State;
 
