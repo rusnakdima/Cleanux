@@ -13,7 +13,7 @@ export class CacheService {
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
-    
+
     if (Date.now() - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
       return null;
@@ -25,20 +25,22 @@ export class CacheService {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttlMs
+      ttl: ttlMs,
     });
   }
 
   getOrSet<T>(key: string, factory: () => T, ttlMs: number = 5 * 60 * 1000): T {
     const cached = this.get<T>(key);
     if (cached !== null) return cached;
-    
+
     const data = factory();
     this.set(key, data, ttlMs);
     return data;
   }
 
-  delete(key: string): void { this.cache.delete(key); }
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
   invalidate(pattern: string): void {
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
@@ -62,7 +64,7 @@ export class CacheService {
   has(key: string): boolean {
     const entry = this.cache.get(key);
     if (!entry) return false;
-    
+
     if (Date.now() - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
       return false;

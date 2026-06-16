@@ -93,3 +93,13 @@ impl From<AppError> for ResponseModel {
     error.into_response()
   }
 }
+
+impl From<nosql_orm::error::OrmError> for ResponseModel {
+  fn from(error: nosql_orm::error::OrmError) -> Self {
+    ResponseModel {
+      status: ResponseStatus::Error,
+      message: error.to_string(),
+      data: DataValue::String("".to_string()),
+    }
+  }
+}

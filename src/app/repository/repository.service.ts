@@ -15,7 +15,7 @@ export interface Repository<T, ID = string> {
 export abstract class BaseRepository<T, ID = string> implements Repository<T, ID> {
   protected api = inject(ApiService);
   protected cache = inject(CacheService);
-  
+
   protected abstract cacheKey(id?: ID): string;
   protected abstract commandGetAll: string;
   protected abstract commandGetById: string;
@@ -29,8 +29,8 @@ export abstract class BaseRepository<T, ID = string> implements Repository<T, ID
     if (cached) return of(cached);
 
     return this.api.invoke<T[]>(this.commandGetAll, {}).pipe(
-      tap(items => this.cache.set(key, items)),
-      catchError(err => {
+      tap((items) => this.cache.set(key, items)),
+      catchError((err) => {
         console.error(`Failed to get all: ${this.commandGetAll}`, err);
         return of([]);
       })
@@ -43,20 +43,22 @@ export abstract class BaseRepository<T, ID = string> implements Repository<T, ID
     if (cached) return of(cached);
 
     return this.api.invoke<T | null>(this.commandGetById, { id }).pipe(
-      tap(item => { if (item) this.cache.set(key, item); }),
+      tap((item) => {
+        if (item) this.cache.set(key, item);
+      }),
       catchError(() => of(null))
     );
   }
 
   create(data: Partial<T>): Observable<T> {
-    return this.api.invoke<T>(this.commandCreate, { data }).pipe(
-      tap(() => this.cache.invalidatePrefix(this.baseKey()))
-    );
+    return this.api
+      .invoke<T>(this.commandCreate, { data })
+      .pipe(tap(() => this.cache.invalidatePrefix(this.baseKey())));
   }
 
   update(id: ID, data: Partial<T>): Observable<T> {
     return this.api.invoke<T>(this.commandUpdate, { id, data }).pipe(
-      tap(item => {
+      tap((item) => {
         this.cache.invalidatePrefix(this.baseKey());
         this.cache.set(this.cacheKey(id), item);
       })

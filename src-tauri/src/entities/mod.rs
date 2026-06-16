@@ -1,0 +1,12 @@
+#[path = "automation-recipe.entity.rs"]
+pub mod automation_recipe_entity;
+#[path = "cleaning-profile.entity.rs"]
+pub mod cleaning_profile_entity;
+#[path = "cleaning-report.entity.rs"]
+pub mod cleaning_report_entity;
+#[path = "execution-history.entity.rs"]
+pub mod execution_history_entity;
+#[path = "health-snapshot.entity.rs"]
+pub mod health_snapshot_entity;
+#[path = "response.entity.rs"]
+pub mod response_entity;
