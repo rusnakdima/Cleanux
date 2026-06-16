@@ -88,6 +88,40 @@ impl From<&str> for ResponseModel {
   }
 }
 
+impl ResponseModel {
+  pub fn new_false(message: &str) -> Self {
+    ResponseModel {
+      status: ResponseStatus::Error,
+      message: message.to_string(),
+      data: DataValue::String(String::new()),
+    }
+  }
+
+  pub fn new_success(message: &str) -> Self {
+    ResponseModel {
+      status: ResponseStatus::Success,
+      message: message.to_string(),
+      data: DataValue::String(String::new()),
+    }
+  }
+
+  pub fn new_success_with_data(message: &str, data: serde_json::Value) -> Self {
+    ResponseModel {
+      status: ResponseStatus::Success,
+      message: message.to_string(),
+      data: DataValue::Object(data),
+    }
+  }
+
+  pub fn new_success_with_array(message: &str, data: Vec<serde_json::Value>) -> Self {
+    ResponseModel {
+      status: ResponseStatus::Success,
+      message: message.to_string(),
+      data: DataValue::Array(data),
+    }
+  }
+}
+
 impl From<AppError> for ResponseModel {
   fn from(error: AppError) -> Self {
     error.into_response()
