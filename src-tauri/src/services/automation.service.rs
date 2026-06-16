@@ -1,6 +1,5 @@
 use crate::helpers::{data_string, stderr_string, success_response};
-use crate::models::AppError;
-use crate::models::ResponseModel;
+use crate::models::{AppError, ResponseModel};
 use crate::services::profile_service::ProfileService;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -427,5 +426,47 @@ impl AutomationService {
     let data = serde_json::from_value(json)
       .map_err(|e| AppError::message(format!("Failed to deserialize history: {}", e)))?;
     Ok(success_response("History retrieved", data))
+  }
+
+  pub fn get_quick_actions_list() -> Vec<QuickAction> {
+    get_predefined_quick_actions()
+  }
+
+  pub fn execute_recipe_from_entity(recipe: serde_json::Value) -> Result<ResponseModel, AppError> {
+    let steps: Vec<ActionStep> = recipe
+      .get("steps")
+      .and_then(|s| serde_json::from_value(s.clone()).ok())
+      .unwrap_or_default();
+
+    let name = recipe
+      .get("name")
+      .and_then(|n| n.as_str())
+      .unwrap_or("Unknown")
+      .to_string();
+
+    let start_time = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
+    let total_steps = steps.len() as u32;
+
+    let mut steps_executed = 0u32;
+    for step in &steps {
+      execute_action_step(step)?;
+      steps_executed += 1;
+    }
+
+    let entry = ExecutionHistoryEntry {
+      id: generate_uuid(),
+      name,
+      status: "completed".to_string(),
+      started_at: start_time,
+      completed_at: Some(chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()),
+      steps_executed,
+      total_steps,
+    };
+    let _ = add_to_history(entry);
+
+    Ok(success_response(
+      "Recipe executed successfully",
+      data_string("executed"),
+    ))
   }
 }

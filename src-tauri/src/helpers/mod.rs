@@ -12,7 +12,7 @@ pub mod process_helper;
 #[path = "validation.helper.rs"]
 pub mod validation_helper;
 
-#[path = "common_paths.rs"]
+#[path = "common-paths.helper.rs"]
 pub mod common_paths;
 
 pub use filesystem_helper::{
