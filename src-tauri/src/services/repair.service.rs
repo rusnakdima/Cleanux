@@ -243,7 +243,7 @@ impl RepairService {
     let result = serde_json::json!({
         "removed": removed_count,
         "failed": failed,
-        "cleanedPaths": cleaned_paths
+        "cleaned_paths": cleaned_paths
     });
 
     if failed.is_empty() {

@@ -38,7 +38,7 @@ impl DirectoryService {
 
     let result = serde_json::json!({
         "tree": tree,
-        "totalSize": size
+        "total_size": size
     });
 
     Ok(ResponseModel {

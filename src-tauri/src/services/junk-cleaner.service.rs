@@ -67,7 +67,7 @@ impl JunkCleanerService {
                   JunkCategory::Logs => "logs",
               },
               "description": item.description,
-              "fileCount": item.file_count,
+              "file_count": item.file_count,
           })
         })
         .collect::<Vec<_>>())
@@ -79,8 +79,8 @@ impl JunkCleanerService {
       "browser".to_string(),
       serde_json::json!({
           "category": "Browser",
-          "totalSize": browser_size,
-          "fileCount": browser_count,
+          "total_size": browser_size,
+          "file_count": browser_count,
           "description": "Browser cache files (Firefox, Chrome, Brave, Edge)",
           "items": junk_items_to_json(&browser),
       }),
@@ -92,8 +92,8 @@ impl JunkCleanerService {
       "thumbnails".to_string(),
       serde_json::json!({
           "category": "Thumbnails",
-          "totalSize": thumbnails_size,
-          "fileCount": thumbnails_count,
+          "total_size": thumbnails_size,
+          "file_count": thumbnails_count,
           "description": "Image thumbnail cache",
           "items": junk_items_to_json(&thumbnails),
       }),
@@ -105,8 +105,8 @@ impl JunkCleanerService {
       "applications".to_string(),
       serde_json::json!({
           "category": "Applications",
-          "totalSize": applications_size,
-          "fileCount": applications_count,
+          "total_size": applications_size,
+          "file_count": applications_count,
           "description": "Application caches (Flatpak, Snap, AppImage)",
           "items": junk_items_to_json(&applications),
       }),
@@ -118,8 +118,8 @@ impl JunkCleanerService {
       "system".to_string(),
       serde_json::json!({
           "category": "System",
-          "totalSize": system_size,
-          "fileCount": system_count,
+          "total_size": system_size,
+          "file_count": system_count,
           "description": "System temporary files (/tmp, /var/tmp)",
           "items": junk_items_to_json(&system),
       }),
@@ -131,8 +131,8 @@ impl JunkCleanerService {
       "logs".to_string(),
       serde_json::json!({
           "category": "Logs",
-          "totalSize": logs_size,
-          "fileCount": logs_count,
+          "total_size": logs_size,
+          "file_count": logs_count,
           "description": "Rotated and old log files",
           "items": junk_items_to_json(&logs),
       }),
@@ -153,8 +153,8 @@ impl JunkCleanerService {
           format!("Found {} browser cache items ({} bytes)", items.len(), size),
           DataValue::Object(serde_json::json!({
             "category": "Browser",
-            "totalSize": size,
-            "fileCount": count,
+            "total_size": size,
+            "file_count": count,
             "description": "Browser cache files (Firefox, Chrome, Brave, Edge)",
             "items": items,
           })),
@@ -206,8 +206,8 @@ impl JunkCleanerService {
           ),
           DataValue::Object(serde_json::json!({
             "category": "Thumbnails",
-            "totalSize": size,
-            "fileCount": count,
+            "total_size": size,
+            "file_count": count,
             "description": "Image thumbnail cache",
             "items": items,
           })),
@@ -249,8 +249,8 @@ impl JunkCleanerService {
           ),
           DataValue::Object(serde_json::json!({
             "category": "Applications",
-            "totalSize": size,
-            "fileCount": count,
+            "total_size": size,
+            "file_count": count,
             "description": "Application caches (Flatpak, Snap, AppImage)",
             "items": items,
           })),
@@ -324,8 +324,8 @@ impl JunkCleanerService {
           format!("Found {} system temp items ({} bytes)", items.len(), size),
           DataValue::Object(serde_json::json!({
             "category": "System",
-            "totalSize": size,
-            "fileCount": count,
+            "total_size": size,
+            "file_count": count,
             "description": "System temporary files (/tmp, /var/tmp)",
             "items": items,
           })),
@@ -369,8 +369,8 @@ impl JunkCleanerService {
           format!("Found {} log rotation items ({} bytes)", items.len(), size),
           DataValue::Object(serde_json::json!({
             "category": "Logs",
-            "totalSize": size,
-            "fileCount": count,
+            "total_size": size,
+            "file_count": count,
             "description": "Rotated and old log files",
             "items": items,
           })),

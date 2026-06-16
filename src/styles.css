@@ -871,15 +871,6 @@ mat-icon {
     }
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -1050,10 +1041,6 @@ mat-icon {
     }
   }
 
-  .badge-primary {
-    background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
-    color: var(--accent-primary);
-  }
   .badge-success {
     background: color-mix(in srgb, var(--success) 20%, transparent);
     color: var(--success);
@@ -1071,14 +1058,6 @@ mat-icon {
     color: var(--info);
   }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
   @keyframes slideIn {
     from {
       opacity: 0;

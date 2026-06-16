@@ -16,7 +16,7 @@ export interface LogEntry {
 }
 
 @Injectable({ providedIn: 'root' })
-export class LoggerService {
+export class CoreLoggerService {
   private logs: LogEntry[] = [];
   private maxLogs = 1000;
   private level = LogLevel.Info;

@@ -227,13 +227,13 @@ impl MediaCacheService {
       status: crate::models::ResponseStatus::Success,
       message: "Media cache summary retrieved".to_string(),
       data: DataValue::Object(serde_json::json!({
-          "steamShaderSize": steam_info.shader_cache_size,
-          "steamDownloadSize": steam_info.download_cache_size,
-          "steamGameCount": steam_info.game_count,
-          "spotifyCacheSize": self.get_spotify_cache_size(),
-          "vlcCacheSize": self.get_vlc_cache_size(),
-          "thumbnailCacheSize": self.get_thumbnail_cache_size(),
-          "iconCacheSize": self.get_icon_cache_size(),
+          "steam_shader_size": steam_info.shader_cache_size,
+          "steam_download_size": steam_info.download_cache_size,
+          "steam_game_count": steam_info.game_count,
+          "spotify_cache_size": self.get_spotify_cache_size(),
+          "vlc_cache_size": self.get_vlc_cache_size(),
+          "thumbnail_cache_size": self.get_thumbnail_cache_size(),
+          "icon_cache_size": self.get_icon_cache_size(),
       })),
     }
   }

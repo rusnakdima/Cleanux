@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, tap, catchError } from 'rxjs';
+import { Observable, of, tap, catchError, from } from 'rxjs';
 import { ApiService } from '../services/api.service';
 import { CacheService } from './cache.service';
 
@@ -28,7 +28,7 @@ export abstract class BaseRepository<T, ID = string> implements Repository<T, ID
     const cached = this.cache.get<T[]>(key);
     if (cached) return of(cached);
 
-    return this.api.invoke<T[]>(this.commandGetAll, {}).pipe(
+    return from(this.api.invoke<T[]>(this.commandGetAll, {})).pipe(
       tap((items) => this.cache.set(key, items)),
       catchError((err) => {
         console.error(`Failed to get all: ${this.commandGetAll}`, err);
@@ -42,7 +42,7 @@ export abstract class BaseRepository<T, ID = string> implements Repository<T, ID
     const cached = this.cache.get<T>(key);
     if (cached) return of(cached);
 
-    return this.api.invoke<T | null>(this.commandGetById, { id }).pipe(
+    return from(this.api.invoke<T | null>(this.commandGetById, { id })).pipe(
       tap((item) => {
         if (item) this.cache.set(key, item);
       }),
@@ -51,13 +51,13 @@ export abstract class BaseRepository<T, ID = string> implements Repository<T, ID
   }
 
   create(data: Partial<T>): Observable<T> {
-    return this.api
-      .invoke<T>(this.commandCreate, { data })
-      .pipe(tap(() => this.cache.invalidatePrefix(this.baseKey())));
+    return from(this.api.invoke<T>(this.commandCreate, { data })).pipe(
+      tap(() => this.cache.invalidatePrefix(this.baseKey()))
+    );
   }
 
   update(id: ID, data: Partial<T>): Observable<T> {
-    return this.api.invoke<T>(this.commandUpdate, { id, data }).pipe(
+    return from(this.api.invoke<T>(this.commandUpdate, { id, data })).pipe(
       tap((item) => {
         this.cache.invalidatePrefix(this.baseKey());
         this.cache.set(this.cacheKey(id), item);
@@ -66,7 +66,7 @@ export abstract class BaseRepository<T, ID = string> implements Repository<T, ID
   }
 
   delete(id: ID): Observable<void> {
-    return this.api.invoke<void>(this.commandDelete, { id }).pipe(
+    return from(this.api.invoke<void>(this.commandDelete, { id })).pipe(
       tap(() => {
         this.cache.invalidatePrefix(this.baseKey());
         this.cache.delete(this.cacheKey(id));

@@ -137,9 +137,9 @@ impl ScannerService {
 
     let result = serde_json::json!({
         "groups": duplicate_groups,
-        "totalGroups": duplicate_groups.len(),
-        "totalDuplicates": total_duplicates,
-        "totalWastedSpace": total_wasted
+        "total_groups": duplicate_groups.len(),
+        "total_duplicates": total_duplicates,
+        "total_wasted_space": total_wasted
     });
 
     Ok(ResponseModel {
