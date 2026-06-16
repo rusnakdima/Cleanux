@@ -7,6 +7,10 @@ export interface ToastMessage {
   type: 'success' | 'error' | 'warning' | 'info';
 }
 
+export interface ToastOptions {
+  persistent?: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -15,15 +19,21 @@ export class ToastService {
 
   private idCounter = 0;
 
-  show(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info'): string {
+  show(
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'info',
+    options?: ToastOptions
+  ): string {
     const id = `toast-${++this.idCounter}`;
     const toast: ToastMessage = { id, message, type };
 
     this.toasts.update((current) => [...current, toast]);
 
-    setTimeout(() => {
-      this.dismiss(id);
-    }, TOAST_DURATION_MS);
+    if (!options?.persistent) {
+      setTimeout(() => {
+        this.dismiss(id);
+      }, TOAST_DURATION_MS);
+    }
 
     return id;
   }
@@ -32,19 +42,19 @@ export class ToastService {
     this.toasts.update((current) => current.filter((t) => t.id !== id));
   }
 
-  success(message: string): string {
-    return this.show(message, 'success');
+  success(message: string, options?: ToastOptions): string {
+    return this.show(message, 'success', options);
   }
 
-  error(message: string): string {
-    return this.show(message, 'error');
+  error(message: string, options?: ToastOptions): string {
+    return this.show(message, 'error', options);
   }
 
-  warning(message: string): string {
-    return this.show(message, 'warning');
+  warning(message: string, options?: ToastOptions): string {
+    return this.show(message, 'warning', options);
   }
 
-  info(message: string): string {
-    return this.show(message, 'info');
+  info(message: string, options?: ToastOptions): string {
+    return this.show(message, 'info', options);
   }
 }
