@@ -76,7 +76,7 @@ export class LogStorageService {
     const db = await this.ensureDb();
 
     const stored: StoredLog = {
-      id: entry.id,
+      id: entry.id || `log_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
       timestamp: entry.timestamp,
       level: entry.level,
       source: entry.source || '',

@@ -14,3 +14,36 @@ export class ApiException extends Error {
     this.name = 'ApiException';
   }
 }
+
+export enum TauriApiErrorCode {
+  Timeout = 'TIMEOUT',
+  ConnectionFailed = 'CONNECTION_FAILED',
+  PermissionDenied = 'PERMISSION_DENIED',
+  NotFound = 'NOT_FOUND',
+  Unknown = 'UNKNOWN',
+}
+
+export interface TauriApiError {
+  code: TauriApiErrorCode;
+  message: string;
+  context?: string;
+  timestamp: number;
+  retryable: boolean;
+}
+
+export interface AppError {
+  code: string;
+  message: string;
+  context?: string;
+  timestamp: number;
+  retryable: boolean;
+}
+
+export function isTauriApiError(error: unknown): error is TauriApiError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    'message' in error
+  );
+}

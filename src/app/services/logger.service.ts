@@ -1,114 +1,146 @@
 import { Injectable } from '@angular/core';
-import { getLoggingService, LogEntry } from '@tauri-apps/logger';
+import { invoke } from '@tauri-apps/api/core';
 
-export type { LogEntry };
+export type LogLevel = 'debug' | 'warn' | 'error' | 'info';
 
-export type LogFilter = {
-  level?: 'warn' | 'error';
+export interface LogEntry {
+  id?: string;
+  level: string;
+  component?: string;
+  source?: string;
+  message: string;
+  timestamp: string;
+  context?: string;
+  data?: unknown;
+  error?: { message: string; stack?: string };
+}
+
+export interface LogFilter {
+  level?: string;
   source?: string;
   search?: string;
   since?: Date;
   until?: Date;
-  operationId?: string;
-};
-
-export type LogLevel = 'warn' | 'error';
+}
 
 export interface LogStats {
   total: number;
-  byLevel: Record<LogLevel, number>;
+  byLevel: Record<string, number>;
   bySource: Record<string, number>;
+  oldest: string | null;
+  newest: string | null;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class LoggerService {
-  private logger = getLoggingService();
+  private logs: LogEntry[] = [];
+  private maxLogs = 1000;
 
-  get consoleOutput(): boolean {
-    return this.logger.consoleOutput;
+  consoleOutput = true;
+  memoryOutput = true;
+  fileOutput = false;
+
+  debug(message: string, data?: Record<string, unknown>): void {
+    console.debug(message, data || '');
+    invoke('log_message', { level: 'debug', component: 'app', message }).catch(() => {});
   }
 
-  set consoleOutput(value: boolean) {
-    this.logger.setConsoleOutput(value);
+  info(message: string, data?: Record<string, unknown>): void {
+    console.info(message, data || '');
+    invoke('log_message', { level: 'info', component: 'app', message }).catch(() => {});
   }
 
-  get memoryOutput(): boolean {
-    return this.logger.memoryOutput;
+  warn(message: string, data?: Record<string, unknown>): void {
+    console.warn(message, data || '');
+    invoke('log_message', { level: 'warn', component: 'app', message }).catch(() => {});
   }
 
-  set memoryOutput(value: boolean) {
-    this.logger.setMemoryOutput(value);
+  error(message: string, error?: unknown, data?: Record<string, unknown>): void {
+    console.error(message, error, data || '');
+    invoke('log_message', { level: 'error', component: 'app', message }).catch(() => {});
   }
 
-  get fileOutput(): boolean {
-    return this.logger.fileOutput;
+  logDebug(source: string, context: any, method: string, message: string): void {
+    console.debug(`[${source}]`, message);
+    invoke('log_message', { level: 'debug', component: source, message }).catch(() => {});
   }
 
-  set fileOutput(value: boolean) {
-    this.logger.setFileOutput(value);
+  logInfo(source: string, message: string): void {
+    console.info(`[${source}]`, message);
+    invoke('log_message', { level: 'info', component: source, message }).catch(() => {});
   }
 
-  logInfo(source: string, context?: string, operation?: string, message?: string): void {
-    const msg = message || context || '';
-    const ctx = operation ? { operation } : undefined;
-    this.logger.info(source, msg, ctx);
+  logWarn(source: string, message: string): void {
+    console.warn(`[${source}]`, message);
+    invoke('log_message', { level: 'warn', component: source, message }).catch(() => {});
   }
 
-  logError(
-    source: string,
-    context: string | undefined,
-    operation: string | undefined,
-    message: string,
-    error?: unknown,
-    extraContext?: Record<string, unknown>
-  ): void {
-    this.logger.error(source, message, error, extraContext);
-  }
-
-  logDebug(
-    source: string,
-    context: string | undefined,
-    operation: string | undefined,
-    message: string
-  ): void {
-    this.logger.debug(source, message, { source, context, operation });
-  }
-
-  info(message: string, context?: Record<string, unknown>, data?: unknown): void {
-    this.logger.info('', message, context, data);
-  }
-
-  debug(message: string, context?: Record<string, unknown>, data?: unknown): void {
-    this.logger.debug('', message, context, data);
-  }
-
-  warn(message: string, context?: Record<string, unknown>, data?: unknown): void {
-    this.logger.warn('', message, context, data);
-  }
-
-  error(message: string, error?: unknown, context?: Record<string, unknown>): void {
-    this.logger.error('', message, error, context);
-  }
-
-  startOperation(name: string, context?: Record<string, unknown>): string {
-    return this.logger.startOperation(name, context);
-  }
-
-  completeOperation(name: string, operationId: string, success?: boolean, data?: unknown): void {
-    this.logger.completeOperation(name, operationId, success, data);
+  logError(source: string, context: any, method: string, message: string, error?: Error, extra?: Record<string, unknown>): void {
+    console.error(`[${source}]`, message, error, extra);
+    invoke('log_message', { level: 'error', component: source, message }).catch(() => {});
   }
 
   getLogs(filter?: LogFilter): LogEntry[] {
-    return this.logger.getLogs(filter);
+    let result = [...this.logs];
+    if (filter?.level) {
+      result = result.filter(log => log.level === filter.level);
+    }
+    if (filter?.source) {
+      result = result.filter(log => log.source === filter.source);
+    }
+    if (filter?.search) {
+      const search = filter.search.toLowerCase();
+      result = result.filter(log => log.message.toLowerCase().includes(search));
+    }
+    return result;
   }
 
   getLogStats(): LogStats {
-    return this.logger.getLogStats() as LogStats;
+    const byLevel: Record<string, number> = {};
+    const bySource: Record<string, number> = {};
+    let oldest: string | null = null;
+    let newest: string | null = null;
+
+    for (const log of this.logs) {
+      byLevel[log.level] = (byLevel[log.level] || 0) + 1;
+      const source = log.source || 'unknown';
+      bySource[source] = (bySource[source] || 0) + 1;
+    }
+
+    if (this.logs.length > 0) {
+      oldest = this.logs[0]?.timestamp || null;
+      newest = this.logs[this.logs.length - 1]?.timestamp || null;
+    }
+
+    return {
+      total: this.logs.length,
+      byLevel,
+      bySource,
+      oldest,
+      newest,
+    };
   }
 
   clearLogs(): void {
-    this.logger.clearLogs();
+    this.logs = [];
   }
 }
+
+export const logger = {
+  debug(message: string, component: string = 'app'): void {
+    console.debug(`[${component}]`, message);
+    invoke('log_message', { level: 'debug', component, message }).catch(console.error);
+  },
+  warn(message: string, component: string = 'app'): void {
+    console.warn(`[${component}]`, message);
+    invoke('log_message', { level: 'warn', component, message }).catch(console.error);
+  },
+  error(message: string, component: string = 'app'): void {
+    console.error(`[${component}]`, message);
+    invoke('log_message', { level: 'error', component, message }).catch(console.error);
+  },
+  info(message: string, component: string = 'app'): void {
+    console.info(`[${component}]`, message);
+    invoke('log_message', { level: 'info', component, message }).catch(console.error);
+  },
+};

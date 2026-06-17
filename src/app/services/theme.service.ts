@@ -1,15 +1,29 @@
-import { ChangeDetectionStrategy, Injectable, signal, effect, inject } from '@angular/core';
-import { LoggerService } from './logger.service';
+import { Injectable, signal, effect } from '@angular/core';
 import {
-  ACCENT_COLORS,
-  DEFAULT_ACCENT_COLOR,
-  GLASS_OPACITY_DEFAULT,
-} from '@shared/constants/theme.constants';
-import { THEME_TRANSITION_TIMEOUT_MS } from '@shared/constants/timeout.constants';
+  AppearanceSettings,
+  ThemePreset,
+  THEME_PRESETS,
+  DEFAULT_APPEARANCE_SETTINGS,
+  getAccentShades,
+} from '@models/theme.model';
+import { LoggerService } from '@services/logger.service';
 
-export type ThemeMode = 'dark' | 'light' | 'system';
+const STORAGE_KEY = 'appearance_settings';
 
-export type AccentCategory = 'general' | 'buttons' | 'navigation' | 'borders' | 'icons';
+const ACCENT_COLORS_LIST = [
+  '#6366f1',
+  '#8b5cf6',
+  '#ec4899',
+  '#ef4444',
+  '#f97316',
+  '#eab308',
+  '#22c55e',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b82f6',
+];
+
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 export interface AccentConfig {
   [key: string]: string;
@@ -26,157 +40,188 @@ export interface ThemeConfig {
   glassOpacity: number;
 }
 
-const DEFAULT_ACCENT_CONFIG: AccentConfig = {
-  general: DEFAULT_ACCENT_COLOR,
-  buttons: DEFAULT_ACCENT_COLOR,
-  navigation: DEFAULT_ACCENT_COLOR,
-  borders: DEFAULT_ACCENT_COLOR,
-  icons: DEFAULT_ACCENT_COLOR,
-};
-
-const DEFAULT_THEME: ThemeConfig = {
-  mode: 'dark',
-  accentConfig: { ...DEFAULT_ACCENT_CONFIG },
-  glassOpacity: GLASS_OPACITY_DEFAULT,
-};
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class ThemeService {
-  private readonly STORAGE_KEY = 'cleanux_theme';
   private loggingService = new LoggerService();
+  private settings = signal<AppearanceSettings>(this.loadSettings());
 
-  currentTheme = signal<ThemeConfig>(this.loadTheme());
-  accentColors = signal<string[]>([...ACCENT_COLORS]);
+  mode = signal<'light' | 'dark' | 'system'>(this.settings().mode);
+  preset = signal<ThemePreset>(this.settings().preset);
+  accentColors = signal<string[]>([...ACCENT_COLORS_LIST]);
+
+  private htmlEl = document.querySelector('html');
 
   constructor() {
-    this.loggingService.info('ThemeService initialized');
     effect(() => {
-      this.applyTheme(this.currentTheme());
-    });
-  }
+      const mode = this.mode();
+      const preset = this.preset();
+      const effectiveMode =
+        mode === 'system'
+          ? window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light'
+          : mode;
 
-  private loadTheme(): ThemeConfig {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return {
-          ...DEFAULT_THEME,
-          ...parsed,
-          accentConfig: { ...DEFAULT_ACCENT_CONFIG, ...parsed.accentConfig },
-        };
+      if (this.htmlEl) {
+        this.htmlEl.setAttribute('data-theme', effectiveMode);
+        this.htmlEl.classList.toggle('dark', effectiveMode === 'dark');
+        this.htmlEl.classList.toggle('light', effectiveMode === 'light');
+        this.applyAccentColor(preset.accentColor);
       }
-    } catch {}
-    return { ...DEFAULT_THEME };
-  }
-
-  private saveTheme(config: ThemeConfig) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(config));
-  }
-
-  setMode(mode: ThemeMode) {
-    this.loggingService.debug('Setting theme mode', { mode });
-    this.currentTheme.update((t) => ({ ...t, mode }));
-    this.saveTheme(this.currentTheme());
-  }
-
-  setAccentColor(color: string) {
-    this.loggingService.debug('Setting accent color', { color });
-    this.currentTheme.update((t) => ({
-      ...t,
-      accentConfig: {
-        ...t.accentConfig,
-        general: color,
-        buttons: color,
-        navigation: color,
-        borders: color,
-        icons: color,
-      },
-    }));
-    this.saveTheme(this.currentTheme());
-  }
-
-  setAccentForCategory(category: AccentCategory, color: string) {
-    this.loggingService.debug('Setting accent for category', { category, color });
-    this.currentTheme.update((t) => ({
-      ...t,
-      accentConfig: { ...t.accentConfig, [category]: color },
-    }));
-    this.saveTheme(this.currentTheme());
-  }
-
-  resetAccentToDefault(category: AccentCategory) {
-    this.loggingService.debug('Resetting accent to default', { category });
-    this.setAccentForCategory(category, DEFAULT_ACCENT_CONFIG[category]);
-  }
-
-  resetAllAccents() {
-    this.loggingService.debug('Resetting all accents');
-    this.currentTheme.update((t) => ({
-      ...t,
-      accentConfig: { ...DEFAULT_ACCENT_CONFIG },
-    }));
-    this.saveTheme(this.currentTheme());
-  }
-
-  setGlassOpacity(opacity: number) {
-    this.loggingService.debug('Setting glass opacity', { opacity });
-    this.currentTheme.update((t) => ({ ...t, glassOpacity: Math.max(0, Math.min(1, opacity)) }));
-    this.saveTheme(this.currentTheme());
-  }
-
-  applyTheme(config: ThemeConfig) {
-    this.loggingService.debug('Applying theme', { mode: config.mode });
-    const root = document.documentElement;
-    const body = document.body;
-
-    const applyAccentVar = (name: string, color: string) => {
-      const r = parseInt(color.slice(1, 3), 16);
-      const g = parseInt(color.slice(3, 5), 16);
-      const b = parseInt(color.slice(5, 7), 16);
-      root.style.setProperty(name, color);
-      root.style.setProperty(name + '-light', `rgba(${r}, ${g}, ${b}, 0.1)`);
-      root.style.setProperty(name + '-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
-      root.style.setProperty(name + '-rgb', `${r}, ${g}, ${b}`);
-    };
-
-    applyAccentVar('--accent', config.accentConfig.general);
-    applyAccentVar('--accent-buttons', config.accentConfig.buttons);
-    applyAccentVar('--accent-nav', config.accentConfig.navigation);
-    applyAccentVar('--accent-borders', config.accentConfig.borders);
-    applyAccentVar('--accent-icons', config.accentConfig.icons);
-    root.style.setProperty('--glass-opacity', config.glassOpacity.toString());
-    root.style.setProperty('--icon-cpu', config.accentConfig.icons);
-    root.style.setProperty('--icon-memory', config.accentConfig.icons);
-
-    const isDark =
-      config.mode === 'dark' ||
-      (config.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    body.classList.add('theme-transitioning');
-    requestAnimationFrame(() => {
-      root.classList.toggle('dark', isDark);
-      root.classList.toggle('light', !isDark);
-      setTimeout(() => {
-        body.classList.remove('theme-transitioning');
-      }, THEME_TRANSITION_TIMEOUT_MS);
     });
   }
 
-  getEffectiveMode(): boolean {
-    const config = this.currentTheme();
-    return (
-      config.mode === 'dark' ||
-      (config.mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    );
+  private applyAccentColor(hexColor: string): void {
+    if (!this.htmlEl) return;
+    const shades = getAccentShades(hexColor);
+    this.htmlEl.style.setProperty('--accent-color', shades['500']);
+    this.htmlEl.style.setProperty('--accent-50', shades['50']);
+    this.htmlEl.style.setProperty('--accent-100', shades['100']);
+    this.htmlEl.style.setProperty('--accent-200', shades['200']);
+    this.htmlEl.style.setProperty('--accent-300', shades['300']);
+    this.htmlEl.style.setProperty('--accent-400', shades['400']);
+    this.htmlEl.style.setProperty('--accent-500', shades['500']);
+    this.htmlEl.style.setProperty('--accent-600', shades['600']);
+    this.htmlEl.style.setProperty('--accent-700', shades['700']);
+    this.htmlEl.style.setProperty('--accent-800', shades['800']);
+    this.htmlEl.style.setProperty('--accent-900', shades['900']);
   }
 
-  getAccentColor(): string {
-    return this.currentTheme().accentConfig.general;
+  private loadSettings(): AppearanceSettings {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as AppearanceSettings;
+        const preset = THEME_PRESETS.find((p) => p.id === parsed.preset.id) || THEME_PRESETS[0];
+        return { ...parsed, preset };
+      }
+    } catch (error) {
+      this.loggingService.warn('Failed to load theme settings: ' + error);
+    }
+
+    const legacyTheme = localStorage.getItem('theme');
+    if (legacyTheme === 'dark' || legacyTheme === 'light') {
+      return {
+        mode: legacyTheme,
+        preset: THEME_PRESETS[0],
+      };
+    }
+
+    return DEFAULT_APPEARANCE_SETTINGS;
   }
+
+  getSettings(): AppearanceSettings {
+    return {
+      mode: this.mode(),
+      preset: this.preset(),
+    };
+  }
+
+  updateMode(mode: 'light' | 'dark' | 'system'): void {
+    this.mode.set(mode);
+    this.persistSettings();
+  }
+
+  updatePreset(preset: ThemePreset): void {
+    this.preset.set(preset);
+    this.applyAccentColor(preset.accentColor);
+    this.persistSettings();
+  }
+
+  updateAccentColor(color: string): void {
+    const currentPreset = this.preset();
+    this.preset.set({ ...currentPreset, accentColor: color });
+    this.persistSettings();
+  }
+
+  private persistSettings(): void {
+    const settings = this.getSettings();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  }
+
+  getAccentShades() {
+    return getAccentShades(this.preset().accentColor);
+  }
+
+  toggleMode(): void {
+    const current = this.mode();
+    if (current === 'light') {
+      this.mode.set('dark');
+    } else if (current === 'dark') {
+      this.mode.set('light');
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.mode.set(prefersDark ? 'light' : 'dark');
+    }
+    this.persistSettings();
+  }
+
+  getEffectiveMode(): 'light' | 'dark' {
+    const current = this.mode();
+    if (current === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return current;
+  }
+
+  setMode(mode: 'light' | 'dark' | 'system'): void {
+    this.updateMode(mode);
+  }
+
+  setPreset(preset: ThemePreset): void {
+    this.updatePreset(preset);
+  }
+
+  resetToDefaults(): void {
+    this.mode.set(DEFAULT_APPEARANCE_SETTINGS.mode);
+    this.preset.set(DEFAULT_APPEARANCE_SETTINGS.preset);
+    this.persistSettings();
+  }
+
+  applyTheme(_config?: ThemeConfig): void {
+    const mode = this.mode();
+    const preset = this.preset();
+    const effectiveMode =
+      mode === 'system'
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        : mode;
+
+    if (this.htmlEl) {
+      this.htmlEl.setAttribute('data-theme', effectiveMode);
+      this.htmlEl.classList.toggle('dark', effectiveMode === 'dark');
+      this.htmlEl.classList.toggle('light', effectiveMode === 'light');
+      this.applyAccentColor(preset.accentColor);
+    }
+  }
+
+  currentTheme(): ThemeConfig {
+    const mode = this.mode();
+    const preset = this.preset();
+    return {
+      mode,
+      accentConfig: {
+        general: preset.accentColor,
+        buttons: preset.accentColor,
+        navigation: preset.accentColor,
+        borders: preset.accentColor,
+        icons: preset.accentColor,
+      },
+      glassOpacity: 0.7,
+    };
+  }
+
+  setAccentColor(color: string): void {
+    this.updateAccentColor(color);
+  }
+
+  setGlassOpacity(_opacity: number): void {}
 
   getAccentGradient(): string {
-    const color = this.getAccentColor();
+    const color = this.preset().accentColor;
     const r = parseInt(color.slice(1, 3), 16);
     const g = parseInt(color.slice(3, 5), 16);
     const b = parseInt(color.slice(5, 7), 16);
@@ -184,24 +229,15 @@ export class ThemeService {
   }
 
   getAccentLightGradient(): string {
-    const color = this.getAccentColor();
+    const color = this.preset().accentColor;
     return `linear-gradient(135deg, ${color}33, ${color}22)`;
   }
 
   getSecondaryAccentGradient(): string {
-    const secondary = this.currentTheme().accentConfig.buttons;
-    const color = this.currentTheme().accentConfig.general;
-    const r = parseInt(secondary.slice(1, 3), 16);
-    const g = parseInt(secondary.slice(3, 5), 16);
-    const b = parseInt(secondary.slice(5, 7), 16);
-    return `linear-gradient(135deg, ${color}, rgba(${r}, ${g}, ${b}, 0.8))`;
+    return this.getAccentGradient();
   }
 
-  getStatIconGradient(category: 'default' | 'success' | 'warning' | 'error' = 'default'): string {
-    const color = this.getAccentColor();
-    const r = parseInt(color.slice(1, 3), 16);
-    const g = parseInt(color.slice(3, 5), 16);
-    const b = parseInt(color.slice(5, 7), 16);
-    return `linear-gradient(135deg, ${color}, rgba(${r}, ${g}, ${b}, 0.8))`;
+  getStatIconGradient(_category: 'default' | 'success' | 'warning' | 'error' = 'default'): string {
+    return this.getAccentGradient();
   }
 }

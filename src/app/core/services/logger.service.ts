@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { invoke } from '@tauri-apps/api/core';
 
 export enum LogLevel {
   Debug = 0,
@@ -21,6 +22,10 @@ export class CoreLoggerService {
   private maxLogs = 1000;
   private level = LogLevel.Info;
 
+  private logToBackend(level: string, message: string, context?: string): void {
+    invoke('log_message', { level, component: context || 'app', message }).catch(() => {});
+  }
+
   private format(level: LogLevel, message: string, context?: string, data?: any): LogEntry {
     return {
       timestamp: new Date().toISOString(),
@@ -33,34 +38,36 @@ export class CoreLoggerService {
 
   debug(message: string, context?: string, data?: any): void {
     if (this.level <= LogLevel.Debug) {
-      this.log(this.format(LogLevel.Debug, message, context, data));
+      this.log(this.format(LogLevel.Debug, message, context, data), context);
     }
   }
 
   info(message: string, context?: string, data?: any): void {
     if (this.level <= LogLevel.Info) {
-      this.log(this.format(LogLevel.Info, message, context, data));
+      this.log(this.format(LogLevel.Info, message, context, data), context);
     }
   }
 
   warn(message: string, context?: string, data?: any): void {
     if (this.level <= LogLevel.Warn) {
-      this.log(this.format(LogLevel.Warn, message, context, data));
+      this.log(this.format(LogLevel.Warn, message, context, data), context);
     }
   }
 
   error(message: string, context?: string, data?: any): void {
     if (this.level <= LogLevel.Error) {
-      this.log(this.format(LogLevel.Error, message, context, data));
+      this.log(this.format(LogLevel.Error, message, context, data), context);
     }
   }
 
-  private log(entry: LogEntry): void {
+  private log(entry: LogEntry, context?: string): void {
     console.log(`[${entry.level}] ${entry.message}`, entry.data || '');
     this.logs.push(entry);
     if (this.logs.length > this.maxLogs) {
       this.logs.shift();
     }
+    const levelStr = ['debug', 'info', 'warn', 'error'][entry.level];
+    this.logToBackend(levelStr, entry.message, context);
   }
 
   getLogs(): LogEntry[] {
