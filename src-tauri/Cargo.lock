@@ -498,7 +498,6 @@ dependencies = [
 name = "cleanux"
 version = "0.2.1"
 dependencies = [
- "async-trait",
  "base64 0.22.1",
  "chrono",
  "dirs 5.0.1",
@@ -521,7 +520,6 @@ dependencies = [
  "tempfile",
  "thiserror 1.0.69",
  "tokio",
- "uuid",
  "walkdir",
 ]
 

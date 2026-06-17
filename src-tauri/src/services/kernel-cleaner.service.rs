@@ -6,7 +6,7 @@ use log;
 
 use crate::models::{AppError, Response, Status};
 use crate::utils::{
-  get_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
+  calculate_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
 };
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -115,7 +115,9 @@ impl KernelCleanerService {
 
     let modules_path = PathBuf::from("/lib/modules").join(version);
     if modules_path.exists() {
-      total_size += get_dir_size(&modules_path);
+      total_size += calculate_dir_size(&modules_path)
+        .map(|(s, _)| s)
+        .unwrap_or(0);
     }
 
     total_size
@@ -212,7 +214,7 @@ impl KernelCleanerService {
 
     let modules_path = PathBuf::from("/lib/modules").join(version);
     if modules_path.exists() {
-      match Self::remove_dir_all(&modules_path) {
+      match fs::remove_dir_all(&modules_path) {
         Ok(_) => removed_items.push(modules_path.to_string_lossy().into_owned()),
         Err(e) => failed_items.push(format!("{}: {}", modules_path.display(), e)),
       }
@@ -267,22 +269,6 @@ impl KernelCleanerService {
         }),
       ))
     }
-  }
-
-  fn remove_dir_all(path: &Path) -> Result<(), std::io::Error> {
-    if path.is_dir() {
-      for entry in fs::read_dir(path)? {
-        let entry = entry?;
-        let entry_path = entry.path();
-        if entry_path.is_dir() {
-          Self::remove_dir_all(&entry_path)?;
-        } else {
-          fs::remove_file(entry_path)?;
-        }
-      }
-      fs::remove_dir(path)?;
-    }
-    Ok(())
   }
 
   pub fn get_old_initramfs(&self) -> Vec<InitramfsInfo> {

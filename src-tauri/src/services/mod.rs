@@ -1,5 +1,8 @@
 /* services module */
 
+#[path = "junk/mod.rs"]
+pub mod junk;
+
 #[path = "automation.service.rs"]
 pub mod automation_service;
 
@@ -75,8 +78,14 @@ pub mod trash_cleaning_service;
 #[path = "junk-cleaner.service.rs"]
 pub mod junk_cleaner_service;
 
+#[path = "app_residue/mod.rs"]
+pub mod app_residue;
+
 #[path = "app-residue.service.rs"]
 pub mod app_residue_service;
+
+#[path = "logs/mod.rs"]
+pub mod logs;
 
 #[path = "log-manager.service.rs"]
 pub mod log_manager_service;

@@ -6,9 +6,8 @@ use std::process::Command;
 use log;
 
 use crate::models::{AppError, Response, Status};
-use crate::utils::{
-  get_dir_size, home_dir, models_into_data_array, stdout_string, success_response,
-};
+use crate::services::app_residue::AppDetector;
+use crate::utils::{calculate_dir_size, home_dir, models_into_data_array, success_response};
 use serde_json::Value;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -47,169 +46,6 @@ pub struct AppResidueSummary {
 pub struct AppResidueService;
 
 impl AppResidueService {
-  fn get_installed_apps() -> HashSet<String> {
-    let mut installed: HashSet<String> = HashSet::new();
-
-    if let Ok(output) = Command::new("dpkg").arg("-l").output() {
-      if output.status.success() {
-        let stdout = stdout_string(&output);
-        for line in stdout.lines().skip(5) {
-          let parts: Vec<&str> = line.split_whitespace().collect();
-          if parts.len() >= 4 {
-            let status = parts[0];
-            let name = parts[3].to_lowercase();
-            if status == "ii" {
-              installed.insert(name.clone());
-              if let Some(descr) = parts.get(4) {
-                let alt_name = format!("{}-{}", name, *descr).to_lowercase();
-                installed.insert(alt_name);
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if let Ok(output) = Command::new("snap").arg("list").output() {
-      if output.status.success() {
-        let stdout = stdout_string(&output);
-        for line in stdout.lines().skip(1) {
-          let parts: Vec<&str> = line.split_whitespace().collect();
-          if !parts.is_empty() {
-            installed.insert(parts[0].to_lowercase());
-          }
-        }
-      }
-    }
-
-    if let Ok(output) = Command::new("flatpak").arg("list").output() {
-      if output.status.success() {
-        let stdout = stdout_string(&output);
-        for line in stdout.lines() {
-          let parts: Vec<&str> = line.split('\t').collect();
-          if !parts.is_empty() {
-            let name = parts[0].to_lowercase();
-            installed.insert(name);
-            if let Some(last) = parts.last() {
-              let alt_name = last.replace('.', "-").to_lowercase();
-              installed.insert(alt_name);
-            }
-          }
-        }
-      }
-    }
-
-    let common_apps = [
-      "code",
-      "visual-studio-code",
-      "firefox",
-      "chrome",
-      "chromium",
-      "brave",
-      "opera",
-      "vlc",
-      "spotify",
-      "discord",
-      "slack",
-      "teams",
-      "zoom",
-      "skype",
-      "telegram",
-      "whatsapp",
-      "signal",
-      "gimp",
-      "inkscape",
-      "blender",
-      "audacity",
-      "obs",
-      "steam",
-      "libreoffice",
-      "openoffice",
-      "thunderbird",
-      "evolution",
-      "nautilus",
-      "dolphin",
-      "konqueror",
-      "nemo",
-      "pcmanfm",
-      "terminal",
-      "gnome-terminal",
-      "konsole",
-      "xfce4-terminal",
-      "file-roller",
-      "ark",
-      "p7zip",
-      "gzip",
-      "tar",
-      "curl",
-      "wget",
-      "ssh",
-      "git",
-      "vim",
-      "nano",
-      "emacs",
-      "atom",
-      "sublime-text",
-      "intellij",
-      "pycharm",
-      "webstorm",
-      "clion",
-      "goland",
-      "rider",
-      "android-studio",
-      "eclipse",
-      "netbeans",
-      "mysql",
-      "postgresql",
-      "redis",
-      "apache",
-      "nginx",
-      "docker",
-      "kubernetes",
-      "kubectl",
-      "helm",
-      "terraform",
-      "ansible",
-      "vagrant",
-      "virtualbox",
-    ];
-    for app in common_apps {
-      installed.insert(app.to_string());
-    }
-
-    installed
-  }
-
-  fn normalize_app_name(name: &str) -> String {
-    name
-      .to_lowercase()
-      .replace(['.', '-', '_'], "-")
-      .replace(|c: char| !c.is_alphanumeric() && c != '-', "")
-  }
-
-  fn matches_installed_app(app_name: &str, installed_apps: &HashSet<String>) -> bool {
-    let normalized = Self::normalize_app_name(app_name);
-
-    if installed_apps.contains(&normalized) {
-      return true;
-    }
-
-    for installed in installed_apps {
-      if normalized.contains(installed) || installed.contains(&normalized) {
-        return true;
-      }
-      let parts: Vec<&str> = normalized.split('-').collect();
-      if parts.len() > 1 {
-        let short_name = parts[0];
-        if normalized.starts_with(short_name) && installed.contains(short_name) {
-          return true;
-        }
-      }
-    }
-
-    false
-  }
-
   pub fn scan_user_configs(&self) -> Vec<AppResidue> {
     let config_dir = match home_dir() {
       Ok(h) => h.join(".config"),
@@ -220,7 +56,7 @@ impl AppResidueService {
       return Vec::new();
     }
 
-    let installed = Self::get_installed_apps();
+    let installed = AppDetector::get_installed_apps();
     let mut residues: Vec<AppResidue> = Vec::new();
 
     if let Ok(entries) = fs::read_dir(&config_dir) {
@@ -235,9 +71,9 @@ impl AppResidueService {
           continue;
         }
 
-        let is_installed = Self::matches_installed_app(&app_name, &installed);
+        let is_installed = AppDetector::matches_installed_app(&app_name, &installed);
 
-        let size = get_dir_size(&path);
+        let size = calculate_dir_size(&path).map(|(s, _)| s).unwrap_or(0);
         if size == 0 && path.is_dir() {
           continue;
         }
@@ -266,7 +102,7 @@ impl AppResidueService {
       return Vec::new();
     }
 
-    let installed = Self::get_installed_apps();
+    let installed = AppDetector::get_installed_apps();
     let mut residues: Vec<AppResidue> = Vec::new();
 
     let known_data_dirs = [
@@ -282,7 +118,7 @@ impl AppResidueService {
     let config_names: HashSet<String> = config_residues
       .iter()
       .filter(|r| r.detected_as_uninstalled)
-      .map(|r| Self::normalize_app_name(&r.app_name))
+      .map(|r| AppDetector::normalize_app_name(&r.app_name))
       .collect();
 
     if let Ok(entries) = fs::read_dir(&data_dir) {
@@ -301,11 +137,11 @@ impl AppResidueService {
           continue;
         }
 
-        let normalized = Self::normalize_app_name(&app_name);
-        let is_installed =
-          config_names.contains(&normalized) || Self::matches_installed_app(&app_name, &installed);
+        let normalized = AppDetector::normalize_app_name(&app_name);
+        let is_installed = config_names.contains(&normalized)
+          || AppDetector::matches_installed_app(&app_name, &installed);
 
-        let size = get_dir_size(&path);
+        let size = calculate_dir_size(&path).map(|(s, _)| s).unwrap_or(0);
         if size == 0 && path.is_dir() {
           continue;
         }
@@ -334,7 +170,7 @@ impl AppResidueService {
       return Vec::new();
     }
 
-    let installed = Self::get_installed_apps();
+    let installed = AppDetector::get_installed_apps();
     let mut residues: Vec<AppResidue> = Vec::new();
 
     if let Ok(entries) = fs::read_dir(&cache_dir) {
@@ -353,9 +189,9 @@ impl AppResidueService {
           continue;
         }
 
-        let is_installed = Self::matches_installed_app(&app_name, &installed);
+        let is_installed = AppDetector::matches_installed_app(&app_name, &installed);
 
-        let size = get_dir_size(&path);
+        let size = calculate_dir_size(&path).map(|(s, _)| s).unwrap_or(0);
         if size == 0 && path.is_dir() {
           continue;
         }
@@ -375,6 +211,8 @@ impl AppResidueService {
   }
 
   pub fn get_orphaned_configs(&self) -> Vec<OrphanedConfig> {
+    use crate::utils::stdout_string;
+
     let mut orphaned: Vec<OrphanedConfig> = Vec::new();
 
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
@@ -412,8 +250,8 @@ impl AppResidueService {
                 .chars()
                 .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
             {
-              let installed = Self::get_installed_apps();
-              if !Self::matches_installed_app(&pkg_name, &installed) {
+              let installed = AppDetector::get_installed_apps();
+              if !AppDetector::matches_installed_app(&pkg_name, &installed) {
                 orphaned.push(OrphanedConfig {
                   path: path.to_string_lossy().into_owned(),
                   package_name: pkg_name,
@@ -436,7 +274,7 @@ impl AppResidueService {
     };
 
     let mut residues: Vec<AppResidue> = Vec::new();
-    let installed = Self::get_installed_apps();
+    let installed = AppDetector::get_installed_apps();
 
     let home_entries = [".config", ".local/share", ".cache"];
     for entry_name in home_entries {
@@ -454,8 +292,8 @@ impl AppResidueService {
               continue;
             }
 
-            let is_installed = Self::matches_installed_app(&app_name, &installed);
-            let size = get_dir_size(&path);
+            let is_installed = AppDetector::matches_installed_app(&app_name, &installed);
+            let size = calculate_dir_size(&path).map(|(s, _)| s).unwrap_or(0);
 
             if size == 0 && path.is_dir() {
               continue;

@@ -2,7 +2,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   inject,
   Input,
   Output,
@@ -31,8 +30,8 @@ import { PaginationComponent } from '../pagination/pagination.component';
 /* models */
 import { ListColumn, ListOptions, ListActionEvent } from '@models/data-list.model';
 import { formatSize } from '@shared/utils/format.util';
-import { CheckboxComponent } from '@shared/checkbox';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { sortData, filterData, getCellValue, rowRecord } from '@shared/utils/list.helpers';
 
 @Component({
   selector: 'app-data-list',
@@ -81,9 +80,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   _originalData: T[] = [];
   _filteredData: T[] = [];
 
-  allSelected = signal(false);
-  indeterminate = signal(false);
-
   sortKey = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc'>('asc');
   searchQuery = signal<string>('');
@@ -101,16 +97,14 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   p = 1;
 
   constructor() {
-    effect(() => {
-      this.searchControl.valueChanges
-        .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-        .subscribe((value: string | null) => {
-          const query = value ?? '';
-          this.searchQuery.set(query);
-          untracked(() => this.onSearch());
-          this.searchChange.emit(query);
-        });
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((value: string | null) => {
+        const query = value ?? '';
+        this.searchQuery.set(query);
+        untracked(() => this.onSearch());
+        this.searchChange.emit(query);
+      });
   }
 
   ngOnDestroy(): void {
@@ -139,24 +133,10 @@ export class DataListComponent<T extends object = object> implements OnChanges {
   }
 
   onSearch(): void {
-    const query = this.searchQuery().toLowerCase().trim();
-    if (!query) {
-      this._filteredData = [...this._originalData];
-      return;
-    }
-
-    this._filteredData = this._originalData.filter((item) => {
-      const record = this.rowRecord(item);
-      return Object.values(record).some((val) => {
-        if (val === null || val === undefined) return false;
-        return String(val).toLowerCase().includes(query);
-      });
-    });
+    this._filteredData = filterData(this._originalData, this.searchQuery(), rowRecord);
   }
 
-  rowRecord(item: T): Record<string, unknown> {
-    return item as unknown as Record<string, unknown>;
-  }
+  rowRecord = rowRecord;
 
   get paginatedData(): T[] {
     const startIndex = (this.p - 1) * this.pageSize;
@@ -168,7 +148,9 @@ export class DataListComponent<T extends object = object> implements OnChanges {
     if (!this.sortKey()) {
       return [...this._filteredData];
     }
-    return this.sortData([...this._filteredData], this.sortKey()!, this.sortDirection());
+    return sortData(this._filteredData, this.sortKey()!, this.sortDirection(), (item, key) =>
+      this.cellValue(item, key)
+    );
   }
 
   get totalItems(): number {
@@ -177,7 +159,7 @@ export class DataListComponent<T extends object = object> implements OnChanges {
 
   onPageChange(page: number): void {
     this.p = page;
-    this.pageChange.emit(this.p);
+    this.pageChange.emit(page);
   }
 
   get showCheckbox(): boolean {
@@ -425,38 +407,12 @@ export class DataListComponent<T extends object = object> implements OnChanges {
 
   updateSelectionState(): void {}
 
-  cellValue(item: T, key: string): unknown {
-    const keys = key.split('.');
-    let value: unknown = item;
-    for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
-        value = (value as Record<string, unknown>)[k];
-      } else {
-        return undefined;
-      }
-    }
-    return value;
-  }
+  cellValue = getCellValue;
 
-  sortData(data: T[], key: string, direction: 'asc' | 'desc'): T[] {
-    return [...data].sort((a, b) => {
-      const aVal = this.cellValue(a, key);
-      const bVal = this.cellValue(b, key);
-
-      if (aVal === null || aVal === undefined) return direction === 'asc' ? 1 : -1;
-      if (bVal === null || bVal === undefined) return direction === 'asc' ? -1 : 1;
-
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return direction === 'asc' ? aVal - bVal : bVal - aVal;
-      }
-
-      const aStr = String(aVal).toLowerCase();
-      const bStr = String(bVal).toLowerCase();
-
-      if (aStr < bStr) return direction === 'asc' ? -1 : 1;
-      if (aStr > bStr) return direction === 'asc' ? 1 : -1;
-      return 0;
-    });
+  formatCell(key: string, item: T): string {
+    const value = this.cellValue(item, key);
+    if (value === null || value === undefined) return '';
+    return String(value);
   }
 
   clearSearch(): void {
@@ -493,12 +449,6 @@ export class DataListComponent<T extends object = object> implements OnChanges {
 
   isSelected(item: T): boolean {
     return this._selectedKeys.has(this.getKey(item));
-  }
-
-  formatCell(key: string, item: T): string {
-    const value = this.cellValue(item, key);
-    if (value === null || value === undefined) return '';
-    return String(value);
   }
 
   trackByFn(index: number, item: T): number {

@@ -33,8 +33,6 @@ flate2 = "1.0"
 rusqlite = { version = "0.32", features = ["bundled"] }
 log = "0.4"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros"] }
-uuid = { version = "1", features = ["v4"] }
-async-trait = "0.1"
 rand = "0.8"
 
 nosql_orm = { git = "https://github.com/rusnakdima/nosql_orm", branch = "main", features = ["json", "query_cache", "validators"] }

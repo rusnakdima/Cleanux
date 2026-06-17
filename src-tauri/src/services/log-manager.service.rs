@@ -4,6 +4,8 @@ use crate::utils::{
 };
 /* models */
 use crate::models::{AppError, Response};
+/* services::logs */
+use crate::services::logs::RotatedLogHandler;
 /* sys lib */
 use chrono::{DateTime, Local};
 use std::fs;
@@ -22,14 +24,7 @@ pub struct JournalInfo {
   pub is_active: bool,
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub struct RotatedLogInfo {
-  pub path: String,
-  pub size_bytes: u64,
-  pub size_human: String,
-  pub modified: String,
-  pub compression_ratio: Option<f64>,
-}
+pub use crate::services::logs::rotated_logs::RotatedLogInfo;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct LogrotateConfig {
@@ -242,152 +237,38 @@ impl LogManagerService {
   }
 
   pub fn get_rotated_logs_size() -> u64 {
-    Self::get_rotated_logs_size_inner().unwrap_or(0)
-  }
-
-  fn get_rotated_logs_size_inner() -> Result<u64, AppError> {
-    let log_dirs = [
-      Path::new("/var/log"),
-      Path::new("/var/log/apache2"),
-      Path::new("/var/log/nginx"),
-      Path::new("/var/log/apache"),
-    ];
-
-    let patterns = [".gz", ".old", ".1", ".2", ".bz2", ".xz", ".lz4"];
-    let mut total_size = 0u64;
-
-    for dir in log_dirs.iter() {
-      if dir.exists() {
-        if let Ok(entries) = fs::read_dir(dir) {
-          for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_file() {
-              if let Some(ext) = path.extension() {
-                let ext_str = ext.to_string_lossy().to_lowercase();
-                if patterns.iter().any(|p| ext_str.contains(p))
-                  || path
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .map(|n| n.ends_with(".1") || n.ends_with(".old") || n.contains("rotate"))
-                    .unwrap_or(false)
-                {
-                  if let Ok(meta) = fs::metadata(&path) {
-                    total_size += meta.len();
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    Ok(total_size)
+    RotatedLogHandler::get_size()
   }
 
   pub fn get_rotated_logs() -> Vec<RotatedLogInfo> {
-    Self::get_rotated_logs_inner().unwrap_or_default()
-  }
-
-  fn get_rotated_logs_inner() -> Result<Vec<RotatedLogInfo>, AppError> {
-    let log_dirs = [
-      Path::new("/var/log"),
-      Path::new("/var/log/apache2"),
-      Path::new("/var/log/nginx"),
-      Path::new("/var/log/apache"),
-    ];
-
-    let patterns = [".gz", ".old", ".1", ".2", ".bz2", ".xz", ".lz4"];
-    let mut logs = Vec::new();
-
-    for dir in log_dirs.iter() {
-      if dir.exists() {
-        if let Ok(entries) = fs::read_dir(dir) {
-          for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_file() {
-              let is_rotated = path
-                .extension()
-                .map(|e| {
-                  let ext = e.to_string_lossy().to_lowercase();
-                  patterns.iter().any(|p| ext.contains(p))
-                })
-                .unwrap_or(false);
-
-              let filename = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-
-              let is_old_log = filename.ends_with(".1")
-                || filename.ends_with(".old")
-                || filename.contains("rotate")
-                || filename.ends_with(".2")
-                || filename.ends_with(".gz");
-
-              if is_rotated || is_old_log {
-                if let Ok(meta) = fs::metadata(&path) {
-                  let modified: DateTime<Local> =
-                    meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
-
-                  logs.push(RotatedLogInfo {
-                    path: path.to_string_lossy().into_owned(),
-                    size_bytes: meta.len(),
-                    size_human: format_size(meta.len()),
-                    modified: modified.format("%Y-%m-%d %H:%M:%S").to_string(),
-                    compression_ratio: None,
-                  });
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    logs.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
-    Ok(logs)
+    RotatedLogHandler::get_logs()
   }
 
   pub fn clean_rotated_logs(
     days: u32,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
-    Self::clean_rotated_logs_inner(days).map_err(|e| e.into_response())
-  }
-
-  fn clean_rotated_logs_inner(days: u32) -> Result<Response<serde_json::Value>, AppError> {
-    let cutoff = SystemTime::now()
-      .checked_sub(std::time::Duration::from_secs(days as u64 * 86400))
-      .unwrap_or(SystemTime::UNIX_EPOCH);
-
-    let logs = Self::get_rotated_logs_inner()?;
-    let mut cleaned_count = 0u32;
-    let mut errors: Vec<String> = Vec::new();
-
-    for log in logs {
-      if let Ok(meta) = fs::metadata(&log.path) {
-        if let Ok(modified) = meta.modified() {
-          if modified < cutoff {
-            match fs::remove_file(&log.path) {
-              Ok(_) => cleaned_count += 1,
-              Err(e) => errors.push(format!("{}: {}", log.path, e)),
-            }
-          }
+    match RotatedLogHandler::clean_old_logs(days) {
+      Ok((count, errors)) => {
+        if errors.is_empty() {
+          Ok(success_response(
+            format!(
+              "Cleaned {} rotated log files older than {} days",
+              count, days
+            ),
+            data_string(count.to_string()),
+          ))
+        } else {
+          Err(
+            AppError::message(format!(
+              "Cleaned {} files, errors: {}",
+              count,
+              errors.join("; ")
+            ))
+            .into_response(),
+          )
         }
       }
-    }
-
-    if errors.is_empty() {
-      Ok(success_response(
-        format!(
-          "Cleaned {} rotated log files older than {} days",
-          cleaned_count, days
-        ),
-        data_string(cleaned_count.to_string()),
-      ))
-    } else {
-      Err(AppError::message(format!(
-        "Cleaned {} files, errors: {}",
-        cleaned_count,
-        errors.join("; ")
-      )))
+      Err(e) => Err(e.into_response()),
     }
   }
 
@@ -548,12 +429,6 @@ impl LogManagerService {
           if let Ok(meta) = fs::metadata(&entry_path) {
             let modified: DateTime<Local> =
               meta.modified().unwrap_or(SystemTime::UNIX_EPOCH).into();
-
-            let _filename = entry_path
-              .file_name()
-              .and_then(|n| n.to_str())
-              .unwrap_or("")
-              .to_string();
 
             let extension = entry_path
               .extension()
