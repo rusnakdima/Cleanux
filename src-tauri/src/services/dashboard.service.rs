@@ -13,17 +13,18 @@ fn is_cache_file(name: &OsStr) -> bool {
 }
 
 /* models */
-use crate::models::{DataValue, ResponseModel, ScanSummaryModel, SystemServiceModel};
+use crate::models::{Response, ScanSummaryModel, SystemServiceModel};
+use serde_json::Value;
 
 /* helpers */
-use crate::helpers::{home_dir, stderr_string, stdout_string, ResponseBuilder};
+use crate::utils::{home_dir, stderr_string, stdout_string, ResponseBuilder};
 use rayon::prelude::*;
 use walkdir::WalkDir;
 
 pub struct DashboardService;
 
 impl DashboardService {
-  pub fn get_running_services(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_running_services(&self) -> Result<Response<Value>, Response<Value>> {
     #[cfg(target_os = "linux")]
     {
       let output = Command::new("systemctl")
@@ -70,7 +71,7 @@ impl DashboardService {
       Ok(
         ResponseBuilder::new()
           .success("Running services retrieved successfully")
-          .data(DataValue::Array(
+          .data(Value::Array(
             services
               .into_iter()
               .map(|s| serde_json::to_value(s).map_err(|e| format!("Serialization error: {}", e)))
@@ -81,7 +82,7 @@ impl DashboardService {
     }
   }
 
-  pub fn get_cache_summary(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_cache_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let cache_dir = dirs::cache_dir().ok_or("Cache directory not found")?;
 
     let entries: Vec<_> = WalkDir::new(cache_dir)
@@ -109,14 +110,12 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Large files summary retrieved successfully")
-        .data(DataValue::Object(
-          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
-        ))
+        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
         .build(),
     )
   }
 
-  pub fn get_trash_summary(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_trash_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let home = home_dir().map_err(|_| "Home directory not found")?;
     let trash_dir = home.join(".local/share/Trash/files");
     let mut total_size = 0;
@@ -139,14 +138,12 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Trash summary retrieved successfully")
-        .data(DataValue::Object(
-          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
-        ))
+        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
         .build(),
     )
   }
 
-  pub fn get_log_summary(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_log_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let log_dir = Path::new("/var/log");
 
     let entries: Vec<_> = WalkDir::new(log_dir)
@@ -178,14 +175,12 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Log summary retrieved successfully")
-        .data(DataValue::Object(
-          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
-        ))
+        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
         .build(),
     )
   }
 
-  pub fn get_large_files_summary(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_large_files_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let home = home_dir().map_err(|_| "Home directory not found")?;
     let threshold = 100 * 1024 * 1024;
 
@@ -228,9 +223,7 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Large files summary retrieved successfully")
-        .data(DataValue::Object(
-          serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?,
-        ))
+        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
         .build(),
     )
   }

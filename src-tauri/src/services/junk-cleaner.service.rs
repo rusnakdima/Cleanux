@@ -1,11 +1,12 @@
 /* helpers */
-use crate::helpers::common_paths::CommonPath;
-use crate::helpers::{
+use crate::utils::common_paths::CommonPath;
+use crate::utils::{
   calculate_dir_size, data_string, remove_dir_contents, service_method_full, success_response,
 };
 /* models */
-use crate::models::{AppError, DataValue, ResponseModel};
+use crate::models::{AppError, Response};
 /* sys lib */
+use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -43,7 +44,7 @@ pub struct JunkCleanerService;
 impl JunkCleanerService {
   service_method_full!(get_junk_summary => get_junk_summary_inner);
 
-  fn get_junk_summary_inner(&self) -> CleanerResult<ResponseModel> {
+  fn get_junk_summary_inner(&self) -> CleanerResult<Response<Value>> {
     let mut summary = serde_json::Map::new();
 
     let browser = self.scan_browser_caches_inner()?;
@@ -140,24 +141,24 @@ impl JunkCleanerService {
 
     Ok(success_response(
       "Junk summary retrieved successfully",
-      DataValue::Object(serde_json::Value::Object(summary)),
+      Value::Object(summary),
     ))
   }
 
-  pub fn scan_browser_caches(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_browser_caches(&self) -> Result<Response<Value>, Response<Value>> {
     match self.scan_browser_caches_inner() {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
           format!("Found {} browser cache items ({} bytes)", items.len(), size),
-          DataValue::Object(serde_json::json!({
+          serde_json::json!({
             "category": "Browser",
             "total_size": size,
             "file_count": count,
             "description": "Browser cache files (Firefox, Chrome, Brave, Edge)",
             "items": items,
-          })),
+          }),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -193,7 +194,7 @@ impl JunkCleanerService {
     Ok(items)
   }
 
-  pub fn scan_thumbnail_caches(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_thumbnail_caches(&self) -> Result<Response<Value>, Response<Value>> {
     match self.scan_thumbnail_caches_inner() {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
@@ -204,13 +205,13 @@ impl JunkCleanerService {
             items.len(),
             size
           ),
-          DataValue::Object(serde_json::json!({
+          serde_json::json!({
             "category": "Thumbnails",
             "total_size": size,
             "file_count": count,
             "description": "Image thumbnail cache",
             "items": items,
-          })),
+          }),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -236,7 +237,7 @@ impl JunkCleanerService {
     }])
   }
 
-  pub fn scan_application_caches(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_application_caches(&self) -> Result<Response<Value>, Response<Value>> {
     match self.scan_application_caches_inner() {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
@@ -247,13 +248,13 @@ impl JunkCleanerService {
             items.len(),
             size
           ),
-          DataValue::Object(serde_json::json!({
+          serde_json::json!({
             "category": "Applications",
             "total_size": size,
             "file_count": count,
             "description": "Application caches (Flatpak, Snap, AppImage)",
             "items": items,
-          })),
+          }),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -315,20 +316,20 @@ impl JunkCleanerService {
     Ok(items)
   }
 
-  pub fn scan_system_temp(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_system_temp(&self) -> Result<Response<Value>, Response<Value>> {
     match self.scan_system_temp_inner() {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
           format!("Found {} system temp items ({} bytes)", items.len(), size),
-          DataValue::Object(serde_json::json!({
+          serde_json::json!({
             "category": "System",
             "total_size": size,
             "file_count": count,
             "description": "System temporary files (/tmp, /var/tmp)",
             "items": items,
-          })),
+          }),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -360,20 +361,20 @@ impl JunkCleanerService {
     Ok(items)
   }
 
-  pub fn scan_log_rotations(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_log_rotations(&self) -> Result<Response<Value>, Response<Value>> {
     match self.scan_log_rotations_inner() {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
           format!("Found {} log rotation items ({} bytes)", items.len(), size),
-          DataValue::Object(serde_json::json!({
+          serde_json::json!({
             "category": "Logs",
             "total_size": size,
             "file_count": count,
             "description": "Rotated and old log files",
             "items": items,
-          })),
+          }),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -433,13 +434,13 @@ impl JunkCleanerService {
     Ok(items)
   }
 
-  pub fn clean_junk_category(&self, category: String) -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_junk_category(&self, category: String) -> Result<Response<Value>, Response<Value>> {
     self
       .clean_junk_category_inner(category)
       .map_err(|e| e.into_response())
   }
 
-  fn clean_junk_category_inner(&self, category: String) -> CleanerResult<ResponseModel> {
+  fn clean_junk_category_inner(&self, category: String) -> CleanerResult<Response<Value>> {
     let cat = match category.to_lowercase().as_str() {
       "browser" => JunkCategory::Browser,
       "thumbnails" => JunkCategory::Thumbnails,
@@ -464,7 +465,7 @@ impl JunkCleanerService {
     &self,
     paths: &[(PathBuf, &str)],
     description: &str,
-  ) -> CleanerResult<ResponseModel> {
+  ) -> CleanerResult<Response<Value>> {
     let mut cleaned_count = 0u32;
     let mut errors: Vec<String> = Vec::new();
 
@@ -491,7 +492,7 @@ impl JunkCleanerService {
     }
   }
 
-  fn clean_browser_caches(&self) -> CleanerResult<ResponseModel> {
+  fn clean_browser_caches(&self) -> CleanerResult<Response<Value>> {
     let browser_paths = [
       CommonPath::MozillaCache,
       CommonPath::ChromeCache,
@@ -527,7 +528,7 @@ impl JunkCleanerService {
     }
   }
 
-  fn clean_thumbnail_caches(&self) -> CleanerResult<ResponseModel> {
+  fn clean_thumbnail_caches(&self) -> CleanerResult<Response<Value>> {
     let path = CommonPath::Thumbnails
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -551,7 +552,7 @@ impl JunkCleanerService {
     }
   }
 
-  fn clean_application_caches(&self) -> CleanerResult<ResponseModel> {
+  fn clean_application_caches(&self) -> CleanerResult<Response<Value>> {
     let paths = [
       (CommonPath::FlatpakCache, "Flatpak"),
       (CommonPath::FlatpakAlt, "Flatpak alt"),
@@ -590,7 +591,7 @@ impl JunkCleanerService {
     }
   }
 
-  fn clean_system_temp(&self) -> CleanerResult<ResponseModel> {
+  fn clean_system_temp(&self) -> CleanerResult<Response<Value>> {
     let temp_paths: Vec<(PathBuf, &str)> = ["/tmp", "/var/tmp"]
       .iter()
       .map(|p| (PathBuf::from(p), *p))
@@ -599,7 +600,7 @@ impl JunkCleanerService {
     self.clean_paths(&temp_paths, "temporary directories")
   }
 
-  fn clean_log_rotations(&self) -> CleanerResult<ResponseModel> {
+  fn clean_log_rotations(&self) -> CleanerResult<Response<Value>> {
     let log_dir = Path::new("/var/log");
     if !log_dir.exists() {
       return Ok(success_response(

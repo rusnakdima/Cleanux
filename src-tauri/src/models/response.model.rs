@@ -1,139 +1,84 @@
-/* sys lib */
 use serde::{Deserialize, Serialize};
 
-use crate::errors::AppError;
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
-pub enum ResponseStatus {
+pub enum Status {
   Success,
   Info,
   Warning,
   Error,
+  Created,
+  Updated,
+  Deleted,
+  ValidationError,
+  NotFound,
+  Unauthorized,
+  Forbidden,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(untagged)]
-pub enum DataValue {
-  String(String),
-  Number(f64),
-  Bool(bool),
-  Array(Vec<serde_json::Value>),
-  Object(serde_json::Value),
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PaginatedData<T> {
-  pub data: Vec<T>,
-  pub has_more: bool,
-  pub total: usize,
-}
-
-impl<T: Serialize> PaginatedData<T> {
-  pub fn new(data: Vec<T>, has_more: bool, total: usize) -> Self {
-    Self {
-      data,
-      has_more,
-      total,
-    }
-  }
-}
-
-impl From<serde_json::Value> for DataValue {
-  fn from(v: serde_json::Value) -> Self {
-    DataValue::Object(v)
-  }
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ResponseModel {
-  pub status: ResponseStatus,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Response<T = serde_json::Value> {
+  pub status: Status,
   pub message: String,
-  pub data: DataValue,
+  pub data: T,
 }
 
-impl std::fmt::Display for ResponseModel {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "{}", self.message)
-  }
-}
-
-impl From<Box<dyn std::error::Error + Send + Sync>> for ResponseModel {
-  fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Error,
-      message: error.to_string(),
-      data: DataValue::String("".to_string()),
+impl<T> Response<T> {
+  pub fn success(message: impl Into<String>, data: T) -> Self {
+    Self {
+      status: Status::Success,
+      message: message.into(),
+      data,
     }
   }
-}
 
-impl From<String> for ResponseModel {
-  fn from(error: String) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Error,
-      message: error,
-      data: DataValue::String("".to_string()),
+  pub fn error(status: Status, message: impl Into<String>) -> Self
+  where
+    T: Default,
+  {
+    Self {
+      status,
+      message: message.into(),
+      data: T::default(),
     }
   }
 }
 
-impl From<&str> for ResponseModel {
-  fn from(error: &str) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Error,
-      message: error.to_string(),
-      data: DataValue::String("".to_string()),
-    }
+impl<T: Serialize> Response<T> {
+  pub fn to_json_value(self) -> serde_json::Value {
+    serde_json::to_value(self).unwrap_or_else(|_| {
+      serde_json::json!({
+          "status": "error",
+          "message": "Serialization failed",
+          "data": null
+      })
+    })
   }
 }
 
-impl ResponseModel {
-  pub fn new_false(message: &str) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Error,
-      message: message.to_string(),
-      data: DataValue::String(String::new()),
-    }
-  }
-
-  pub fn new_success(message: &str) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Success,
-      message: message.to_string(),
-      data: DataValue::String(String::new()),
-    }
-  }
-
-  pub fn new_success_with_data(message: &str, data: serde_json::Value) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Success,
-      message: message.to_string(),
-      data: DataValue::Object(data),
-    }
-  }
-
-  pub fn new_success_with_array(message: &str, data: Vec<serde_json::Value>) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Success,
-      message: message.to_string(),
-      data: DataValue::Array(data),
-    }
+impl Default for Status {
+  fn default() -> Self {
+    Status::Success
   }
 }
 
-impl From<AppError> for ResponseModel {
+use crate::errors::AppError;
+
+impl From<AppError> for Response<serde_json::Value> {
   fn from(error: AppError) -> Self {
     error.into_response()
   }
 }
 
-impl From<nosql_orm::error::OrmError> for ResponseModel {
-  fn from(error: nosql_orm::error::OrmError) -> Self {
-    ResponseModel {
-      status: ResponseStatus::Error,
-      message: error.to_string(),
-      data: DataValue::String("".to_string()),
-    }
+impl From<String> for Response<serde_json::Value> {
+  fn from(error: String) -> Self {
+    Response::error(Status::Error, error)
+  }
+}
+
+impl From<&str> for Response<serde_json::Value> {
+  fn from(error: &str) -> Self {
+    Response::error(Status::Error, error.to_string())
   }
 }

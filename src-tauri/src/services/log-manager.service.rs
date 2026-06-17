@@ -1,9 +1,9 @@
 /* helpers */
-use crate::helpers::{
+use crate::utils::{
   data_string, format_size, get_dir_size, stderr_string, stdout_string, success_response,
 };
 /* models */
-use crate::models::{AppError, ResponseModel};
+use crate::models::{AppError, Response};
 /* sys lib */
 use chrono::{DateTime, Local};
 use std::fs;
@@ -185,7 +185,9 @@ impl LogManagerService {
     let _ = Command::new("journalctl").args(["--flush"]).output();
   }
 
-  pub fn vacuum_journal(size_mb: u32) -> Result<ResponseModel, ResponseModel> {
+  pub fn vacuum_journal(
+    size_mb: u32,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::prepare_journal_vacuum();
 
     let vacuum_output = Command::new("journalctl")
@@ -211,7 +213,9 @@ impl LogManagerService {
     }
   }
 
-  pub fn vacuum_journal_by_days(days: u32) -> Result<ResponseModel, ResponseModel> {
+  pub fn vacuum_journal_by_days(
+    days: u32,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::prepare_journal_vacuum();
 
     let vacuum_output = Command::new("journalctl")
@@ -342,11 +346,13 @@ impl LogManagerService {
     Ok(logs)
   }
 
-  pub fn clean_rotated_logs(days: u32) -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_rotated_logs(
+    days: u32,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::clean_rotated_logs_inner(days).map_err(|e| e.into_response())
   }
 
-  fn clean_rotated_logs_inner(days: u32) -> Result<ResponseModel, AppError> {
+  fn clean_rotated_logs_inner(days: u32) -> Result<Response<serde_json::Value>, AppError> {
     let cutoff = SystemTime::now()
       .checked_sub(std::time::Duration::from_secs(days as u64 * 86400))
       .unwrap_or(SystemTime::UNIX_EPOCH);

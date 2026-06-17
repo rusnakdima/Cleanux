@@ -1,7 +1,8 @@
-use crate::helpers::{
+use crate::models::{AppError, Response};
+use crate::utils::{
   calculate_dir_size, data_string, stderr_string, stdout_string, success_response,
 };
-use crate::models::{AppError, DataValue, ResponseModel};
+use serde_json::Value;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -17,11 +18,11 @@ pub struct PackageCacheInfo {
 }
 
 impl PackageService {
-  pub fn get_package_cache_info() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_package_cache_info() -> Result<Response<Value>, Response<Value>> {
     Self::get_package_cache_info_inner().map_err(|e| e.into_response())
   }
 
-  fn get_package_cache_info_inner() -> Result<ResponseModel, AppError> {
+  fn get_package_cache_info_inner() -> Result<Response<Value>, AppError> {
     let mut cache_infos: Vec<PackageCacheInfo> = Vec::new();
 
     let configs = Self::get_cache_info_configs();
@@ -57,7 +58,7 @@ impl PackageService {
 
     Ok(success_response(
       "Package cache info retrieved successfully",
-      DataValue::Array(data),
+      Value::Array(data),
     ))
   }
 
@@ -101,11 +102,11 @@ impl PackageService {
     ]
   }
 
-  pub fn clean_package_cache(manager: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_package_cache(manager: &str) -> Result<Response<Value>, Response<Value>> {
     Self::clean_package_cache_inner(manager).map_err(|e| e.into_response())
   }
 
-  fn clean_package_cache_inner(manager: &str) -> Result<ResponseModel, AppError> {
+  fn clean_package_cache_inner(manager: &str) -> Result<Response<Value>, AppError> {
     match manager {
       "snap" => Self::clean_snap(),
       "flatpak" => Self::clean_flatpak(),
@@ -117,7 +118,7 @@ impl PackageService {
     }
   }
 
-  fn clean_snap() -> Result<ResponseModel, AppError> {
+  fn clean_snap() -> Result<Response<Value>, AppError> {
     let output = Command::new("snap")
       .args(["list", "--all"])
       .output()
@@ -171,7 +172,7 @@ impl PackageService {
     ))
   }
 
-  fn clean_flatpak() -> Result<ResponseModel, AppError> {
+  fn clean_flatpak() -> Result<Response<Value>, AppError> {
     let output = Command::new("flatpak")
       .args(["uninstall", "--unused", "-y"])
       .output()
@@ -184,14 +185,14 @@ impl PackageService {
       ))
     } else {
       let stderr = stderr_string(&output);
-      Ok(crate::helpers::info_response(
+      Ok(crate::utils::info_response(
         format!("Flatpak cleanup: {}", stderr),
         data_string("flatpak"),
       ))
     }
   }
 
-  fn clean_yum() -> Result<ResponseModel, AppError> {
+  fn clean_yum() -> Result<Response<Value>, AppError> {
     let output = Command::new("yum")
       .args(["clean", "all"])
       .output()

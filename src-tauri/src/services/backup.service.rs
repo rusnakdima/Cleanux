@@ -1,9 +1,10 @@
-use crate::helpers::{data_empty_string, data_string, success_response};
 use crate::models::AppError;
-use crate::models::{DataValue, ResponseModel};
+use crate::models::Response;
+use crate::utils::{data_empty_string, data_string, success_response};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
+use serde_json::Value;
 use std::fs::{self, File};
 use std::path::Path;
 
@@ -15,11 +16,11 @@ impl BackupService {
   pub fn create_backup(
     paths: Vec<String>,
     archive_path: &str,
-  ) -> Result<ResponseModel, ResponseModel> {
+  ) -> Result<Response<Value>, Response<Value>> {
     Self::create_backup_inner(paths, archive_path).map_err(|e| e.into_response())
   }
 
-  fn create_backup_inner(paths: Vec<String>, archive_path: &str) -> BackupResult<ResponseModel> {
+  fn create_backup_inner(paths: Vec<String>, archive_path: &str) -> BackupResult<Response<Value>> {
     let tar_gz = File::create(archive_path)?;
     let encoder = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(encoder);
@@ -53,11 +54,11 @@ impl BackupService {
   pub fn restore_backup(
     archive_path: &str,
     destination: &str,
-  ) -> Result<ResponseModel, ResponseModel> {
+  ) -> Result<Response<Value>, Response<Value>> {
     Self::restore_backup_inner(archive_path, destination).map_err(|e| e.into_response())
   }
 
-  fn restore_backup_inner(archive_path: &str, destination: &str) -> BackupResult<ResponseModel> {
+  fn restore_backup_inner(archive_path: &str, destination: &str) -> BackupResult<Response<Value>> {
     let file = File::open(archive_path)?;
     let decoder = GzDecoder::new(file);
     let mut archive = tar::Archive::new(decoder);
@@ -73,14 +74,14 @@ impl BackupService {
     ))
   }
 
-  pub fn list_backups() -> Result<ResponseModel, ResponseModel> {
+  pub fn list_backups() -> Result<Response<Value>, Response<Value>> {
     Self::list_backups_inner().map_err(|e| e.into_response())
   }
 
-  fn list_backups_inner() -> BackupResult<ResponseModel> {
+  fn list_backups_inner() -> BackupResult<Response<Value>> {
     let backup_dir = Self::get_backup_dir()?;
     if !backup_dir.exists() {
-      return Ok(success_response("No backups found", data_string("[]")));
+      return Ok(success_response("No backups found", Value::Array(vec![])));
     }
 
     let mut backups: Vec<serde_json::Value> = Vec::new();
@@ -119,15 +120,15 @@ impl BackupService {
 
     Ok(success_response(
       format!("Found {} backups", backups.len()),
-      DataValue::Array(backups),
+      Value::Array(backups),
     ))
   }
 
-  pub fn delete_backup(archive_path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn delete_backup(archive_path: &str) -> Result<Response<Value>, Response<Value>> {
     Self::delete_backup_inner(archive_path).map_err(|e| e.into_response())
   }
 
-  fn delete_backup_inner(archive_path: &str) -> BackupResult<ResponseModel> {
+  fn delete_backup_inner(archive_path: &str) -> BackupResult<Response<Value>> {
     let path = Path::new(archive_path);
     if !path.exists() {
       return Err(AppError::BackupFailed("Backup file not found".to_string()));

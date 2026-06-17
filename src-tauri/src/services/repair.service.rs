@@ -2,8 +2,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use crate::helpers::{home_dir, stderr_string, stdout_string};
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::{Response, Status};
+use crate::utils::{home_dir, stderr_string, stdout_string};
+use serde_json::Value;
 use walkdir::WalkDir;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -30,7 +31,7 @@ fn get_common_dirs() -> Vec<PathBuf> {
 
 #[allow(non_snake_case)]
 impl RepairService {
-  pub fn find_broken_symlinks() -> Result<ResponseModel, ResponseModel> {
+  pub fn find_broken_symlinks() -> Result<Response<Value>, Response<Value>> {
     let mut broken_links: Vec<RepairItem> = Vec::new();
 
     for dir in get_common_dirs() {
@@ -63,10 +64,10 @@ impl RepairService {
       }
     }
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Found {} broken symlinks", broken_links.len()),
-      data: DataValue::Array(
+      data: Value::Array(
         broken_links
           .into_iter()
           .map(serde_json::to_value)
@@ -76,7 +77,7 @@ impl RepairService {
     })
   }
 
-  pub fn find_orphaned_packages() -> Result<ResponseModel, ResponseModel> {
+  pub fn find_orphaned_packages() -> Result<Response<Value>, Response<Value>> {
     let mut orphaned: Vec<RepairItem> = Vec::new();
 
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
@@ -138,10 +139,10 @@ impl RepairService {
       }
     }
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Found {} orphaned packages", orphaned.len()),
-      data: DataValue::Array(
+      data: Value::Array(
         orphaned
           .into_iter()
           .map(serde_json::to_value)
@@ -151,17 +152,17 @@ impl RepairService {
     })
   }
 
-  pub fn clean_font_cache() -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_font_cache() -> Result<Response<Value>, Response<Value>> {
     let font_cache_path = home_dir()
       .map(|h| h.join(".cache/fontconfig"))
       .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/fontconfig"));
 
     if !font_cache_path.exists() {
-      return Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      return Ok(Response {
+        status: Status::Success,
         message: "Font cache directory does not exist".to_string(),
-        data: DataValue::Array(vec![]),
+        data: Value::Array(vec![]),
       });
     }
 
@@ -191,21 +192,21 @@ impl RepairService {
     });
 
     if failed.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Cleaned {} font cache files", removed_count),
-        data: DataValue::Object(result),
+        data: result,
       })
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Cleaned {} files, {} failed", removed_count, failed.len()),
-        data: DataValue::Object(result),
+        data: result,
       })
     }
   }
 
-  pub fn clean_icon_cache() -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_icon_cache() -> Result<Response<Value>, Response<Value>> {
     let icon_cache_path = home_dir()
       .map(|h| h.join(".cache/icon-cache"))
       .ok()
@@ -247,21 +248,21 @@ impl RepairService {
     });
 
     if failed.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Cleaned {} icon cache files", removed_count),
-        data: DataValue::Object(result),
+        data: result,
       })
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Cleaned {} files, {} failed", removed_count, failed.len()),
-        data: DataValue::Object(result),
+        data: result,
       })
     }
   }
 
-  pub fn repair_permissions() -> Result<ResponseModel, ResponseModel> {
+  pub fn repair_permissions() -> Result<Response<Value>, Response<Value>> {
     let mut repaired_count = 0;
     let mut failed: Vec<String> = Vec::new();
 
@@ -299,62 +300,62 @@ impl RepairService {
     });
 
     if failed.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Repaired permissions for {} items", repaired_count),
-        data: DataValue::Object(result),
+        data: result,
       })
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Repaired {} items, {} failed", repaired_count, failed.len()),
-        data: DataValue::Object(result),
+        data: result,
       })
     }
   }
 
-  pub fn remove_broken_symlink(path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn remove_broken_symlink(path: &str) -> Result<Response<Value>, Response<Value>> {
     let symlink_path = Path::new(path);
 
     if !symlink_path.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Bool(false),
+        data: Value::Bool(false),
       });
     }
 
     if !symlink_path.is_symlink() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path is not a symlink: {}", path),
-        data: DataValue::Bool(false),
+        data: Value::Bool(false),
       });
     }
 
     match fs::remove_file(path) {
-      Ok(_) => Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(_) => Ok(Response {
+        status: Status::Success,
         message: format!("Removed broken symlink: {}", path),
-        data: DataValue::Bool(true),
+        data: Value::Bool(true),
       }),
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
+      Err(e) => Err(Response {
+        status: Status::Error,
         message: format!("Failed to remove symlink: {} - {}", path, e),
-        data: DataValue::Bool(false),
+        data: Value::Bool(false),
       }),
     }
   }
 
-  pub fn remove_orphaned_package(path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn remove_orphaned_package(path: &str) -> Result<Response<Value>, Response<Value>> {
     let is_valid_package_name = path
       .chars()
       .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '_' || c == '-' || c == '+');
     if !is_valid_package_name || path.is_empty() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Invalid package name format: {}", path),
-        data: DataValue::Bool(false),
+        data: Value::Bool(false),
       });
     }
 
@@ -363,24 +364,24 @@ impl RepairService {
     match output {
       Ok(result) => {
         if result.status.success() {
-          Ok(ResponseModel {
-            status: ResponseStatus::Success,
+          Ok(Response {
+            status: Status::Success,
             message: format!("Purged package: {}", path),
-            data: DataValue::Bool(true),
+            data: Value::Bool(true),
           })
         } else {
           let stderr = stderr_string(&result);
-          Err(ResponseModel {
-            status: ResponseStatus::Error,
+          Err(Response {
+            status: Status::Error,
             message: format!("Failed to purge package {}: {}", path, stderr),
-            data: DataValue::Bool(false),
+            data: Value::Bool(false),
           })
         }
       }
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
+      Err(e) => Err(Response {
+        status: Status::Error,
         message: format!("Failed to execute dpkg: {}", e),
-        data: DataValue::Bool(false),
+        data: Value::Bool(false),
       }),
     }
   }

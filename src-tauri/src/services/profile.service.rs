@@ -1,7 +1,7 @@
 /* models */
-use crate::models::{AppError, CleaningProfile, DataValue, ResponseModel};
+use crate::models::{AppError, CleaningProfile, Response};
 /* helpers */
-use crate::helpers::{data_empty_string, data_string, home_dir, success_response};
+use crate::utils::{data_empty_string, data_string, home_dir, success_response};
 /* sys lib */
 use std::fs;
 use std::path::PathBuf;
@@ -32,11 +32,13 @@ impl ProfileService {
     Ok(dir.join(format!("{}.json", safe_name)))
   }
 
-  pub fn save_profile(profile: CleaningProfile) -> Result<ResponseModel, ResponseModel> {
+  pub fn save_profile(
+    profile: CleaningProfile,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::save_profile_inner(profile).map_err(|e| e.into_response())
   }
 
-  fn save_profile_inner(profile: CleaningProfile) -> ProfileResult<ResponseModel> {
+  fn save_profile_inner(profile: CleaningProfile) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(&profile.name)?;
     let json = serde_json::to_string_pretty(&profile)
       .map_err(|e| AppError::message(format!("Failed to serialize profile: {}", e)))?;
@@ -48,11 +50,13 @@ impl ProfileService {
     ))
   }
 
-  pub fn load_profile(name: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn load_profile(
+    name: &str,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::load_profile_inner(name).map_err(|e| e.into_response())
   }
 
-  fn load_profile_inner(name: &str) -> ProfileResult<ResponseModel> {
+  fn load_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
       return Err(AppError::message("Profile not found"));
@@ -63,15 +67,15 @@ impl ProfileService {
       .map_err(|e| AppError::message(format!("Failed to parse profile: {}", e)))?;
     Ok(success_response(
       format!("Profile '{}' loaded successfully", name),
-      DataValue::Object(serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null)),
+      serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null),
     ))
   }
 
-  pub fn list_profiles() -> Result<ResponseModel, ResponseModel> {
+  pub fn list_profiles() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::list_profiles_inner().map_err(|e| e.into_response())
   }
 
-  fn list_profiles_inner() -> ProfileResult<ResponseModel> {
+  fn list_profiles_inner() -> ProfileResult<Response<serde_json::Value>> {
     let dir = Self::ensure_profiles_dir()?;
     let mut profiles: Vec<serde_json::Value> = Vec::new();
 
@@ -102,15 +106,17 @@ impl ProfileService {
 
     Ok(success_response(
       format!("Found {} profiles", profiles.len()),
-      DataValue::Array(profiles),
+      serde_json::Value::Array(profiles),
     ))
   }
 
-  pub fn delete_profile(name: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn delete_profile(
+    name: &str,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::delete_profile_inner(name).map_err(|e| e.into_response())
   }
 
-  fn delete_profile_inner(name: &str) -> ProfileResult<ResponseModel> {
+  fn delete_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
       return Err(AppError::message("Profile not found"));
@@ -123,11 +129,14 @@ impl ProfileService {
     ))
   }
 
-  pub fn apply_profile(&self, name: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn apply_profile(
+    &self,
+    name: &str,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::apply_profile_inner(name).map_err(|e| e.into_response())
   }
 
-  fn apply_profile_inner(name: &str) -> ProfileResult<ResponseModel> {
+  fn apply_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
       return Err(AppError::message("Profile not found"));

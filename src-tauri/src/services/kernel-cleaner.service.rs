@@ -4,10 +4,10 @@ use std::process::Command;
 
 use log;
 
-use crate::helpers::{
+use crate::models::{AppError, Response, Status};
+use crate::utils::{
   get_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
 };
-use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KernelInfo {
@@ -143,27 +143,28 @@ impl KernelCleanerService {
     self.get_old_kernels().iter().map(|k| k.size).sum()
   }
 
-  pub fn remove_kernel(&self, version: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn remove_kernel(
+    &self,
+    version: &str,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     log::info!("Attempting to remove kernel version: {}", version);
     let current = self.get_current_kernel();
 
     if version == current {
       log::warn!("Cannot remove currently running kernel: {}", version);
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: "Cannot remove the currently running kernel!".to_string(),
-        data: DataValue::Bool(false),
-      });
+      return Err(Response::error(
+        Status::Error,
+        "Cannot remove the currently running kernel!".to_string(),
+      ));
     }
 
     let all_kernels = self.get_installed_kernels();
     if all_kernels.len() <= 1 {
       log::warn!("Cannot remove last remaining kernel");
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: "Cannot remove the last remaining kernel!".to_string(),
-        data: DataValue::Bool(false),
-      });
+      return Err(Response::error(
+        Status::Error,
+        "Cannot remove the last remaining kernel!".to_string(),
+      ));
     }
 
     let latest_version = all_kernels
@@ -173,22 +174,19 @@ impl KernelCleanerService {
 
     if version == latest_version {
       log::warn!("Cannot remove latest kernel (fallback kernel): {}", version);
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: "Cannot remove the latest kernel (fallback kernel). Remove old kernels first."
-          .to_string(),
-        data: DataValue::Bool(false),
-      });
+      return Err(Response::error(
+        Status::Error,
+        "Cannot remove the latest kernel (fallback kernel). Remove old kernels first.".to_string(),
+      ));
     }
 
     let kernel_exists = all_kernels.iter().any(|k| k.version == version);
     if !kernel_exists {
       log::error!("Kernel version {} not found", version);
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Kernel version {} not found", version),
-        data: DataValue::Bool(false),
-      });
+      return Err(Response::error(
+        Status::Error,
+        format!("Kernel version {} not found", version),
+      ));
     }
 
     let mut removed_items: Vec<String> = Vec::new();
@@ -245,31 +243,29 @@ impl KernelCleanerService {
         removed_items.len()
       );
 
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!(
+      Ok(Response::success(
+        format!(
           "Successfully removed kernel {} ({} items removed)",
           version,
           removed_items.len()
         ),
-        data: DataValue::Object(serde_json::json!({
+        serde_json::json!({
             "removed": removed_items,
             "failed": failed_items
-        })),
-      })
+        }),
+      ))
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!(
+      Ok(Response::success(
+        format!(
           "Removed kernel {} with {} failures",
           version,
           failed_items.len()
         ),
-        data: DataValue::Object(serde_json::json!({
+        serde_json::json!({
             "removed": removed_items,
             "failed": failed_items
-        })),
-      })
+        }),
+      ))
     }
   }
 
@@ -326,7 +322,10 @@ impl KernelCleanerService {
     initramfs_files
   }
 
-  pub fn remove_initramfs(&self, version: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn remove_initramfs(
+    &self,
+    version: &str,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let boot_path = get_boot_path();
 
     let patterns = vec![
@@ -354,25 +353,23 @@ impl KernelCleanerService {
     }
 
     if failed.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Removed {} initramfs files", removed.len()),
-        data: DataValue::Object(serde_json::json!({
+      Ok(Response::success(
+        format!("Removed {} initramfs files", removed.len()),
+        serde_json::json!({
             "removed": removed.len(),
             "files": removed
-        })),
-      })
+        }),
+      ))
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: format!("Removed {} files, {} failed", removed.len(), failed.len()),
-        data: DataValue::Object(serde_json::json!({
+      Ok(Response::success(
+        format!("Removed {} files, {} failed", removed.len(), failed.len()),
+        serde_json::json!({
             "removed": removed.len(),
             "failed": failed.len(),
             "files": removed,
             "errors": failed
-        })),
-      })
+        }),
+      ))
     }
   }
 
@@ -419,11 +416,13 @@ impl KernelCleanerService {
     }
   }
 
-  pub fn update_grub(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn update_grub(&self) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     self.update_grub_internal()
   }
 
-  fn update_grub_internal(&self) -> Result<ResponseModel, ResponseModel> {
+  fn update_grub_internal(
+    &self,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     log::info!("Updating GRUB configuration");
     let update_cmd = if Path::new("/usr/sbin/update-grub").exists() {
       ("update-grub", vec![])
@@ -431,11 +430,10 @@ impl KernelCleanerService {
       ("grub-mkconfig", vec!["-o", "/boot/grub/grub.cfg"])
     } else {
       log::error!("No GRUB update tool found");
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
-        message: "No GRUB update tool found".to_string(),
-        data: DataValue::Bool(false),
-      });
+      return Err(Response::error(
+        Status::Error,
+        "No GRUB update tool found".to_string(),
+      ));
     };
 
     let output = if update_cmd.1.is_empty() {
@@ -451,59 +449,60 @@ impl KernelCleanerService {
       Ok(result) => {
         if result.status.success() {
           log::info!("GRUB configuration updated successfully");
-          Ok(ResponseModel {
-            status: ResponseStatus::Success,
-            message: "GRUB configuration updated successfully".to_string(),
-            data: DataValue::Bool(true),
-          })
+          Ok(Response::success(
+            "GRUB configuration updated successfully".to_string(),
+            serde_json::Value::Bool(true),
+          ))
         } else {
           let stderr = stderr_string(&result);
           log::error!("GRUB update failed: {}", stderr);
-          Err(ResponseModel {
-            status: ResponseStatus::Error,
-            message: format!("GRUB update failed: {}", stderr),
-            data: DataValue::Bool(false),
-          })
+          Err(Response::error(
+            Status::Error,
+            format!("GRUB update failed: {}", stderr),
+          ))
         }
       }
       Err(e) => {
         log::error!("Failed to execute GRUB update: {}", e);
-        Err(ResponseModel {
-          status: ResponseStatus::Error,
-          message: format!("Failed to execute GRUB update: {}", e),
-          data: DataValue::Bool(false),
-        })
+        Err(Response::error(
+          Status::Error,
+          format!("Failed to execute GRUB update: {}", e),
+        ))
       }
     }
   }
 
-  pub fn get_installed_kernels_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_installed_kernels_response(
+    &self,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let kernels = self.get_installed_kernels();
     let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response("Installed kernels retrieved", data))
   }
 
-  pub fn get_old_kernels_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_old_kernels_response(
+    &self,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let kernels = self.get_old_kernels();
     let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response("Old kernels retrieved", data))
   }
 
-  pub fn get_old_initramfs_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_old_initramfs_response(
+    &self,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let initramfs = self.get_old_initramfs();
     let data = models_into_data_array(initramfs).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response("Old initramfs retrieved", data))
   }
 
-  pub fn get_boot_space_info_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_boot_space_info_response(
+    &self,
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let info = self.get_boot_space_info();
     Ok(success_response(
       "Boot space info retrieved",
-      DataValue::Object(serde_json::to_value(info).map_err(|e| ResponseModel {
-        status: ResponseStatus::Error,
-        message: format!("Serialization error: {}", e),
-        data: DataValue::Bool(false),
-      })?),
+      serde_json::to_value(info).unwrap_or(serde_json::Value::Null),
     ))
   }
 }

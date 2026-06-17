@@ -86,7 +86,3 @@ pub mod kernel_cleaner_service;
 
 #[path = "dev-cache.service.rs"]
 pub mod dev_cache_service;
-
-pub mod repository;
-
-pub use repository::service::RepositoryService;

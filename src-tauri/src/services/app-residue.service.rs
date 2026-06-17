@@ -5,10 +5,11 @@ use std::process::Command;
 
 use log;
 
-use crate::helpers::{
+use crate::models::{AppError, Response, Status};
+use crate::utils::{
   get_dir_size, home_dir, models_into_data_array, stdout_string, success_response,
 };
-use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+use serde_json::Value;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct AppResidue {
@@ -476,16 +477,16 @@ impl AppResidueService {
     residues
   }
 
-  pub fn clean_residue(&self, path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_residue(&self, path: &str) -> Result<Response<Value>, Response<Value>> {
     log::info!("Attempting to clean residue at: {}", path);
     let path_obj = Path::new(path);
 
     if !path_obj.exists() {
       log::error!("Path does not exist: {}", path);
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Bool(false),
+        data: Value::Bool(false),
       });
     }
 
@@ -498,24 +499,24 @@ impl AppResidueService {
     match result {
       Ok(_) => {
         log::info!("Successfully removed residue: {}", path);
-        Ok(ResponseModel {
-          status: ResponseStatus::Success,
+        Ok(Response {
+          status: Status::Success,
           message: format!("Removed residue: {}", path),
-          data: DataValue::Bool(true),
+          data: Value::Bool(true),
         })
       }
       Err(e) => {
         log::error!("Failed to remove residue {}: {}", path, e);
-        Err(ResponseModel {
-          status: ResponseStatus::Error,
+        Err(Response {
+          status: Status::Error,
           message: format!("Failed to remove {}: {}", path, e),
-          data: DataValue::Bool(false),
+          data: Value::Bool(false),
         })
       }
     }
   }
 
-  pub fn clean_multiple(&self, paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_multiple(&self, paths: Vec<String>) -> Result<Response<Value>, Response<Value>> {
     log::info!("Attempting to clean {} residue items", paths.len());
     let mut removed = 0;
     let mut failed: Vec<String> = Vec::new();
@@ -552,17 +553,17 @@ impl AppResidueService {
 
     if failed.is_empty() {
       log::info!("Successfully cleaned all {} residue items", removed);
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Cleaned {} residue items", removed),
-        data: DataValue::Object(result),
+        data: result,
       })
     } else {
       log::warn!("Cleaned {} items, {} failed", removed, failed.len());
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Cleaned {} items, {} failed", removed, failed.len()),
-        data: DataValue::Object(result),
+        data: result,
       })
     }
   }
@@ -597,7 +598,7 @@ impl AppResidueService {
     }
   }
 
-  pub fn scan_user_configs_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_user_configs_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_user_configs();
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
@@ -607,7 +608,7 @@ impl AppResidueService {
     ))
   }
 
-  pub fn scan_user_data_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_user_data_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_user_data();
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
@@ -617,7 +618,7 @@ impl AppResidueService {
     ))
   }
 
-  pub fn scan_user_caches_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_user_caches_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_user_caches();
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
@@ -627,7 +628,7 @@ impl AppResidueService {
     ))
   }
 
-  pub fn scan_home_residues_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_home_residues_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_home_residues();
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
@@ -637,7 +638,7 @@ impl AppResidueService {
     ))
   }
 
-  pub fn get_orphaned_configs_response(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_orphaned_configs_response(&self) -> Result<Response<Value>, Response<Value>> {
     let orphaned = self.get_orphaned_configs();
     let count = orphaned.len();
     let data = models_into_data_array(orphaned).map_err(|e| AppError::from(e).into_response())?;

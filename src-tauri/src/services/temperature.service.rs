@@ -5,8 +5,8 @@ use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
-use crate::helpers::stdout_string;
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::Response;
+use crate::utils::stdout_string;
 
 const CACHE_TTL_SECS: u64 = 5;
 
@@ -73,7 +73,7 @@ impl TemperatureService {
     temperatures
   }
 
-  pub fn get_temperatures() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_temperatures() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let temperatures = if let Some(cached) = get_temp_cache().get() {
       cached
     } else {
@@ -124,11 +124,10 @@ impl TemperatureService {
       .map(|t| serde_json::to_value(t).unwrap_or(serde_json::Value::Null))
       .collect();
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: "Temperatures retrieved successfully".to_string(),
-      data: DataValue::Array(json_values),
-    })
+    Ok(Response::success(
+      "Temperatures retrieved successfully".to_string(),
+      serde_json::Value::Array(json_values),
+    ))
   }
 
   fn read_thermal_zones() -> Vec<TemperatureInfo> {
@@ -304,7 +303,7 @@ impl TemperatureService {
     "cpu".to_string()
   }
 
-  pub fn get_cpu_temperature() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_cpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let temperatures = if let Some(cached) = get_temp_cache().get() {
       cached
     } else {
@@ -325,29 +324,25 @@ impl TemperatureService {
     });
 
     if let Some(cpu) = cpu_temps.first() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: "CPU temperature retrieved successfully".to_string(),
-        data: DataValue::Object(serde_json::to_value(cpu).map_err(|e| e.to_string())?),
-      })
+      Ok(Response::success(
+        "CPU temperature retrieved successfully".to_string(),
+        serde_json::to_value(cpu).unwrap_or(serde_json::Value::Null),
+      ))
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: "No CPU temperature found".to_string(),
-        data: DataValue::Object(
-          serde_json::to_value(TemperatureInfo {
-            name: "CPU".to_string(),
-            sensor_type: "cpu".to_string(),
-            temperature_celsius: 0.0,
-            max_temp: 100.0,
-          })
-          .map_err(|e| e.to_string())?,
-        ),
-      })
+      Ok(Response::success(
+        "No CPU temperature found".to_string(),
+        serde_json::to_value(TemperatureInfo {
+          name: "CPU".to_string(),
+          sensor_type: "cpu".to_string(),
+          temperature_celsius: 0.0,
+          max_temp: 100.0,
+        })
+        .unwrap_or(serde_json::Value::Null),
+      ))
     }
   }
 
-  pub fn get_gpu_temperature() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_gpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let temperatures = if let Some(cached) = get_temp_cache().get() {
       cached
     } else {
@@ -368,25 +363,21 @@ impl TemperatureService {
     });
 
     if let Some(gpu) = gpu_temps.first() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: "GPU temperature retrieved successfully".to_string(),
-        data: DataValue::Object(serde_json::to_value(gpu).map_err(|e| e.to_string())?),
-      })
+      Ok(Response::success(
+        "GPU temperature retrieved successfully".to_string(),
+        serde_json::to_value(gpu).unwrap_or(serde_json::Value::Null),
+      ))
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
-        message: "No GPU temperature found".to_string(),
-        data: DataValue::Object(
-          serde_json::to_value(TemperatureInfo {
-            name: "GPU".to_string(),
-            sensor_type: "gpu".to_string(),
-            temperature_celsius: 0.0,
-            max_temp: 100.0,
-          })
-          .map_err(|e| e.to_string())?,
-        ),
-      })
+      Ok(Response::success(
+        "No GPU temperature found".to_string(),
+        serde_json::to_value(TemperatureInfo {
+          name: "GPU".to_string(),
+          sensor_type: "gpu".to_string(),
+          temperature_celsius: 0.0,
+          max_temp: 100.0,
+        })
+        .unwrap_or(serde_json::Value::Null),
+      ))
     }
   }
 }

@@ -1,6 +1,6 @@
 /* models */
-use crate::helpers::validation_helper::validate_path;
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::{Response, Status};
+use crate::utils::validation_helper::validate_path;
 /* sys lib */
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -31,15 +31,11 @@ impl ScannerService {
   pub fn scan_for_duplicates(
     path: &str,
     extension_filter: Option<String>,
-  ) -> Result<ResponseModel, ResponseModel> {
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let validated_path = match validate_path(path) {
       Ok(p) => p,
       Err(e) => {
-        return Err(ResponseModel {
-          status: ResponseStatus::Error,
-          message: e.to_string(),
-          data: DataValue::Array(vec![]),
-        });
+        return Err(Response::error(Status::Error, e.to_string()));
       }
     };
 
@@ -142,10 +138,9 @@ impl ScannerService {
         "total_wasted_space": total_wasted
     });
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
-      message: format!("Found {} duplicate groups", duplicate_groups.len()),
-      data: DataValue::Object(result),
-    })
+    Ok(Response::success(
+      format!("Found {} duplicate groups", duplicate_groups.len()),
+      result,
+    ))
   }
 }

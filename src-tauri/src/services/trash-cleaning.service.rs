@@ -1,11 +1,11 @@
 /* helpers */
-use crate::helpers::common_paths::CommonPath;
-use crate::helpers::{
+use crate::utils::common_paths::CommonPath;
+use crate::utils::{
   collect_trash_file_models, data_empty_string, models_into_data_array, remove_paths_with_errors,
   service_method_full, success_response,
 };
 /* models */
-use crate::models::{ResponseModel, TrashFileModel};
+use crate::models::{Response, TrashFileModel};
 /* errors */
 use crate::models::AppError;
 
@@ -19,7 +19,7 @@ type CleanResult<T> = Result<T, AppError>;
 impl TrashCleaningService {
   service_method_full!(get_trash_files => get_trash_files_inner);
 
-  fn get_trash_files_inner(&self) -> CleanResult<ResponseModel> {
+  fn get_trash_files_inner(&self) -> CleanResult<Response<serde_json::Value>> {
     let trash_dir = CommonPath::TrashFiles
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -31,7 +31,7 @@ impl TrashCleaningService {
   pub fn clear_selected_trash_files(
     &self,
     paths: Vec<String>,
-  ) -> Result<ResponseModel, ResponseModel> {
+  ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     log::info!("Clearing {} selected trash files", paths.len());
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
@@ -57,7 +57,7 @@ impl TrashCleaningService {
     }
   }
 
-  pub fn clear_trash(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_trash(&self) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     log::info!("Clearing trash directory");
     let trash_dir = CommonPath::TrashFiles
       .path()

@@ -1,14 +1,15 @@
 /* helpers */
-use crate::helpers::common_paths::CommonPath;
-use crate::helpers::{
+use crate::utils::common_paths::CommonPath;
+use crate::utils::{
   data_empty_string, format_size, get_dir_size, remove_dir_contents, service_method_full,
   success_response,
 };
 /* models */
-use crate::models::{DataValue, ResponseModel};
+use crate::models::{Response, Status};
 /* errors */
 use crate::models::AppError;
 
+use serde_json::Value;
 use std::fs;
 
 pub struct MediaCacheService;
@@ -72,7 +73,7 @@ impl MediaCacheService {
 
   service_method_full!(clean_steam_shader_cache => clean_steam_shader_cache_inner);
 
-  fn clean_steam_shader_cache_inner(&self) -> MediaResult<ResponseModel> {
+  fn clean_steam_shader_cache_inner(&self) -> MediaResult<Response<Value>> {
     let shader_path = CommonPath::SteamShaderCache
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -93,7 +94,7 @@ impl MediaCacheService {
 
   service_method_full!(clean_steam_download_cache => clean_steam_download_cache_inner);
 
-  fn clean_steam_download_cache_inner(&self) -> MediaResult<ResponseModel> {
+  fn clean_steam_download_cache_inner(&self) -> MediaResult<Response<Value>> {
     let download_path = CommonPath::SteamDownloadCache
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -120,7 +121,7 @@ impl MediaCacheService {
 
   service_method_full!(clean_spotify_cache => clean_spotify_cache_inner);
 
-  fn clean_spotify_cache_inner(&self) -> MediaResult<ResponseModel> {
+  fn clean_spotify_cache_inner(&self) -> MediaResult<Response<Value>> {
     let cache_path = CommonPath::SpotifyCache
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -150,7 +151,7 @@ impl MediaCacheService {
 
   service_method_full!(clean_vlc_cache => clean_vlc_cache_inner);
 
-  fn clean_vlc_cache_inner(&self) -> MediaResult<ResponseModel> {
+  fn clean_vlc_cache_inner(&self) -> MediaResult<Response<Value>> {
     let cache_path = CommonPath::VlcCache
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -179,7 +180,7 @@ impl MediaCacheService {
 
   service_method_full!(clean_thumbnail_cache => clean_thumbnail_cache_inner);
 
-  fn clean_thumbnail_cache_inner(&self) -> MediaResult<ResponseModel> {
+  fn clean_thumbnail_cache_inner(&self) -> MediaResult<Response<Value>> {
     let thumb_path = CommonPath::Thumbnails
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -205,7 +206,7 @@ impl MediaCacheService {
 
   service_method_full!(clean_icon_cache => clean_icon_cache_inner);
 
-  fn clean_icon_cache_inner(&self) -> MediaResult<ResponseModel> {
+  fn clean_icon_cache_inner(&self) -> MediaResult<Response<Value>> {
     let icon_path = CommonPath::IconCache
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
@@ -221,12 +222,12 @@ impl MediaCacheService {
     ))
   }
 
-  pub fn get_media_cache_summary(&self) -> ResponseModel {
+  pub fn get_media_cache_summary(&self) -> Response<Value> {
     let steam_info = self.get_steam_info();
-    ResponseModel {
-      status: crate::models::ResponseStatus::Success,
+    Response {
+      status: Status::Success,
       message: "Media cache summary retrieved".to_string(),
-      data: DataValue::Object(serde_json::json!({
+      data: serde_json::json!({
           "steam_shader_size": steam_info.shader_cache_size,
           "steam_download_size": steam_info.download_cache_size,
           "steam_game_count": steam_info.game_count,
@@ -234,7 +235,7 @@ impl MediaCacheService {
           "vlc_cache_size": self.get_vlc_cache_size(),
           "thumbnail_cache_size": self.get_thumbnail_cache_size(),
           "icon_cache_size": self.get_icon_cache_size(),
-      })),
+      }),
     }
   }
 }

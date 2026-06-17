@@ -1,7 +1,8 @@
 use std::sync::Mutex;
 use sysinfo::System;
 
-use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+use crate::models::{AppError, Response, Status};
+use serde_json::Value;
 
 static PROCESS_SYSTEM: Mutex<Option<System>> = Mutex::new(None);
 
@@ -64,7 +65,7 @@ fn parse_proc_swaps() -> SwapInfo {
 }
 
 impl MemoryService {
-  pub fn get_memory_info() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_memory_info() -> Result<Response<Value>, Response<Value>> {
     let content = std::fs::read_to_string("/proc/meminfo")
       .map_err(|e| AppError::Message(format!("Failed to read meminfo: {}", e)).into_response())?;
 
@@ -83,24 +84,24 @@ impl MemoryService {
       buffers,
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "Memory info retrieved".to_string(),
-      data: DataValue::Object(serde_json::to_value(memory_info).map_err(|e| e.to_string())?),
+      data: serde_json::to_value(memory_info).map_err(|e| e.to_string())?,
     })
   }
 
-  pub fn get_swap_info() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_swap_info() -> Result<Response<Value>, Response<Value>> {
     let swap_info = parse_proc_swaps();
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "Swap info retrieved".to_string(),
-      data: DataValue::Object(serde_json::to_value(swap_info).map_err(|e| e.to_string())?),
+      data: serde_json::to_value(swap_info).map_err(|e| e.to_string())?,
     })
   }
 
-  pub fn get_process_memory() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_process_memory() -> Result<Response<Value>, Response<Value>> {
     {
       let mut sys = PROCESS_SYSTEM.lock().unwrap();
       if sys.is_none() {
@@ -130,10 +131,10 @@ impl MemoryService {
         .unwrap_or(std::cmp::Ordering::Equal)
     });
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Found {} processes", processes.len()),
-      data: DataValue::Array(
+      data: Value::Array(
         processes
           .into_iter()
           .map(serde_json::to_value)
@@ -143,14 +144,14 @@ impl MemoryService {
     })
   }
 
-  pub fn optimize_memory() -> Result<ResponseModel, ResponseModel> {
+  pub fn optimize_memory() -> Result<Response<Value>, Response<Value>> {
     std::fs::write("/proc/sys/vm/drop_caches", "3")
       .map_err(|e| AppError::Message(format!("Failed to drop caches: {}", e)).into_response())?;
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "Memory caches dropped successfully".to_string(),
-      data: DataValue::Bool(true),
+      data: Value::Bool(true),
     })
   }
 }

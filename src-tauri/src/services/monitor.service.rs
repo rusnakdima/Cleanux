@@ -3,7 +3,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use sysinfo::System;
 
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::{Response, Status};
+use serde_json::Value;
 
 static MONITORING_ACTIVE: AtomicBool = AtomicBool::new(false);
 static SYSTEM: Mutex<Option<System>> = Mutex::new(None);
@@ -22,7 +23,7 @@ pub struct SystemStats {
 }
 
 impl MonitorService {
-  pub fn get_system_stats() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_system_stats() -> Result<Response<Value>, Response<Value>> {
     {
       let mut sys = SYSTEM.lock().unwrap();
       if sys.is_none() {
@@ -68,28 +69,28 @@ impl MonitorService {
       disk_usage_percent,
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "System stats retrieved successfully".to_string(),
-      data: DataValue::Object(serde_json::to_value(stats).map_err(|e| e.to_string())?),
+      data: serde_json::to_value(stats).map_err(|e| e.to_string())?,
     })
   }
 
-  pub fn start_monitoring() -> Result<ResponseModel, ResponseModel> {
+  pub fn start_monitoring() -> Result<Response<Value>, Response<Value>> {
     MONITORING_ACTIVE.store(true, Ordering::SeqCst);
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "Monitoring started".to_string(),
-      data: DataValue::Bool(true),
+      data: Value::Bool(true),
     })
   }
 
-  pub fn stop_monitoring() -> Result<ResponseModel, ResponseModel> {
+  pub fn stop_monitoring() -> Result<Response<Value>, Response<Value>> {
     MONITORING_ACTIVE.store(false, Ordering::SeqCst);
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "Monitoring stopped".to_string(),
-      data: DataValue::Bool(false),
+      data: Value::Bool(false),
     })
   }
 }

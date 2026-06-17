@@ -1,4 +1,5 @@
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::{Response, Status};
+use serde_json::Value;
 use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
@@ -23,13 +24,13 @@ pub struct DirectoryNode {
 
 #[allow(non_snake_case)]
 impl DirectoryService {
-  pub fn scan_directory(path: &str, max_depth: u32) -> Result<ResponseModel, ResponseModel> {
+  pub fn scan_directory(path: &str, max_depth: u32) -> Result<Response<Value>, Response<Value>> {
     let start_path = Path::new(path);
     if !start_path.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Array(vec![]),
+        data: Value::Array(vec![]),
       });
     }
 
@@ -41,20 +42,20 @@ impl DirectoryService {
         "total_size": size
     });
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "Directory scanned successfully".to_string(),
-      data: DataValue::Object(result),
+      data: result,
     })
   }
 
-  pub fn get_directory_size(path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn get_directory_size(path: &str) -> Result<Response<Value>, Response<Value>> {
     let dir_path = Path::new(path);
     if !dir_path.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Object(serde_json::Value::Null),
+        data: serde_json::Value::Null,
       });
     }
 
@@ -77,14 +78,14 @@ impl DirectoryService {
         "size": total_size
     });
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Size: {} bytes", total_size),
-      data: DataValue::Object(result),
+      data: result,
     })
   }
 
-  fn build_directory_tree(path: &Path, max_depth: u32) -> Result<DirectoryNode, ResponseModel> {
+  fn build_directory_tree(path: &Path, max_depth: u32) -> Result<DirectoryNode, Response<Value>> {
     let name = path
       .file_name()
       .map(|n| n.to_string_lossy().into_owned())
@@ -138,13 +139,13 @@ impl DirectoryService {
     Ok(node)
   }
 
-  pub fn find_empty_directories(path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn find_empty_directories(path: &str) -> Result<Response<Value>, Response<Value>> {
     let start_path = Path::new(path);
     if !start_path.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Array(vec![]),
+        data: Value::Array(vec![]),
       });
     }
 
@@ -162,10 +163,10 @@ impl DirectoryService {
       })
       .collect();
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Found {} empty directories", result.len()),
-      data: DataValue::Array(result),
+      data: Value::Array(result),
     })
   }
 
@@ -194,13 +195,13 @@ impl DirectoryService {
     }
   }
 
-  pub fn find_nested_empty_directories(path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn find_nested_empty_directories(path: &str) -> Result<Response<Value>, Response<Value>> {
     let start_path = Path::new(path);
     if !start_path.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Array(vec![]),
+        data: Value::Array(vec![]),
       });
     }
 
@@ -218,10 +219,10 @@ impl DirectoryService {
       })
       .collect();
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Found {} nested empty directories", result.len()),
-      data: DataValue::Array(result),
+      data: Value::Array(result),
     })
   }
 
@@ -267,49 +268,49 @@ impl DirectoryService {
     }
   }
 
-  pub fn remove_empty_directory(path: &str) -> Result<ResponseModel, ResponseModel> {
+  pub fn remove_empty_directory(path: &str) -> Result<Response<Value>, Response<Value>> {
     let dir_path = Path::new(path);
     if !dir_path.exists() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: DataValue::Object(serde_json::Value::Null),
+        data: serde_json::Value::Null,
       });
     }
 
     if !dir_path.is_dir() {
-      return Err(ResponseModel {
-        status: ResponseStatus::Error,
+      return Err(Response {
+        status: Status::Error,
         message: format!("Path is not a directory: {}", path),
-        data: DataValue::Object(serde_json::Value::Null),
+        data: serde_json::Value::Null,
       });
     }
 
     if let Ok(entries) = fs::read_dir(dir_path) {
       if entries.count() > 0 {
-        return Err(ResponseModel {
-          status: ResponseStatus::Error,
+        return Err(Response {
+          status: Status::Error,
           message: format!("Directory is not empty: {}", path),
-          data: DataValue::Object(serde_json::Value::Null),
+          data: serde_json::Value::Null,
         });
       }
     }
 
     match fs::remove_dir(path) {
-      Ok(_) => Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(_) => Ok(Response {
+        status: Status::Success,
         message: format!("Removed directory: {}", path),
-        data: DataValue::Object(serde_json::Value::Null),
+        data: serde_json::Value::Null,
       }),
-      Err(e) => Err(ResponseModel {
-        status: ResponseStatus::Error,
+      Err(e) => Err(Response {
+        status: Status::Error,
         message: format!("Failed to remove directory: {} - {}", path, e),
-        data: DataValue::Object(serde_json::Value::Null),
+        data: serde_json::Value::Null,
       }),
     }
   }
 
-  pub fn remove_empty_directories(paths: Vec<String>) -> Result<ResponseModel, ResponseModel> {
+  pub fn remove_empty_directories(paths: Vec<String>) -> Result<Response<Value>, Response<Value>> {
     let mut removed_count = 0;
     let mut failed: Vec<String> = Vec::new();
 
@@ -338,20 +339,20 @@ impl DirectoryService {
     });
 
     if failed.is_empty() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("Successfully removed {} directories", removed_count),
-        data: DataValue::Object(result),
+        data: result,
       })
     } else {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!(
           "Removed {} directories, {} failed",
           removed_count,
           failed.len()
         ),
-        data: DataValue::Object(result),
+        data: result,
       })
     }
   }

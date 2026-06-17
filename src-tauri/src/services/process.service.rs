@@ -1,4 +1,5 @@
-use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+use crate::models::{AppError, Response, Status};
+use serde_json::Value;
 use sysinfo::System;
 
 pub struct ProcessService;
@@ -14,11 +15,11 @@ pub struct ProcessItem {
 }
 
 impl ProcessService {
-  pub fn get_processes() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_processes() -> Result<Response<Value>, Response<Value>> {
     Self::get_processes_inner().map_err(|e| e.into_response())
   }
 
-  fn get_processes_inner() -> ProcessResult<ResponseModel> {
+  fn get_processes_inner() -> ProcessResult<Response<Value>> {
     let mut sys = System::new_all();
     sys.refresh_all();
 
@@ -33,10 +34,10 @@ impl ProcessService {
       })
       .collect();
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: format!("Found {} processes", processes.len()),
-      data: DataValue::Array(
+      data: Value::Array(
         processes
           .into_iter()
           .map(serde_json::to_value)
@@ -46,21 +47,21 @@ impl ProcessService {
     })
   }
 
-  pub fn kill_process(pid: u32) -> Result<ResponseModel, ResponseModel> {
+  pub fn kill_process(pid: u32) -> Result<Response<Value>, Response<Value>> {
     Self::kill_process_inner(pid).map_err(|e| e.into_response())
   }
 
-  fn kill_process_inner(pid: u32) -> ProcessResult<ResponseModel> {
+  fn kill_process_inner(pid: u32) -> ProcessResult<Response<Value>> {
     let mut sys = System::new_all();
     sys.refresh_all();
 
     let sysinfo_pid = sysinfo::Pid::from_u32(pid);
     if let Some(process) = sys.process(sysinfo_pid) {
       if process.kill() {
-        Ok(ResponseModel {
-          status: ResponseStatus::Success,
+        Ok(Response {
+          status: Status::Success,
           message: format!("Process {} killed", pid),
-          data: DataValue::String(pid.to_string()),
+          data: Value::String(pid.to_string()),
         })
       } else {
         Err(AppError::ProcessNotFound(pid))

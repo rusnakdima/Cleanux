@@ -1,5 +1,5 @@
-use crate::helpers::{calculate_dir_size, run_command, success_response};
-use crate::models::{AppError, DataValue, ResponseModel};
+use crate::utils::{calculate_dir_size, run_command, success_response};
+use crate::models::{AppError, DataValue, Response};
 use std::path::Path;
 
 pub struct DnfService;
@@ -16,7 +16,7 @@ impl DnfService {
     }
   }
 
-  pub fn clean_all() -> Result<ResponseModel, AppError> {
+  pub fn clean_all() -> Result<Response, AppError> {
     let before_size = Self::get_cache_size_internal();
     let (success, stderr, _) = run_command("dnf", &["clean", "all"])?;
 

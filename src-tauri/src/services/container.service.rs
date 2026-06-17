@@ -1,6 +1,6 @@
 /* sys lib */
-use crate::helpers::{run_command_ignore_error, run_command_raw, stderr_string, stdout_string};
-use crate::models::{AppError, DataValue, ResponseModel, ResponseStatus};
+use crate::models::{AppError, Response, Status};
+use crate::utils::{run_command_ignore_error, run_command_raw, stderr_string, stdout_string};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DockerInfo {
@@ -135,7 +135,10 @@ impl ContainerService {
       .map(|n| (n * multiplier as f64) as u64)
   }
 
-  fn container_system_prune(container_type: &str, all: bool) -> Result<ResponseModel, AppError> {
+  fn container_system_prune(
+    container_type: &str,
+    all: bool,
+  ) -> Result<Response<serde_json::Value>, AppError> {
     let mut args = vec!["system", "prune", "-f"];
     if all {
       args.push("-a");
@@ -143,7 +146,10 @@ impl ContainerService {
     Self::container_prune_helper(container_type, &args, "system prune")
   }
 
-  fn container_image_prune(container_type: &str, all: bool) -> Result<ResponseModel, AppError> {
+  fn container_image_prune(
+    container_type: &str,
+    all: bool,
+  ) -> Result<Response<serde_json::Value>, AppError> {
     let mut args = vec!["image", "prune", "-f"];
     if all {
       args.push("-a");
@@ -151,7 +157,9 @@ impl ContainerService {
     Self::container_prune_helper(container_type, &args, "image prune")
   }
 
-  fn container_container_prune(container_type: &str) -> Result<ResponseModel, AppError> {
+  fn container_container_prune(
+    container_type: &str,
+  ) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_prune_helper(
       container_type,
       &["container", "prune", "-f"],
@@ -159,11 +167,14 @@ impl ContainerService {
     )
   }
 
-  fn container_volume_prune(container_type: &str) -> Result<ResponseModel, AppError> {
+  fn container_volume_prune(container_type: &str) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_prune_helper(container_type, &["volume", "prune", "-f"], "volume prune")
   }
 
-  fn container_preview_prune(container_type: &str, all: bool) -> Result<ResponseModel, AppError> {
+  fn container_preview_prune(
+    container_type: &str,
+    all: bool,
+  ) -> Result<Response<serde_json::Value>, AppError> {
     let mut args = vec!["system", "prune", "-f", "--dry-run"];
     if all {
       args.push("-a");
@@ -175,7 +186,7 @@ impl ContainerService {
     container_type: &str,
     args: &[&str],
     action: &str,
-  ) -> Result<ResponseModel, AppError> {
+  ) -> Result<Response<serde_json::Value>, AppError> {
     let output = Self::run_command(container_type, args)?;
     let stderr = stderr_string(&output);
     let stdout = stdout_string(&output);
@@ -186,10 +197,10 @@ impl ContainerService {
     };
 
     if output.status.success() {
-      Ok(ResponseModel {
-        status: ResponseStatus::Success,
+      Ok(Response {
+        status: Status::Success,
         message: format!("{} {} completed: {}", container_type, action, message),
-        data: DataValue::String(message.to_string()),
+        data: serde_json::Value::String(message.to_string()),
       })
     } else {
       Err(AppError::Unknown(format!(
@@ -199,19 +210,19 @@ impl ContainerService {
     }
   }
 
-  pub fn docker_system_prune(&self, all: bool) -> Result<ResponseModel, AppError> {
+  pub fn docker_system_prune(&self, all: bool) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_system_prune("docker", all)
   }
 
-  pub fn docker_image_prune(&self, all: bool) -> Result<ResponseModel, AppError> {
+  pub fn docker_image_prune(&self, all: bool) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_image_prune("docker", all)
   }
 
-  pub fn docker_container_prune(&self) -> Result<ResponseModel, AppError> {
+  pub fn docker_container_prune(&self) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_container_prune("docker")
   }
 
-  pub fn docker_volume_prune(&self) -> Result<ResponseModel, AppError> {
+  pub fn docker_volume_prune(&self) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_volume_prune("docker")
   }
 
@@ -270,11 +281,11 @@ impl ContainerService {
       .unwrap_or(0)
   }
 
-  pub fn podman_system_prune(&self, all: bool) -> Result<ResponseModel, AppError> {
+  pub fn podman_system_prune(&self, all: bool) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_system_prune("podman", all)
   }
 
-  pub fn podman_image_prune(&self, all: bool) -> Result<ResponseModel, AppError> {
+  pub fn podman_image_prune(&self, all: bool) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_image_prune("podman", all)
   }
 
@@ -285,7 +296,7 @@ impl ContainerService {
     }
   }
 
-  pub fn docker_preview_prune(&self, all: bool) -> Result<ResponseModel, AppError> {
+  pub fn docker_preview_prune(&self, all: bool) -> Result<Response<serde_json::Value>, AppError> {
     Self::container_preview_prune("docker", all)
   }
 }

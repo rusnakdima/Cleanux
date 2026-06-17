@@ -1,23 +1,24 @@
 /* helpers */
-use crate::helpers::{data_empty_string, error_response};
+use crate::utils::{data_empty_string, error_response};
 /* models */
-use crate::models::{DataValue, ResponseModel, ResponseStatus};
+use crate::models::{Response, Status};
 /* sys lib */
 use base64::{engine::general_purpose::STANDARD, Engine};
 use serde_json::json;
+use serde_json::Value;
 use std::fs;
 use std::path::Path;
 
 pub struct FilePreviewService;
 
 impl FilePreviewService {
-  pub fn preview_file(path: String) -> Result<ResponseModel, ResponseModel> {
+  pub fn preview_file(path: String) -> Result<Response<Value>, Response<Value>> {
     let file_path = Path::new(&path);
 
     if !file_path.exists() {
       return Err(error_response(
         "File not found",
-        DataValue::String(String::new()),
+        Value::String(String::new()),
       ));
     }
 
@@ -87,10 +88,10 @@ impl FilePreviewService {
       }),
     };
 
-    Ok(ResponseModel {
-      status: ResponseStatus::Success,
+    Ok(Response {
+      status: Status::Success,
       message: "File preview retrieved".to_string(),
-      data: DataValue::Object(response_data),
+      data: response_data,
     })
   }
 }

@@ -1,11 +1,12 @@
 /* helpers */
-use crate::helpers::{
+use crate::utils::{
   calculate_dir_size, clean_cache_dir, data_string, home_dir, remove_dir_contents,
   service_method_full, success_response,
 };
 /* models */
-use crate::models::{AppError, ResponseModel};
+use crate::models::{AppError, Response};
 /* sys lib */
+use serde_json::Value;
 use std::path::{Path, PathBuf};
 
 type DevCacheResult<T> = Result<T, AppError>;
@@ -33,7 +34,7 @@ pub struct DevCacheService;
 impl DevCacheService {
   service_method_full!(get_all_dev_caches => get_all_dev_caches_inner);
 
-  fn get_all_dev_caches_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn get_all_dev_caches_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
 
     let npm = self.scan_npm_cache_inner(&home);
@@ -53,7 +54,7 @@ impl DevCacheService {
 
     Ok(success_response(
       "Dev cache summary retrieved successfully",
-      serde_json::Value::Object(summary).into(),
+      serde_json::Value::Object(summary),
     ))
   }
 
@@ -213,7 +214,7 @@ impl DevCacheService {
 
   service_method_full!(clean_npm_cache => clean_npm_cache_inner);
 
-  fn clean_npm_cache_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_npm_cache_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
     let npm_path = home.join(".npm");
     clean_cache_dir(&npm_path, "npm")
@@ -221,7 +222,7 @@ impl DevCacheService {
 
   service_method_full!(clean_pip_cache => clean_pip_cache_inner);
 
-  fn clean_pip_cache_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_pip_cache_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
     let pip_path = home.join(".cache/pip");
     clean_cache_dir(&pip_path, "pip")
@@ -229,7 +230,7 @@ impl DevCacheService {
 
   service_method_full!(clean_cargo_cache => clean_cargo_cache_inner);
 
-  fn clean_cargo_cache_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_cargo_cache_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
     let registry = home.join(".cargo/registry");
     let git = home.join(".cargo/git");
@@ -266,7 +267,7 @@ impl DevCacheService {
 
   service_method_full!(clean_go_cache => clean_go_cache_inner);
 
-  fn clean_go_cache_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_go_cache_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
     let go_path = home.join("go/pkg/mod");
     clean_cache_dir(&go_path, "Go")
@@ -274,7 +275,7 @@ impl DevCacheService {
 
   service_method_full!(clean_maven_cache => clean_maven_cache_inner);
 
-  fn clean_maven_cache_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_maven_cache_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
     let maven_path = home.join(".m2/repository");
     clean_cache_dir(&maven_path, "Maven")
@@ -282,19 +283,19 @@ impl DevCacheService {
 
   service_method_full!(clean_gradle_cache => clean_gradle_cache_inner);
 
-  fn clean_gradle_cache_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_gradle_cache_inner(&self) -> DevCacheResult<Response<Value>> {
     let home = home_dir()?;
     let gradle_path = home.join(".gradle/caches");
     clean_cache_dir(&gradle_path, "Gradle")
   }
 
-  pub fn clean_all_dev_caches(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clean_all_dev_caches(&self) -> Result<Response<Value>, Response<Value>> {
     self
       .clean_all_dev_caches_inner()
       .map_err(|e| e.into_response())
   }
 
-  fn clean_all_dev_caches_inner(&self) -> DevCacheResult<ResponseModel> {
+  fn clean_all_dev_caches_inner(&self) -> DevCacheResult<Response<Value>> {
     let mut cleaned_total = 0u32;
     let mut errors: Vec<String> = Vec::new();
 
@@ -360,8 +361,8 @@ impl DevCacheService {
     }
   }
 
-  fn extract_count_from_response(response: &ResponseModel) -> Option<u32> {
-    if let crate::models::DataValue::String(s) = &response.data {
+  fn extract_count_from_response(response: &Response<Value>) -> Option<u32> {
+    if let serde_json::Value::String(s) = &response.data {
       s.parse().ok()
     } else {
       None

@@ -1,7 +1,8 @@
-use crate::helpers::{data_string, stderr_string, success_response};
-use crate::models::{AppError, ResponseModel};
+use crate::models::{AppError, Response};
 use crate::services::profile_service::ProfileService;
+use crate::utils::{data_string, stderr_string, success_response};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
 use std::thread;
@@ -180,8 +181,14 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
       _ => Err(AppError::message(format!("Unknown category: {}", category))),
     },
     ActionStep::RunProfile { profile_name } => match ProfileService.apply_profile(profile_name) {
-      Ok(result) => Ok(format!("Profile '{}' applied: {}", profile_name, result)),
-      Err(e) => Err(AppError::message(format!("Failed to run profile: {}", e))),
+      Ok(result) => Ok(format!(
+        "Profile '{}' applied: {}",
+        profile_name, result.message
+      )),
+      Err(e) => Err(AppError::message(format!(
+        "Failed to run profile: {}",
+        e.message
+      ))),
     },
     ActionStep::ExecuteCommand { command } => {
       let allowed_commands = ["sync", "shutdown", "reboot", "systemctl", "service"];
@@ -238,11 +245,11 @@ fn get_execution_history() -> Result<Vec<ExecutionHistoryEntry>, AppError> {
 }
 
 impl AutomationService {
-  pub fn get_quick_actions() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_quick_actions() -> Result<Response<Value>, Response<Value>> {
     Self::get_quick_actions_inner().map_err(|e| e.into_response())
   }
 
-  fn get_quick_actions_inner() -> Result<ResponseModel, AppError> {
+  fn get_quick_actions_inner() -> Result<Response<Value>, AppError> {
     let actions = get_predefined_quick_actions();
     let json = serde_json::to_value(&actions)
       .map_err(|e| AppError::message(format!("Failed to serialize actions: {}", e)))?;
@@ -251,11 +258,11 @@ impl AutomationService {
     Ok(success_response("Quick actions retrieved", data))
   }
 
-  pub fn execute_action(action_id: String) -> Result<ResponseModel, ResponseModel> {
+  pub fn execute_action(action_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::execute_action_inner(action_id).map_err(|e| e.into_response())
   }
 
-  fn execute_action_inner(action_id: String) -> Result<ResponseModel, AppError> {
+  fn execute_action_inner(action_id: String) -> Result<Response<Value>, AppError> {
     let actions = get_predefined_quick_actions();
     let action = actions
       .into_iter()
@@ -288,14 +295,14 @@ impl AutomationService {
     ))
   }
 
-  pub fn get_recipes() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_recipes() -> Result<Response<Value>, Response<Value>> {
     Self::get_recipes_inner().map_err(|e| e.into_response())
   }
 
-  fn get_recipes_inner() -> Result<ResponseModel, AppError> {
+  fn get_recipes_inner() -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
-      return Ok(success_response("No recipes saved", data_string("[]")));
+      return Ok(success_response("No recipes saved", Value::Array(vec![])));
     }
     let content = fs::read_to_string(&path)
       .map_err(|e| AppError::message(format!("Failed to read recipes: {}", e)))?;
@@ -308,11 +315,11 @@ impl AutomationService {
     Ok(success_response("Recipes retrieved", data))
   }
 
-  pub fn save_recipe(recipe: AutomationRecipe) -> Result<ResponseModel, ResponseModel> {
+  pub fn save_recipe(recipe: AutomationRecipe) -> Result<Response<Value>, Response<Value>> {
     Self::save_recipe_inner(recipe).map_err(|e| e.into_response())
   }
 
-  fn save_recipe_inner(mut recipe: AutomationRecipe) -> Result<ResponseModel, AppError> {
+  fn save_recipe_inner(mut recipe: AutomationRecipe) -> Result<Response<Value>, AppError> {
     if recipe.id.is_empty() {
       recipe.id = generate_uuid();
     }
@@ -343,11 +350,11 @@ impl AutomationService {
     ))
   }
 
-  pub fn delete_recipe(recipe_id: String) -> Result<ResponseModel, ResponseModel> {
+  pub fn delete_recipe(recipe_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::delete_recipe_inner(recipe_id).map_err(|e| e.into_response())
   }
 
-  fn delete_recipe_inner(recipe_id: String) -> Result<ResponseModel, AppError> {
+  fn delete_recipe_inner(recipe_id: String) -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
       return Ok(success_response(
@@ -370,11 +377,11 @@ impl AutomationService {
     Ok(success_response("Recipe deleted", data_string("deleted")))
   }
 
-  pub fn execute_recipe(recipe_id: String) -> Result<ResponseModel, ResponseModel> {
+  pub fn execute_recipe(recipe_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::execute_recipe_inner(recipe_id).map_err(|e| e.into_response())
   }
 
-  fn execute_recipe_inner(recipe_id: String) -> Result<ResponseModel, AppError> {
+  fn execute_recipe_inner(recipe_id: String) -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
       return Err(AppError::message("No recipes found"));
@@ -415,11 +422,11 @@ impl AutomationService {
     ))
   }
 
-  pub fn get_execution_history_list() -> Result<ResponseModel, ResponseModel> {
+  pub fn get_execution_history_list() -> Result<Response<Value>, Response<Value>> {
     Self::get_execution_history_inner().map_err(|e| e.into_response())
   }
 
-  fn get_execution_history_inner() -> Result<ResponseModel, AppError> {
+  fn get_execution_history_inner() -> Result<Response<Value>, AppError> {
     let history = get_execution_history()?;
     let json = serde_json::to_value(&history)
       .map_err(|e| AppError::message(format!("Failed to serialize history: {}", e)))?;
@@ -432,7 +439,9 @@ impl AutomationService {
     get_predefined_quick_actions()
   }
 
-  pub fn execute_recipe_from_entity(recipe: serde_json::Value) -> Result<ResponseModel, AppError> {
+  pub fn execute_recipe_from_entity(
+    recipe: serde_json::Value,
+  ) -> Result<Response<Value>, AppError> {
     let steps: Vec<ActionStep> = recipe
       .get("steps")
       .and_then(|s| serde_json::from_value(s.clone()).ok())

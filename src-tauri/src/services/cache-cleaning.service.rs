@@ -1,25 +1,26 @@
 /* helpers */
-use crate::helpers::{
+use crate::utils::{
   collect_cache_file_models, data_empty_string, remove_paths_with_errors, success_response,
 };
 /* models */
-use crate::models::{PaginatedData, ResponseModel};
+use crate::models::Response;
 /* errors */
 use crate::models::AppError;
 
 use log;
+use serde_json::Value;
 use std::fs;
 
 pub struct CacheCleaningService;
 
-type CleanResult<T> = Result<T, ResponseModel>;
+type CleanResult<T> = Result<T, Response<Value>>;
 
 impl CacheCleaningService {
   pub fn get_cache_files(
     &self,
     limit: Option<usize>,
     offset: Option<usize>,
-  ) -> Result<ResponseModel, ResponseModel> {
+  ) -> Result<Response<Value>, Response<Value>> {
     self.get_cache_files_inner(limit, offset)
   }
 
@@ -27,7 +28,7 @@ impl CacheCleaningService {
     &self,
     limit: Option<usize>,
     offset: Option<usize>,
-  ) -> CleanResult<ResponseModel> {
+  ) -> CleanResult<Response<Value>> {
     log::info!(
       "Fetching cache files with limit: {:?}, offset: {:?}",
       limit,
@@ -42,19 +43,20 @@ impl CacheCleaningService {
       total,
       has_more
     );
-    let paginated = PaginatedData::new(files, has_more, total);
+    let paginated = serde_json::json!({
+        "data": files,
+        "has_more": has_more,
+        "total": total
+    });
     let data = serde_json::to_value(paginated)
       .map_err(|e| AppError::Unknown(format!("Failed to serialize cache data: {}", e)))?;
-    Ok(success_response(
-      "Cache files retrieved successfully",
-      crate::models::DataValue::Object(data),
-    ))
+    Ok(success_response("Cache files retrieved successfully", data))
   }
 
   pub fn clear_selected_cache_files(
     &self,
     paths: Vec<String>,
-  ) -> Result<ResponseModel, ResponseModel> {
+  ) -> Result<Response<Value>, Response<Value>> {
     log::info!("Clearing {} selected cache files", paths.len());
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
@@ -80,11 +82,11 @@ impl CacheCleaningService {
     }
   }
 
-  pub fn clear_cache(&self) -> Result<ResponseModel, ResponseModel> {
+  pub fn clear_cache(&self) -> Result<Response<Value>, Response<Value>> {
     self.clear_cache_inner()
   }
 
-  fn clear_cache_inner(&self) -> CleanResult<ResponseModel> {
+  fn clear_cache_inner(&self) -> CleanResult<Response<Value>> {
     log::info!("Clearing cache directory");
     let cache_dir = dirs::cache_dir()
       .ok_or_else(|| AppError::InvalidPath("Cache directory not found".to_string()))?;
