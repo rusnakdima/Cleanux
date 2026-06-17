@@ -3,9 +3,9 @@
 use std::fs;
 use std::path::PathBuf;
 
-use crate::helpers::home_dir;
 use crate::models::AppError;
 use crate::security::PathValidator;
+use crate::utils::home_dir;
 
 pub const ALLOWED_PATHS: &[&str] = &[
   "/home",
