@@ -1,0 +1,27 @@
+#[path = "automation.command.rs"]
+pub mod automation_command;
+#[path = "cleaner.command.rs"]
+pub mod cleaner_command;
+#[path = "macros.rs"]
+pub mod crud_macros;
+
+#[path = "dashboard.command.rs"]
+pub mod dashboard_command;
+#[path = "health.command.rs"]
+pub mod health_command;
+#[path = "log.command.rs"]
+pub mod log_command;
+#[path = "logger.command.rs"]
+pub mod logger;
+#[path = "monitor.command.rs"]
+pub mod monitor_command;
+#[path = "package.command.rs"]
+pub mod package_command;
+#[path = "profile.command.rs"]
+pub mod profile_command;
+#[path = "report.command.rs"]
+pub mod report_command;
+#[path = "storage.command.rs"]
+pub mod storage_command;
+#[path = "system.command.rs"]
+pub mod system_command;
