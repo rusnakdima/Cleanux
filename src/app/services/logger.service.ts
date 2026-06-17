@@ -75,7 +75,14 @@ export class LoggerService {
     invoke('log_message', { level: 'warn', component: source, message }).catch(() => {});
   }
 
-  logError(source: string, context: any, method: string, message: string, error?: Error, extra?: Record<string, unknown>): void {
+  logError(
+    source: string,
+    context: any,
+    method: string,
+    message: string,
+    error?: Error,
+    extra?: Record<string, unknown>
+  ): void {
     console.error(`[${source}]`, message, error, extra);
     invoke('log_message', { level: 'error', component: source, message }).catch(() => {});
   }
@@ -83,14 +90,14 @@ export class LoggerService {
   getLogs(filter?: LogFilter): LogEntry[] {
     let result = [...this.logs];
     if (filter?.level) {
-      result = result.filter(log => log.level === filter.level);
+      result = result.filter((log) => log.level === filter.level);
     }
     if (filter?.source) {
-      result = result.filter(log => log.source === filter.source);
+      result = result.filter((log) => log.source === filter.source);
     }
     if (filter?.search) {
       const search = filter.search.toLowerCase();
-      result = result.filter(log => log.message.toLowerCase().includes(search));
+      result = result.filter((log) => log.message.toLowerCase().includes(search));
     }
     return result;
   }

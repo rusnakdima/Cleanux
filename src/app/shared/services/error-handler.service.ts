@@ -158,7 +158,9 @@ export class ErrorHandlerService {
         message: error.message,
         context,
         timestamp,
-        retryable: error.code === TauriApiErrorCode.Timeout || error.code === TauriApiErrorCode.ConnectionFailed,
+        retryable:
+          error.code === TauriApiErrorCode.Timeout ||
+          error.code === TauriApiErrorCode.ConnectionFailed,
       };
     }
 
@@ -221,17 +223,33 @@ export class ErrorHandlerService {
           retryable: true,
         };
       case 400:
-        return this.parseErrorResponse(error, 'VALIDATION_ERROR', 'Invalid request. Please check your input.');
+        return this.parseErrorResponse(
+          error,
+          'VALIDATION_ERROR',
+          'Invalid request. Please check your input.'
+        );
       case 401:
-        return this.parseErrorResponse(error, 'UNAUTHORIZED', 'Authentication required. Please log in.');
+        return this.parseErrorResponse(
+          error,
+          'UNAUTHORIZED',
+          'Authentication required. Please log in.'
+        );
       case 403:
-        return this.parseErrorResponse(error, 'FORBIDDEN', "You don't have permission to perform this action.");
+        return this.parseErrorResponse(
+          error,
+          'FORBIDDEN',
+          "You don't have permission to perform this action."
+        );
       case 404:
         return this.parseErrorResponse(error, 'NOT_FOUND', 'The requested resource was not found.');
       case 408:
         return this.parseErrorResponse(error, 'TIMEOUT', 'Request timed out. Please try again.');
       case 500:
-        return this.parseErrorResponse(error, 'SERVER_ERROR', 'Server error. Please try again later.');
+        return this.parseErrorResponse(
+          error,
+          'SERVER_ERROR',
+          'Server error. Please try again later.'
+        );
       case 502:
       case 503:
       case 504:
@@ -245,7 +263,11 @@ export class ErrorHandlerService {
     }
   }
 
-  private parseErrorResponse(error: HttpErrorResponse, defaultCode: string, defaultMessage: string): AppError {
+  private parseErrorResponse(
+    error: HttpErrorResponse,
+    defaultCode: string,
+    defaultMessage: string
+  ): AppError {
     let userMessage = defaultMessage;
     let details: string | undefined;
     let code = defaultCode;
@@ -269,8 +291,15 @@ export class ErrorHandlerService {
     };
   }
 
-  async retry<T>(operation: () => Promise<T>, config: Partial<RetryConfig> = {}, context?: string): Promise<T> {
-    this.logger.debug('[ERROR_HANDLER] retry started', { maxAttempts: config.maxAttempts, context });
+  async retry<T>(
+    operation: () => Promise<T>,
+    config: Partial<RetryConfig> = {},
+    context?: string
+  ): Promise<T> {
+    this.logger.debug('[ERROR_HANDLER] retry started', {
+      maxAttempts: config.maxAttempts,
+      context,
+    });
     const { maxAttempts, delayMs, backoffMultiplier } = { ...DEFAULT_RETRY_CONFIG, ...config };
 
     let lastError: AppError | null = null;

@@ -40,10 +40,5 @@ export interface AppError {
 }
 
 export function isTauriApiError(error: unknown): error is TauriApiError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    'message' in error
-  );
+  return typeof error === 'object' && error !== null && 'code' in error && 'message' in error;
 }
