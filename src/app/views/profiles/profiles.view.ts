@@ -176,8 +176,4 @@ export class ProfilesView implements OnInit {
   formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString();
   }
-
-  formatBytes(bytes: number): string {
-    return formatSize(bytes);
-  }
 }
