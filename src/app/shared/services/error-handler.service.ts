@@ -178,30 +178,6 @@ export class ErrorHandlerService {
     };
   }
 
-  private convertToAppError(error: unknown): AppError {
-    if (error instanceof HttpErrorResponse) {
-      return this.convertHttpError(error);
-    }
-
-    if (error instanceof Error) {
-      return {
-        code: 'UNKNOWN',
-        message: error.message,
-        context: undefined,
-        timestamp: Date.now(),
-        retryable: true,
-      };
-    }
-
-    return {
-      code: 'UNKNOWN',
-      message: String(error),
-      context: undefined,
-      timestamp: Date.now(),
-      retryable: true,
-    };
-  }
-
   private convertHttpError(error: HttpErrorResponse): AppError {
     if (!navigator.onLine) {
       return {
