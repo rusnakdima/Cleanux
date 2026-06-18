@@ -43,25 +43,25 @@
           <div class="flex justify-between">
             <span class="text-zinc-500 dark:text-zinc-400">Total</span>
             <span class="font-medium text-zinc-900 dark:text-white">{{
-              formatBytes(memoryInfo()!.total)
+              formatSize(memoryInfo()!.total)
             }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-zinc-500 dark:text-zinc-400">Used</span>
             <span class="font-medium text-zinc-900 dark:text-white">{{
-              formatBytes(memoryInfo()!.used)
+              formatSize(memoryInfo()!.used)
             }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-zinc-500 dark:text-zinc-400">Available</span>
             <span class="font-medium text-zinc-900 dark:text-white">{{
-              formatBytes(memoryInfo()!.available)
+              formatSize(memoryInfo()!.available)
             }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-zinc-500 dark:text-zinc-400">Cached</span>
             <span class="font-medium text-zinc-900 dark:text-white">{{
-              formatBytes(memoryInfo()!.cached)
+              formatSize(memoryInfo()!.cached)
             }}</span>
           </div>
         </div>
@@ -110,13 +110,13 @@
           <div class="flex justify-between">
             <span class="text-zinc-500 dark:text-zinc-400">Total</span>
             <span class="font-medium text-zinc-900 dark:text-white">{{
-              formatBytes(swapInfo()!.total)
+              formatSize(swapInfo()!.total)
             }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-zinc-500 dark:text-zinc-400">Used</span>
             <span class="font-medium text-zinc-900 dark:text-white">{{
-              formatBytes(swapInfo()!.used)
+              formatSize(swapInfo()!.used)
             }}</span>
           </div>
         </div>

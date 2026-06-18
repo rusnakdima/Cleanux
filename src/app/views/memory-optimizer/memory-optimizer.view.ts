@@ -131,10 +131,6 @@ export class MemoryOptimizerView extends LoadingErrorMixin implements OnInit, On
     }
   }
 
-  formatBytes(bytes: number): string {
-    return formatSize(bytes);
-  }
-
   get memoryUsagePercent(): number {
     const mem = this.memoryInfo();
     if (!mem || mem.total === 0) return 0;
