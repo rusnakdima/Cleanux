@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { LogEntry, LogFilter, LoggerService } from './logger.service';
+import { LogEntry, LogFilter } from '@entities/log-manager.model';
 
 const DB_NAME = 'cleanux_logs';
 const DB_VERSION = 1;
@@ -22,7 +22,6 @@ interface StoredLog {
 export class LogStorageService {
   private db: IDBDatabase | null = null;
   private initPromise: Promise<void> | null = null;
-  private logger = inject(LoggerService);
 
   async init(): Promise<void> {
     if (this.db) return;
@@ -32,19 +31,11 @@ export class LogStorageService {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
 
       request.onerror = () => {
-        this.logger.logError(
-          'service',
-          undefined,
-          'init',
-          '[LogStorage] Failed to open IndexedDB',
-          request.error as Error
-        );
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
-        this.logger.logDebug('service', undefined, 'init', '[LogStorage] IndexedDB initialized');
         resolve();
       };
 
@@ -57,7 +48,6 @@ export class LogStorageService {
           store.createIndex('source', 'source', { unique: false });
           store.createIndex('view', 'view', { unique: false });
         }
-        this.logger.logDebug('service', undefined, 'init', '[LogStorage] IndexedDB schema created');
       };
     });
 
@@ -134,12 +124,6 @@ export class LogStorageService {
           deleted++;
           cursor.continue();
         } else {
-          this.logger.logDebug(
-            'service',
-            undefined,
-            'cleanup',
-            `[LogStorage] Cleaned up ${deleted} old log entries`
-          );
           resolve();
         }
       };
@@ -255,7 +239,6 @@ export class LogStorageService {
       const request = store.clear();
 
       request.onsuccess = () => {
-        this.logger.logDebug('service', undefined, 'clearLogs', '[LogStorage] All logs cleared');
         resolve();
       };
       request.onerror = () => reject(request.error);

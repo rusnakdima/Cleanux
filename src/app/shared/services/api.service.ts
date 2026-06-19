@@ -3,42 +3,32 @@ import { Injectable, inject } from '@angular/core';
 
 /* api */
 import { TauriApiService, ApiException } from '@api/tauri-api.service';
-import { LoggerService } from '@services/logger.service';
 
 /* models */
-import { Response, getData } from '@models/response.model';
+import { Response, getData } from '@entities/response.model';
 
-export { ApiException } from '@models/error.model';
+export { ApiException } from '@entities/error.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private tauriApi = inject(TauriApiService);
-  private loggingService = new LoggerService();
-
-  constructor() {
-    this.loggingService.info('ApiService initialized');
-  }
 
   async invoke<T>(
     command: string,
     args?: Record<string, unknown>,
     options: { suppressError?: boolean } = {}
   ): Promise<T> {
-    this.loggingService.debug('Invoking command', { command, hasArgs: !!args });
     try {
       const result = await this.tauriApi.invoke<T>(command, args, options);
-      this.loggingService.debug('Command completed', { command });
       return result;
     } catch (error) {
-      this.loggingService.error('Operation failed', error as Error, { command, args });
       throw error;
     }
   }
 
   async listen<T>(event: string, handler: (event: { payload: T }) => void): Promise<() => void> {
-    this.loggingService.debug('Listening to event', { event });
     return this.tauriApi.listen<T>(event, handler);
   }
 }

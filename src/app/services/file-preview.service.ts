@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { FilePreviewData } from '@models/file-preview.model';
+import { FilePreviewData } from '@entities/file-preview.model';
 import { FileService } from '@services/file.service';
 
 @Injectable({

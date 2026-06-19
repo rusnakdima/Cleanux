@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { LoggerService, LogEntry, LogFilter } from './logger.service';
 import { LogStorageService } from './log-storage.service';
 import { LogExportService, ProblemReport } from '@features/log-manager/services/log-export.service';
+import { LogEntry, LogFilter } from '@entities/log-manager.model';
 import { environment } from '@env/environment';
 import { TOAST_DURATION_MS } from '@shared/utils/constants';
 
@@ -12,7 +12,6 @@ const AUTO_REPORT_KEY = 'cleanux_auto_report_enabled';
   providedIn: 'root',
 })
 export class ProblemReportService {
-  private logger = inject(LoggerService);
   private storage = inject(LogStorageService);
   private exporter = inject(LogExportService);
 
@@ -45,15 +44,6 @@ export class ProblemReportService {
     }
     this.lastErrorTime = now;
 
-    this.logger.logError(
-      'service',
-      undefined,
-      'ProblemReportService',
-      'Error detected',
-      error,
-      context
-    );
-
     if (this.errorCount >= ERROR_THRESHOLD) {
       await this.generateAndStoreReport();
       this.errorCount = 0;
@@ -61,13 +51,14 @@ export class ProblemReportService {
   }
 
   async generateAndStoreReport(): Promise<ProblemReport> {
-    const logs = this.logger.getLogs({ level: 'error' }).slice(-500);
-    const report = await this.exporter.generateProblemReport(logs, environment.version);
+    const logs = await this.storage.getLogs({ level: 'error' } as LogFilter, 500);
+    const report = await this.exporter.generateProblemReport(
+      logs as LogEntry[],
+      environment.version
+    );
 
     this.lastReport.set(report);
     localStorage.setItem('cleanux_last_report', JSON.stringify(report));
-
-    this.logger.logInfo('service', '[ProblemReport] Auto-generated report');
 
     return report;
   }
@@ -101,8 +92,6 @@ export class ProblemReportService {
       throw new Error('No report available. Generate one first.');
     }
 
-    const logs = this.logger.getLogs({ level: 'error' }).slice(-1000);
-
     switch (format) {
       case 'json':
         return JSON.stringify(report, null, 2);
@@ -119,7 +108,7 @@ export class ProblemReportService {
       throw new Error('No report available. Generate one first.');
     }
 
-    const logs = this.logger.getLogs({ level: 'error' }).slice(-100);
+    const logs = report.recentActions;
     return this.exporter.generateShareableLink(logs);
   }
 
@@ -128,8 +117,12 @@ export class ProblemReportService {
     localStorage.removeItem('cleanux_last_report');
   }
 
-  getErrorSummary(): { count: number; lastError: string | null; sources: Record<string, number> } {
-    const errors = this.logger.getLogs({ level: 'error' }).slice(-1000);
+  async getErrorSummary(): Promise<{
+    count: number;
+    lastError: string | null;
+    sources: Record<string, number>;
+  }> {
+    const errors = await this.storage.getErrors(1000);
     const sources: Record<string, number> = {};
 
     for (const error of errors) {

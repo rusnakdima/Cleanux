@@ -1,3 +1,3 @@
 export * from './confirm-dialog';
-export * from './loading-skeleton.component';
-export * from './empty-state.component';
+export * from './shared.loading-skeleton.component';
+export * from './shared.empty-state.component';

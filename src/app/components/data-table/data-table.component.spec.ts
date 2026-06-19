@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { DataTableComponent } from './data-table.component';
-import { TableColumn } from '@models/data-table.model';
+import { TableColumn } from '@entities/data-table.model';
 
 interface TestItem {
   id: string;

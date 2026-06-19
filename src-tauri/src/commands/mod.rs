@@ -11,8 +11,7 @@ pub mod dashboard_command;
 pub mod health_command;
 #[path = "log.command.rs"]
 pub mod log_command;
-#[path = "logger.command.rs"]
-pub mod logger;
+
 #[path = "monitor.command.rs"]
 pub mod monitor_command;
 #[path = "package.command.rs"]

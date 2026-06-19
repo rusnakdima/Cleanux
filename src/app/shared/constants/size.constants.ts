@@ -5,7 +5,7 @@ import {
   HEALTHY_SCORE,
   WARNING_SCORE,
   CRITICAL_SCORE,
-} from '../../models/types-generated';
+} from '../../entities/types-generated';
 
 export {
   CRITICAL_JUNK_SIZE,

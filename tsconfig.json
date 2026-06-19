@@ -1,23 +1,19 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
       "@components/*": ["src/app/components/*"],
-      "@views/*": ["src/app/views/*"],
-      "@models/*": ["src/app/models/*"],
+      "@pages/*": ["src/app/pages/*"],
+      "@entities/*": ["src/app/entities/*"],
       "@services/*": ["src/app/services/*"],
-      "@helpers/*": ["src/app/helpers/*"],
-      "@guards/*": ["src/app/guards/*"],
       "@shared/*": ["src/app/shared/*"],
       "@app/*": ["src/app/*"],
       "@assets/*": ["src/assets/*"],
       "@styles/*": ["src/styles/*"],
       "@env/*": ["src/environments/*"],
       "@api/*": ["src/app/api/*"],
-      "@stores/*": ["src/app/stores/*"],
+      "@store/*": ["src/app/store/*"],
       "@features/*": ["src/app/features/*"],
       "@interceptors/*": ["src/app/interceptors/*"],
       "@resolvers/*": ["src/app/resolvers/*"],

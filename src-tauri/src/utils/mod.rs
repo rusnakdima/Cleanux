@@ -36,5 +36,3 @@ pub use crate::service_method_full;
 #[path = "cache.helper.rs"]
 pub mod cache_helper;
 pub use cache_helper::TimedCache;
-
-pub mod logger;

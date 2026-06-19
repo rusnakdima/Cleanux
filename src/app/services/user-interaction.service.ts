@@ -1,5 +1,4 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { LoggerService } from './logger.service';
 
 export interface UserAction {
   type:
@@ -22,7 +21,6 @@ export interface UserAction {
   providedIn: 'root',
 })
 export class UserInteractionService {
-  private logger = inject(LoggerService);
   private currentView = signal<string>('unknown');
   private actionHistory: UserAction[] = [];
   private maxHistory = 100;
@@ -125,7 +123,6 @@ export class UserInteractionService {
 
   setCurrentView(view: string): void {
     if (this.currentView() !== view) {
-      this.logger.logInfo('user', 'View changed to: ' + view);
       this.currentView.set(view);
     }
   }
@@ -147,10 +144,5 @@ export class UserInteractionService {
     if (this.actionHistory.length > this.maxHistory) {
       this.actionHistory = this.actionHistory.slice(-this.maxHistory);
     }
-
-    this.logger.logInfo(
-      'user',
-      'User ' + action.type + ': ' + action.action + ' in ' + action.view
-    );
   }
 }

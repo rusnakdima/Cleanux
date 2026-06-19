@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 import { listen, UnlistenFn } from '@tauri-apps/api/event';
-import { Response, getData } from '@models/response.model';
-import { ApiException } from '@models/error.model';
+import { Response, getData } from '@entities/response.model';
+import { ApiException } from '@entities/error.model';
 import { getErrorMessage } from '@shared/utils/error.util';
-import { LoggerService } from '@services/logger.service';
 import { DEFAULT_TIMEOUT_MS } from '@shared/utils/constants';
 
 export interface InvokeOptions {
@@ -16,8 +15,6 @@ export interface InvokeOptions {
   providedIn: 'root',
 })
 export class TauriApiService {
-  private loggingService = new LoggerService();
-
   async invoke<T>(
     command: string,
     args?: Record<string, unknown>,
@@ -42,10 +39,6 @@ export class TauriApiService {
         throw new ApiException(response.message || `Operation failed: ${command}`, command);
       }
     } catch (error: unknown) {
-      if (!options.suppressError) {
-        const err = error instanceof Error ? error : new Error(String(error));
-        this.loggingService.error(`Error invoking command "${command}"`, err, { args });
-      }
       if (error instanceof ApiException) {
         throw error;
       }
@@ -63,6 +56,6 @@ export class TauriApiService {
   }
 }
 
-export { ApiException } from '@models/error.model';
-export type { Response } from '@models/response.model';
-export { getData } from '@models/response.model';
+export { ApiException } from '@entities/error.model';
+export type { Response } from '@entities/response.model';
+export { getData } from '@entities/response.model';

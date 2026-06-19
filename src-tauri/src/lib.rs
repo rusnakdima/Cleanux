@@ -19,8 +19,6 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  utils::logger::init_logger("cleanux", log::LevelFilter::Info).ok();
-
   tauri::Builder::default()
     .setup(|app| {
       let app_data_dir = app
@@ -196,7 +194,6 @@ pub fn run() {
       commands::log_command::get_var_log_usage,
       commands::log_command::get_largest_log_files,
       commands::log_command::get_log_manager_summary,
-      commands::logger::log_message,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {

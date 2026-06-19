@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { EmptyDirCleanerService } from '@services/empty-dir-cleaner.service';
 import { DataTableComponent } from '@components/data-table/data-table.component';
-import { TableColumn, TableOptions } from '@models/data-table.model';
+import { TableColumn, TableOptions } from '@entities/data-table.model';
 
 export interface EmptyDirectory {
   path: string;

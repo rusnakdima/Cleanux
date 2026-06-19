@@ -15,10 +15,10 @@ import { ThemeService } from './services/theme.service';
 import { TauriApiService } from '@api/tauri-api.service';
 
 /* stores */
-import { CleanerStore } from '@stores/cleaner.store';
-import { SystemStore } from '@stores/system.store';
-import { MonitorStore } from '@stores/monitor.store';
-import { AutomationStore } from '@stores/automation.store';
+import { CleanerStore } from '@store/cleaner.store';
+import { SystemStore } from '@store/system.store';
+import { MonitorStore } from '@store/monitor.store';
+import { AutomationStore } from '@store/automation.store';
 
 /* routes */
 import { routes } from './app.routes';

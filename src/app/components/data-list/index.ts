@@ -7,4 +7,4 @@ export type {
   ListSelectionEvent,
   ListSortEvent,
   ListCellFormat,
-} from '@models/data-list.model';
+} from '@entities/data-list.model';

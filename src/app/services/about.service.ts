@@ -7,8 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '@env/environment';
 
 /* models */
-import { GitHubReleaseByTag, GitHubReleaseLatest } from '@models/github-release.model';
-import { LoggerService } from './logger.service';
+import { GitHubReleaseByTag, GitHubReleaseLatest } from '@entities/github-release.model';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -21,17 +20,13 @@ const httpOptions = {
 })
 export class AboutService {
   private http = inject(HttpClient);
-  private loggingService = new LoggerService();
 
   gitRepoName: string = environment.gitRepoName;
   githubUser: string = environment.githubUser;
 
-  constructor() {
-    this.loggingService.info('AboutService initialized');
-  }
+  constructor() {}
 
   getDate(version: string) {
-    this.loggingService.info('Getting release date', { version });
     return toSignal(
       this.http.get<GitHubReleaseByTag>(
         `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/tags/v${version}`,
@@ -41,7 +36,6 @@ export class AboutService {
   }
 
   checkUpdate() {
-    this.loggingService.info('Checking for updates');
     return toSignal(
       this.http.get<GitHubReleaseLatest>(
         `https://api.github.com/repos/${this.githubUser}/${this.gitRepoName}/releases/latest`,

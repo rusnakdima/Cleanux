@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseApiService } from '@services/base-api.service';
-import { BatteryInfo, PowerProfile, ThermalInfo } from '@models/power.model';
+import { BatteryInfo, PowerProfile, ThermalInfo } from '@entities/power.model';
 
 @Injectable({
   providedIn: 'root',

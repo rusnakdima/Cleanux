@@ -1,5 +1,5 @@
 import { WritableSignal } from '@angular/core';
-import { PaginatedData } from '@models/system.model';
+import { PaginatedData } from '@entities/system.model';
 
 export interface PaginatedState<T> {
   data: WritableSignal<T[]>;

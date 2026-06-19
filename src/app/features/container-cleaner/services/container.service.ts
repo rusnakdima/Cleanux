@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseApiService } from '@services/base-api.service';
-import { ContainerSummary, PruneResult } from '@models/container.model';
+import { ContainerSummary, PruneResult } from '@entities/container.model';
 
 @Injectable({
   providedIn: 'root',

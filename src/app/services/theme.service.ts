@@ -5,8 +5,7 @@ import {
   THEME_PRESETS,
   DEFAULT_APPEARANCE_SETTINGS,
   getAccentShades,
-} from '@models/theme.model';
-import { LoggerService } from '@services/logger.service';
+} from '@entities/theme.model';
 
 const STORAGE_KEY = 'appearance_settings';
 
@@ -44,7 +43,6 @@ export interface ThemeConfig {
   providedIn: 'root',
 })
 export class ThemeService {
-  private loggingService = new LoggerService();
   private settings = signal<AppearanceSettings>(this.loadSettings());
 
   mode = signal<'light' | 'dark' | 'system'>(this.settings().mode);
@@ -98,7 +96,7 @@ export class ThemeService {
         return { ...parsed, preset };
       }
     } catch (error) {
-      this.loggingService.warn('Failed to load theme settings: ' + error);
+      // Ignore load errors
     }
 
     const legacyTheme = localStorage.getItem('theme');

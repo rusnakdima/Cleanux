@@ -28,7 +28,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PaginationComponent } from '../pagination/pagination.component';
 
 /* models */
-import { ListColumn, ListOptions, ListActionEvent } from '@models/data-list.model';
+import { ListColumn, ListOptions, ListActionEvent } from '@entities/data-list.model';
 import { formatSize } from '@shared/utils/format.util';
 import { ConfirmDialogService } from '@shared/confirm-dialog';
 import { sortData, filterData, getCellValue, rowRecord } from '@shared/utils/list.helpers';

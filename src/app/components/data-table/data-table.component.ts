@@ -31,7 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { PaginationComponent } from '../pagination/pagination.component';
 
 /* models */
-import { TableColumn, TableOptions, TableAction, RowActionEvent } from '@models/data-table.model';
+import { TableColumn, TableOptions, TableAction, RowActionEvent } from '@entities/data-table.model';
 import { formatSize } from '@shared/utils/format.util';
 import { CheckboxComponent } from '@shared/checkbox';
 import { ConfirmDialogService } from '@shared/confirm-dialog';

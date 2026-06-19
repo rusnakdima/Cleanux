@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 /* models */
-import { FilePreviewData } from '@models/file-preview.model';
+import { FilePreviewData } from '@entities/file-preview.model';
 
 @Component({
   selector: 'app-file-preview',

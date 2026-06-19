@@ -1,4 +1,4 @@
-import { Response } from '@models/response.model';
+import { Response } from '@entities/response.model';
 
 export function createSuccessResponse<T>(data: T, message = 'Success'): Response<T> {
   return {
