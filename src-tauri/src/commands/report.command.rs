@@ -10,7 +10,7 @@ use crate::models::{Response, Status};
 use crate::AppState;
 use tauri::State;
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_generate_cleaning_report(
   state: State<'_, AppState>,
   items_cleaned: i64,
@@ -35,7 +35,7 @@ pub async fn crud_generate_cleaning_report(
     .map_err(|e| Response::error(Status::Error, e.to_string()))
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_cleaning_history(
   state: State<'_, AppState>,
   limit: Option<u64>,
@@ -54,7 +54,7 @@ pub async fn crud_get_cleaning_history(
     .map_err(|e| Response::error(Status::Error, e.to_string()))
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_compare_snapshots(
   state: State<'_, AppState>,
   before_id: String,

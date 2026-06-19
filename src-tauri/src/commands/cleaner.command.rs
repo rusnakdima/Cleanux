@@ -5,39 +5,39 @@ use crate::services::container_service::ContainerService;
 use crate::services::repair_service::RepairService;
 use crate::services::startup_service::StartupService;
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn find_broken_symlinks() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   RepairService::find_broken_symlinks()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn find_orphaned_packages() -> Result<Response<serde_json::Value>, Response<serde_json::Value>>
 {
   RepairService::find_orphaned_packages()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_font_cache() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   RepairService::clean_font_cache()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_repair_icon_cache() -> Result<Response<serde_json::Value>, Response<serde_json::Value>>
 {
   RepairService::clean_icon_cache()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn repair_permissions() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   RepairService::repair_permissions()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn remove_broken_symlink(
   path: String,
@@ -45,7 +45,7 @@ pub fn remove_broken_symlink(
   RepairService::remove_broken_symlink(&path)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_repair_orphaned_pkg(
   path: String,
@@ -53,13 +53,13 @@ pub fn clean_repair_orphaned_pkg(
   RepairService::remove_orphaned_package(&path)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_startup_items() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   StartupService::get_startup_items()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn disable_startup_item(
   path: String,
@@ -67,7 +67,7 @@ pub fn disable_startup_item(
   StartupService::disable_startup_item(&path)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn enable_startup_item(
   path: String,
@@ -75,7 +75,7 @@ pub fn enable_startup_item(
   StartupService::enable_startup_item(&path)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_container_summary() -> ContainerSummaryResponse {
   let summary = ContainerService.get_container_summary();
   ContainerSummaryResponse {
@@ -104,7 +104,7 @@ pub struct ContainerSummaryResponse {
   pub podman_version: Option<String>,
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn docker_system_prune(
   all: bool,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -113,7 +113,7 @@ pub fn docker_system_prune(
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn docker_image_prune(
   all: bool,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -122,7 +122,7 @@ pub fn docker_image_prune(
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn docker_container_prune() -> Result<Response<serde_json::Value>, Response<serde_json::Value>>
 {
   ContainerService
@@ -130,14 +130,14 @@ pub fn docker_container_prune() -> Result<Response<serde_json::Value>, Response<
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn docker_volume_prune() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   ContainerService
     .docker_volume_prune()
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn docker_preview_prune(
   all: bool,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -146,7 +146,7 @@ pub fn docker_preview_prune(
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn podman_system_prune(
   all: bool,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -155,7 +155,7 @@ pub fn podman_system_prune(
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn podman_image_prune(
   all: bool,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -164,13 +164,13 @@ pub fn podman_image_prune(
     .map_err(|e| e.into_response())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_quick_actions() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AutomationService::get_quick_actions()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn execute_action(
   action_id: String,
@@ -178,13 +178,13 @@ pub fn execute_action(
   AutomationService::execute_action(action_id)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_recipes() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AutomationService::get_recipes()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn save_recipe(
   recipe: AutomationRecipe,
@@ -192,7 +192,7 @@ pub fn save_recipe(
   AutomationService::save_recipe(recipe)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn delete_recipe(
   recipe_id: String,
@@ -200,7 +200,7 @@ pub fn delete_recipe(
   AutomationService::delete_recipe(recipe_id)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn execute_recipe(
   recipe_id: String,
@@ -208,49 +208,49 @@ pub fn execute_recipe(
   AutomationService::execute_recipe(recipe_id)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_execution_history() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AutomationService::get_execution_history_list()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_residue_summary() -> Result<AppResidueSummary, Response<serde_json::Value>> {
   Ok(AppResidueService.get_residue_summary())
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn scan_user_configs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AppResidueService.scan_user_configs_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn scan_user_data() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AppResidueService.scan_user_data_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn scan_user_caches() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AppResidueService.scan_user_caches_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn scan_home_residues() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AppResidueService.scan_home_residues_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_orphaned_configs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   AppResidueService.get_orphaned_configs_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_app_residue(
   path: String,
@@ -258,7 +258,7 @@ pub fn clean_app_residue(
   AppResidueService.clean_residue(&path)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_multiple_app_residues(
   paths: Vec<String>,

@@ -50,6 +50,8 @@ export class MemoryOptimizerView extends LoadingErrorMixin implements OnInit, On
   private ngZone = inject(NgZone);
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
 
+  formatSize = formatSize;
+
   memoryInfo = signal<MemoryInfo | null>(null);
   swapInfo = signal<SwapInfo | null>(null);
   processes = signal<ProcessMemory[]>([]);

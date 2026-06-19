@@ -14,7 +14,7 @@ use crate::models::{Response, Status};
 use crate::AppState;
 use tauri::State;
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_execution_history(
   state: State<'_, AppState>,
   page: Option<u64>,
@@ -40,7 +40,7 @@ pub async fn crud_get_execution_history(
   ))
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_quick_actions(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   use crate::services::automation_service::AutomationService;
@@ -52,7 +52,7 @@ pub async fn crud_get_quick_actions(
   ))
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_execute_action(
   action_id: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -61,7 +61,7 @@ pub async fn crud_execute_action(
   AutomationService::execute_action(action_id)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_execute_recipe(
   state: State<'_, AppState>,
   recipe_id: String,

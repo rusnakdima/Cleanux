@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { invoke } from '@tauri-apps/api/core';
+import { Injectable, inject } from '@angular/core';
+import { TauriApiService } from '@app/api/tauri-api.service';
 
 export type LogLevel = 'debug' | 'warn' | 'error' | 'info';
 
@@ -33,6 +33,7 @@ export interface LogStats {
 
 @Injectable({ providedIn: 'root' })
 export class LoggerService {
+  private api = inject(TauriApiService);
   private logs: LogEntry[] = [];
   private maxLogs = 1000;
 
@@ -42,37 +43,37 @@ export class LoggerService {
 
   debug(message: string, data?: Record<string, unknown>): void {
     console.debug(message, data || '');
-    invoke('log_message', { level: 'debug', component: 'app', message }).catch(() => {});
+    this.api.logMessage('debug', 'app', message);
   }
 
   info(message: string, data?: Record<string, unknown>): void {
     console.info(message, data || '');
-    invoke('log_message', { level: 'info', component: 'app', message }).catch(() => {});
+    this.api.logMessage('info', 'app', message);
   }
 
   warn(message: string, data?: Record<string, unknown>): void {
     console.warn(message, data || '');
-    invoke('log_message', { level: 'warn', component: 'app', message }).catch(() => {});
+    this.api.logMessage('warn', 'app', message);
   }
 
   error(message: string, error?: unknown, data?: Record<string, unknown>): void {
     console.error(message, error, data || '');
-    invoke('log_message', { level: 'error', component: 'app', message }).catch(() => {});
+    this.api.logMessage('error', 'app', message);
   }
 
   logDebug(source: string, context: any, method: string, message: string): void {
     console.debug(`[${source}]`, message);
-    invoke('log_message', { level: 'debug', component: source, message }).catch(() => {});
+    this.api.logMessage('debug', source, message);
   }
 
   logInfo(source: string, message: string): void {
     console.info(`[${source}]`, message);
-    invoke('log_message', { level: 'info', component: source, message }).catch(() => {});
+    this.api.logMessage('info', source, message);
   }
 
   logWarn(source: string, message: string): void {
     console.warn(`[${source}]`, message);
-    invoke('log_message', { level: 'warn', component: source, message }).catch(() => {});
+    this.api.logMessage('warn', source, message);
   }
 
   logError(
@@ -84,7 +85,7 @@ export class LoggerService {
     extra?: Record<string, unknown>
   ): void {
     console.error(`[${source}]`, message, error, extra);
-    invoke('log_message', { level: 'error', component: source, message }).catch(() => {});
+    this.api.logMessage('error', source, message);
   }
 
   getLogs(filter?: LogFilter): LogEntry[] {
@@ -133,21 +134,23 @@ export class LoggerService {
   }
 }
 
+const api = new TauriApiService();
+
 export const logger = {
   debug(message: string, component: string = 'app'): void {
     console.debug(`[${component}]`, message);
-    invoke('log_message', { level: 'debug', component, message }).catch(console.error);
+    api.logMessage('debug', component, message);
   },
   warn(message: string, component: string = 'app'): void {
     console.warn(`[${component}]`, message);
-    invoke('log_message', { level: 'warn', component, message }).catch(console.error);
+    api.logMessage('warn', component, message);
   },
   error(message: string, component: string = 'app'): void {
     console.error(`[${component}]`, message);
-    invoke('log_message', { level: 'error', component, message }).catch(console.error);
+    api.logMessage('error', component, message);
   },
   info(message: string, component: string = 'app'): void {
     console.info(`[${component}]`, message);
-    invoke('log_message', { level: 'info', component, message }).catch(console.error);
+    api.logMessage('info', component, message);
   },
 };

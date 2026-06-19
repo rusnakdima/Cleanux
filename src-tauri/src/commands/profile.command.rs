@@ -14,7 +14,7 @@ use crate::models::{Response, Status};
 use crate::AppState;
 use tauri::State;
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn apply_cleaning_profile(
   state: State<'_, AppState>,
   name: String,

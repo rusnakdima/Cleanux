@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { UnifiedStorageService } from '@app/core/storage/unified-storage.service';
+import { UnifiedStorageService } from '@app/core/services/unified-storage.service';
 import { SystemServiceItem, ProcessItem } from '@models/system.model';
 
 @Injectable({ providedIn: 'root' })

@@ -2,7 +2,7 @@
 macro_rules! crud_get_command {
   ($route:ident, $table:expr) => {
     #[allow(dead_code)]
-    #[tauri::command]
+    #[tauri::command(rename_all = "camelCase")]
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       id: Option<String>,
@@ -32,7 +32,7 @@ macro_rules! crud_get_command {
 macro_rules! crud_get_all_command {
   ($route:ident, $table:expr) => {
     #[allow(dead_code)]
-    #[tauri::command]
+    #[tauri::command(rename_all = "camelCase")]
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       page: Option<u64>,
@@ -58,7 +58,7 @@ macro_rules! crud_get_all_command {
 macro_rules! crud_create_command {
   ($route:ident, $table:expr) => {
     #[allow(dead_code)]
-    #[tauri::command]
+    #[tauri::command(rename_all = "camelCase")]
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       data: serde_json::Value,
@@ -83,7 +83,7 @@ macro_rules! crud_create_command {
 macro_rules! crud_update_command {
   ($route:ident, $table:expr) => {
     #[allow(dead_code)]
-    #[tauri::command]
+    #[tauri::command(rename_all = "camelCase")]
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       id: String,
@@ -109,7 +109,7 @@ macro_rules! crud_update_command {
 macro_rules! crud_delete_command {
   ($route:ident, $table:expr) => {
     #[allow(dead_code)]
-    #[tauri::command]
+    #[tauri::command(rename_all = "camelCase")]
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       id: String,
@@ -134,7 +134,7 @@ macro_rules! crud_delete_command {
 macro_rules! crud_patch_command {
   ($route:ident, $table:expr) => {
     #[allow(dead_code)]
-    #[tauri::command]
+    #[tauri::command(rename_all = "camelCase")]
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       id: String,

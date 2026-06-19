@@ -57,6 +57,10 @@ export class TauriApiService {
   async listen<T>(event: string, handler: (event: { payload: T }) => void): Promise<UnlistenFn> {
     return await listen<T>(event, handler);
   }
+
+  logMessage(level: string, component: string, message: string): void {
+    invoke('log_message', { level, component, message }).catch(() => {});
+  }
 }
 
 export { ApiException } from '@models/error.model';

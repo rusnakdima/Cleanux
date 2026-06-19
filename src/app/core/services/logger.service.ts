@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { invoke } from '@tauri-apps/api/core';
+import { Injectable, inject } from '@angular/core';
+import { TauriApiService } from '@app/api/tauri-api.service';
 
 export enum LogLevel {
   Debug = 0,
@@ -18,12 +18,13 @@ export interface LogEntry {
 
 @Injectable({ providedIn: 'root' })
 export class CoreLoggerService {
+  private api = inject(TauriApiService);
   private logs: LogEntry[] = [];
   private maxLogs = 1000;
   private level = LogLevel.Info;
 
   private logToBackend(level: string, message: string, context?: string): void {
-    invoke('log_message', { level, component: context || 'app', message }).catch(() => {});
+    this.api.logMessage(level, context || 'app', message);
   }
 
   private format(level: LogLevel, message: string, context?: string, data?: any): LogEntry {

@@ -27,14 +27,14 @@ pub struct CleanResult {
   pub message: String,
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_package_cache_info() -> Result<Response<serde_json::Value>, Response<serde_json::Value>>
 {
   PackageService::get_package_cache_info()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_package_cache(
   manager: String,

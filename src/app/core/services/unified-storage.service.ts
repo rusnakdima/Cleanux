@@ -1,5 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { StorageEntityService, EntityFilter, PaginationParams } from './storage-entity.service';
+import {
+  StorageEntityService,
+  EntityFilter,
+  PaginationParams,
+} from '../../services/storage-entity.service';
 import { StorageCacheService } from './storage-cache.service';
 import { StorageQueryService } from './storage-query.service';
 

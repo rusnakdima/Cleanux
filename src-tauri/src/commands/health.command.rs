@@ -10,7 +10,7 @@ use crate::models::{Response, Status};
 use crate::AppState;
 use tauri::State;
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_health_history(
   state: State<'_, AppState>,
   days: Option<u32>,
@@ -46,7 +46,7 @@ pub async fn crud_get_health_history(
   ))
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_health_trends(
   state: State<'_, AppState>,
   days: Option<u32>,
@@ -128,7 +128,7 @@ pub async fn crud_get_health_trends(
   ))
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub async fn crud_save_health_snapshot(
   state: State<'_, AppState>,
   data: serde_json::Value,

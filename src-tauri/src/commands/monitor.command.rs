@@ -14,22 +14,22 @@ fn get_health_service() -> &'static HealthHistoryService {
   })
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_temperatures() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   TemperatureService::get_temperatures()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_cpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   TemperatureService::get_cpu_temperature()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_gpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   TemperatureService::get_gpu_temperature()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn save_health_snapshot(
   health_score: f64,
@@ -63,7 +63,7 @@ pub fn save_health_snapshot(
   }
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_health_history(
   days: u32,
@@ -78,7 +78,7 @@ pub fn get_health_history(
   }
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_health_trends(
   days: u32,
@@ -98,17 +98,17 @@ pub fn get_health_trends(
   }
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_system_stats() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MonitorService::get_system_stats()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn start_monitoring() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MonitorService::start_monitoring()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn stop_monitoring() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MonitorService::stop_monitoring()
 }

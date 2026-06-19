@@ -12,37 +12,37 @@ fn get_kernel_service() -> &'static KernelCleanerService {
   KERNEL_SERVICE.get_or_init(|| KernelCleanerService)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_memory_info() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MemoryService::get_memory_info()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_swap_info() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MemoryService::get_swap_info()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_process_memory() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MemoryService::get_process_memory()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn optimize_memory() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MemoryService::optimize_memory()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_processes() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   ProcessService::get_processes()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn kill_process(pid: u32) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   ProcessService::kill_process(pid)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn kill_selected_processes(
   pids: Vec<u32>,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -81,7 +81,7 @@ pub fn kill_selected_processes(
   }
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_current_kernel() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   Ok(
     ResponseBuilder::new()
@@ -93,17 +93,17 @@ pub fn get_current_kernel() -> Result<Response<serde_json::Value>, Response<serd
   )
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_installed_kernels() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().get_installed_kernels_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_old_kernels() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().get_old_kernels_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_old_kernels_size() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let size = get_kernel_service().get_old_kernels_size();
   Ok(
@@ -114,72 +114,72 @@ pub fn get_old_kernels_size() -> Result<Response<serde_json::Value>, Response<se
   )
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn remove_kernel(
   version: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().remove_kernel(&version)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_old_initramfs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().get_old_initramfs_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn remove_initramfs(
   version: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().remove_initramfs(&version)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_boot_space_info() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().get_boot_space_info_response()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn update_grub() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   get_kernel_service().update_grub()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_battery_info() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   PowerService::get_battery_info()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_power_profiles() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   PowerService::get_power_profiles()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn set_power_profile(
   profile: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   PowerService::set_power_profile(profile)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_thermal_info() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   PowerService::get_thermal_info()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn stop_service(
   service: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   SystemService.stop_service(&service)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn stop_selected_services(
   services: Vec<String>,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   SystemService.stop_selected_services(services)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn open_file(
   path: String,
   command: Option<String>,
@@ -187,26 +187,26 @@ pub fn open_file(
   SystemService.open_file(&path, command)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn get_all_services() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   SystemService.get_all_services()
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn enable_service(
   service: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   SystemService.enable_service(&service)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn start_service(
   service: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   SystemService.start_service(&service)
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "camelCase")]
 pub fn enable_selected_services(
   services: Vec<String>,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
