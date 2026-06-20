@@ -2,7 +2,6 @@ use cleanux_lib::models::{DataValue, ResponseStatus};
 use cleanux_lib::services::kernel_cleaner_service::{
   BootSpaceInfo, InitramfsInfo, KernelCleanerService, KernelInfo,
 };
-
 #[test]
 fn test_kernel_info_serialization() {
   let kernel_info = KernelInfo {
@@ -11,13 +10,11 @@ fn test_kernel_info_serialization() {
     size: 102400,
     is_current: true,
   };
-
   let json = serde_json::to_string(&kernel_info).unwrap();
   assert!(json.contains("5.4.0- generic"));
   assert!(json.contains("102400"));
   assert!(json.contains("\"is_current\":true"));
 }
-
 #[test]
 fn test_initramfs_info_serialization() {
   let initramfs_info = InitramfsInfo {
@@ -25,12 +22,10 @@ fn test_initramfs_info_serialization() {
     path: "/boot/initrd.img-5.4.0- generic".to_string(),
     size: 51200,
   };
-
   let json = serde_json::to_string(&initramfs_info).unwrap();
   assert!(json.contains("5.4.0- generic"));
   assert!(json.contains("51200"));
 }
-
 #[test]
 fn test_boot_space_info_serialization() {
   let boot_space_info = BootSpaceInfo {
@@ -39,20 +34,17 @@ fn test_boot_space_info_serialization() {
     available: 500000,
     usage_percent: 50.0,
   };
-
   let json = serde_json::to_string(&boot_space_info).unwrap();
   assert!(json.contains("1000000"));
   assert!(json.contains("500000"));
   assert!(json.contains("50.0"));
 }
-
 #[test]
 fn test_get_current_kernel() {
   let service = KernelCleanerService;
   let result = service.get_current_kernel();
   assert!(!result.is_empty());
 }
-
 #[test]
 fn test_get_installed_kernels() {
   let service = KernelCleanerService;
@@ -63,7 +55,6 @@ fn test_get_installed_kernels() {
     assert!(!kernel.path.is_empty());
   }
 }
-
 #[test]
 fn test_get_old_kernels() {
   let service = KernelCleanerService;
@@ -72,14 +63,12 @@ fn test_get_old_kernels() {
     assert!(!kernel.is_current);
   }
 }
-
 #[test]
 fn test_get_old_kernels_size() {
   let service = KernelCleanerService;
   let size = service.get_old_kernels_size();
   assert!(size >= 0);
 }
-
 #[test]
 fn test_get_old_initramfs() {
   let service = KernelCleanerService;
@@ -89,7 +78,6 @@ fn test_get_old_initramfs() {
     assert!(!initramfs.path.is_empty());
   }
 }
-
 #[test]
 fn test_get_boot_space_info() {
   let service = KernelCleanerService;
@@ -98,7 +86,6 @@ fn test_get_boot_space_info() {
   assert!(boot_space.usage_percent >= 0.0);
   assert!(boot_space.usage_percent <= 100.0);
 }
-
 #[test]
 fn test_remove_kernel_validation_current() {
   let service = KernelCleanerService;
@@ -109,7 +96,6 @@ fn test_remove_kernel_validation_current() {
   assert_eq!(response.status, ResponseStatus::Error);
   assert!(response.message.contains("currently running kernel"));
 }
-
 #[test]
 fn test_remove_kernel_validation_not_found() {
   let service = KernelCleanerService;
@@ -119,7 +105,6 @@ fn test_remove_kernel_validation_not_found() {
   assert_eq!(response.status, ResponseStatus::Error);
   assert!(response.message.contains("not found"));
 }
-
 #[test]
 fn test_remove_initramfs_nonexistent() {
   let service = KernelCleanerService;
@@ -128,7 +113,6 @@ fn test_remove_initramfs_nonexistent() {
   let response = result.unwrap();
   assert_eq!(response.status, ResponseStatus::Success);
 }
-
 #[test]
 fn test_update_grub_returns_result() {
   let service = KernelCleanerService;

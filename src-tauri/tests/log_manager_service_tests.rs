@@ -2,43 +2,36 @@ use cleanux_lib::services::log_manager_service::{
   JournalInfo, LogFileInfo, LogManagerService, LogManagerSummary, LogrotateAnalysis,
   LogrotateConfig, RotatedLogInfo, VarLogUsage,
 };
-
 #[test]
 fn test_log_manager_service_get_journal_size() {
   let size = LogManagerService::get_journal_size();
   assert!(size >= 0);
 }
-
 #[test]
 fn test_log_manager_service_get_var_log_usage() {
   let usage = LogManagerService::get_var_log_usage();
   assert!(usage.total_bytes >= 0);
 }
-
 #[test]
 fn test_log_manager_service_get_rotated_logs_size() {
   let size = LogManagerService::get_rotated_logs_size();
   assert!(size >= 0);
 }
-
 #[test]
 fn test_log_manager_service_get_journal_usage() {
   let info = LogManagerService::get_journal_usage();
   assert!(info.size_bytes >= 0);
 }
-
 #[test]
 fn test_log_manager_service_get_largest_log_files() {
   let files = LogManagerService::get_largest_log_files(10);
   assert!(files.len() >= 0);
 }
-
 #[test]
 fn test_log_manager_service_get_rotated_logs() {
   let logs = LogManagerService::get_rotated_logs();
   assert!(logs.len() >= 0);
 }
-
 #[test]
 fn test_journal_info_serialization() {
   let info = JournalInfo {
@@ -48,13 +41,11 @@ fn test_journal_info_serialization() {
     newest_entry: Some("2024-12-01".to_string()),
     is_active: true,
   };
-
   let json = serde_json::to_string(&info).unwrap();
   assert!(json.contains("1024"));
   assert!(json.contains("1.00 KB"));
   assert!(json.contains("is_active"));
 }
-
 #[test]
 fn test_rotated_log_info_serialization() {
   let info = RotatedLogInfo {
@@ -64,12 +55,10 @@ fn test_rotated_log_info_serialization() {
     modified: "2024-01-01".to_string(),
     compression_ratio: Some(0.5),
   };
-
   let json = serde_json::to_string(&info).unwrap();
   assert!(json.contains("/var/log/syslog.1"));
   assert!(json.contains("2048"));
 }
-
 #[test]
 fn test_logrotate_config_serialization() {
   let config = LogrotateConfig {
@@ -81,12 +70,10 @@ fn test_logrotate_config_serialization() {
     compress: true,
     rotate_count: Some(4),
   };
-
   let json = serde_json::to_string(&config).unwrap();
   assert!(json.contains("/etc/logrotate.conf"));
   assert!(json.contains("daily"));
 }
-
 #[test]
 fn test_logrotate_analysis_serialization() {
   let analysis = LogrotateAnalysis {
@@ -96,12 +83,10 @@ fn test_logrotate_analysis_serialization() {
     potential_savings_mb: 100,
     issues: vec!["Issue 1".to_string()],
   };
-
   let json = serde_json::to_string(&analysis).unwrap();
   assert!(json.contains("5"));
   assert!(json.contains("100"));
 }
-
 #[test]
 fn test_var_log_usage_serialization() {
   let usage = VarLogUsage {
@@ -110,12 +95,10 @@ fn test_var_log_usage_serialization() {
     file_count: 100,
     directory_count: 10,
   };
-
   let json = serde_json::to_string(&usage).unwrap();
   assert!(json.contains("1.00 MB"));
   assert!(json.contains("100"));
 }
-
 #[test]
 fn test_log_file_info_serialization() {
   let info = LogFileInfo {
@@ -125,12 +108,10 @@ fn test_log_file_info_serialization() {
     modified: "2024-01-01".to_string(),
     file_type: "plain".to_string(),
   };
-
   let json = serde_json::to_string(&info).unwrap();
   assert!(json.contains("/var/log/auth.log"));
   assert!(json.contains("plain"));
 }
-
 #[test]
 fn test_log_manager_summary_serialization() {
   let summary = LogManagerSummary {
@@ -143,27 +124,23 @@ fn test_log_manager_summary_serialization() {
     logrotate_configs_count: 3,
     potential_savings_mb: 50,
   };
-
   let json = serde_json::to_string(&summary).unwrap();
   assert!(json.contains("1.00 MB"));
   assert!(json.contains("3"));
   assert!(json.contains("50"));
 }
-
 #[test]
 fn test_log_manager_service_analyze_logrotate() {
   let analysis = LogManagerService::analyze_logrotate();
   assert!(analysis.total_configs >= 0);
   assert!(analysis.potential_savings_mb >= 0);
 }
-
 #[test]
 fn test_log_manager_service_get_summary() {
   let summary = LogManagerService::get_log_manager_summary();
   assert!(summary.journal_size_bytes >= 0);
   assert!(summary.var_log_size_bytes >= 0);
 }
-
 #[test]
 fn test_log_manager_service_clean_rotated_logs_dry_run() {
   let result = LogManagerService::clean_rotated_logs(30);

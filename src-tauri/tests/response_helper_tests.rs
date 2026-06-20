@@ -3,14 +3,12 @@ use cleanux_lib::helpers::response_helper::{
   success_response, ResponseBuilder,
 };
 use cleanux_lib::models::{DataValue, ResponseStatus};
-
 #[test]
 fn test_response_builder_new() {
   let builder = ResponseBuilder::new();
   let response = builder.build();
   assert_eq!(response.status, ResponseStatus::Info);
 }
-
 #[test]
 fn test_response_builder_success() {
   let response = ResponseBuilder::new()
@@ -19,20 +17,17 @@ fn test_response_builder_success() {
   assert_eq!(response.status, ResponseStatus::Success);
   assert_eq!(response.message, "Operation successful");
 }
-
 #[test]
 fn test_response_builder_info() {
   let response = ResponseBuilder::new().info("Informational message").build();
   assert_eq!(response.status, ResponseStatus::Info);
 }
-
 #[test]
 fn test_response_builder_error() {
   let response = ResponseBuilder::new().error("Something went wrong").build();
   assert_eq!(response.status, ResponseStatus::Error);
   assert_eq!(response.message, "Something went wrong");
 }
-
 #[test]
 fn test_response_builder_with_data() {
   let response = ResponseBuilder::new()
@@ -46,7 +41,6 @@ fn test_response_builder_with_data() {
     _ => panic!("Expected String data"),
   }
 }
-
 #[test]
 fn test_response_builder_chaining() {
   let response = ResponseBuilder::new()
@@ -56,28 +50,24 @@ fn test_response_builder_chaining() {
   assert_eq!(response.status, ResponseStatus::Success);
   assert_eq!(response.message, "Done");
 }
-
 #[test]
 fn test_success_response() {
   let response = success_response("Success!", DataValue::String("data".to_string()));
   assert_eq!(response.status, ResponseStatus::Success);
   assert_eq!(response.message, "Success!");
 }
-
 #[test]
 fn test_info_response() {
   let response = info_response("Info", DataValue::Bool(true));
   assert_eq!(response.status, ResponseStatus::Info);
   assert_eq!(response.message, "Info");
 }
-
 #[test]
 fn test_error_response() {
   let response = error_response("Error occurred", DataValue::Number(0.0));
   assert_eq!(response.status, ResponseStatus::Error);
   assert_eq!(response.message, "Error occurred");
 }
-
 #[test]
 fn test_data_empty_string() {
   let data = data_empty_string();
@@ -86,7 +76,6 @@ fn test_data_empty_string() {
     _ => panic!("Expected empty string"),
   }
 }
-
 #[test]
 fn test_data_string() {
   let data = data_string("hello");
@@ -95,7 +84,6 @@ fn test_data_string() {
     _ => panic!("Expected string"),
   }
 }
-
 #[test]
 fn test_models_into_data_array_empty() {
   #[derive(serde::Serialize)]
@@ -110,7 +98,6 @@ fn test_models_into_data_array_empty() {
     _ => panic!("Expected array"),
   }
 }
-
 #[test]
 fn test_models_into_data_array_multiple() {
   #[derive(serde::Serialize)]
@@ -143,7 +130,6 @@ fn test_models_into_data_array_multiple() {
     _ => panic!("Expected array"),
   }
 }
-
 #[test]
 fn test_models_into_data_array_preserves_order() {
   #[derive(serde::Serialize)]

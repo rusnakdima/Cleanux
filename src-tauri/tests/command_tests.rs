@@ -1,5 +1,4 @@
 use cleanux_lib::services::kernel_cleaner_service::KernelInfo;
-
 #[test]
 fn test_kernel_info_empty_version() {
   let kernel = KernelInfo {
@@ -11,7 +10,6 @@ fn test_kernel_info_empty_version() {
   assert!(kernel.version.is_empty());
   assert!(!kernel.is_current);
 }
-
 #[test]
 fn test_kernel_info_is_current() {
   let kernel = KernelInfo {
@@ -22,7 +20,6 @@ fn test_kernel_info_is_current() {
   };
   assert!(kernel.is_current);
 }
-
 #[test]
 fn test_kernel_info_not_current() {
   let kernel = KernelInfo {
