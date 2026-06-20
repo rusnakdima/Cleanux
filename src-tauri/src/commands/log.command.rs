@@ -1,7 +1,6 @@
 use crate::models::Response;
 use crate::services::log_manager_service::LogManagerService;
 use crate::utils::{array_response, ResponseBuilder};
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_journal_size() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -13,7 +12,6 @@ pub fn get_journal_size() -> Result<Response<serde_json::Value>, Response<serde_
       .build(),
   )
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_journal_usage() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -25,7 +23,6 @@ pub fn get_journal_usage() -> Result<Response<serde_json::Value>, Response<serde
       .build(),
   )
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn vacuum_journal(
@@ -33,7 +30,6 @@ pub fn vacuum_journal(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   LogManagerService::vacuum_journal(size_mb)
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn vacuum_journal_by_days(
@@ -41,7 +37,6 @@ pub fn vacuum_journal_by_days(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   LogManagerService::vacuum_journal_by_days(days)
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_rotated_logs_size() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -53,14 +48,12 @@ pub fn get_rotated_logs_size() -> Result<Response<serde_json::Value>, Response<s
       .build(),
   )
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_rotated_logs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let logs = LogManagerService::get_rotated_logs();
   array_response("Rotated logs retrieved", logs)
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn clean_rotated_logs(
@@ -68,14 +61,12 @@ pub fn clean_rotated_logs(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   LogManagerService::clean_rotated_logs(days)
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_logrotate_configs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let configs = LogManagerService::get_logrotate_configs();
   array_response("Logrotate configs retrieved", configs)
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn analyze_logrotate() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -87,7 +78,6 @@ pub fn analyze_logrotate() -> Result<Response<serde_json::Value>, Response<serde
       .build(),
   )
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_var_log_usage() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -99,7 +89,6 @@ pub fn get_var_log_usage() -> Result<Response<serde_json::Value>, Response<serde
       .build(),
   )
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_largest_log_files(
@@ -108,7 +97,6 @@ pub fn get_largest_log_files(
   let files = LogManagerService::get_largest_log_files(limit);
   array_response("Largest log files retrieved", files)
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_log_manager_summary() -> Result<Response<serde_json::Value>, Response<serde_json::Value>>

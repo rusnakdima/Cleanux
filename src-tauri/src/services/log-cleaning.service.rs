@@ -7,24 +7,18 @@ use crate::utils::{
 use crate::models::{LogFileModel, Response};
 /* errors */
 use crate::models::AppError;
-
 use serde_json::Value;
 use std::path::Path;
-
 pub struct LogCleaningService;
-
 type CleanResult<T> = Result<T, AppError>;
-
 impl LogCleaningService {
   service_method_full!(get_system_logs => get_system_logs_inner);
-
   fn get_system_logs_inner(&self) -> CleanResult<Response<Value>> {
     let log_dir = Path::new("/var/log");
     let files: Vec<LogFileModel> = collect_log_file_models(log_dir, 3, 500);
     let data = models_into_data_array(files)?;
     Ok(success_response("System logs retrieved successfully", data))
   }
-
   pub fn clear_selected_log_files(
     &self,
     paths: Vec<String>,
@@ -52,7 +46,6 @@ impl LogCleaningService {
       )
     }
   }
-
   pub fn clear_all_logs(&self) -> Result<Response<Value>, Response<Value>> {
     let log_dir = Path::new("/var/log");
     let files: Vec<LogFileModel> = collect_log_file_models(log_dir, 3, 500);

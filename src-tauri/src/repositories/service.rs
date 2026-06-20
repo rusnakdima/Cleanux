@@ -1,20 +1,16 @@
-use serde_json::Value;
-use std::sync::Arc;
-
 use nosql_orm::provider::DatabaseProvider;
 use nosql_orm::query::Filter;
-
+use serde_json::Value;
+use std::sync::Arc;
 pub struct RepositoryService {
   json_provider: Arc<nosql_orm::providers::JsonProvider>,
 }
-
 impl RepositoryService {
   pub fn new(json_provider: nosql_orm::providers::JsonProvider) -> Self {
     Self {
       json_provider: Arc::new(json_provider),
     }
   }
-
   pub async fn find_by_id(
     &self,
     collection: &str,
@@ -22,7 +18,6 @@ impl RepositoryService {
   ) -> Result<Option<Value>, nosql_orm::error::OrmError> {
     self.json_provider.find_by_id(collection, id).await
   }
-
   pub async fn find_many(
     &self,
     collection: &str,
@@ -37,7 +32,6 @@ impl RepositoryService {
       .find_many(collection, filter.as_ref(), skip, limit, sort_by, sort_asc)
       .await
   }
-
   pub async fn insert(
     &self,
     collection: &str,
@@ -45,7 +39,6 @@ impl RepositoryService {
   ) -> Result<Value, nosql_orm::error::OrmError> {
     self.json_provider.insert(collection, data).await
   }
-
   pub async fn update(
     &self,
     collection: &str,
@@ -54,7 +47,6 @@ impl RepositoryService {
   ) -> Result<Value, nosql_orm::error::OrmError> {
     self.json_provider.update(collection, id, data).await
   }
-
   pub async fn patch(
     &self,
     collection: &str,
@@ -63,7 +55,6 @@ impl RepositoryService {
   ) -> Result<Value, nosql_orm::error::OrmError> {
     self.json_provider.patch(collection, id, patch).await
   }
-
   pub async fn delete(
     &self,
     collection: &str,
@@ -71,7 +62,6 @@ impl RepositoryService {
   ) -> Result<bool, nosql_orm::error::OrmError> {
     self.json_provider.delete(collection, id).await
   }
-
   pub async fn count(
     &self,
     collection: &str,
@@ -79,7 +69,6 @@ impl RepositoryService {
   ) -> Result<u64, nosql_orm::error::OrmError> {
     self.json_provider.count(collection, filter).await
   }
-
   pub async fn find_one(
     &self,
     collection: &str,
@@ -92,7 +81,6 @@ impl RepositoryService {
     Ok(results.into_iter().next())
   }
 }
-
 impl Clone for RepositoryService {
   fn clone(&self) -> Self {
     Self {

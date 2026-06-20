@@ -8,34 +8,27 @@ use serde_json::json;
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
-
 pub struct FilePreviewService;
-
 impl FilePreviewService {
   pub fn preview_file(path: String) -> Result<Response<Value>, Response<Value>> {
     let file_path = Path::new(&path);
-
     if !file_path.exists() {
       return Err(error_response(
         "File not found",
         Value::String(String::new()),
       ));
     }
-
     let extension = file_path
       .extension()
       .and_then(|e| e.to_str())
       .unwrap_or("")
       .to_lowercase();
-
     let file_type = classify_file_type(&path, &extension);
-
     let name = file_path
       .file_name()
       .and_then(|n| n.to_str())
       .unwrap_or("unknown")
       .to_string();
-
     let response_data = match file_type {
       FileKind::Image => {
         let bytes = fs::read(&path).map_err(|e| {
@@ -87,7 +80,6 @@ impl FilePreviewService {
         }
       }),
     };
-
     Ok(Response {
       status: Status::Success,
       message: "File preview retrieved".to_string(),
@@ -95,7 +87,6 @@ impl FilePreviewService {
     })
   }
 }
-
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum FileKind {
   Image,
@@ -103,7 +94,6 @@ enum FileKind {
   Binary,
   Unknown,
 }
-
 fn classify_file_type(path: &str, extension: &str) -> FileKind {
   let image_ext = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico"];
   let text_ext = [
@@ -141,20 +131,15 @@ fn classify_file_type(path: &str, extension: &str) -> FileKind {
     "dockerignore",
     "editorconfig",
   ];
-
   if image_ext.contains(&extension) {
     return FileKind::Image;
   }
-
   let meta_len = fs::metadata(path).ok().map(|m| m.len()).unwrap_or(u64::MAX);
-
   if text_ext.contains(&extension) {
     return sniff_text_by_utf8(path, meta_len);
   }
-
   sniff_printable_ascii(path, meta_len)
 }
-
 fn sniff_text_by_utf8(path: &str, meta_len: u64) -> FileKind {
   if meta_len >= 1024 * 1024 {
     return FileKind::Text;
@@ -175,7 +160,6 @@ fn sniff_text_by_utf8(path: &str, meta_len: u64) -> FileKind {
     Err(_) => FileKind::Binary,
   }
 }
-
 fn sniff_printable_ascii(path: &str, meta_len: u64) -> FileKind {
   if meta_len >= 1024 * 1024 {
     return FileKind::Binary;

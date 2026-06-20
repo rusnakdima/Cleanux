@@ -8,7 +8,6 @@ pub mod repositories;
 pub mod security;
 pub mod services;
 pub mod utils;
-
 use crate::entities::automation_recipe_entity::AutomationRecipeEntity;
 use crate::entities::cleaning_profile_entity::CleaningProfileEntity;
 use crate::entities::execution_history_entity::ExecutionHistoryEntity;
@@ -16,7 +15,6 @@ use crate::entities::health_snapshot_entity::HealthSnapshotEntity;
 use nosql_orm::relations::register_relations_for_entity;
 use std::sync::Arc;
 use tauri::Manager;
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -26,28 +24,29 @@ pub fn run() {
         .app_data_dir()
         .expect("Failed to get app data directory");
       std::fs::create_dir_all(&app_data_dir).ok();
-
       register_relations_for_entity::<CleaningProfileEntity>();
       register_relations_for_entity::<AutomationRecipeEntity>();
       register_relations_for_entity::<ExecutionHistoryEntity>();
       register_relations_for_entity::<HealthSnapshotEntity>();
-
       let json_provider =
         tauri::async_runtime::block_on(nosql_orm::providers::JsonProvider::new(&app_data_dir))
           .expect("Failed to create JSON provider");
-
-      let repository_service =
-        Arc::new(repositories::service::RepositoryService::new(json_provider));
-
+      let repository_service = Arc::new(repositories::service::RepositoryService::new(
+        json_provider.clone(),
+      ));
+      let crud_service = Arc::new(services::crud_service::CrudService::new(json_provider));
       app.manage(AppState {
-        data: DataState { repository_service },
+        data: DataState {
+          repository_service,
+          crud_service,
+        },
       });
-
       Ok(())
     })
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_opener::init())
     .invoke_handler(tauri::generate_handler![
+      commands::crud_command::crud_execute,
       commands::health_command::crud_get_health_snapshot,
       commands::health_command::crud_get_health_snapshots,
       commands::health_command::crud_create_health_snapshot,
@@ -197,15 +196,13 @@ pub fn run() {
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|e| {
-      log::error!("error while running tauri application: {}", e);
       std::process::exit(1);
     });
 }
-
 pub struct AppState {
   pub data: DataState,
 }
-
 pub struct DataState {
   pub repository_service: Arc<repositories::service::RepositoryService>,
+  pub crud_service: Arc<services::crud_service::CrudService>,
 }

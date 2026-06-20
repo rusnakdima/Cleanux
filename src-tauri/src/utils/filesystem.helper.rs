@@ -1,5 +1,4 @@
 /* helpers */
-
 use crate::utils::validation_helper::{is_allowed_path, validate_path};
 /* models */
 use crate::models::{AppError, CacheFileModel, LargeFileModel, LogFileModel, TrashFileModel};
@@ -9,16 +8,12 @@ use rayon::prelude::*;
 use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
-
 /* response helper */
 use crate::models::Response;
-
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
-
 pub fn home_dir() -> Result<PathBuf, AppError> {
   dirs::home_dir().ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))
 }
-
 pub fn home_scan_dirs(home: &Path) -> Vec<PathBuf> {
   vec![
     home.join("Downloads"),
@@ -28,7 +23,6 @@ pub fn home_scan_dirs(home: &Path) -> Vec<PathBuf> {
     home.join("Desktop"),
   ]
 }
-
 pub fn modified_string(metadata: &std::fs::Metadata) -> String {
   let modified: DateTime<Local> = metadata
     .modified()
@@ -36,7 +30,6 @@ pub fn modified_string(metadata: &std::fs::Metadata) -> String {
     .into();
   modified.format("%Y-%m-%d %H:%M:%S").to_string()
 }
-
 pub fn collect_file_models<T, F>(
   root: &Path,
   max_depth: u32,
@@ -58,7 +51,6 @@ where
     .filter_map(|entry| filter(entry.path()))
     .collect()
 }
-
 pub fn collect_cache_file_models(
   cache_dir: PathBuf,
   skip: Option<usize>,
@@ -72,26 +64,21 @@ pub fn collect_cache_file_models(
       modified: modified_string(&metadata),
     })
   });
-
   let total = all_files.len();
   let skip_count = skip.unwrap_or(0);
   let limit_count = limit.unwrap_or(usize::MAX);
-
   let has_more = if skip_count >= total {
     false
   } else {
     skip_count + limit_count < total
   };
-
   let result: Vec<CacheFileModel> = all_files
     .into_iter()
     .skip(skip_count)
     .take(limit_count)
     .collect();
-
   (result, has_more, total)
 }
-
 pub fn collect_trash_file_models(trash_dir: &Path) -> Vec<TrashFileModel> {
   collect_file_models(trash_dir, 1, 10000, |path| {
     let metadata = fs::metadata(path).ok()?;
@@ -111,7 +98,6 @@ pub fn collect_trash_file_models(trash_dir: &Path) -> Vec<TrashFileModel> {
     })
   })
 }
-
 pub fn collect_log_file_models(log_dir: &Path, max_depth: usize, take: usize) -> Vec<LogFileModel> {
   collect_file_models(log_dir, max_depth as u32, take, |path| {
     let metadata = fs::metadata(path).ok()?;
@@ -122,7 +108,6 @@ pub fn collect_log_file_models(log_dir: &Path, max_depth: usize, take: usize) ->
     })
   })
 }
-
 /// Scan configured user folders for files above threshold with pagination support.
 pub fn scan_large_file_models(
   home: &Path,
@@ -162,44 +147,34 @@ pub fn scan_large_file_models(
     })
     .flatten()
     .collect();
-
   files.sort_by_key(|b| std::cmp::Reverse(b.size));
-
   let total = files.len();
-
   if let Some(max) = sort_truncate {
     if files.len() > max {
       files.truncate(max);
     }
   }
-
   let skip_count = skip.unwrap_or(0);
   let limit_count = limit.unwrap_or(usize::MAX);
-
   let has_more = if skip_count >= total {
     false
   } else {
     skip_count + limit_count < total
   };
-
   let result: Vec<LargeFileModel> = files
     .into_iter()
     .skip(skip_count)
     .take(limit_count)
     .collect();
-
   (result, has_more, total)
 }
-
 pub struct BulkRemoveOutcome {
   pub cleared: usize,
   pub errors: Vec<String>,
 }
-
 pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
   let mut cleared = 0usize;
   let mut errors = Vec::new();
-
   let home = match home_dir() {
     Ok(h) => h,
     Err(_) => {
@@ -209,7 +184,6 @@ pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
       };
     }
   };
-
   for path in paths {
     let canonical = match validate_path(&path) {
       Ok(p) => p,
@@ -218,12 +192,10 @@ pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
         continue;
       }
     };
-
     if !is_allowed_path(&canonical, &home) {
       errors.push(format!("Path not within allowed directories: {}", path));
       continue;
     }
-
     if let Err(e) = fs::remove_file(&canonical) {
       errors.push(format!("{}: {}", path, e));
     } else {
@@ -232,15 +204,12 @@ pub fn remove_paths_with_errors(paths: Vec<String>) -> BulkRemoveOutcome {
   }
   BulkRemoveOutcome { cleared, errors }
 }
-
 pub fn calculate_dir_size(path: &Path) -> Result<(u64, u64), AppError> {
   let mut total_size = 0u64;
   let mut file_count = 0u64;
-
   if !path.exists() {
     return Ok((0, 0));
   }
-
   for entry in fs::read_dir(path)? {
     let entry = entry?;
     let metadata = entry.metadata()?;
@@ -253,15 +222,12 @@ pub fn calculate_dir_size(path: &Path) -> Result<(u64, u64), AppError> {
       file_count += count;
     }
   }
-
   Ok((total_size, file_count))
 }
-
 pub fn remove_dir_contents(path: &Path) -> Result<u64, AppError> {
   if !path.exists() {
     return Ok(0);
   }
-
   let mut count = 0u64;
   for entry in fs::read_dir(path)? {
     let entry = entry?;
@@ -276,21 +242,17 @@ pub fn remove_dir_contents(path: &Path) -> Result<u64, AppError> {
   }
   Ok(count)
 }
-
 pub fn get_dir_size(path: &Path) -> u64 {
   calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0)
 }
-
 pub fn clean_cache_dir(path: &Path, name: &str) -> Result<Response<serde_json::Value>, AppError> {
   use crate::utils::response_helper::{data_string, success_response};
-
   if !path.exists() {
     return Ok(success_response(
       format!("{} cache is empty", name),
       data_string("0".to_string()),
     ));
   }
-
   match remove_dir_contents(path) {
     Ok(count) => Ok(success_response(
       format!("Cleaned {} cache ({} items)", name, count),
@@ -302,12 +264,10 @@ pub fn clean_cache_dir(path: &Path, name: &str) -> Result<Response<serde_json::V
     ))),
   }
 }
-
 pub fn format_size(bytes: u64) -> String {
   const KB: u64 = 1024;
   const MB: u64 = KB * 1024;
   const GB: u64 = MB * 1024;
-
   if bytes >= GB {
     format!("{:.2} GB", bytes as f64 / GB as f64)
   } else if bytes >= MB {

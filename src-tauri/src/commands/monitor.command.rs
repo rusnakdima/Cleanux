@@ -3,9 +3,7 @@ use crate::services::health_history_service::{HealthHistoryService, HealthSnapsh
 use crate::services::monitor_service::MonitorService;
 use crate::services::temperature_service::TemperatureService;
 use crate::utils::{array_response, ResponseBuilder};
-
 static HEALTH_SERVICE: std::sync::OnceLock<HealthHistoryService> = std::sync::OnceLock::new();
-
 fn get_health_service() -> &'static HealthHistoryService {
   HEALTH_SERVICE.get_or_init(|| {
     let svc = HealthHistoryService::new();
@@ -13,22 +11,18 @@ fn get_health_service() -> &'static HealthHistoryService {
     svc
   })
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_temperatures() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   TemperatureService::get_temperatures()
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_cpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   TemperatureService::get_cpu_temperature()
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_gpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   TemperatureService::get_gpu_temperature()
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn save_health_snapshot(
@@ -47,7 +41,6 @@ pub fn save_health_snapshot(
     log_size,
     large_files_count,
   };
-
   match get_health_service().save_health_snapshot(snapshot) {
     Ok(id) => Ok(
       ResponseBuilder::new()
@@ -62,7 +55,6 @@ pub fn save_health_snapshot(
     ),
   }
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_health_history(
@@ -77,7 +69,6 @@ pub fn get_health_history(
     ),
   }
 }
-
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_health_trends(
@@ -97,17 +88,14 @@ pub fn get_health_trends(
     ),
   }
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_system_stats() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MonitorService::get_system_stats()
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub fn start_monitoring() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MonitorService::start_monitoring()
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub fn stop_monitoring() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   MonitorService::stop_monitoring()

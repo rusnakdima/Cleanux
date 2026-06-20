@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use nosql_orm::Model;
 use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("health_snapshots")]
 #[index("timestamp", 1)]
@@ -15,7 +14,6 @@ pub struct HealthSnapshotEntity {
   pub log_size: u64,
   pub large_files_count: i64,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HealthTrendEntity {
   pub trend: String,

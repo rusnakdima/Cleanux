@@ -2,16 +2,18 @@
 pub mod automation_command;
 #[path = "cleaner.command.rs"]
 pub mod cleaner_command;
+#[path = "crud_command.rs"]
+pub mod crud_command;
+#[path = "crud.macro.rs"]
+pub mod crud_macro;
 #[path = "macros.rs"]
 pub mod crud_macros;
-
 #[path = "dashboard.command.rs"]
 pub mod dashboard_command;
 #[path = "health.command.rs"]
 pub mod health_command;
 #[path = "log.command.rs"]
 pub mod log_command;
-
 #[path = "monitor.command.rs"]
 pub mod monitor_command;
 #[path = "package.command.rs"]

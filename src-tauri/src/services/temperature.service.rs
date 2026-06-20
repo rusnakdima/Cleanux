@@ -1,31 +1,25 @@
 /* sys lib */
+use crate::models::Response;
+use crate::utils::stdout_string;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
-
-use crate::models::Response;
-use crate::utils::stdout_string;
-
 const CACHE_TTL_SECS: u64 = 5;
-
 struct CachedTemperature {
   readings: Vec<TemperatureInfo>,
   timestamp: Instant,
 }
-
 struct TempCache {
   data: Mutex<Option<CachedTemperature>>,
 }
-
 impl TempCache {
   fn new() -> Self {
     Self {
       data: Mutex::new(None),
     }
   }
-
   fn get(&self) -> Option<Vec<TemperatureInfo>> {
     let guard = self.data.lock().ok()?;
     let cache = guard.as_ref()?;
@@ -35,7 +29,6 @@ impl TempCache {
       None
     }
   }
-
   fn set(&self, readings: Vec<TemperatureInfo>) {
     if let Ok(mut guard) = self.data.lock() {
       *guard = Some(CachedTemperature {
@@ -45,15 +38,11 @@ impl TempCache {
     }
   }
 }
-
 static TEMP_CACHE: std::sync::OnceLock<TempCache> = std::sync::OnceLock::new();
-
 fn get_temp_cache() -> &'static TempCache {
   TEMP_CACHE.get_or_init(TempCache::new)
 }
-
 pub struct TemperatureService;
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TemperatureInfo {
   pub name: String,
@@ -61,18 +50,14 @@ pub struct TemperatureInfo {
   pub temperature_celsius: f32,
   pub max_temp: f32,
 }
-
 impl TemperatureService {
   fn collect_temperatures() -> Vec<TemperatureInfo> {
     let mut temperatures: Vec<TemperatureInfo> = Vec::new();
-
     temperatures.extend(Self::read_thermal_zones());
     temperatures.extend(Self::read_hwmon_temperatures());
     temperatures.extend(Self::parse_sensors_output());
-
     temperatures
   }
-
   pub fn get_temperatures() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let temperatures = if let Some(cached) = get_temp_cache().get() {
       cached
@@ -81,7 +66,6 @@ impl TemperatureService {
       get_temp_cache().set(temps.clone());
       temps
     };
-
     let mut cpu_temps: Vec<TemperatureInfo> = temperatures
       .iter()
       .filter(|t| t.sensor_type == "cpu")
@@ -92,7 +76,6 @@ impl TemperatureService {
         .partial_cmp(&b.temperature_celsius)
         .unwrap_or(std::cmp::Ordering::Equal)
     });
-
     let mut gpu_temps: Vec<TemperatureInfo> = temperatures
       .iter()
       .filter(|t| t.sensor_type == "gpu")
@@ -103,13 +86,11 @@ impl TemperatureService {
         .partial_cmp(&a.temperature_celsius)
         .unwrap_or(std::cmp::Ordering::Equal)
     });
-
     let mut result: Vec<TemperatureInfo> = Vec::new();
     if let Some(cpu) = cpu_temps.first() {
       result.push(cpu.clone());
     }
     result.extend(gpu_temps);
-
     if result.is_empty() {
       result.push(TemperatureInfo {
         name: "CPU".to_string(),
@@ -118,27 +99,22 @@ impl TemperatureService {
         max_temp: 100.0,
       });
     }
-
     let json_values: Vec<serde_json::Value> = result
       .iter()
       .map(|t| serde_json::to_value(t).unwrap_or(serde_json::Value::Null))
       .collect();
-
     Ok(Response::success(
       "Temperatures retrieved successfully".to_string(),
       serde_json::Value::Array(json_values),
     ))
   }
-
   fn read_thermal_zones() -> Vec<TemperatureInfo> {
     let mut temps = Vec::new();
     let thermal_base = Path::new("/sys/class/thermal");
-
     if let Ok(entries) = fs::read_dir(thermal_base) {
       for entry in entries.flatten() {
         let path = entry.path();
         let temp_file = path.join("temp");
-
         if temp_file.exists() {
           if let Ok(content) = fs::read_to_string(&temp_file) {
             if let Ok(temp_millidegrees) = content.trim().parse::<i32>() {
@@ -148,7 +124,6 @@ impl TemperatureService {
                 .and_then(|n| n.to_str())
                 .unwrap_or("unknown")
                 .to_string();
-
               let sensor_type = Self::categorize_sensor(&name);
               temps.push(TemperatureInfo {
                 name,
@@ -161,20 +136,16 @@ impl TemperatureService {
         }
       }
     }
-
     temps
   }
-
   fn read_hwmon_temperatures() -> Vec<TemperatureInfo> {
     let mut temps = Vec::new();
     let hwmon_base = Path::new("/sys/class/hwmon");
-
     if let Ok(entries) = fs::read_dir(hwmon_base) {
       for entry in entries.flatten() {
         let path = entry.path();
         let name_file = path.join("name");
         let temp_file = path.join("temp1_input");
-
         let sensor_name = if name_file.exists() {
           fs::read_to_string(&name_file)
             .map(|s| s.trim().to_string())
@@ -186,14 +157,12 @@ impl TemperatureService {
             .unwrap_or("hwmon")
             .to_string()
         };
-
         if temp_file.exists() {
           if let Ok(content) = fs::read_to_string(&temp_file) {
             if let Ok(temp_millidegrees) = content.trim().parse::<i32>() {
               let temp_celsius = temp_millidegrees as f32 / 1000.0;
               let full_name = format!("hwmon-{}", sensor_name);
               let sensor_type = Self::categorize_sensor(&sensor_name);
-
               temps.push(TemperatureInfo {
                 name: full_name,
                 sensor_type,
@@ -205,33 +174,25 @@ impl TemperatureService {
         }
       }
     }
-
     temps
   }
-
   fn parse_sensors_output() -> Vec<TemperatureInfo> {
     let output = match Command::new("sensors").output() {
       Ok(o) => o,
       Err(_) => return Vec::new(),
     };
-
     if !output.status.success() {
       return Vec::new();
     }
-
     let stdout = stdout_string(&output);
     let mut temps = Vec::new();
-
     let mut current_section = String::new();
-
     for line in stdout.lines() {
       let line = line.trim();
-
       if line.ends_with(':') && !line.contains("Adapter") {
         current_section = line.trim_end_matches(':').to_string();
         continue;
       }
-
       if line.starts_with("temp1:") || line.starts_with("CPU Temperature:") {
         if let Some(temp) = Self::extract_temp(line) {
           temps.push(TemperatureInfo {
@@ -263,10 +224,8 @@ impl TemperatureService {
         }
       }
     }
-
     temps
   }
-
   fn extract_temp(line: &str) -> Option<f32> {
     let parts: Vec<&str> = line.split_whitespace().collect();
     for part in parts {
@@ -284,14 +243,11 @@ impl TemperatureService {
     }
     None
   }
-
   fn categorize_sensor(name: &str) -> String {
     let name_lower = name.to_lowercase();
-
     if name_lower.contains("cpu") || name_lower.contains("core") || name_lower.contains("pkg") {
       return "cpu".to_string();
     }
-
     if name_lower.contains("gpu")
       || name_lower.contains("graphics")
       || name_lower.contains("nvidia")
@@ -299,10 +255,8 @@ impl TemperatureService {
     {
       return "gpu".to_string();
     }
-
     "cpu".to_string()
   }
-
   pub fn get_cpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let temperatures = if let Some(cached) = get_temp_cache().get() {
       cached
@@ -311,7 +265,6 @@ impl TemperatureService {
       get_temp_cache().set(temps.clone());
       temps
     };
-
     let mut cpu_temps: Vec<TemperatureInfo> = temperatures
       .iter()
       .filter(|t| t.sensor_type == "cpu")
@@ -322,7 +275,6 @@ impl TemperatureService {
         .partial_cmp(&b.temperature_celsius)
         .unwrap_or(std::cmp::Ordering::Equal)
     });
-
     if let Some(cpu) = cpu_temps.first() {
       Ok(Response::success(
         "CPU temperature retrieved successfully".to_string(),
@@ -341,7 +293,6 @@ impl TemperatureService {
       ))
     }
   }
-
   pub fn get_gpu_temperature() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let temperatures = if let Some(cached) = get_temp_cache().get() {
       cached
@@ -350,7 +301,6 @@ impl TemperatureService {
       get_temp_cache().set(temps.clone());
       temps
     };
-
     let mut gpu_temps: Vec<TemperatureInfo> = temperatures
       .iter()
       .filter(|t| t.sensor_type == "gpu")
@@ -361,7 +311,6 @@ impl TemperatureService {
         .partial_cmp(&a.temperature_celsius)
         .unwrap_or(std::cmp::Ordering::Equal)
     });
-
     if let Some(gpu) = gpu_temps.first() {
       Ok(Response::success(
         "GPU temperature retrieved successfully".to_string(),

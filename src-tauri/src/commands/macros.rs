@@ -11,7 +11,6 @@ macro_rules! crud_get_command {
       crate::models::Response<serde_json::Value>,
     > {
       use crate::models::{Response, Status};
-
       if let Some(id) = id {
         let doc = state
           .data
@@ -27,7 +26,6 @@ macro_rules! crud_get_command {
     }
   };
 }
-
 #[macro_export]
 macro_rules! crud_get_all_command {
   ($route:ident, $table:expr) => {
@@ -42,7 +40,6 @@ macro_rules! crud_get_all_command {
       crate::models::Response<serde_json::Value>,
     > {
       use crate::models::{Response, Status};
-
       let docs = state
         .data
         .repository_service
@@ -53,7 +50,6 @@ macro_rules! crud_get_all_command {
     }
   };
 }
-
 #[macro_export]
 macro_rules! crud_create_command {
   ($route:ident, $table:expr) => {
@@ -67,7 +63,6 @@ macro_rules! crud_create_command {
       crate::models::Response<serde_json::Value>,
     > {
       use crate::models::{Response, Status};
-
       let doc = state
         .data
         .repository_service
@@ -78,7 +73,6 @@ macro_rules! crud_create_command {
     }
   };
 }
-
 #[macro_export]
 macro_rules! crud_update_command {
   ($route:ident, $table:expr) => {
@@ -93,7 +87,6 @@ macro_rules! crud_update_command {
       crate::models::Response<serde_json::Value>,
     > {
       use crate::models::{Response, Status};
-
       let doc = state
         .data
         .repository_service
@@ -104,7 +97,6 @@ macro_rules! crud_update_command {
     }
   };
 }
-
 #[macro_export]
 macro_rules! crud_delete_command {
   ($route:ident, $table:expr) => {
@@ -118,7 +110,6 @@ macro_rules! crud_delete_command {
       crate::models::Response<serde_json::Value>,
     > {
       use crate::models::{Response, Status};
-
       let _ = state
         .data
         .repository_service
@@ -129,7 +120,6 @@ macro_rules! crud_delete_command {
     }
   };
 }
-
 #[macro_export]
 macro_rules! crud_patch_command {
   ($route:ident, $table:expr) => {
@@ -144,7 +134,6 @@ macro_rules! crud_patch_command {
       crate::models::Response<serde_json::Value>,
     > {
       use crate::models::{Response, Status};
-
       let doc = state
         .data
         .repository_service

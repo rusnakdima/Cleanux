@@ -1,6 +1,5 @@
 use crate::utils::home_dir;
 use std::path::PathBuf;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommonPath {
   Trash,
@@ -24,7 +23,6 @@ pub enum CommonPath {
   VlcConfig,
   IconCache,
 }
-
 impl CommonPath {
   pub fn path(&self) -> Option<PathBuf> {
     let home = home_dir().ok()?;
@@ -51,11 +49,9 @@ impl CommonPath {
       CommonPath::IconCache => home.join(".cache/icons"),
     })
   }
-
   pub fn exists(&self) -> bool {
     self.path().map(|p| p.exists()).unwrap_or(false)
   }
-
   pub fn to_path_buf(&self) -> PathBuf {
     self.path().unwrap_or_default()
   }

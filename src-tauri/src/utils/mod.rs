@@ -1,20 +1,16 @@
 /* utils module */
-
-#[path = "response.helper.rs"]
-pub mod response_helper;
-
-#[path = "filesystem.helper.rs"]
-pub mod filesystem_helper;
-
-#[path = "process.helper.rs"]
-pub mod process_helper;
-
-#[path = "validation.helper.rs"]
-pub mod validation_helper;
-
 #[path = "common-paths.helper.rs"]
 pub mod common_paths;
-
+#[path = "filesystem.helper.rs"]
+pub mod filesystem_helper;
+#[path = "process.helper.rs"]
+pub mod process_helper;
+#[path = "response.utils.rs"]
+pub mod response;
+#[path = "response.helper.rs"]
+pub mod response_helper;
+#[path = "validation.helper.rs"]
+pub mod validation_helper;
 pub use filesystem_helper::{
   calculate_dir_size, clean_cache_dir, collect_cache_file_models, collect_log_file_models,
   collect_trash_file_models, format_size, get_dir_size, home_dir, remove_dir_contents,
@@ -28,11 +24,9 @@ pub use response_helper::{
   array_response, data_empty_string, data_string, error_response, info_response,
   models_into_data_array, success_response, ResponseBuilder,
 };
-
 #[path = "service_macro.rs"]
 pub mod service_macro;
 pub use crate::service_method_full;
-
 #[path = "cache.helper.rs"]
 pub mod cache_helper;
 pub use cache_helper::TimedCache;

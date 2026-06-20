@@ -1,32 +1,26 @@
 /* sys lib */
+use crate::models::{Response, Status};
+use crate::utils::{stderr_string, stdout_string};
+use serde_json::Value;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
-
-use crate::models::{Response, Status};
-use crate::utils::{stderr_string, stdout_string};
-use serde_json::Value;
-
 const CACHE_TTL_SECS: u64 = 10;
-
 struct CachedBatteryInfo {
   info: Option<BatteryInfo>,
   timestamp: Instant,
 }
-
 struct BatteryCache {
   data: Mutex<Option<CachedBatteryInfo>>,
 }
-
 impl BatteryCache {
   fn new() -> Self {
     Self {
       data: Mutex::new(None),
     }
   }
-
   fn get(&self) -> Option<Option<BatteryInfo>> {
     let guard = self.data.lock().ok()?;
     let cache = guard.as_ref()?;
@@ -36,7 +30,6 @@ impl BatteryCache {
       None
     }
   }
-
   fn set(&self, info: Option<BatteryInfo>) {
     if let Ok(mut guard) = self.data.lock() {
       *guard = Some(CachedBatteryInfo {
@@ -46,15 +39,11 @@ impl BatteryCache {
     }
   }
 }
-
 static BATTERY_CACHE: std::sync::OnceLock<BatteryCache> = std::sync::OnceLock::new();
-
 fn get_battery_cache() -> &'static BatteryCache {
   BATTERY_CACHE.get_or_init(BatteryCache::new)
 }
-
 pub struct PowerService;
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct BatteryInfo {
   pub present: bool,
@@ -64,21 +53,18 @@ pub struct BatteryInfo {
   pub temperature: f32,
   pub status: String,
 }
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct PowerProfile {
   pub name: String,
   pub profile_type: String,
   pub active: bool,
 }
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct ThermalInfo {
   pub name: String,
   pub temperature_celsius: f32,
   pub max_temp: f32,
 }
-
 impl PowerService {
   pub fn get_battery_info() -> Result<Response<Value>, Response<Value>> {
     let battery_info = match get_battery_cache().get() {
@@ -89,37 +75,29 @@ impl PowerService {
         info
       }
     };
-
     let json_value = serde_json::to_value(&battery_info).map_err(|e| e.to_string())?;
-
     Ok(Response {
       status: Status::Success,
       message: "Battery info retrieved successfully".to_string(),
       data: json_value,
     })
   }
-
   fn collect_battery_info() -> Option<BatteryInfo> {
     let power_supply_base = Path::new("/sys/class/power_supply");
-
     let entries = match fs::read_dir(power_supply_base) {
       Ok(e) => e,
       Err(_) => return None,
     };
-
     for entry in entries.flatten() {
       let path = entry.path();
       let uevent_file = path.join("uevent");
-
       if !uevent_file.exists() {
         continue;
       }
-
       let content = match fs::read_to_string(&uevent_file) {
         Ok(c) => c,
         Err(_) => continue,
       };
-
       let mut present = false;
       let mut power_supply_type = String::new();
       let mut charge_full: u64 = 0;
@@ -127,7 +105,6 @@ impl PowerService {
       let mut charge_now: u64 = 0;
       let mut status = String::new();
       let mut cycle_count: u32 = 0;
-
       for line in content.lines() {
         let parts: Vec<&str> = line.split('=').collect();
         if parts.len() != 2 {
@@ -135,7 +112,6 @@ impl PowerService {
         }
         let key = parts[0];
         let value = parts[1];
-
         match key {
           "POWER_SUPPLY_PRESENT" => {
             present = value == "1";
@@ -176,11 +152,9 @@ impl PowerService {
           _ => {}
         }
       }
-
       if !present || power_supply_type != "Battery" {
         continue;
       }
-
       let charge_percent = if charge_full > 0 {
         ((charge_now as f64 / charge_full as f64) * 100.0) as u8
       } else if charge_full_design > 0 {
@@ -188,15 +162,12 @@ impl PowerService {
       } else {
         50
       };
-
       let health_percent = if charge_full_design > 0 && charge_full > 0 {
         ((charge_full as f64 / charge_full_design as f64) * 100.0) as u8
       } else {
         100
       };
-
       let temperature = Self::read_battery_temperature(&path);
-
       return Some(BatteryInfo {
         present,
         charge_percent: charge_percent.min(100),
@@ -206,10 +177,8 @@ impl PowerService {
         status,
       });
     }
-
     None
   }
-
   fn read_battery_temperature(battery_path: &Path) -> f32 {
     let temp_file = battery_path.join("temp");
     if temp_file.exists() {
@@ -219,7 +188,6 @@ impl PowerService {
         }
       }
     }
-
     let uevent_file = battery_path.join("uevent");
     if let Ok(content) = fs::read_to_string(&uevent_file) {
       for line in content.lines() {
@@ -231,35 +199,28 @@ impl PowerService {
         }
       }
     }
-
     0.0
   }
-
   pub fn get_power_profiles() -> Result<Response<Value>, Response<Value>> {
     let profiles = Self::collect_power_profiles();
-
     let json_values: Vec<serde_json::Value> = profiles
       .iter()
       .map(|p| serde_json::to_value(p).unwrap_or(serde_json::Value::Null))
       .collect();
-
     Ok(Response {
       status: Status::Success,
       message: "Power profiles retrieved successfully".to_string(),
       data: Value::Array(json_values),
     })
   }
-
   fn collect_power_profiles() -> Vec<PowerProfile> {
     let mut profiles = Vec::new();
-
     if let Ok(output) = Command::new("powerprofilesctl").arg("list").output() {
       if output.status.success() {
         let stdout = stdout_string(&output);
         profiles = Self::parse_powerprofilesctl_output(&stdout);
       }
     }
-
     if profiles.is_empty() {
       if let Ok(output) = Command::new("systemctl")
         .arg("--user")
@@ -276,7 +237,6 @@ impl PowerService {
         }
       }
     }
-
     if profiles.is_empty() {
       profiles.push(PowerProfile {
         name: "power-saver".to_string(),
@@ -294,14 +254,11 @@ impl PowerService {
         active: false,
       });
     }
-
     profiles
   }
-
   fn parse_powerprofilesctl_output(output: &str) -> Vec<PowerProfile> {
     let mut profiles = Vec::new();
     let mut active_profile = String::new();
-
     for line in output.lines() {
       if line.contains('*') {
         if let Some(name) = line.split_whitespace().nth(1) {
@@ -309,7 +266,6 @@ impl PowerService {
         }
       }
     }
-
     let profile_names = ["power-saver", "balanced", "performance"];
     for name in profile_names {
       profiles.push(PowerProfile {
@@ -318,13 +274,10 @@ impl PowerService {
         active: name == active_profile,
       });
     }
-
     profiles
   }
-
   pub fn set_power_profile(profile: String) -> Result<Response<Value>, Response<Value>> {
     let profile_lower = profile.to_lowercase();
-
     let valid_profiles = ["power-saver", "balanced", "performance"];
     if !valid_profiles.contains(&profile_lower.as_str()) {
       return Ok(Response {
@@ -333,12 +286,10 @@ impl PowerService {
         data: Value::Bool(false),
       });
     }
-
     let result = Command::new("powerprofilesctl")
       .arg("set")
       .arg(&profile_lower)
       .output();
-
     match result {
       Ok(output) => {
         if output.status.success() {
@@ -363,7 +314,6 @@ impl PowerService {
       Err(_) => Self::set_power_profile_systemd(&profile_lower),
     }
   }
-
   fn set_power_profile_systemd(profile: &str) -> Result<Response<Value>, Response<Value>> {
     Ok(Response {
       status: Status::Success,
@@ -371,31 +321,25 @@ impl PowerService {
       data: Value::Bool(true),
     })
   }
-
   pub fn get_thermal_info() -> Result<Response<Value>, Response<Value>> {
     let thermals = Self::collect_thermal_info();
-
     let json_values: Vec<serde_json::Value> = thermals
       .iter()
       .map(|t| serde_json::to_value(t).unwrap_or(serde_json::Value::Null))
       .collect();
-
     Ok(Response {
       status: Status::Success,
       message: "Thermal info retrieved successfully".to_string(),
       data: Value::Array(json_values),
     })
   }
-
   fn collect_thermal_info() -> Vec<ThermalInfo> {
     let mut thermals = Vec::new();
     let thermal_base = Path::new("/sys/class/thermal");
-
     if let Ok(entries) = fs::read_dir(thermal_base) {
       for entry in entries.flatten() {
         let path = entry.path();
         let temp_file = path.join("temp");
-
         if temp_file.exists() {
           if let Ok(content) = fs::read_to_string(&temp_file) {
             if let Ok(temp_millidegrees) = content.trim().parse::<i32>() {
@@ -405,7 +349,6 @@ impl PowerService {
                 .and_then(|n| n.to_str())
                 .unwrap_or("thermal")
                 .to_string();
-
               thermals.push(ThermalInfo {
                 name,
                 temperature_celsius: temp_celsius,
@@ -416,13 +359,11 @@ impl PowerService {
         }
       }
     }
-
     if thermals.is_empty() {
       if let Ok(entries) = fs::read_dir(Path::new("/sys/class/hwmon")) {
         for entry in entries.flatten() {
           let path = entry.path();
           let temp_file = path.join("temp1_input");
-
           if temp_file.exists() {
             if let Ok(content) = fs::read_to_string(&temp_file) {
               if let Ok(temp_millidegrees) = content.trim().parse::<i32>() {
@@ -432,7 +373,6 @@ impl PowerService {
                   .and_then(|n| n.to_str())
                   .unwrap_or("hwmon")
                   .to_string();
-
                 thermals.push(ThermalInfo {
                   name,
                   temperature_celsius: temp_celsius,
@@ -444,7 +384,6 @@ impl PowerService {
         }
       }
     }
-
     thermals
   }
 }

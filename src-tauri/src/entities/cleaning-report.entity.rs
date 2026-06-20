@@ -1,6 +1,5 @@
 use nosql_orm::Model;
 use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("cleaning_reports")]
 #[index("date", 1)]
@@ -12,7 +11,6 @@ pub struct CleaningReportEntity {
   pub duration: f64,
   pub categories: ReportCategories,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportCategories {
   pub cache: i64,
@@ -21,7 +19,6 @@ pub struct ReportCategories {
   pub large_files: i64,
   pub duplicates: i64,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SnapshotComparison {
   pub before_id: String,
@@ -31,7 +28,6 @@ pub struct SnapshotComparison {
   pub health_improvement: f64,
   pub details: ComparisonDetails,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ComparisonDetails {
   pub cache_change: i64,

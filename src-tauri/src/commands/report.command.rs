@@ -1,15 +1,12 @@
 use crate::crud_create_command;
 use crate::crud_get_all_command;
 use crate::crud_get_command;
-
 crud_get_command!(get_cleaning_report, "cleaning_reports");
 crud_get_all_command!(get_cleaning_reports, "cleaning_reports");
 crud_create_command!(create_cleaning_report, "cleaning_reports");
-
 use crate::models::{Response, Status};
 use crate::AppState;
 use tauri::State;
-
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_generate_cleaning_report(
   state: State<'_, AppState>,
@@ -25,7 +22,6 @@ pub async fn crud_generate_cleaning_report(
       "duration": duration,
       "categories": categories,
   });
-
   state
     .data
     .repository_service
@@ -34,7 +30,6 @@ pub async fn crud_generate_cleaning_report(
     .map(|doc| Response::success("Report generated".to_string(), doc))
     .map_err(|e| Response::error(Status::Error, e.to_string()))
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_cleaning_history(
   state: State<'_, AppState>,
@@ -53,7 +48,6 @@ pub async fn crud_get_cleaning_history(
     })
     .map_err(|e| Response::error(Status::Error, e.to_string()))
 }
-
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_compare_snapshots(
   state: State<'_, AppState>,
@@ -61,7 +55,6 @@ pub async fn crud_compare_snapshots(
   after_id: String,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   use crate::entities::cleaning_report_entity::{ComparisonDetails, SnapshotComparison};
-
   let before_doc = state
     .data
     .repository_service
@@ -69,7 +62,6 @@ pub async fn crud_compare_snapshots(
     .await
     .map_err(|e| Response::error(Status::Error, e.to_string()))?
     .ok_or_else(|| Response::error(Status::NotFound, "Before report not found".to_string()))?;
-
   let after_doc = state
     .data
     .repository_service
@@ -77,7 +69,6 @@ pub async fn crud_compare_snapshots(
     .await
     .map_err(|e| Response::error(Status::Error, e.to_string()))?
     .ok_or_else(|| Response::error(Status::NotFound, "After report not found".to_string()))?;
-
   let before_space = before_doc
     .get("space_reclaimed")
     .and_then(|v| v.as_u64())
@@ -94,10 +85,8 @@ pub async fn crud_compare_snapshots(
     .get("items_cleaned")
     .and_then(|v| v.as_i64())
     .unwrap_or(0);
-
   let before_categories = before_doc.get("categories");
   let after_categories = after_doc.get("categories");
-
   let comparison = SnapshotComparison {
     before_id,
     after_id,
@@ -111,13 +100,11 @@ pub async fn crud_compare_snapshots(
       large_file_change: get_category_change(before_categories, after_categories, "large_files"),
     },
   };
-
   Ok(Response::success(
     "Snapshots compared".to_string(),
     serde_json::to_value(comparison).unwrap_or_default(),
   ))
 }
-
 fn get_category_change(
   before: Option<&serde_json::Value>,
   after: Option<&serde_json::Value>,

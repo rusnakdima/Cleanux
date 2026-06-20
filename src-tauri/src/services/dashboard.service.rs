@@ -3,7 +3,6 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
-
 fn is_cache_file(name: &OsStr) -> bool {
   let name_str = name.to_string_lossy();
   name_str.contains("cache")
@@ -11,18 +10,14 @@ fn is_cache_file(name: &OsStr) -> bool {
     || name_str.ends_with(".bak")
     || name_str.ends_with(".log")
 }
-
 /* models */
 use crate::models::{Response, ScanSummaryModel, SystemServiceModel};
 use serde_json::Value;
-
 /* helpers */
 use crate::utils::{home_dir, stderr_string, stdout_string, ResponseBuilder};
 use rayon::prelude::*;
 use walkdir::WalkDir;
-
 pub struct DashboardService;
-
 impl DashboardService {
   pub fn get_running_services(&self) -> Result<Response<Value>, Response<Value>> {
     #[cfg(target_os = "linux")]
@@ -37,7 +32,6 @@ impl DashboardService {
         ])
         .output()
         .map_err(|e| format!("Failed to run systemctl: {}", e))?;
-
       if !output.status.success() {
         return Err(
           ResponseBuilder::new()
@@ -45,10 +39,8 @@ impl DashboardService {
             .build(),
         );
       }
-
       let stdout = stdout_string(&output);
       let mut services = Vec::new();
-
       for line in stdout.lines().skip(1) {
         let parts: Vec<&str> = line.split_whitespace().collect();
         if parts.len() >= 4 {
@@ -67,7 +59,6 @@ impl DashboardService {
           });
         }
       }
-
       Ok(
         ResponseBuilder::new()
           .success("Running services retrieved successfully")
@@ -81,10 +72,8 @@ impl DashboardService {
       )
     }
   }
-
   pub fn get_cache_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let cache_dir = dirs::cache_dir().ok_or("Cache directory not found")?;
-
     let entries: Vec<_> = WalkDir::new(cache_dir)
       .max_depth(4)
       .into_iter()
@@ -92,7 +81,6 @@ impl DashboardService {
       .filter(|e| e.file_type().is_file())
       .take(2000)
       .collect();
-
     let (total_size, file_count) = entries
       .into_par_iter()
       .filter(|e| is_cache_file(e.file_name()))
@@ -101,12 +89,10 @@ impl DashboardService {
         (metadata.as_ref().map(|m| m.len()).unwrap_or(0), 1)
       })
       .reduce(|| (0u64, 0usize), |(a, b), (c, d)| (a + c, b + d));
-
     let summary = ScanSummaryModel {
       file_count,
       total_size,
     };
-
     Ok(
       ResponseBuilder::new()
         .success("Large files summary retrieved successfully")
@@ -114,13 +100,11 @@ impl DashboardService {
         .build(),
     )
   }
-
   pub fn get_trash_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let home = home_dir().map_err(|_| "Home directory not found")?;
     let trash_dir = home.join(".local/share/Trash/files");
     let mut total_size = 0;
     let mut file_count = 0;
-
     if let Ok(entries) = fs::read_dir(&trash_dir) {
       for entry in entries.flatten() {
         if let Ok(meta) = fs::metadata(entry.path()) {
@@ -129,12 +113,10 @@ impl DashboardService {
         }
       }
     }
-
     let summary = ScanSummaryModel {
       total_size,
       file_count,
     };
-
     Ok(
       ResponseBuilder::new()
         .success("Trash summary retrieved successfully")
@@ -142,10 +124,8 @@ impl DashboardService {
         .build(),
     )
   }
-
   pub fn get_log_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let log_dir = Path::new("/var/log");
-
     let entries: Vec<_> = WalkDir::new(log_dir)
       .max_depth(2)
       .into_iter()
@@ -153,7 +133,6 @@ impl DashboardService {
       .filter(|e| e.file_type().is_file())
       .take(500)
       .collect();
-
     let (total_size, file_count) = entries
       .into_par_iter()
       .filter_map(|entry| fs::metadata(entry.path()).ok())
@@ -166,12 +145,10 @@ impl DashboardService {
         },
       )
       .reduce(|| (0u64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
-
     let summary = ScanSummaryModel {
       total_size,
       file_count,
     };
-
     Ok(
       ResponseBuilder::new()
         .success("Log summary retrieved successfully")
@@ -179,11 +156,9 @@ impl DashboardService {
         .build(),
     )
   }
-
   pub fn get_large_files_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let home = home_dir().map_err(|_| "Home directory not found")?;
     let threshold = 100 * 1024 * 1024;
-
     let dirs_to_scan = vec![
       home.join("Downloads"),
       home.join("Documents"),
@@ -191,7 +166,6 @@ impl DashboardService {
       home.join("Pictures"),
       home.join("Desktop"),
     ];
-
     let (total_size, file_count) = dirs_to_scan
       .into_par_iter()
       .map(|dir| {
@@ -214,12 +188,10 @@ impl DashboardService {
           .fold((0u64, 0usize), |acc, size| (acc.0 + size, acc.1 + 1))
       })
       .reduce(|| (0u64, 0usize), |a, b| (a.0 + b.0, a.1 + b.1));
-
     let summary = ScanSummaryModel {
       total_size,
       file_count,
     };
-
     Ok(
       ResponseBuilder::new()
         .success("Large files summary retrieved successfully")

@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use nosql_orm::Model;
 use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("automation_recipes")]
 #[index("name", 1)]
@@ -16,7 +15,6 @@ pub struct AutomationRecipeEntity {
   #[timestamp]
   pub updated_at: DateTime<Utc>,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ActionStep {
   CleanCategory { category: String },
@@ -24,14 +22,12 @@ pub enum ActionStep {
   ExecuteCommand { command: String },
   Wait { seconds: u32 },
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RecipeTrigger {
   Manual,
   Scheduled,
   Event,
 }
-
 impl From<crate::services::automation_service::AutomationRecipe> for AutomationRecipeEntity {
   fn from(recipe: crate::services::automation_service::AutomationRecipe) -> Self {
     Self {
@@ -49,7 +45,6 @@ impl From<crate::services::automation_service::AutomationRecipe> for AutomationR
     }
   }
 }
-
 impl From<crate::services::automation_service::ActionStep> for ActionStep {
   fn from(step: crate::services::automation_service::ActionStep) -> Self {
     match step {

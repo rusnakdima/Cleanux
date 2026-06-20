@@ -1,11 +1,8 @@
 use crate::models::{AppError, Response, Status};
 use serde_json::Value;
 use sysinfo::System;
-
 pub struct ProcessService;
-
 type ProcessResult<T> = Result<T, AppError>;
-
 #[derive(serde::Serialize)]
 pub struct ProcessItem {
   pub pid: u32,
@@ -13,16 +10,13 @@ pub struct ProcessItem {
   pub cpu_usage: f32,
   pub memory_usage: u64,
 }
-
 impl ProcessService {
   pub fn get_processes() -> Result<Response<Value>, Response<Value>> {
     Self::get_processes_inner().map_err(|e| e.into_response())
   }
-
   fn get_processes_inner() -> ProcessResult<Response<Value>> {
     let mut sys = System::new_all();
     sys.refresh_all();
-
     let processes: Vec<ProcessItem> = sys
       .processes()
       .iter()
@@ -33,7 +27,6 @@ impl ProcessService {
         memory_usage: process.memory(),
       })
       .collect();
-
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} processes", processes.len()),
@@ -46,15 +39,12 @@ impl ProcessService {
       ),
     })
   }
-
   pub fn kill_process(pid: u32) -> Result<Response<Value>, Response<Value>> {
     Self::kill_process_inner(pid).map_err(|e| e.into_response())
   }
-
   fn kill_process_inner(pid: u32) -> ProcessResult<Response<Value>> {
     let mut sys = System::new_all();
     sys.refresh_all();
-
     let sysinfo_pid = sysinfo::Pid::from_u32(pid);
     if let Some(process) = sys.process(sysinfo_pid) {
       if process.kill() {

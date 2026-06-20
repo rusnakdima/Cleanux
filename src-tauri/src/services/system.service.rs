@@ -1,17 +1,13 @@
 /* sys lib */
 use std::path::PathBuf;
-
 /* models */
 use crate::models::{AppError, Response};
 use crate::security::allowlist::is_path_allowed;
 use crate::utils::service_method_full;
 use crate::utils::{pkexec, pkexec_with_args, run_command_raw};
 use crate::utils::{stderr_string, stdout_string};
-
 pub struct SystemService;
-
 type ServiceResult<T> = Result<T, AppError>;
-
 impl SystemService {
   pub fn stop_service(
     &self,
@@ -21,7 +17,6 @@ impl SystemService {
       .stop_service_inner(service)
       .map_err(|e| e.into_response())
   }
-
   fn stop_service_inner(&self, service: &str) -> ServiceResult<Response<serde_json::Value>> {
     let output = pkexec("systemctl", &["stop", service])?;
     if output.status.success() {
@@ -37,7 +32,6 @@ impl SystemService {
       )))
     }
   }
-
   pub fn stop_selected_services(
     &self,
     services: Vec<String>,
@@ -46,7 +40,6 @@ impl SystemService {
       .stop_selected_services_inner(services)
       .map_err(|e| e.into_response())
   }
-
   fn stop_selected_services_inner(
     &self,
     services: Vec<String>,
@@ -57,12 +50,10 @@ impl SystemService {
         serde_json::Value::Array(vec![]),
       ));
     }
-
     let service_count = services.len();
     let mut args = vec!["stop"];
     args.extend(services.iter().map(|s| s.as_str()));
     let output = pkexec_with_args("systemctl", args)?;
-
     if output.status.success() {
       Ok(Response::success(
         format!("Stopped {} services successfully", service_count),
@@ -80,7 +71,6 @@ impl SystemService {
       )))
     }
   }
-
   pub fn open_file(
     &self,
     path: &str,
@@ -90,7 +80,6 @@ impl SystemService {
       .open_file_inner(path, command)
       .map_err(|e| e.into_response())
   }
-
   fn open_file_inner(
     &self,
     path: &str,
@@ -103,10 +92,8 @@ impl SystemService {
         path
       )));
     }
-
     let mut cmd = std::process::Command::new("xdg-open");
     cmd.arg(path);
-
     match cmd.spawn() {
       Ok(_) => Ok(Response::success(
         format!("Started editor for file: {}", path),
@@ -115,9 +102,7 @@ impl SystemService {
       Err(e) => Err(AppError::Unknown(format!("Failed to start editor: {}", e))),
     }
   }
-
   service_method_full!(get_all_services => get_all_services_inner);
-
   fn get_all_services_inner(&self) -> ServiceResult<Response<serde_json::Value>> {
     let output = run_command_raw(
       "systemctl",
@@ -129,11 +114,9 @@ impl SystemService {
         "--no-legend",
       ],
     )?;
-
     if !output.status.success() {
       return Err(AppError::Unknown(stderr_string(&output)));
     }
-
     let stdout = stdout_string(&output);
     let services: Vec<serde_json::Value> = stdout
       .lines()
@@ -157,13 +140,11 @@ impl SystemService {
         None
       })
       .collect();
-
     Ok(Response::success(
       format!("Found {} services", services.len()),
       serde_json::Value::Array(services),
     ))
   }
-
   pub fn enable_service(
     &self,
     service: &str,
@@ -172,7 +153,6 @@ impl SystemService {
       .enable_service_inner(service)
       .map_err(|e| e.into_response())
   }
-
   fn enable_service_inner(&self, service: &str) -> ServiceResult<Response<serde_json::Value>> {
     let output = pkexec("systemctl", &["enable", service])?;
     if output.status.success() {
@@ -184,7 +164,6 @@ impl SystemService {
       Err(AppError::ServiceNotFound(stderr_string(&output)))
     }
   }
-
   pub fn start_service(
     &self,
     service: &str,
@@ -193,7 +172,6 @@ impl SystemService {
       .start_service_inner(service)
       .map_err(|e| e.into_response())
   }
-
   fn start_service_inner(&self, service: &str) -> ServiceResult<Response<serde_json::Value>> {
     let output = pkexec("systemctl", &["start", service])?;
     if output.status.success() {
@@ -205,7 +183,6 @@ impl SystemService {
       Err(AppError::ServiceNotFound(stderr_string(&output)))
     }
   }
-
   pub fn enable_selected_services(
     &self,
     services: Vec<String>,
@@ -214,7 +191,6 @@ impl SystemService {
       .enable_selected_services_inner(services)
       .map_err(|e| e.into_response())
   }
-
   fn enable_selected_services_inner(
     &self,
     services: Vec<String>,
@@ -225,12 +201,10 @@ impl SystemService {
         serde_json::Value::Array(vec![]),
       ));
     }
-
     let service_count = services.len();
     let mut args = vec!["enable"];
     args.extend(services.iter().map(|s| s.as_str()));
     let output = pkexec_with_args("systemctl", args)?;
-
     if output.status.success() {
       Ok(Response::success(
         format!("Enabled {} services successfully", service_count),

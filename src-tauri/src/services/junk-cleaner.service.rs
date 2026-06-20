@@ -10,9 +10,7 @@ use crate::services::junk::{
 };
 /* sys lib */
 use serde_json::Value;
-
 type CleanerResult<T> = Result<T, AppError>;
-
 #[derive(Debug, Clone)]
 pub struct JunkSummary {
   pub category: String,
@@ -21,21 +19,16 @@ pub struct JunkSummary {
   pub description: String,
   pub items: Vec<JunkItem>,
 }
-
 pub struct JunkCleanerService;
-
 impl JunkCleanerService {
   service_method_full!(get_junk_summary => get_junk_summary_inner);
-
   fn get_junk_summary_inner(&self) -> CleanerResult<Response<Value>> {
     let mut summary = serde_json::Map::new();
-
     let browser = BrowserCacheScanner::scan()?;
     let thumbnails = ThumbnailCacheScanner::scan()?;
     let applications = ApplicationCacheScanner::scan()?;
     let system = SystemTempScanner::scan()?;
     let logs = LogRotationScanner::scan()?;
-
     fn junk_items_to_json(items: &[JunkItem]) -> serde_json::Value {
       serde_json::json!(items
         .iter()
@@ -56,7 +49,6 @@ impl JunkCleanerService {
         })
         .collect::<Vec<_>>())
     }
-
     let browser_size: u64 = browser.iter().map(|i| i.size).sum();
     let browser_count: u32 = browser.iter().map(|i| i.file_count).sum();
     summary.insert(
@@ -69,7 +61,6 @@ impl JunkCleanerService {
           "items": junk_items_to_json(&browser),
       }),
     );
-
     let thumbnails_size: u64 = thumbnails.iter().map(|i| i.size).sum();
     let thumbnails_count: u32 = thumbnails.iter().map(|i| i.file_count).sum();
     summary.insert(
@@ -82,7 +73,6 @@ impl JunkCleanerService {
           "items": junk_items_to_json(&thumbnails),
       }),
     );
-
     let applications_size: u64 = applications.iter().map(|i| i.size).sum();
     let applications_count: u32 = applications.iter().map(|i| i.file_count).sum();
     summary.insert(
@@ -95,7 +85,6 @@ impl JunkCleanerService {
           "items": junk_items_to_json(&applications),
       }),
     );
-
     let system_size: u64 = system.iter().map(|i| i.size).sum();
     let system_count: u32 = system.iter().map(|i| i.file_count).sum();
     summary.insert(
@@ -108,7 +97,6 @@ impl JunkCleanerService {
           "items": junk_items_to_json(&system),
       }),
     );
-
     let logs_size: u64 = logs.iter().map(|i| i.size).sum();
     let logs_count: u32 = logs.iter().map(|i| i.file_count).sum();
     summary.insert(
@@ -121,13 +109,11 @@ impl JunkCleanerService {
           "items": junk_items_to_json(&logs),
       }),
     );
-
     Ok(success_response(
       "Junk summary retrieved successfully",
       Value::Object(summary),
     ))
   }
-
   pub fn scan_browser_caches(&self) -> Result<Response<Value>, Response<Value>> {
     match BrowserCacheScanner::scan() {
       Ok(items) => {
@@ -147,7 +133,6 @@ impl JunkCleanerService {
       Err(e) => Err(e.into_response()),
     }
   }
-
   pub fn scan_thumbnail_caches(&self) -> Result<Response<Value>, Response<Value>> {
     match ThumbnailCacheScanner::scan() {
       Ok(items) => {
@@ -171,7 +156,6 @@ impl JunkCleanerService {
       Err(e) => Err(e.into_response()),
     }
   }
-
   pub fn scan_application_caches(&self) -> Result<Response<Value>, Response<Value>> {
     match ApplicationCacheScanner::scan() {
       Ok(items) => {
@@ -195,7 +179,6 @@ impl JunkCleanerService {
       Err(e) => Err(e.into_response()),
     }
   }
-
   pub fn scan_system_temp(&self) -> Result<Response<Value>, Response<Value>> {
     match SystemTempScanner::scan() {
       Ok(items) => {
@@ -215,7 +198,6 @@ impl JunkCleanerService {
       Err(e) => Err(e.into_response()),
     }
   }
-
   pub fn scan_log_rotations(&self) -> Result<Response<Value>, Response<Value>> {
     match LogRotationScanner::scan() {
       Ok(items) => {
@@ -235,13 +217,11 @@ impl JunkCleanerService {
       Err(e) => Err(e.into_response()),
     }
   }
-
   pub fn clean_junk_category(&self, category: String) -> Result<Response<Value>, Response<Value>> {
     self
       .clean_junk_category_inner(category)
       .map_err(|e| e.into_response())
   }
-
   fn clean_junk_category_inner(&self, category: String) -> CleanerResult<Response<Value>> {
     let cat = match category.to_lowercase().as_str() {
       "browser" => JunkCategory::Browser,
@@ -253,7 +233,6 @@ impl JunkCleanerService {
         return Err(AppError::message(format!("Invalid category: {}", category)));
       }
     };
-
     match cat {
       JunkCategory::Browser => self.clean_browser_caches(),
       JunkCategory::Thumbnails => self.clean_thumbnail_caches(),
@@ -262,7 +241,6 @@ impl JunkCleanerService {
       JunkCategory::Logs => self.clean_log_rotations(),
     }
   }
-
   fn clean_browser_caches(&self) -> CleanerResult<Response<Value>> {
     match BrowserCacheScanner::clean() {
       Ok(count) => Ok(success_response(
@@ -275,7 +253,6 @@ impl JunkCleanerService {
       ))),
     }
   }
-
   fn clean_thumbnail_caches(&self) -> CleanerResult<Response<Value>> {
     match ThumbnailCacheScanner::clean() {
       Ok(count) => Ok(success_response(
@@ -288,7 +265,6 @@ impl JunkCleanerService {
       ))),
     }
   }
-
   fn clean_application_caches(&self) -> CleanerResult<Response<Value>> {
     match ApplicationCacheScanner::clean() {
       Ok(count) => Ok(success_response(
@@ -301,7 +277,6 @@ impl JunkCleanerService {
       ))),
     }
   }
-
   fn clean_system_temp(&self) -> CleanerResult<Response<Value>> {
     match SystemTempScanner::clean() {
       Ok(count) => Ok(success_response(
@@ -314,7 +289,6 @@ impl JunkCleanerService {
       ))),
     }
   }
-
   fn clean_log_rotations(&self) -> CleanerResult<Response<Value>> {
     match LogRotationScanner::clean() {
       Ok(count) => Ok(success_response(

@@ -5,18 +5,14 @@ use crate::utils::{data_empty_string, data_string, home_dir, success_response};
 /* sys lib */
 use std::fs;
 use std::path::PathBuf;
-
 type ProfileResult<T> = Result<T, AppError>;
-
 pub struct ProfileService;
-
 impl ProfileService {
   fn get_profiles_dir() -> ProfileResult<PathBuf> {
     let config_dir =
       dirs::config_dir().ok_or_else(|| AppError::message("Config directory not found"))?;
     Ok(config_dir.join("cleanux").join("profiles"))
   }
-
   fn ensure_profiles_dir() -> ProfileResult<PathBuf> {
     let dir = Self::get_profiles_dir()?;
     if !dir.exists() {
@@ -25,19 +21,16 @@ impl ProfileService {
     }
     Ok(dir)
   }
-
   fn get_profile_path(name: &str) -> ProfileResult<PathBuf> {
     let dir = Self::ensure_profiles_dir()?;
     let safe_name = name.replace(['/', '\\'], "_").replace("..", "_");
     Ok(dir.join(format!("{}.json", safe_name)))
   }
-
   pub fn save_profile(
     profile: CleaningProfile,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::save_profile_inner(profile).map_err(|e| e.into_response())
   }
-
   fn save_profile_inner(profile: CleaningProfile) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(&profile.name)?;
     let json = serde_json::to_string_pretty(&profile)
@@ -49,13 +42,11 @@ impl ProfileService {
       data_empty_string(),
     ))
   }
-
   pub fn load_profile(
     name: &str,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::load_profile_inner(name).map_err(|e| e.into_response())
   }
-
   fn load_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
@@ -70,15 +61,12 @@ impl ProfileService {
       serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null),
     ))
   }
-
   pub fn list_profiles() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::list_profiles_inner().map_err(|e| e.into_response())
   }
-
   fn list_profiles_inner() -> ProfileResult<Response<serde_json::Value>> {
     let dir = Self::ensure_profiles_dir()?;
     let mut profiles: Vec<serde_json::Value> = Vec::new();
-
     if dir.exists() {
       let entries = fs::read_dir(&dir)
         .map_err(|e| AppError::message(format!("Failed to read profiles directory: {}", e)))?;
@@ -103,19 +91,16 @@ impl ProfileService {
         }
       }
     }
-
     Ok(success_response(
       format!("Found {} profiles", profiles.len()),
       serde_json::Value::Array(profiles),
     ))
   }
-
   pub fn delete_profile(
     name: &str,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::delete_profile_inner(name).map_err(|e| e.into_response())
   }
-
   fn delete_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
@@ -128,14 +113,12 @@ impl ProfileService {
       data_empty_string(),
     ))
   }
-
   pub fn apply_profile(
     &self,
     name: &str,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     Self::apply_profile_inner(name).map_err(|e| e.into_response())
   }
-
   fn apply_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
@@ -145,9 +128,7 @@ impl ProfileService {
       .map_err(|e| AppError::message(format!("Failed to read profile: {}", e)))?;
     let profile: CleaningProfile = serde_json::from_str(&json)
       .map_err(|e| AppError::message(format!("Failed to parse profile: {}", e)))?;
-
     let mut results: Vec<String> = Vec::new();
-
     if profile.clean_cache {
       if let Some(cache_dir) = dirs::cache_dir() {
         if cache_dir.exists() {
@@ -161,7 +142,6 @@ impl ProfileService {
         }
       }
     }
-
     if profile.clean_trash {
       if let Ok(home) = home_dir() {
         let trash_dir = home.join(".local/share/Trash/files");
@@ -181,14 +161,12 @@ impl ProfileService {
         }
       }
     }
-
     if profile.clean_logs {
       let log_dir = PathBuf::from("/var/log");
       if log_dir.exists() {
         results.push("Log cleaning requires elevated permissions".to_string());
       }
     }
-
     if profile.min_large_file_size > 0 {
       if let Ok(_home) = home_dir() {
         results.push(format!(
@@ -197,7 +175,6 @@ impl ProfileService {
         ));
       }
     }
-
     Ok(success_response(
       format!("Profile '{}' applied: {}", name, results.join(", ")),
       data_string(results.len().to_string()),

@@ -1,7 +1,5 @@
 /* security/privilege.rs - Privilege operation auditing */
-
 use chrono::Local;
-
 #[derive(Debug, Clone)]
 pub struct PrivilegeOperation {
   pub timestamp: String,
@@ -10,7 +8,6 @@ pub struct PrivilegeOperation {
   pub result: String,
   pub user: String,
 }
-
 impl PrivilegeOperation {
   pub fn new(operation: &str, target: &str) -> Self {
     Self {
@@ -21,7 +18,6 @@ impl PrivilegeOperation {
       user: std::env::var("USER").unwrap_or_else(|_| "unknown".to_string()),
     }
   }
-
   pub fn with_result(mut self, result: &str) -> Self {
     self.result = result.to_string();
     self

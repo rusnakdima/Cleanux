@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use nosql_orm::Model;
 use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("cleaning_profiles")]
 #[index("name", 1)]
@@ -17,7 +16,6 @@ pub struct CleaningProfileEntity {
   pub clean_logs: bool,
   pub min_large_file_size: u64,
 }
-
 impl From<crate::models::CleaningProfile> for CleaningProfileEntity {
   fn from(profile: crate::models::CleaningProfile) -> Self {
     Self {

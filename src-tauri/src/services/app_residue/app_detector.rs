@@ -1,13 +1,10 @@
 use crate::utils::stdout_string;
 use std::collections::HashSet;
 use std::process::Command;
-
 pub struct AppDetector;
-
 impl AppDetector {
   pub fn get_installed_apps() -> HashSet<String> {
     let mut installed: HashSet<String> = HashSet::new();
-
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
       if output.status.success() {
         let stdout = stdout_string(&output);
@@ -27,7 +24,6 @@ impl AppDetector {
         }
       }
     }
-
     if let Ok(output) = Command::new("snap").arg("list").output() {
       if output.status.success() {
         let stdout = stdout_string(&output);
@@ -39,7 +35,6 @@ impl AppDetector {
         }
       }
     }
-
     if let Ok(output) = Command::new("flatpak").arg("list").output() {
       if output.status.success() {
         let stdout = stdout_string(&output);
@@ -56,15 +51,12 @@ impl AppDetector {
         }
       }
     }
-
     let common_apps = Self::common_apps_list();
     for app in common_apps {
       installed.insert(app.to_string());
     }
-
     installed
   }
-
   pub fn common_apps_list() -> &'static [&'static str] {
     &[
       "code",
@@ -141,21 +133,17 @@ impl AppDetector {
       "virtualbox",
     ]
   }
-
   pub fn normalize_app_name(name: &str) -> String {
     name
       .to_lowercase()
       .replace(['.', '-', '_'], "-")
       .replace(|c: char| !c.is_alphanumeric() && c != '-', "")
   }
-
   pub fn matches_installed_app(app_name: &str, installed_apps: &HashSet<String>) -> bool {
     let normalized = Self::normalize_app_name(app_name);
-
     if installed_apps.contains(&normalized) {
       return true;
     }
-
     for installed in installed_apps {
       if normalized.contains(installed) || installed.contains(&normalized) {
         return true;
@@ -168,7 +156,6 @@ impl AppDetector {
         }
       }
     }
-
     false
   }
 }

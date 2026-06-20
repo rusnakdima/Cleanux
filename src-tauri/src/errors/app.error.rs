@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum AppError {
@@ -22,7 +21,6 @@ pub enum AppError {
   Unknown(String),
   Message(String),
 }
-
 impl fmt::Display for AppError {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
@@ -46,9 +44,7 @@ impl fmt::Display for AppError {
     }
   }
 }
-
 impl std::error::Error for AppError {}
-
 impl From<std::io::Error> for AppError {
   fn from(err: std::io::Error) -> Self {
     match err.kind() {
@@ -58,13 +54,11 @@ impl From<std::io::Error> for AppError {
     }
   }
 }
-
 impl From<serde_json::Error> for AppError {
   fn from(err: serde_json::Error) -> Self {
     Self::ValidationError(err.to_string())
   }
 }
-
 impl From<nosql_orm::error::OrmError> for AppError {
   fn from(err: nosql_orm::error::OrmError) -> Self {
     use nosql_orm::error::OrmError;
@@ -75,24 +69,19 @@ impl From<nosql_orm::error::OrmError> for AppError {
     }
   }
 }
-
 impl AppError {
   pub fn message(text: impl Into<String>) -> Self {
     Self::Message(text.into())
   }
-
   pub fn not_found(entity: &str) -> Self {
     Self::NotFound(entity.into())
   }
-
   pub fn invalid_path(path: &str) -> Self {
     Self::InvalidPath(path.into())
   }
-
   pub fn permission_denied(path: &str) -> Self {
     Self::PermissionDenied(path.into())
   }
-
   pub fn into_response(self) -> crate::models::Response<serde_json::Value> {
     use crate::models::{Response, Status};
     match self {

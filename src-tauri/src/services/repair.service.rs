@@ -1,12 +1,10 @@
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-
 use crate::models::{Response, Status};
 use crate::utils::{home_dir, stderr_string, stdout_string};
 use serde_json::Value;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 use walkdir::WalkDir;
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct RepairItem {
   pub path: String,
@@ -14,9 +12,7 @@ pub struct RepairItem {
   pub severity: String,
   pub description: Option<String>,
 }
-
 pub struct RepairService;
-
 fn get_common_dirs() -> Vec<PathBuf> {
   let mut dirs = Vec::new();
   if let Ok(home) = home_dir() {
@@ -28,17 +24,14 @@ fn get_common_dirs() -> Vec<PathBuf> {
   dirs.push(PathBuf::from("/usr/lib"));
   dirs
 }
-
 #[allow(non_snake_case)]
 impl RepairService {
   pub fn find_broken_symlinks() -> Result<Response<Value>, Response<Value>> {
     let mut broken_links: Vec<RepairItem> = Vec::new();
-
     for dir in get_common_dirs() {
       if !dir.exists() {
         continue;
       }
-
       for entry in WalkDir::new(&dir)
         .follow_links(false)
         .into_iter()
@@ -63,7 +56,6 @@ impl RepairService {
         }
       }
     }
-
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} broken symlinks", broken_links.len()),
@@ -76,10 +68,8 @@ impl RepairService {
       ),
     })
   }
-
   pub fn find_orphaned_packages() -> Result<Response<Value>, Response<Value>> {
     let mut orphaned: Vec<RepairItem> = Vec::new();
-
     if let Ok(output) = Command::new("dpkg").arg("-l").output() {
       if output.status.success() {
         let stdout = stdout_string(&output);
@@ -102,7 +92,6 @@ impl RepairService {
             }
           })
           .collect();
-
         for pkg in package_names {
           orphaned.push(RepairItem {
             path: pkg.clone(),
@@ -116,7 +105,6 @@ impl RepairService {
         }
       }
     }
-
     if let Ok(output) = Command::new("rpm")
       .args(["-qa", "--qf", "%{NAME}\n"])
       .output()
@@ -138,7 +126,6 @@ impl RepairService {
         }
       }
     }
-
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} orphaned packages", orphaned.len()),
@@ -151,13 +138,11 @@ impl RepairService {
       ),
     })
   }
-
   pub fn clean_font_cache() -> Result<Response<Value>, Response<Value>> {
     let font_cache_path = home_dir()
       .map(|h| h.join(".cache/fontconfig"))
       .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/fontconfig"));
-
     if !font_cache_path.exists() {
       return Ok(Response {
         status: Status::Success,
@@ -165,10 +150,8 @@ impl RepairService {
         data: Value::Array(vec![]),
       });
     }
-
     let mut removed_count = 0;
     let mut failed: Vec<String> = Vec::new();
-
     if let Ok(entries) = fs::read_dir(&font_cache_path) {
       for entry in entries.filter_map(|e| e.ok()) {
         let path = entry.path();
@@ -176,7 +159,6 @@ impl RepairService {
           .file_name()
           .map(|n| n.to_string_lossy().into_owned())
           .unwrap_or_default();
-
         if file_name.ends_with(".cache") || file_name == "fonts.cache-db" {
           match fs::remove_file(&path) {
             Ok(_) => removed_count += 1,
@@ -185,12 +167,10 @@ impl RepairService {
         }
       }
     }
-
     let result = serde_json::json!({
         "removed": removed_count,
         "failed": failed
     });
-
     if failed.is_empty() {
       Ok(Response {
         status: Status::Success,
@@ -205,22 +185,18 @@ impl RepairService {
       })
     }
   }
-
   pub fn clean_icon_cache() -> Result<Response<Value>, Response<Value>> {
     let icon_cache_path = home_dir()
       .map(|h| h.join(".cache/icon-cache"))
       .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/icon-cache"));
-
     let icon_cache_path_kde = home_dir()
       .map(|h| h.join(".cache/plasma_icon_cache"))
       .ok()
       .unwrap_or_else(|| PathBuf::from(".cache/plasma_icon_cache"));
-
     let mut removed_count = 0;
     let mut failed: Vec<String> = Vec::new();
     let mut cleaned_paths: Vec<String> = Vec::new();
-
     for cache_path in &[icon_cache_path, icon_cache_path_kde] {
       if cache_path.exists() {
         if let Ok(entries) = fs::read_dir(cache_path) {
@@ -240,13 +216,11 @@ impl RepairService {
         }
       }
     }
-
     let result = serde_json::json!({
         "removed": removed_count,
         "failed": failed,
         "cleaned_paths": cleaned_paths
     });
-
     if failed.is_empty() {
       Ok(Response {
         status: Status::Success,
@@ -261,24 +235,20 @@ impl RepairService {
       })
     }
   }
-
   pub fn repair_permissions() -> Result<Response<Value>, Response<Value>> {
     let mut repaired_count = 0;
     let mut failed: Vec<String> = Vec::new();
-
     let common_paths = vec![
       home_dir().map(|h| h.join(".config")),
       home_dir().map(|h| h.join(".local/share")),
       home_dir().map(|h| h.join(".cache")),
     ];
-
     for path in common_paths.into_iter().flatten() {
       if path.exists() {
         let perms_path = path.to_string_lossy().into_owned();
         let output = Command::new("pkexec")
           .args(["chmod", "755", &perms_path])
           .output();
-
         match output {
           Ok(result) => {
             if result.status.success() {
@@ -293,12 +263,10 @@ impl RepairService {
         }
       }
     }
-
     let result = serde_json::json!({
         "repaired": repaired_count,
         "failed": failed
     });
-
     if failed.is_empty() {
       Ok(Response {
         status: Status::Success,
@@ -313,10 +281,8 @@ impl RepairService {
       })
     }
   }
-
   pub fn remove_broken_symlink(path: &str) -> Result<Response<Value>, Response<Value>> {
     let symlink_path = Path::new(path);
-
     if !symlink_path.exists() {
       return Err(Response {
         status: Status::Error,
@@ -324,7 +290,6 @@ impl RepairService {
         data: Value::Bool(false),
       });
     }
-
     if !symlink_path.is_symlink() {
       return Err(Response {
         status: Status::Error,
@@ -332,7 +297,6 @@ impl RepairService {
         data: Value::Bool(false),
       });
     }
-
     match fs::remove_file(path) {
       Ok(_) => Ok(Response {
         status: Status::Success,
@@ -346,7 +310,6 @@ impl RepairService {
       }),
     }
   }
-
   pub fn remove_orphaned_package(path: &str) -> Result<Response<Value>, Response<Value>> {
     let is_valid_package_name = path
       .chars()
@@ -358,9 +321,7 @@ impl RepairService {
         data: Value::Bool(false),
       });
     }
-
     let output = Command::new("dpkg").args(["--purge", path]).output();
-
     match output {
       Ok(result) => {
         if result.status.success() {

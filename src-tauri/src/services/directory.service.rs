@@ -3,16 +3,13 @@ use serde_json::Value;
 use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct EmptyDirectory {
   pub path: String,
   pub depth: u32,
   pub parent: Option<String>,
 }
-
 pub struct DirectoryService;
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct DirectoryNode {
   pub name: String,
@@ -21,7 +18,6 @@ pub struct DirectoryNode {
   #[serde(default)]
   pub children: Vec<DirectoryNode>,
 }
-
 #[allow(non_snake_case)]
 impl DirectoryService {
   pub fn scan_directory(path: &str, max_depth: u32) -> Result<Response<Value>, Response<Value>> {
@@ -33,22 +29,18 @@ impl DirectoryService {
         data: Value::Array(vec![]),
       });
     }
-
     let tree = Self::build_directory_tree(start_path, max_depth)?;
     let size = tree.size;
-
     let result = serde_json::json!({
         "tree": tree,
         "total_size": size
     });
-
     Ok(Response {
       status: Status::Success,
       message: "Directory scanned successfully".to_string(),
       data: result,
     })
   }
-
   pub fn get_directory_size(path: &str) -> Result<Response<Value>, Response<Value>> {
     let dir_path = Path::new(path);
     if !dir_path.exists() {
@@ -58,9 +50,7 @@ impl DirectoryService {
         data: serde_json::Value::Null,
       });
     }
-
     let mut total_size: u64 = 0;
-
     for entry in WalkDir::new(dir_path)
       .follow_links(false)
       .into_iter()
@@ -72,39 +62,32 @@ impl DirectoryService {
         }
       }
     }
-
     let result = serde_json::json!({
         "path": path,
         "size": total_size
     });
-
     Ok(Response {
       status: Status::Success,
       message: format!("Size: {} bytes", total_size),
       data: result,
     })
   }
-
   fn build_directory_tree(path: &Path, max_depth: u32) -> Result<DirectoryNode, Response<Value>> {
     let name = path
       .file_name()
       .map(|n| n.to_string_lossy().into_owned())
       .unwrap_or_else(|| path.to_string_lossy().into_owned());
-
     let mut node = DirectoryNode {
       name,
       path: path.to_string_lossy().into_owned(),
       size: 0,
       children: vec![],
     };
-
     if let Ok(entries) = fs::read_dir(path) {
       let mut children: Vec<DirectoryNode> = vec![];
       let mut dir_size: u64 = 0;
-
       for entry in entries.filter_map(|e| e.ok()) {
         let entry_path = entry.path();
-
         if entry_path.is_dir() {
           if let Ok(subtree) = Self::build_directory_tree(&entry_path, max_depth.saturating_sub(1))
           {
@@ -115,12 +98,10 @@ impl DirectoryService {
           if let Ok(metadata) = fs::metadata(&entry_path) {
             let file_size = metadata.len();
             dir_size += file_size;
-
             let file_name = entry_path
               .file_name()
               .map(|n| n.to_string_lossy().into_owned())
               .unwrap_or_default();
-
             children.push(DirectoryNode {
               name: file_name,
               path: entry_path.to_string_lossy().into_owned(),
@@ -130,15 +111,12 @@ impl DirectoryService {
           }
         }
       }
-
       children.sort_by_key(|b| std::cmp::Reverse(b.size));
       node.children = children;
       node.size = dir_size;
     }
-
     Ok(node)
   }
-
   pub fn find_empty_directories(path: &str) -> Result<Response<Value>, Response<Value>> {
     let start_path = Path::new(path);
     if !start_path.exists() {
@@ -148,10 +126,8 @@ impl DirectoryService {
         data: Value::Array(vec![]),
       });
     }
-
     let mut empty_dirs: Vec<EmptyDirectory> = Vec::new();
     Self::collect_empty_directories(start_path, 0, &mut empty_dirs);
-
     let result: Vec<serde_json::Value> = empty_dirs
       .iter()
       .map(|dir| {
@@ -162,20 +138,16 @@ impl DirectoryService {
         })
       })
       .collect();
-
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} empty directories", result.len()),
       data: Value::Array(result),
     })
   }
-
   fn collect_empty_directories(path: &Path, depth: u32, empty_dirs: &mut Vec<EmptyDirectory>) {
     let parent = path.parent().map(|p| p.to_string_lossy().into_owned());
-
     if let Ok(entries) = fs::read_dir(path) {
       let mut has_content = false;
-
       for entry in entries.filter_map(|e| e.ok()) {
         let entry_path = entry.path();
         if entry_path.is_dir() {
@@ -184,7 +156,6 @@ impl DirectoryService {
           has_content = true;
         }
       }
-
       if !has_content {
         empty_dirs.push(EmptyDirectory {
           path: path.to_string_lossy().into_owned(),
@@ -194,7 +165,6 @@ impl DirectoryService {
       }
     }
   }
-
   pub fn find_nested_empty_directories(path: &str) -> Result<Response<Value>, Response<Value>> {
     let start_path = Path::new(path);
     if !start_path.exists() {
@@ -204,10 +174,8 @@ impl DirectoryService {
         data: Value::Array(vec![]),
       });
     }
-
     let mut nested_empty_dirs: Vec<EmptyDirectory> = Vec::new();
     Self::collect_nested_empty_directories(start_path, 0, &mut nested_empty_dirs);
-
     let result: Vec<serde_json::Value> = nested_empty_dirs
       .iter()
       .map(|dir| {
@@ -218,25 +186,21 @@ impl DirectoryService {
         })
       })
       .collect();
-
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} nested empty directories", result.len()),
       data: Value::Array(result),
     })
   }
-
   fn collect_nested_empty_directories(
     path: &Path,
     depth: u32,
     nested_empty_dirs: &mut Vec<EmptyDirectory>,
   ) {
     let parent = path.parent().map(|p| p.to_string_lossy().into_owned());
-
     if let Ok(entries) = fs::read_dir(path) {
       let entries: Vec<_> = entries.filter_map(|e| e.ok()).collect();
       let mut all_subdirs_empty = true;
-
       for entry in &entries {
         let entry_path = entry.path();
         if entry_path.is_dir() {
@@ -248,7 +212,6 @@ impl DirectoryService {
           all_subdirs_empty = false;
         }
       }
-
       if all_subdirs_empty && !entries.is_empty() {
         nested_empty_dirs.push(EmptyDirectory {
           path: path.to_string_lossy().into_owned(),
@@ -258,7 +221,6 @@ impl DirectoryService {
       }
     }
   }
-
   fn is_directory_empty(path: &Path) -> bool {
     if let Ok(entries) = fs::read_dir(path) {
       let count = entries.count();
@@ -267,7 +229,6 @@ impl DirectoryService {
       true
     }
   }
-
   pub fn remove_empty_directory(path: &str) -> Result<Response<Value>, Response<Value>> {
     let dir_path = Path::new(path);
     if !dir_path.exists() {
@@ -277,7 +238,6 @@ impl DirectoryService {
         data: serde_json::Value::Null,
       });
     }
-
     if !dir_path.is_dir() {
       return Err(Response {
         status: Status::Error,
@@ -285,7 +245,6 @@ impl DirectoryService {
         data: serde_json::Value::Null,
       });
     }
-
     if let Ok(entries) = fs::read_dir(dir_path) {
       if entries.count() > 0 {
         return Err(Response {
@@ -295,7 +254,6 @@ impl DirectoryService {
         });
       }
     }
-
     match fs::remove_dir(path) {
       Ok(_) => Ok(Response {
         status: Status::Success,
@@ -309,11 +267,9 @@ impl DirectoryService {
       }),
     }
   }
-
   pub fn remove_empty_directories(paths: Vec<String>) -> Result<Response<Value>, Response<Value>> {
     let mut removed_count = 0;
     let mut failed: Vec<String> = Vec::new();
-
     for path in &paths {
       let dir_path = Path::new(path);
       if dir_path.exists() && dir_path.is_dir() {
@@ -331,13 +287,11 @@ impl DirectoryService {
         failed.push(format!("{}: does not exist", path));
       }
     }
-
     let result = serde_json::json!({
         "removed": removed_count,
         "failed": failed,
         "total": paths.len()
     });
-
     if failed.is_empty() {
       Ok(Response {
         status: Status::Success,

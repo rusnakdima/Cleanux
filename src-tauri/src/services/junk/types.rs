@@ -6,7 +6,6 @@ pub enum JunkCategory {
   System,
   Logs,
 }
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct JunkItem {
   pub path: String,

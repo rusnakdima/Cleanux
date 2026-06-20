@@ -6,9 +6,7 @@ use serde_json::Value;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
-
 pub struct PackageService;
-
 #[derive(Debug, Clone)]
 pub struct PackageCacheInfo {
   pub name: String,
@@ -16,15 +14,12 @@ pub struct PackageCacheInfo {
   pub size: u64,
   pub description: String,
 }
-
 impl PackageService {
   pub fn get_package_cache_info() -> Result<Response<Value>, Response<Value>> {
     Self::get_package_cache_info_inner().map_err(|e| e.into_response())
   }
-
   fn get_package_cache_info_inner() -> Result<Response<Value>, AppError> {
     let mut cache_infos: Vec<PackageCacheInfo> = Vec::new();
-
     let configs = Self::get_cache_info_configs();
     for (name, path, description) in configs {
       if path.exists() {
@@ -43,7 +38,6 @@ impl PackageService {
         });
       }
     }
-
     let data: Vec<serde_json::Value> = cache_infos
       .iter()
       .map(|info| {
@@ -55,13 +49,11 @@ impl PackageService {
         })
       })
       .collect();
-
     Ok(success_response(
       "Package cache info retrieved successfully",
       Value::Array(data),
     ))
   }
-
   fn calculate_deb_size(path: &Path) -> u64 {
     fs::read_dir(path)
       .map(|entries| {
@@ -79,7 +71,6 @@ impl PackageService {
       })
       .unwrap_or(0)
   }
-
   fn get_cache_info_configs() -> Vec<(&'static str, std::path::PathBuf, &'static str)> {
     let home = dirs::home_dir().unwrap_or_default();
     vec![
@@ -101,11 +92,9 @@ impl PackageService {
       ),
     ]
   }
-
   pub fn clean_package_cache(manager: &str) -> Result<Response<Value>, Response<Value>> {
     Self::clean_package_cache_inner(manager).map_err(|e| e.into_response())
   }
-
   fn clean_package_cache_inner(manager: &str) -> Result<Response<Value>, AppError> {
     match manager {
       "snap" => Self::clean_snap(),
@@ -117,13 +106,11 @@ impl PackageService {
       ))),
     }
   }
-
   fn clean_snap() -> Result<Response<Value>, AppError> {
     let output = Command::new("snap")
       .args(["list", "--all"])
       .output()
       .map_err(|e| AppError::message(format!("Failed to run snap list: {}", e)))?;
-
     if !output.status.success() {
       let stderr = stderr_string(&output);
       return Err(AppError::message(format!(
@@ -131,11 +118,9 @@ impl PackageService {
         stderr
       )));
     }
-
     let stdout = stdout_string(&output);
     let mut revision_counts: std::collections::HashMap<String, u32> =
       std::collections::HashMap::new();
-
     for line in stdout.lines().skip(1) {
       let parts: Vec<&str> = line.split_whitespace().collect();
       if parts.len() >= 4 {
@@ -145,7 +130,6 @@ impl PackageService {
         *revision_counts.entry(key).or_insert(0) += 1;
       }
     }
-
     let mut removed_count = 0;
     for (key, _) in revision_counts {
       if let Some(dash_pos) = key.rfind('-') {
@@ -154,7 +138,6 @@ impl PackageService {
         let remove_output = Command::new("snap")
           .args(["remove", name, "--revision", revision])
           .output();
-
         if let Ok(out) = remove_output {
           if out.status.success() {
             removed_count += 1;
@@ -162,7 +145,6 @@ impl PackageService {
         }
       }
     }
-
     Ok(success_response(
       format!(
         "Snap cleanup completed, removed {} revisions",
@@ -171,13 +153,11 @@ impl PackageService {
       data_string(removed_count.to_string()),
     ))
   }
-
   fn clean_flatpak() -> Result<Response<Value>, AppError> {
     let output = Command::new("flatpak")
       .args(["uninstall", "--unused", "-y"])
       .output()
       .map_err(|e| AppError::message(format!("Failed to run flatpak uninstall: {}", e)))?;
-
     if output.status.success() {
       Ok(success_response(
         "Flatpak unused packages cleaned successfully",
@@ -191,13 +171,11 @@ impl PackageService {
       ))
     }
   }
-
   fn clean_yum() -> Result<Response<Value>, AppError> {
     let output = Command::new("yum")
       .args(["clean", "all"])
       .output()
       .map_err(|e| AppError::message(format!("Failed to run yum clean: {}", e)))?;
-
     if output.status.success() {
       Ok(success_response(
         "YUM cache cleaned successfully",

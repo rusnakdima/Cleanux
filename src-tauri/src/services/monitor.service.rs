@@ -1,16 +1,12 @@
 /* sys lib */
+use crate::models::{Response, Status};
+use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use sysinfo::System;
-
-use crate::models::{Response, Status};
-use serde_json::Value;
-
 static MONITORING_ACTIVE: AtomicBool = AtomicBool::new(false);
 static SYSTEM: Mutex<Option<System>> = Mutex::new(None);
-
 pub struct MonitorService;
-
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct SystemStats {
   pub cpu_usage: f32,
@@ -21,7 +17,6 @@ pub struct SystemStats {
   pub disk_total: u64,
   pub disk_usage_percent: f32,
 }
-
 impl MonitorService {
   pub fn get_system_stats() -> Result<Response<Value>, Response<Value>> {
     {
@@ -35,9 +30,7 @@ impl MonitorService {
     let mut sys = SYSTEM.lock().unwrap();
     let sys = sys.as_mut().unwrap();
     sys.refresh_all();
-
     let cpu_usage = sys.global_cpu_usage();
-
     let memory_used = sys.used_memory();
     let memory_total = sys.total_memory();
     let memory_usage_percent = if memory_total > 0 {
@@ -45,7 +38,6 @@ impl MonitorService {
     } else {
       0.0
     };
-
     let disks = sysinfo::Disks::new_with_refreshed_list();
     let mut disk_used: u64 = 0;
     let mut disk_total: u64 = 0;
@@ -58,7 +50,6 @@ impl MonitorService {
     } else {
       0.0
     };
-
     let stats = SystemStats {
       cpu_usage,
       memory_used,
@@ -68,14 +59,12 @@ impl MonitorService {
       disk_total,
       disk_usage_percent,
     };
-
     Ok(Response {
       status: Status::Success,
       message: "System stats retrieved successfully".to_string(),
       data: serde_json::to_value(stats).map_err(|e| e.to_string())?,
     })
   }
-
   pub fn start_monitoring() -> Result<Response<Value>, Response<Value>> {
     MONITORING_ACTIVE.store(true, Ordering::SeqCst);
     Ok(Response {
@@ -84,7 +73,6 @@ impl MonitorService {
       data: Value::Bool(true),
     })
   }
-
   pub fn stop_monitoring() -> Result<Response<Value>, Response<Value>> {
     MONITORING_ACTIVE.store(false, Ordering::SeqCst);
     Ok(Response {

@@ -7,14 +7,10 @@ use crate::utils::{
 use crate::models::Response;
 /* errors */
 use crate::models::AppError;
-
 use serde_json::Value;
 use std::fs;
-
 pub struct LargeFileCleaningService;
-
 type CleanResult<T> = Result<T, Response<Value>>;
-
 impl LargeFileCleaningService {
   pub fn get_large_files(
     &self,
@@ -23,7 +19,6 @@ impl LargeFileCleaningService {
   ) -> Result<Response<Value>, Response<Value>> {
     self.get_large_files_inner(limit, offset)
   }
-
   fn get_large_files_inner(
     &self,
     limit: Option<usize>,
@@ -40,7 +35,6 @@ impl LargeFileCleaningService {
       .map_err(|e| AppError::Unknown(format!("Failed to serialize large files data: {}", e)))?;
     Ok(success_response("Large files retrieved successfully", data))
   }
-
   pub fn clear_selected_large_files(
     &self,
     paths: Vec<String>,
@@ -62,11 +56,9 @@ impl LargeFileCleaningService {
       )
     }
   }
-
   pub fn clear_all_large_files(&self) -> Result<Response<Value>, Response<Value>> {
     self.clear_all_large_files_inner()
   }
-
   fn clear_all_large_files_inner(&self) -> CleanResult<Response<Value>> {
     let home = home_dir().map_err(|e| e.into_response())?;
     let (files, _, _) = scan_large_file_models(&home, 3, 50, None, None, None);

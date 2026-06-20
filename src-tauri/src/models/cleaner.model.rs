@@ -1,7 +1,6 @@
 /* models */
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CleaningProfile {
   pub name: String,
@@ -14,7 +13,6 @@ pub struct CleaningProfile {
   pub clean_logs: bool,
   pub min_large_file_size: u64,
 }
-
 impl CleaningProfile {
   pub fn new(name: String) -> Self {
     Self {
@@ -30,14 +28,12 @@ impl CleaningProfile {
     }
   }
 }
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CacheFileModel {
   pub path: String,
   pub size: u64,
   pub modified: String,
 }
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LargeFileModel {
   pub name: String,
@@ -45,14 +41,12 @@ pub struct LargeFileModel {
   pub size: u64,
   pub modified: String,
 }
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LogFileModel {
   pub path: String,
   pub size: u64,
   pub modified: String,
 }
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TrashFileModel {
   pub name: String,
@@ -60,7 +54,6 @@ pub struct TrashFileModel {
   pub size: u64,
   pub deleted_date: String,
 }
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ScanSummaryModel {
   pub file_count: usize,

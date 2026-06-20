@@ -2,21 +2,16 @@ use crate::models::AppError;
 use crate::services::junk::types::{JunkCategory, JunkItem};
 use std::fs;
 use std::path::Path;
-
 pub struct LogRotationScanner;
-
 impl LogRotationScanner {
   pub fn scan() -> Result<Vec<JunkItem>, AppError> {
     let mut items = Vec::new();
     let log_dir = Path::new("/var/log");
-
     if !log_dir.exists() {
       return Ok(Vec::new());
     }
-
     let mut total_size = 0u64;
     let mut total_count = 0u32;
-
     if let Ok(entries) = fs::read_dir(log_dir) {
       for entry in entries.flatten() {
         let path = entry.path();
@@ -45,7 +40,6 @@ impl LogRotationScanner {
         }
       }
     }
-
     if total_count > 0 {
       items.push(JunkItem {
         path: "/var/log".to_string(),
@@ -55,18 +49,14 @@ impl LogRotationScanner {
         file_count: total_count,
       });
     }
-
     Ok(items)
   }
-
   pub fn clean() -> Result<u64, AppError> {
     let log_dir = Path::new("/var/log");
     if !log_dir.exists() {
       return Ok(0);
     }
-
     let mut cleaned_count = 0u64;
-
     if let Ok(entries) = fs::read_dir(log_dir) {
       for entry in entries.flatten() {
         let path = entry.path();
@@ -82,7 +72,6 @@ impl LogRotationScanner {
                   || name.ends_with(".2")
               })
               .unwrap_or(false);
-
           if should_delete {
             if fs::remove_file(&path).is_ok() {
               cleaned_count += 1;
@@ -91,7 +80,6 @@ impl LogRotationScanner {
         }
       }
     }
-
     Ok(cleaned_count)
   }
 }

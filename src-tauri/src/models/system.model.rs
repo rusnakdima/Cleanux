@@ -1,6 +1,5 @@
 /* sys lib */
 use serde::{Deserialize, Serialize};
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SystemServiceModel {
   pub name: String,
