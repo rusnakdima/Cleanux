@@ -1,7 +1,15 @@
 export type ResponseStatus =
-  | 'success' | 'info' | 'warning' | 'error'
-  | 'created' | 'updated' | 'deleted'
-  | 'validationError' | 'notFound' | 'unauthorized' | 'forbidden';
+  | 'success'
+  | 'info'
+  | 'warning'
+  | 'error'
+  | 'created'
+  | 'updated'
+  | 'deleted'
+  | 'validationError'
+  | 'notFound'
+  | 'unauthorized'
+  | 'forbidden';
 
 export interface Response<T = unknown> {
   status: ResponseStatus;
@@ -14,5 +22,5 @@ export function isSuccess<T>(r: Response<T>): boolean {
 }
 
 export function getData<T>(response: Response<unknown>): T | null {
-  return response.data as T ?? null;
+  return (response.data as T) ?? null;
 }

@@ -45,6 +45,7 @@ pub fn run() {
     })
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_opener::init())
+    .plugin(tauri_plugin_mcp_bridge::init())
     .invoke_handler(tauri::generate_handler![
       commands::crud_command::crud_execute,
       commands::health_command::crud_get_health_snapshot,

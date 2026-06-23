@@ -33,11 +33,7 @@ export class CrudService {
   }
 
   async getAll<T = unknown>(entity: string, filter?: unknown): Promise<T[]> {
-    const result = await this.execute<{ [key: string]: T[] }>(
-      'get_all',
-      entity,
-      { filter }
-    );
+    const result = await this.execute<{ [key: string]: T[] }>('get_all', entity, { filter });
     return Object.values(result ?? {})[0] ?? [];
   }
 
