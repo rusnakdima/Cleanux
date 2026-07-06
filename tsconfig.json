@@ -17,7 +17,9 @@
       "@features/*": ["src/app/features/*"],
       "@interceptors/*": ["src/app/interceptors/*"],
       "@resolvers/*": ["src/app/resolvers/*"],
-      "@tauri-shared/*": ["../_shared/*"]
+      "@tauri-shared/*": ["../_shared/*"],
+      "@tauri-front/shared": ["../../Web/tauri-front-shared/projects/shared/dist"],
+      "@tauri-front/shared/*": ["../../Web/tauri-front-shared/projects/shared/dist/*"]
     },
     "strict": true,
     "noImplicitOverride": true,
