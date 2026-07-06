@@ -22,6 +22,10 @@ pub mod package_command;
 pub mod profile_command;
 #[path = "report.command.rs"]
 pub mod report_command;
+#[path = "schema.command.rs"]
+pub mod schema_command;
+#[path = "schema_commands.rs"]
+pub mod schema_commands;
 #[path = "storage.command.rs"]
 pub mod storage_command;
 #[path = "system.command.rs"]

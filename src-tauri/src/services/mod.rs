@@ -57,6 +57,8 @@ pub mod repair_service;
 pub mod report_service;
 #[path = "scanner.service.rs"]
 pub mod scanner_service;
+#[path = "schema_service.rs"]
+pub mod schema_service;
 #[path = "startup.service.rs"]
 pub mod startup_service;
 #[path = "system.service.rs"]

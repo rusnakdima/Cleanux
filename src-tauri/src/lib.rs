@@ -5,6 +5,7 @@ pub mod entities;
 pub mod errors;
 pub mod models;
 pub mod repositories;
+
 pub mod security;
 pub mod services;
 pub mod utils;
@@ -34,12 +35,16 @@ pub fn run() {
       let repository_service = Arc::new(repositories::service::RepositoryService::new(
         json_provider.clone(),
       ));
-      let crud_service = Arc::new(services::crud_service::CrudService::new(json_provider));
+      let crud_service = Arc::new(services::crud_service::CrudService::new(
+        json_provider.clone(),
+      ));
+      let schema_state = commands::schema_command::SchemaState::new(Arc::new(json_provider));
       app.manage(AppState {
         data: DataState {
           repository_service,
           crud_service,
         },
+        schema: schema_state,
       });
       Ok(())
     })
@@ -194,14 +199,21 @@ pub fn run() {
       commands::log_command::get_var_log_usage,
       commands::log_command::get_largest_log_files,
       commands::log_command::get_log_manager_summary,
+      commands::schema_command::get_schema,
+      commands::schema_command::save_schema,
+      commands::schema_command::get_all_schemas,
+      commands::schema_command::delete_schema,
+      commands::schema_commands::get_cleanux_schema,
+      commands::schema_commands::save_cleanux_schema,
     ])
     .run(tauri::generate_context!())
-    .unwrap_or_else(|e| {
+    .unwrap_or_else(|_e| {
       std::process::exit(1);
     });
 }
 pub struct AppState {
   pub data: DataState,
+  pub schema: commands::schema_command::SchemaState,
 }
 pub struct DataState {
   pub repository_service: Arc<repositories::service::RepositoryService>,
