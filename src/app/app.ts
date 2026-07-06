@@ -1,13 +1,22 @@
 /* sys lib */
-import { Component, signal, inject, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  ChangeDetectionStrategy,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-/* components */
-import { BottomNavComponent } from '@components/bottom-nav/bottom-nav.component';
-import { HeaderBarComponent } from '@components/header-bar/header-bar.component';
+/* shared */
+import { SchemaRouterService, SchemaRouteViewerComponent } from '@tauri-front/shared';
+
+/* schema */
+import { cleanuxSchema } from './schemas/cleanux-schema';
 
 interface RouteInfo {
   title: string;
@@ -20,16 +29,17 @@ interface RouteInfo {
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterOutlet, BottomNavComponent, HeaderBarComponent],
+  imports: [CommonModule, SchemaRouteViewerComponent],
   templateUrl: './app.html',
 })
-export class App implements OnDestroy {
+export class App implements OnInit, OnDestroy {
   pageTitle = signal('Home');
   pageBreadcrumb = signal('');
   showBackButton = signal(false);
 
   private router = inject(Router);
   private routerSubscription!: Subscription;
+  protected schemaRouter = inject(SchemaRouterService);
 
   private routeInfo: Record<string, RouteInfo> = {
     home: { title: 'Home', breadcrumb: '', parent: '', showBack: false },
@@ -94,6 +104,11 @@ export class App implements OnDestroy {
       });
   }
 
+  ngOnInit() {
+    this.schemaRouter.setSchema(cleanuxSchema);
+    this.schemaRouter.navigate('/dashboard');
+  }
+
   ngOnDestroy(): void {
     this.routerSubscription?.unsubscribe();
   }
@@ -102,9 +117,9 @@ export class App implements OnDestroy {
     const currentPath = this.router.url.split('/').pop()?.split('?')[0] || 'home';
     const info = this.routeInfo[currentPath];
     if (info && info.parent) {
-      this.router.navigate(['/' + info.parent]);
+      this.schemaRouter.navigate('/' + info.parent);
     } else {
-      this.router.navigate(['/home']);
+      this.schemaRouter.navigate('/home');
     }
   }
 

@@ -4,8 +4,18 @@ import { Injectable, inject, signal } from '@angular/core';
 /* services */
 import { ApiService } from '@services/api.service';
 
-/* models */
-import { DirectoryNode, TreemapItem } from '@pages/disk-usage/disk-usage.view';
+export interface DirectoryNode {
+  name: string;
+  path: string;
+  size: number;
+  children: DirectoryNode[];
+}
+
+export interface TreemapItem {
+  node: DirectoryNode;
+  depth: number;
+  percentage: number;
+}
 
 interface ScanResult {
   tree: DirectoryNode;

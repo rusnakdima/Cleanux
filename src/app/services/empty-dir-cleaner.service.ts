@@ -1,6 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '@services/api.service';
-import { EmptyDirectory } from '@components/empty-dir-cleaner/empty-dir-cleaner.component';
+
+export interface EmptyDirectory {
+  path: string;
+  size?: number;
+}
 
 export interface RemoveResult {
   removed: number;
