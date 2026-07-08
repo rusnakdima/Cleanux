@@ -9,6 +9,15 @@ pub mod repositories;
 pub mod security;
 pub mod services;
 pub mod utils;
+
+// tauri_shared re-exports for use across the crate
+pub use tauri_shared::log_debug;
+pub use tauri_shared::log_error;
+pub use tauri_shared::log_info;
+pub use tauri_shared::log_warn;
+pub use tauri_shared::Response as TauriResponse;
+pub use tauri_shared::Status;
+
 use crate::entities::automation_recipe_entity::AutomationRecipeEntity;
 use crate::entities::cleaning_profile_entity::CleaningProfileEntity;
 use crate::entities::execution_history_entity::ExecutionHistoryEntity;
@@ -203,8 +212,8 @@ pub fn run() {
       commands::schema_command::save_schema,
       commands::schema_command::get_all_schemas,
       commands::schema_command::delete_schema,
-      commands::schema_commands::get_cleanux_schema,
-      commands::schema_commands::save_cleanux_schema,
+      tauri_shared::get_ui_schema,
+      tauri_shared::save_ui_schema,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|_e| {
