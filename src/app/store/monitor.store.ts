@@ -1,6 +1,7 @@
-import { Injectable, signal, inject, OnDestroy, computed, NgZone } from '@angular/core';
+import { Injectable, signal, inject, OnDestroy, OnInit, computed, NgZone } from '@angular/core';
+import { listen } from '@tauri-apps/api/event';
 import { formatSize } from '@shared/utils/format.util';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import { POLL_INTERVAL_MS } from '@shared/utils/constants';
 import { TEMPERATURE_REFRESH_INTERVAL_MS } from '@shared/constants/timeout.constants';
 
@@ -36,8 +37,8 @@ const MAX_HISTORY_LENGTH = 20;
 @Injectable({
   providedIn: 'root',
 })
-export class MonitorStore implements OnDestroy {
-  private api = inject(ApiService);
+export class MonitorStore implements OnInit, OnDestroy {
+  private api = inject(InvokeWrapperService);
   private ngZone = inject(NgZone);
   private unlisten: (() => void) | null = null;
   private unlistenTemps: (() => void) | null = null;
@@ -79,7 +80,9 @@ export class MonitorStore implements OnDestroy {
   readonly diskUsedFormatted = computed(() => formatSize(this.systemStats().diskUsed ?? 0));
   readonly diskTotalFormatted = computed(() => formatSize(this.systemStats().diskTotal ?? 0));
 
-  constructor() {
+  constructor() {}
+
+  ngOnInit() {
     this.visibilityHandler = () => {
       if (document.hidden) {
         this.stopMonitoring();
@@ -135,7 +138,7 @@ export class MonitorStore implements OnDestroy {
         disk_used: number;
         disk_total: number;
         disk_usage_percent: number;
-      }>('get_system_stats', {}, { suppressError: true });
+      }>('get_system_stats', {});
 
       this.systemStats.set({
         cpuUsage: response.cpu_usage,
@@ -171,8 +174,7 @@ export class MonitorStore implements OnDestroy {
       this.temperaturesLoading.set(true);
       const response = await this.api.invoke<{ cpu_temp?: number; gpu_temp?: number }>(
         'get_temperatures',
-        {},
-        { suppressError: true }
+        {}
       );
 
       if (response && typeof response === 'object' && !Array.isArray(response)) {
@@ -200,7 +202,7 @@ export class MonitorStore implements OnDestroy {
   }
 
   async setupScanProgressListener(handler: (progress: number) => void): Promise<void> {
-    this.unlisten = await this.api.listen<{ progress: number }>('scan-progress', (event) => {
+    this.unlisten = await listen<{ progress: number }>('scan-progress', (event) => {
       handler(event.payload.progress * 100);
     });
   }
