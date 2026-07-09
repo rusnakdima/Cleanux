@@ -47,7 +47,7 @@ pub fn run() {
       let crud_service = Arc::new(services::crud_service::CrudService::new(
         json_provider.clone(),
       ));
-      let schema_state = commands::schema_command::SchemaState::new(Arc::new(json_provider));
+      let schema_state = commands::schema_command::SchemaState::new(Arc::new(json_provider.clone()));
       app.manage(AppState {
         data: DataState {
           repository_service,
@@ -55,6 +55,7 @@ pub fn run() {
         },
         schema: schema_state,
       });
+      app.manage(json_provider);
       Ok(())
     })
     .plugin(tauri_plugin_fs::init())
