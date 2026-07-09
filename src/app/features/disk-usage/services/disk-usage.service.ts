@@ -2,7 +2,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface DirectoryNode {
   name: string;
@@ -26,7 +26,7 @@ interface ScanResult {
   providedIn: 'root',
 })
 export class DiskUsageService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   private _originalTree = signal<DirectoryNode | null>(null);
   private _currentNode = signal<DirectoryNode | null>(null);

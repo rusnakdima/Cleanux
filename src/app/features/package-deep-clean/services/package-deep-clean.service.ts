@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface PackageManagerSummary {
   aptAvailable: boolean;
@@ -36,7 +36,7 @@ export interface DeepCleanResponse {
   providedIn: 'root',
 })
 export class PackageDeepCleanService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   readonly summary = signal<PackageManagerSummary | null>(null);
   readonly orphanedPackages = signal<OrphanedPackage[]>([]);

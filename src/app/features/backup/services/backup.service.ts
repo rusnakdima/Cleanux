@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface BackupItem {
   name: string;
@@ -15,7 +15,7 @@ export interface BackupItem {
   providedIn: 'root',
 })
 export class BackupService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

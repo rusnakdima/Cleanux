@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import { SystemServiceItem, ProcessItem } from '@entities/system.model';
@@ -13,7 +13,7 @@ export type { SystemServiceItem, ProcessItem } from '@entities/system.model';
   providedIn: 'root',
 })
 export class SystemService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

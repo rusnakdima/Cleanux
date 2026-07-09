@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface RepairItem {
   path: string;
@@ -19,7 +19,7 @@ export interface RepairResult {
   providedIn: 'root',
 })
 export class RepairService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

@@ -23,12 +23,11 @@ describe('SystemService', () => {
   ];
 
   beforeEach(async () => {
-    const { ApiService } = await import('@services/api.service');
-    mockApi = { invoke: vi.fn() };
-    ApiService.prototype.api = mockApi;
+    const { InvokeWrapperService } = await import('@tauri-front/shared');
+    mockApi = { invoke: vi.fn(), listen: vi.fn() };
 
     injector = Injector.create({
-      providers: [{ provide: ApiService, useValue: mockApi }],
+      providers: [{ provide: InvokeWrapperService, useValue: mockApi }],
     });
   });
 

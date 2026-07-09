@@ -1,2 +1,2 @@
 export * from './toast.component';
-export * from './toast.service';
+// ToastService removed — use ToastService from @tauri-front/shared

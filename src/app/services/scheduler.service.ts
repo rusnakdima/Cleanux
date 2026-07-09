@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import { ScheduleConfig } from '@entities/schedule.model';
@@ -11,7 +11,7 @@ import { ScheduleConfig } from '@entities/schedule.model';
   providedIn: 'root',
 })
 export class SchedulerService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   async getScheduleConfig(): Promise<ScheduleConfig | null> {
     try {

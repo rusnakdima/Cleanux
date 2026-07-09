@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Injector, runInInjectionContext, NgZone } from '@angular/core';
 import { formatSize } from '@shared/utils/format.util';
 
-vi.mock('@api/tauri-api.service');
+vi.mock('@tauri-front/shared');
 
 describe('MonitorStore', () => {
   let injector: Injector;
@@ -19,9 +19,8 @@ describe('MonitorStore', () => {
   });
 
   beforeEach(async () => {
-    const { TauriApiService } = await import('@api/tauri-api.service');
+    const { InvokeWrapperService } = await import('@tauri-front/shared');
     mockApi = { invoke: vi.fn(), listen: vi.fn().mockResolvedValue(() => {}) };
-    TauriApiService.prototype.api = mockApi;
 
     const mockNgZone = {
       run: (fn: () => void) => fn(),
@@ -30,7 +29,7 @@ describe('MonitorStore', () => {
 
     injector = Injector.create({
       providers: [
-        { provide: TauriApiService, useValue: mockApi },
+        { provide: InvokeWrapperService, useValue: mockApi },
         { provide: NgZone, useValue: mockNgZone },
       ],
     });

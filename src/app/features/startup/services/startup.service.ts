@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import { StartupItem } from '@entities/startup.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StartupService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

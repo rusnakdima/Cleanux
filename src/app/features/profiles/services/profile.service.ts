@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import { CleaningProfile, createEmptyProfile } from '@entities/profile.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProfileService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

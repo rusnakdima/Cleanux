@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import { JunkCategorySummary, JunkItem } from '@entities/junk-cleaner.model';
@@ -11,7 +11,7 @@ import { JunkCategorySummary, JunkItem } from '@entities/junk-cleaner.model';
   providedIn: 'root',
 })
 export class JunkCleanerService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

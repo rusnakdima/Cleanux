@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@api/tauri-api.service');
+vi.mock('@tauri-front/shared');
 
 describe('AutomationStore', () => {
   let injector: Injector;
@@ -40,12 +40,11 @@ describe('AutomationStore', () => {
   ];
 
   beforeEach(async () => {
-    const { TauriApiService } = await import('@api/tauri-api.service');
+    const { InvokeWrapperService } = await import('@tauri-front/shared');
     mockApi = { invoke: vi.fn(), listen: vi.fn() };
-    TauriApiService.prototype.api = mockApi;
 
     injector = Injector.create({
-      providers: [{ provide: TauriApiService, useValue: mockApi }],
+      providers: [{ provide: InvokeWrapperService, useValue: mockApi }],
     });
   });
 

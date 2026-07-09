@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@api/tauri-api.service');
+vi.mock('@tauri-front/shared');
 vi.mock('@services/file.service');
 
 describe('CleanerStore', () => {
@@ -26,7 +26,7 @@ describe('CleanerStore', () => {
     }));
 
   beforeEach(async () => {
-    const { TauriApiService } = await import('@api/tauri-api.service');
+    const { InvokeWrapperService } = await import('@tauri-front/shared');
     const { FileService } = await import('@services/file.service');
 
     mockApi = { invoke: vi.fn(), listen: vi.fn().mockResolvedValue(() => {}) };
@@ -35,12 +35,11 @@ describe('CleanerStore', () => {
       getLargeFiles: vi.fn(),
     };
 
-    TauriApiService.prototype.api = mockApi;
     FileService.prototype.api = mockFileService;
 
     injector = Injector.create({
       providers: [
-        { provide: TauriApiService, useValue: mockApi },
+        { provide: InvokeWrapperService, useValue: mockApi },
         { provide: FileService, useValue: mockFileService },
       ],
     });

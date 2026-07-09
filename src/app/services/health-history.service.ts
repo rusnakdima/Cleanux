@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import { HealthSnapshot, HealthTrend } from '@entities/health-history.model';
@@ -11,7 +11,7 @@ import { HealthSnapshot, HealthTrend } from '@entities/health-history.model';
   providedIn: 'root',
 })
 export class HealthHistoryService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   async saveHealthSnapshot(
     healthScore: number,

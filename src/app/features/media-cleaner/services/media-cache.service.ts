@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface MediaCacheSummary {
   steamShaderSize: number;
@@ -18,7 +18,7 @@ export interface MediaCacheSummary {
   providedIn: 'root',
 })
 export class MediaCacheService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

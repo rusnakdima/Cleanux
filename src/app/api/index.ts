@@ -1,1 +1,1 @@
-export * from './tauri-api.service';
+// TauriApiService removed — use InvokeWrapperService from @tauri-front/shared

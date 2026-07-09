@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import {
   QuickAction,
   ActionStep,
@@ -13,7 +13,7 @@ export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry }
   providedIn: 'root',
 })
 export class AutomationService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

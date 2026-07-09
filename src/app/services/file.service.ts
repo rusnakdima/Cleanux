@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import {
@@ -35,7 +35,7 @@ export interface FilePreviewResult {
   providedIn: 'root',
 })
 export class FileService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   private inFlightRequests = new Map<string, Promise<unknown>>();
   private abortController: AbortController | null = null;

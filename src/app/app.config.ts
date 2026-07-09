@@ -8,7 +8,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideHttpClient } from '@angular/common/http';
 
 /* services */
-import { ThemeService } from './services/theme.service';
+import { StyleThemeService } from '@tauri-front/shared';
 
 /* stores */
 import { CleanerStore } from '@store/cleaner.store';
@@ -16,9 +16,13 @@ import { SystemStore } from '@store/system.store';
 import { MonitorStore } from '@store/monitor.store';
 import { AutomationStore } from '@store/automation.store';
 
+// ThemeService alias for API compatibility: StyleThemeService from shared lib
+// is used directly (it has init() as a no-op, constructor handles init).
+class ThemeService extends StyleThemeService {}
+
 function initializeTheme(themeService: ThemeService) {
   return () => {
-    themeService.applyTheme(themeService.currentTheme());
+    themeService.init();
   };
 }
 
@@ -27,7 +31,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
     provideHttpClient(),
-    CleanerStore,
     SystemStore,
     MonitorStore,
     AutomationStore,

@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import { FileService } from '@services/file.service';
 import { BackupService } from '@features/backup/services/backup.service';
 import { PackageManagerService } from '@services/package-manager.service';
@@ -16,9 +16,9 @@ import {
 import { PackageCacheInfo } from '@entities/package-manager.model';
 import { CleanerTabId } from '@entities/cleaner.model';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class CleanerStore {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
   private fileService = inject(FileService);
   private backupService = inject(BackupService);
   private packageManagerService = inject(PackageManagerService);

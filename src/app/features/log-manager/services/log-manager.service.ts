@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import {
   JournalInfo,
   LogManagerSummary,
@@ -24,7 +24,7 @@ export type {
   providedIn: 'root',
 })
 export class LogManagerService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

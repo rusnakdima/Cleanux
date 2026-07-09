@@ -1,7 +1,7 @@
 import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { ToastService, ToastMessage } from './toast.service';
+import { ToastService } from '@tauri-front/shared';
 
 @Component({
   selector: 'app-toast',

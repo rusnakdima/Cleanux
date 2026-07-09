@@ -2,7 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import { MemoryInfo, SwapInfo, ProcessMemory } from '@entities/memory.model';
@@ -11,7 +11,7 @@ import { MemoryInfo, SwapInfo, ProcessMemory } from '@entities/memory.model';
   providedIn: 'root',
 })
 export class MemoryOptimizerService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

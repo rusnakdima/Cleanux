@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface EntityFilter {
   [key: string]: any;
@@ -17,7 +17,7 @@ export interface SortParams {
 
 @Injectable({ providedIn: 'root' })
 export class StorageEntityService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   async findById<T>(table: string, id: string): Promise<T | null> {
     const commandMap: Record<string, string> = {

@@ -1,11 +1,11 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 import { UnifiedStorageService } from '@app/core/services/unified-storage.service';
 import { SystemServiceItem, ProcessItem } from '@entities/system.model';
 
 @Injectable({ providedIn: 'root' })
 export class SystemStore {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
   private storage = inject(UnifiedStorageService);
 
   private _services = signal<SystemServiceItem[]>([]);

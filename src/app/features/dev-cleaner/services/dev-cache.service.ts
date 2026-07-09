@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface DevCacheItem {
   name: string;
@@ -21,7 +21,7 @@ export interface DevCacheSummary {
   providedIn: 'root',
 })
 export class DevCacheService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

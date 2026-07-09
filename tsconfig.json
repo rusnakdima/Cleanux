@@ -17,11 +17,11 @@
       "@features/*": ["src/app/features/*"],
       "@interceptors/*": ["src/app/interceptors/*"],
       "@resolvers/*": ["src/app/resolvers/*"],
-      "@tauri-shared/*": ["../_shared/*"],
-      "@tauri-front/shared": ["../../Web/tauri-front-shared/projects/shared/dist"],
-      "@tauri-front/shared/*": ["../../Web/tauri-front-shared/projects/shared/dist/*"]
+      "@tauri-front/shared": ["../tauri-front-shared/projects/shared/dist"],
+      "@tauri-front/shared/*": ["../tauri-front-shared/projects/shared/dist/*"]
     },
     "strict": true,
+    "useDefineForClassFields": false,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -29,6 +29,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve"

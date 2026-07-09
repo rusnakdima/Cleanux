@@ -2,7 +2,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 
 /* services */
-import { ApiService } from './api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 /* models */
 import { PackageCacheInfo } from '@entities/package-manager.model';
@@ -11,7 +11,7 @@ import { PackageCacheInfo } from '@entities/package-manager.model';
   providedIn: 'root',
 })
 export class PackageManagerService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   readonly cacheInfo = signal<PackageCacheInfo[]>([]);
   readonly loading = signal(false);

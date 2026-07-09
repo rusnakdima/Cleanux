@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface AppResidue {
   path: string;
@@ -34,7 +34,7 @@ export interface AppResidueSummary {
   providedIn: 'root',
 })
 export class AppResidueService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiService } from '@services/api.service';
+import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface KernelInfo {
   version: string;
@@ -30,7 +30,7 @@ export interface RemoveResult {
   providedIn: 'root',
 })
 export class KernelCleanerService {
-  private api = inject(ApiService);
+  private api = inject(InvokeWrapperService);
 
   constructor() {}
 
