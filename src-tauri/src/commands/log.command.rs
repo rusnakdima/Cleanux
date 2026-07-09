@@ -52,7 +52,7 @@ pub fn get_rotated_logs_size() -> Result<Response<serde_json::Value>, Response<s
 #[allow(non_snake_case)]
 pub fn get_rotated_logs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let logs = LogManagerService::get_rotated_logs();
-  array_response("Rotated logs retrieved", logs)
+  array_response(logs, "Rotated logs retrieved")
 }
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
@@ -65,7 +65,7 @@ pub fn clean_rotated_logs(
 #[allow(non_snake_case)]
 pub fn get_logrotate_configs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let configs = LogManagerService::get_logrotate_configs();
-  array_response("Logrotate configs retrieved", configs)
+  array_response(configs, "Logrotate configs retrieved")
 }
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
@@ -95,7 +95,7 @@ pub fn get_largest_log_files(
   limit: usize,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let files = LogManagerService::get_largest_log_files(limit);
-  array_response("Largest log files retrieved", files)
+  array_response(files, "Largest log files retrieved")
 }
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]

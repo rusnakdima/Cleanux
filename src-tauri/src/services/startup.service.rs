@@ -74,8 +74,8 @@ impl StartupService {
       }
     }
     Ok(Response::success(
+      serde_json::to_value(&items).unwrap_or(serde_json::Value::Null),
       format!("Found {} startup items", items.len()),
-      serde_json::to_value(items).unwrap_or(serde_json::Value::Null),
     ))
   }
   pub fn disable_startup_item(
@@ -112,8 +112,8 @@ impl StartupService {
       )
     })?;
     Ok(Response::success(
-      format!("Disabled startup item: {}", path),
       serde_json::Value::String(disabled_path.to_string_lossy().into_owned()),
+      format!("Disabled startup item: {}", path),
     ))
   }
   pub fn enable_startup_item(
@@ -159,8 +159,8 @@ impl StartupService {
       )
     })?;
     Ok(Response::success(
-      format!("Enabled startup item: {}", enabled_path.display()),
       serde_json::Value::String(enabled_path.to_string_lossy().into_owned()),
+      format!("Enabled startup item: {}", enabled_path.display()),
     ))
   }
 }

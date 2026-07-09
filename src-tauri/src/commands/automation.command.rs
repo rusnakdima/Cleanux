@@ -31,8 +31,8 @@ pub async fn crud_get_execution_history(
     .await
     .map_err(|e| Response::error(Status::Error, e.to_string()))?;
   Ok(Response::success(
-    "Execution history retrieved".to_string(),
     serde_json::to_value(docs).unwrap_or(serde_json::Value::Null),
+    "Execution history retrieved".to_string(),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -41,8 +41,8 @@ pub async fn crud_get_quick_actions(
   use crate::services::automation_service::AutomationService;
   let actions = AutomationService::get_quick_actions_list();
   Ok(Response::success(
-    "Quick actions retrieved".to_string(),
     serde_json::to_value(actions).unwrap_or_default(),
+    "Quick actions retrieved".to_string(),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]

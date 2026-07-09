@@ -33,7 +33,7 @@ impl LargeFileCleaningService {
     });
     let data = serde_json::to_value(paginated)
       .map_err(|e| AppError::Unknown(format!("Failed to serialize large files data: {}", e)))?;
-    Ok(success_response("Large files retrieved successfully", data))
+    Ok(success_response(data, "Large files retrieved successfully"))
   }
   pub fn clear_selected_large_files(
     &self,
@@ -42,8 +42,8 @@ impl LargeFileCleaningService {
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
       Ok(success_response(
-        format!("Successfully cleared {} large files", outcome.cleared),
         data_empty_string(),
+        format!("Successfully cleared {} large files", outcome.cleared),
       ))
     } else {
       Err(
@@ -69,8 +69,8 @@ impl LargeFileCleaningService {
       }
     }
     Ok(success_response(
-      format!("Cleared {} large files", cleared_count),
       data_string(cleared_count.to_string()),
+      format!("Cleared {} large files", cleared_count),
     ))
   }
 }

@@ -104,8 +104,8 @@ impl TemperatureService {
       .map(|t| serde_json::to_value(t).unwrap_or(serde_json::Value::Null))
       .collect();
     Ok(Response::success(
-      "Temperatures retrieved successfully".to_string(),
       serde_json::Value::Array(json_values),
+      "Temperatures retrieved successfully".to_string(),
     ))
   }
   fn read_thermal_zones() -> Vec<TemperatureInfo> {
@@ -277,12 +277,11 @@ impl TemperatureService {
     });
     if let Some(cpu) = cpu_temps.first() {
       Ok(Response::success(
-        "CPU temperature retrieved successfully".to_string(),
         serde_json::to_value(cpu).unwrap_or(serde_json::Value::Null),
+        "CPU temperature retrieved successfully".to_string(),
       ))
     } else {
       Ok(Response::success(
-        "No CPU temperature found".to_string(),
         serde_json::to_value(TemperatureInfo {
           name: "CPU".to_string(),
           sensor_type: "cpu".to_string(),
@@ -290,6 +289,7 @@ impl TemperatureService {
           max_temp: 100.0,
         })
         .unwrap_or(serde_json::Value::Null),
+        "No CPU temperature found".to_string(),
       ))
     }
   }
@@ -313,12 +313,11 @@ impl TemperatureService {
     });
     if let Some(gpu) = gpu_temps.first() {
       Ok(Response::success(
-        "GPU temperature retrieved successfully".to_string(),
         serde_json::to_value(gpu).unwrap_or(serde_json::Value::Null),
+        "GPU temperature retrieved successfully".to_string(),
       ))
     } else {
       Ok(Response::success(
-        "No GPU temperature found".to_string(),
         serde_json::to_value(TemperatureInfo {
           name: "GPU".to_string(),
           sensor_type: "gpu".to_string(),
@@ -326,6 +325,7 @@ impl TemperatureService {
           max_temp: 100.0,
         })
         .unwrap_or(serde_json::Value::Null),
+        "No GPU temperature found".to_string(),
       ))
     }
   }

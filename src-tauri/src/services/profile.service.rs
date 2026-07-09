@@ -38,8 +38,8 @@ impl ProfileService {
     fs::write(&path, json)
       .map_err(|e| AppError::message(format!("Failed to save profile: {}", e)))?;
     Ok(success_response(
-      format!("Profile '{}' saved successfully", profile.name),
       data_empty_string(),
+      format!("Profile '{}' saved successfully", profile.name),
     ))
   }
   pub fn load_profile(
@@ -57,8 +57,8 @@ impl ProfileService {
     let profile: CleaningProfile = serde_json::from_str(&json)
       .map_err(|e| AppError::message(format!("Failed to parse profile: {}", e)))?;
     Ok(success_response(
-      format!("Profile '{}' loaded successfully", name),
       serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null),
+      format!("Profile '{}' loaded successfully", name),
     ))
   }
   pub fn list_profiles() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -92,8 +92,8 @@ impl ProfileService {
       }
     }
     Ok(success_response(
+      serde_json::Value::Array(profiles.clone()),
       format!("Found {} profiles", profiles.len()),
-      serde_json::Value::Array(profiles),
     ))
   }
   pub fn delete_profile(
@@ -109,8 +109,8 @@ impl ProfileService {
     fs::remove_file(&path)
       .map_err(|e| AppError::message(format!("Failed to delete profile: {}", e)))?;
     Ok(success_response(
-      format!("Profile '{}' deleted successfully", name),
       data_empty_string(),
+      format!("Profile '{}' deleted successfully", name),
     ))
   }
   pub fn apply_profile(
@@ -176,8 +176,8 @@ impl ProfileService {
       }
     }
     Ok(success_response(
-      format!("Profile '{}' applied: {}", name, results.join(", ")),
       data_string(results.len().to_string()),
+      format!("Profile '{}' applied: {}", name, results.join(", ")),
     ))
   }
 }

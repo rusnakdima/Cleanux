@@ -44,8 +44,8 @@ impl DevCacheService {
     summary.insert("maven".to_string(), serde_json::json!(maven));
     summary.insert("gradle".to_string(), serde_json::json!(gradle));
     Ok(success_response(
-      "Dev cache summary retrieved successfully",
       serde_json::Value::Object(summary),
+      "Dev cache summary retrieved successfully",
     ))
   }
   fn scan_npm_cache_inner(&self, home: &Path) -> DevCacheItem {
@@ -211,8 +211,8 @@ impl DevCacheService {
     }
     if errors.is_empty() {
       Ok(success_response(
-        format!("Cleaned cargo cache ({} items)", cleaned_count),
         data_string(cleaned_count.to_string()),
+        format!("Cleaned cargo cache ({} items)", cleaned_count),
       ))
     } else {
       Err(AppError::message(format!(
@@ -292,8 +292,8 @@ impl DevCacheService {
     }
     if errors.is_empty() {
       Ok(success_response(
-        format!("Cleaned all dev caches ({} items)", cleaned_total),
         data_string(cleaned_total.to_string()),
+        format!("Cleaned all dev caches ({} items)", cleaned_total),
       ))
     } else {
       Err(AppError::message(format!(

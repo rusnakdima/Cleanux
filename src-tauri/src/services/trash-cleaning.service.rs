@@ -19,7 +19,7 @@ impl TrashCleaningService {
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     let trash_files: Vec<TrashFileModel> = collect_trash_file_models(&trash_dir);
     let data = models_into_data_array(trash_files)?;
-    Ok(success_response("Trash files retrieved successfully", data))
+    Ok(success_response(data, "Trash files retrieved successfully"))
   }
   pub fn clear_selected_trash_files(
     &self,
@@ -28,8 +28,8 @@ impl TrashCleaningService {
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
       Ok(success_response(
-        format!("Successfully cleared {} trash files", outcome.cleared),
         data_empty_string(),
+        format!("Successfully cleared {} trash files", outcome.cleared),
       ))
     } else {
       Err(
@@ -57,8 +57,8 @@ impl TrashCleaningService {
           }
         }
         Ok(success_response(
-          "Trash cleared successfully",
           data_empty_string(),
+          "Trash cleared successfully",
         ))
       }
       Err(e) => Err(AppError::from(e).into_response()),

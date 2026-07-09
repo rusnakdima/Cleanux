@@ -20,12 +20,12 @@ impl ZypperService {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
       Ok(success_response(
-        format!("Zypper cache cleaned. Freed {} bytes", freed),
         DataValue::Object(serde_json::json!({
             "command": "zypper clean",
             "spaceFreed": freed,
             "message": "Zypper cache cleaned successfully"
         })),
+        format!("Zypper cache cleaned. Freed {} bytes", freed),
       ))
     } else {
       let err_msg = format!("Failed to clean Zypper cache: {}", stderr);

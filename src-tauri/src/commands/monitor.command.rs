@@ -61,7 +61,7 @@ pub fn get_health_history(
   days: u32,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   match get_health_service().get_health_history(days) {
-    Ok(history) => array_response("Health history retrieved successfully", history),
+    Ok(history) => array_response(history, "Health history retrieved successfully"),
     Err(e) => Err(
       ResponseBuilder::new()
         .error(&format!("Failed to get health history: {}", e))

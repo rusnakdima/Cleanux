@@ -362,8 +362,8 @@ impl AppResidueService {
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
-      format!("Found {} config residues", count),
       data,
+      format!("Found {} config residues", count),
     ))
   }
   pub fn scan_user_data_response(&self) -> Result<Response<Value>, Response<Value>> {
@@ -371,8 +371,8 @@ impl AppResidueService {
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
-      format!("Found {} data residues", count),
       data,
+      format!("Found {} data residues", count),
     ))
   }
   pub fn scan_user_caches_response(&self) -> Result<Response<Value>, Response<Value>> {
@@ -380,8 +380,8 @@ impl AppResidueService {
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
-      format!("Found {} cache residues", count),
       data,
+      format!("Found {} cache residues", count),
     ))
   }
   pub fn scan_home_residues_response(&self) -> Result<Response<Value>, Response<Value>> {
@@ -389,8 +389,8 @@ impl AppResidueService {
     let count = residues.len();
     let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
-      format!("Found {} home residues", count),
       data,
+      format!("Found {} home residues", count),
     ))
   }
   pub fn get_orphaned_configs_response(&self) -> Result<Response<Value>, Response<Value>> {
@@ -398,8 +398,8 @@ impl AppResidueService {
     let count = orphaned.len();
     let data = models_into_data_array(orphaned).map_err(|e| AppError::from(e).into_response())?;
     Ok(success_response(
-      format!("Found {} orphaned configs", count),
       data,
+      format!("Found {} orphaned configs", count),
     ))
   }
 }

@@ -190,27 +190,27 @@ impl KernelCleanerService {
     if failed_items.is_empty() {
       let _ = self.update_grub_internal();
       Ok(Response::success(
+        serde_json::json!({
+            "removed": removed_items,
+            "failed": failed_items
+        }),
         format!(
           "Successfully removed kernel {} ({} items removed)",
           version,
           removed_items.len()
         ),
+      ))
+    } else {
+      Ok(Response::success(
         serde_json::json!({
             "removed": removed_items,
             "failed": failed_items
         }),
-      ))
-    } else {
-      Ok(Response::success(
         format!(
           "Removed kernel {} with {} failures",
           version,
           failed_items.len()
         ),
-        serde_json::json!({
-            "removed": removed_items,
-            "failed": failed_items
-        }),
       ))
     }
   }
@@ -273,21 +273,21 @@ impl KernelCleanerService {
     }
     if failed.is_empty() {
       Ok(Response::success(
-        format!("Removed {} initramfs files", removed.len()),
         serde_json::json!({
             "removed": removed.len(),
             "files": removed
         }),
+        format!("Removed {} initramfs files", removed.len()),
       ))
     } else {
       Ok(Response::success(
-        format!("Removed {} files, {} failed", removed.len(), failed.len()),
         serde_json::json!({
             "removed": removed.len(),
             "failed": failed.len(),
             "files": removed,
             "errors": failed
         }),
+        format!("Removed {} files, {} failed", removed.len(), failed.len()),
       ))
     }
   }
@@ -356,8 +356,8 @@ impl KernelCleanerService {
       Ok(result) => {
         if result.status.success() {
           Ok(Response::success(
-            "GRUB configuration updated successfully".to_string(),
             serde_json::Value::Bool(true),
+            "GRUB configuration updated successfully".to_string(),
           ))
         } else {
           let stderr = stderr_string(&result);
@@ -378,29 +378,29 @@ impl KernelCleanerService {
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let kernels = self.get_installed_kernels();
     let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response("Installed kernels retrieved", data))
+    Ok(success_response(data, "Installed kernels retrieved"))
   }
   pub fn get_old_kernels_response(
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let kernels = self.get_old_kernels();
     let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response("Old kernels retrieved", data))
+    Ok(success_response(data, "Old kernels retrieved"))
   }
   pub fn get_old_initramfs_response(
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let initramfs = self.get_old_initramfs();
     let data = models_into_data_array(initramfs).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response("Old initramfs retrieved", data))
+    Ok(success_response(data, "Old initramfs retrieved"))
   }
   pub fn get_boot_space_info_response(
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let info = self.get_boot_space_info();
     Ok(success_response(
-      "Boot space info retrieved",
       serde_json::to_value(info).unwrap_or(serde_json::Value::Null),
+      "Boot space info retrieved",
     ))
   }
 }

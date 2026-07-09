@@ -238,7 +238,7 @@ impl AutomationService {
       .map_err(|e| AppError::message(format!("Failed to serialize actions: {}", e)))?;
     let data = serde_json::from_value(json)
       .map_err(|e| AppError::message(format!("Failed to deserialize actions: {}", e)))?;
-    Ok(success_response("Quick actions retrieved", data))
+    Ok(success_response(data, "Quick actions retrieved"))
   }
   pub fn execute_action(action_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::execute_action_inner(action_id).map_err(|e| e.into_response())
@@ -267,8 +267,8 @@ impl AutomationService {
     };
     let _ = add_to_history(entry);
     Ok(success_response(
-      format!("Action '{}' executed successfully", action.name),
       data_string("executed"),
+      format!("Action '{}' executed successfully", action.name),
     ))
   }
   pub fn get_recipes() -> Result<Response<Value>, Response<Value>> {
@@ -277,7 +277,7 @@ impl AutomationService {
   fn get_recipes_inner() -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
-      return Ok(success_response("No recipes saved", Value::Array(vec![])));
+      return Ok(success_response(Value::Array(vec![]), "No recipes saved"));
     }
     let content = fs::read_to_string(&path)
       .map_err(|e| AppError::message(format!("Failed to read recipes: {}", e)))?;
@@ -287,7 +287,7 @@ impl AutomationService {
       .map_err(|e| AppError::message(format!("Failed to serialize recipes: {}", e)))?;
     let data = serde_json::from_value(json)
       .map_err(|e| AppError::message(format!("Failed to deserialize recipes: {}", e)))?;
-    Ok(success_response("Recipes retrieved", data))
+    Ok(success_response(data, "Recipes retrieved"))
   }
   pub fn save_recipe(recipe: AutomationRecipe) -> Result<Response<Value>, Response<Value>> {
     Self::save_recipe_inner(recipe).map_err(|e| e.into_response())
@@ -315,8 +315,8 @@ impl AutomationService {
     fs::write(&path, json)
       .map_err(|e| AppError::message(format!("Failed to write recipes: {}", e)))?;
     Ok(success_response(
-      "Recipe saved successfully",
       data_string("saved"),
+      "Recipe saved successfully",
     ))
   }
   pub fn delete_recipe(recipe_id: String) -> Result<Response<Value>, Response<Value>> {
@@ -326,8 +326,8 @@ impl AutomationService {
     let path = get_recipes_path();
     if !path.exists() {
       return Ok(success_response(
-        "No recipes to delete",
         data_string("deleted"),
+        "No recipes to delete",
       ));
     }
     let content = fs::read_to_string(&path)
@@ -339,7 +339,7 @@ impl AutomationService {
       .map_err(|e| AppError::message(format!("Failed to serialize recipes: {}", e)))?;
     fs::write(&path, json)
       .map_err(|e| AppError::message(format!("Failed to write recipes: {}", e)))?;
-    Ok(success_response("Recipe deleted", data_string("deleted")))
+    Ok(success_response(data_string("deleted"), "Recipe deleted"))
   }
   pub fn execute_recipe(recipe_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::execute_recipe_inner(recipe_id).map_err(|e| e.into_response())
@@ -375,8 +375,8 @@ impl AutomationService {
     };
     let _ = add_to_history(entry);
     Ok(success_response(
-      format!("Recipe '{}' executed successfully", recipe.name),
       data_string("executed"),
+      format!("Recipe '{}' executed successfully", recipe.name),
     ))
   }
   pub fn get_execution_history_list() -> Result<Response<Value>, Response<Value>> {
@@ -388,7 +388,7 @@ impl AutomationService {
       .map_err(|e| AppError::message(format!("Failed to serialize history: {}", e)))?;
     let data = serde_json::from_value(json)
       .map_err(|e| AppError::message(format!("Failed to deserialize history: {}", e)))?;
-    Ok(success_response("History retrieved", data))
+    Ok(success_response(data, "History retrieved"))
   }
   pub fn get_quick_actions_list() -> Vec<QuickAction> {
     get_predefined_quick_actions()
@@ -423,8 +423,8 @@ impl AutomationService {
     };
     let _ = add_to_history(entry);
     Ok(success_response(
-      "Recipe executed successfully",
       data_string("executed"),
+      "Recipe executed successfully",
     ))
   }
 }

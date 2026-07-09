@@ -30,12 +30,12 @@ impl AptService {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
       Ok(success_response(
-        format!("APT cache cleaned. Freed {} bytes", freed),
         serde_json::json!({
             "command": "apt-get clean",
             "spaceFreed": freed,
             "message": "APT cache cleaned successfully"
         }),
+        format!("APT cache cleaned. Freed {} bytes", freed),
       ))
     } else {
       let err_msg = format!("Failed to clean APT cache: {}", stderr);
@@ -46,12 +46,12 @@ impl AptService {
     let (success, stderr, _) = run_command("apt-get", &["autoremove", "-y"])?;
     if success {
       Ok(success_response(
-        "APT autoremove completed successfully",
         serde_json::json!({
             "command": "apt-get autoremove -y",
             "spaceFreed": 0,
             "message": "APT autoremove completed successfully"
         }),
+        "APT autoremove completed successfully",
       ))
     } else {
       let err_msg = format!("Failed to run apt-get autoremove: {}", stderr);
@@ -65,12 +65,12 @@ impl AptService {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
       Ok(success_response(
-        format!("APT autoclean completed. Freed {} bytes", freed),
         serde_json::json!({
             "command": "apt-get autoclean",
             "spaceFreed": freed,
             "message": "APT autoclean completed successfully"
         }),
+        format!("APT autoclean completed. Freed {} bytes", freed),
       ))
     } else {
       let err_msg = format!("Failed to run apt-get autoclean: {}", stderr);
@@ -106,8 +106,8 @@ impl AptService {
     let (success, stderr, _) = run_command("dpkg", &["--remove", name])?;
     if success {
       Ok(success_response(
-        format!("Removed orphaned package: {}", name),
         crate::utils::data_string(name),
+        format!("Removed orphaned package: {}", name),
       ))
     } else {
       let err_msg = format!("Failed to remove package {}: {}", name, stderr);

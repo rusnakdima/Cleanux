@@ -34,8 +34,8 @@ pub async fn crud_get_health_history(
     .await
     .map_err(|e| Response::error(Status::Error, e.to_string()))?;
   Ok(Response::success(
-    "Health history retrieved".to_string(),
     serde_json::to_value(docs).unwrap_or(serde_json::Value::Null),
+    "Health history retrieved".to_string(),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -72,8 +72,8 @@ pub async fn crud_get_health_trends(
       days_analyzed: days,
     };
     return Ok(Response::success(
-      "Health trends calculated".to_string(),
       serde_json::to_value(trend).unwrap_or_default(),
+      "Health trends calculated".to_string(),
     ));
   }
   let first = &docs[0];
@@ -104,8 +104,8 @@ pub async fn crud_get_health_trends(
     days_analyzed: days,
   };
   Ok(Response::success(
-    "Health trends calculated".to_string(),
     serde_json::to_value(trend_entity).unwrap_or_default(),
+    "Health trends calculated".to_string(),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -119,5 +119,5 @@ pub async fn crud_save_health_snapshot(
     .insert("health_snapshots", data)
     .await
     .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-  Ok(Response::success("Health snapshot saved".to_string(), doc))
+  Ok(Response::success(doc, "Health snapshot saved".to_string()))
 }

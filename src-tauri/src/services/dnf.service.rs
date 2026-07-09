@@ -20,12 +20,12 @@ impl DnfService {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
       Ok(success_response(
-        format!("DNF cache cleaned. Freed {} bytes", freed),
         DataValue::Object(serde_json::json!({
             "command": "dnf clean all",
             "spaceFreed": freed,
             "message": "DNF cache cleaned successfully"
         })),
+        format!("DNF cache cleaned. Freed {} bytes", freed),
       ))
     } else {
       let err_msg = format!("Failed to clean DNF cache: {}", stderr);

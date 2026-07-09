@@ -93,7 +93,7 @@ pub async fn apply_cleaning_profile(
     ));
   }
   Ok(Response::success(
-    format!("Profile '{}' applied: {}", name, results.join(", ")),
     serde_json::json!({ "applied": true, "results": results }),
+    format!("Profile '{}' applied: {}", name, results.join(", ")),
   ))
 }

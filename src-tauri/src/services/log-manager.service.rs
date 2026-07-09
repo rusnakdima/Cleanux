@@ -168,8 +168,8 @@ impl LogManagerService {
         if output.status.success() {
           let before = Self::get_journal_size_inner().unwrap_or(0);
           Ok(success_response(
-            format!("Journal vacuumed to {} MB", size_mb),
             data_string(format!("before:{}", before)),
+            format!("Journal vacuumed to {} MB", size_mb),
           ))
         } else {
           let stderr = stderr_string(&output);
@@ -193,8 +193,8 @@ impl LogManagerService {
         if output.status.success() {
           let before = Self::get_journal_size_inner().unwrap_or(0);
           Ok(success_response(
-            format!("Journal vacuumed to {} days", days),
             data_string(format!("before:{}", before)),
+            format!("Journal vacuumed to {} days", days),
           ))
         } else {
           let stderr = stderr_string(&output);
@@ -219,11 +219,11 @@ impl LogManagerService {
       Ok((count, errors)) => {
         if errors.is_empty() {
           Ok(success_response(
+            data_string(count.to_string()),
             format!(
               "Cleaned {} rotated log files older than {} days",
               count, days
             ),
-            data_string(count.to_string()),
           ))
         } else {
           Err(

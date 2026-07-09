@@ -110,8 +110,8 @@ impl JunkCleanerService {
       }),
     );
     Ok(success_response(
-      "Junk summary retrieved successfully",
       Value::Object(summary),
+      "Junk summary retrieved successfully",
     ))
   }
   pub fn scan_browser_caches(&self) -> Result<Response<Value>, Response<Value>> {
@@ -120,7 +120,6 @@ impl JunkCleanerService {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
-          format!("Found {} browser cache items ({} bytes)", items.len(), size),
           serde_json::json!({
             "category": "Browser",
             "total_size": size,
@@ -128,6 +127,7 @@ impl JunkCleanerService {
             "description": "Browser cache files (Firefox, Chrome, Brave, Edge)",
             "items": items,
           }),
+          format!("Found {} browser cache items ({} bytes)", items.len(), size),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -139,11 +139,6 @@ impl JunkCleanerService {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
-          format!(
-            "Found {} thumbnail cache items ({} bytes)",
-            items.len(),
-            size
-          ),
           serde_json::json!({
             "category": "Thumbnails",
             "total_size": size,
@@ -151,6 +146,11 @@ impl JunkCleanerService {
             "description": "Image thumbnail cache",
             "items": items,
           }),
+          format!(
+            "Found {} thumbnail cache items ({} bytes)",
+            items.len(),
+            size
+          ),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -162,11 +162,6 @@ impl JunkCleanerService {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
-          format!(
-            "Found {} application cache items ({} bytes)",
-            items.len(),
-            size
-          ),
           serde_json::json!({
             "category": "Applications",
             "total_size": size,
@@ -174,6 +169,11 @@ impl JunkCleanerService {
             "description": "Application caches (Flatpak, Snap, AppImage)",
             "items": items,
           }),
+          format!(
+            "Found {} application cache items ({} bytes)",
+            items.len(),
+            size
+          ),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -185,7 +185,6 @@ impl JunkCleanerService {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
-          format!("Found {} system temp items ({} bytes)", items.len(), size),
           serde_json::json!({
             "category": "System",
             "total_size": size,
@@ -193,6 +192,7 @@ impl JunkCleanerService {
             "description": "System temporary files (/tmp, /var/tmp)",
             "items": items,
           }),
+          format!("Found {} system temp items ({} bytes)", items.len(), size),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -204,7 +204,6 @@ impl JunkCleanerService {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
         Ok(success_response(
-          format!("Found {} log rotation items ({} bytes)", items.len(), size),
           serde_json::json!({
             "category": "Logs",
             "total_size": size,
@@ -212,6 +211,7 @@ impl JunkCleanerService {
             "description": "Rotated and old log files",
             "items": items,
           }),
+          format!("Found {} log rotation items ({} bytes)", items.len(), size),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -244,8 +244,8 @@ impl JunkCleanerService {
   fn clean_browser_caches(&self) -> CleanerResult<Response<Value>> {
     match BrowserCacheScanner::clean() {
       Ok(count) => Ok(success_response(
-        format!("Cleaned {} browser cache directories", count),
         data_string(count.to_string()),
+        format!("Cleaned {} browser cache directories", count),
       )),
       Err(e) => Err(AppError::message(format!(
         "Failed to clean browser caches: {}",
@@ -256,8 +256,8 @@ impl JunkCleanerService {
   fn clean_thumbnail_caches(&self) -> CleanerResult<Response<Value>> {
     match ThumbnailCacheScanner::clean() {
       Ok(count) => Ok(success_response(
-        format!("Cleaned thumbnail cache ({} items)", count),
         data_string(count.to_string()),
+        format!("Cleaned thumbnail cache ({} items)", count),
       )),
       Err(e) => Err(AppError::message(format!(
         "Failed to clean thumbnail cache: {}",
@@ -268,8 +268,8 @@ impl JunkCleanerService {
   fn clean_application_caches(&self) -> CleanerResult<Response<Value>> {
     match ApplicationCacheScanner::clean() {
       Ok(count) => Ok(success_response(
-        format!("Cleaned {} application cache directories", count),
         data_string(count.to_string()),
+        format!("Cleaned {} application cache directories", count),
       )),
       Err(e) => Err(AppError::message(format!(
         "Failed to clean application caches: {}",
@@ -280,8 +280,8 @@ impl JunkCleanerService {
   fn clean_system_temp(&self) -> CleanerResult<Response<Value>> {
     match SystemTempScanner::clean() {
       Ok(count) => Ok(success_response(
-        format!("Cleaned {} temporary directories", count),
         data_string(count.to_string()),
+        format!("Cleaned {} temporary directories", count),
       )),
       Err(e) => Err(AppError::message(format!(
         "Failed to clean system temp: {}",
@@ -292,8 +292,8 @@ impl JunkCleanerService {
   fn clean_log_rotations(&self) -> CleanerResult<Response<Value>> {
     match LogRotationScanner::clean() {
       Ok(count) => Ok(success_response(
-        format!("Cleaned {} rotated log files", count),
         data_string(count.to_string()),
+        format!("Cleaned {} rotated log files", count),
       )),
       Err(e) => Err(AppError::message(format!(
         "Failed to clean log rotations: {}",

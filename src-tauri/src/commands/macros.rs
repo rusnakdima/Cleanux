@@ -19,7 +19,7 @@ macro_rules! crud_get_command {
           .await
           .map_err(|e| Response::error(Status::Error, e.to_string()))?
           .ok_or_else(|| Response::error(Status::NotFound, "Entity not found"))?;
-        Ok(Response::success("Entity found", doc))
+        Ok(Response::success(doc, "Entity found"))
       } else {
         Err(Response::error(Status::Error, "ID is required"))
       }
@@ -46,7 +46,7 @@ macro_rules! crud_get_all_command {
         .find_many($table, None, page, limit, None, true)
         .await
         .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success("Entities retrieved", docs))
+      Ok(Response::success(docs, "Entities retrieved"))
     }
   };
 }
@@ -69,7 +69,7 @@ macro_rules! crud_create_command {
         .insert($table, data)
         .await
         .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success("Entity created", doc))
+      Ok(Response::success(doc, "Entity created"))
     }
   };
 }
@@ -93,7 +93,7 @@ macro_rules! crud_update_command {
         .update($table, &id, data)
         .await
         .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success("Entity updated", doc))
+      Ok(Response::success(doc, "Entity updated"))
     }
   };
 }
@@ -116,7 +116,7 @@ macro_rules! crud_delete_command {
         .delete($table, &id)
         .await
         .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success("Entity deleted", serde_json::Value::Null))
+      Ok(Response::success(serde_json::Value::Null, "Entity deleted"))
     }
   };
 }
@@ -140,7 +140,7 @@ macro_rules! crud_patch_command {
         .patch($table, &id, patch)
         .await
         .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success("Entity patched", doc))
+      Ok(Response::success(doc, "Entity patched"))
     }
   };
 }

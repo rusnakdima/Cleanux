@@ -27,7 +27,7 @@ pub async fn crud_generate_cleaning_report(
     .repository_service
     .insert("cleaning_reports", data)
     .await
-    .map(|doc| Response::success("Report generated".to_string(), doc))
+    .map(|doc| Response::success(doc, "Report generated".to_string()))
     .map_err(|e| Response::error(Status::Error, e.to_string()))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -42,8 +42,8 @@ pub async fn crud_get_cleaning_history(
     .await
     .map(|docs| {
       Response::success(
-        "Cleaning history retrieved".to_string(),
         serde_json::to_value(docs).unwrap_or(serde_json::Value::Null),
+        "Cleaning history retrieved".to_string(),
       )
     })
     .map_err(|e| Response::error(Status::Error, e.to_string()))
@@ -101,8 +101,8 @@ pub async fn crud_compare_snapshots(
     },
   };
   Ok(Response::success(
-    "Snapshots compared".to_string(),
     serde_json::to_value(comparison).unwrap_or_default(),
+    "Snapshots compared".to_string(),
   ))
 }
 fn get_category_change(

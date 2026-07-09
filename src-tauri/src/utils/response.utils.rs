@@ -25,7 +25,7 @@ pub struct Response<T = serde_json::Value> {
 }
 
 impl<T> Response<T> {
-  pub fn success(message: impl Into<String>, data: T) -> Self {
+  pub fn success(data: T, message: impl Into<String>) -> Self {
     Self {
       status: Status::Success,
       message: message.into(),
@@ -33,7 +33,7 @@ impl<T> Response<T> {
     }
   }
 
-  pub fn created(message: impl Into<String>, data: T) -> Self {
+  pub fn created(data: T, message: impl Into<String>) -> Self {
     Self {
       status: Status::Created,
       message: message.into(),
@@ -41,7 +41,7 @@ impl<T> Response<T> {
     }
   }
 
-  pub fn updated(message: impl Into<String>, data: T) -> Self {
+  pub fn updated(data: T, message: impl Into<String>) -> Self {
     Self {
       status: Status::Updated,
       message: message.into(),
@@ -49,7 +49,7 @@ impl<T> Response<T> {
     }
   }
 
-  pub fn deleted(message: impl Into<String>, data: T) -> Self {
+  pub fn deleted(data: T, message: impl Into<String>) -> Self {
     Self {
       status: Status::Deleted,
       message: message.into(),
@@ -57,7 +57,7 @@ impl<T> Response<T> {
     }
   }
 
-  pub fn info(message: impl Into<String>, data: T) -> Self {
+  pub fn info(data: T, message: impl Into<String>) -> Self {
     Self {
       status: Status::Info,
       message: message.into(),
@@ -65,7 +65,7 @@ impl<T> Response<T> {
     }
   }
 
-  pub fn warning(message: impl Into<String>, data: T) -> Self {
+  pub fn warning(data: T, message: impl Into<String>) -> Self {
     Self {
       status: Status::Warning,
       message: message.into(),

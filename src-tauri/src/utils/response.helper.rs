@@ -41,7 +41,7 @@ impl ResponseBuilder {
       .data
       .unwrap_or(serde_json::Value::String(String::new()));
     if status == Status::Success {
-      Response::success(message, data)
+      Response::success(data, message)
     } else {
       Response::error(status, message)
     }
@@ -53,16 +53,16 @@ impl Default for ResponseBuilder {
   }
 }
 pub fn success_response(
-  message: impl Into<String>,
   data: serde_json::Value,
+  message: impl Into<String>,
 ) -> Response<serde_json::Value> {
-  Response::success(message, data)
+  Response::success(data, message)
 }
 pub fn info_response(
-  message: impl Into<String>,
   data: serde_json::Value,
+  message: impl Into<String>,
 ) -> Response<serde_json::Value> {
-  Response::success(message, data)
+  Response::success(data, message)
 }
 pub fn error_response(
   message: impl Into<String>,
@@ -77,15 +77,15 @@ pub fn data_string(value: impl Into<String>) -> serde_json::Value {
   serde_json::Value::String(value.into())
 }
 pub fn array_response<T: Serialize>(
-  message: impl Into<String>,
   items: Vec<T>,
+  message: impl Into<String>,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let data: Vec<serde_json::Value> = items
     .into_iter()
     .map(|item| serde_json::to_value(item))
     .collect::<Result<_, _>>()
     .map_err(|e| Response::error(Status::Error, format!("Serialization error: {}", e)))?;
-  Ok(Response::success(message, serde_json::Value::Array(data)))
+  Ok(Response::success(serde_json::Value::Array(data), message))
 }
 /// Serialize models to JSON values; propagates first serialization failure instead of swallowing it.
 pub fn models_into_data_array<T: Serialize>(

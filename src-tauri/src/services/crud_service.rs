@@ -31,7 +31,7 @@ impl CrudService {
           .await
           .map_err(|e| e.to_string())?;
         match result {
-          Some(data) => Ok(Response::success("Found", data)),
+          Some(data) => Ok(Response::success(data, "Found")),
           None => Ok(Response::not_found(entity)),
         }
       }
@@ -41,7 +41,7 @@ impl CrudService {
           .find_all(entity)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::success("Found", Value::Array(results)))
+        Ok(Response::success(Value::Array(results), "Found"))
       }
       "create" | "save" => {
         let data = data.ok_or("Data required for create")?;
@@ -50,7 +50,7 @@ impl CrudService {
           .insert(entity, data)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::created("Created", result))
+        Ok(Response::created(result, "Created"))
       }
       "update" => {
         let id = id.ok_or("ID required for update")?;
@@ -63,7 +63,7 @@ impl CrudService {
           .update(entity, id, data)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::updated("Updated", result))
+        Ok(Response::updated(result, "Updated"))
       }
       "patch" => {
         let id = id.ok_or("ID required for patch")?;
@@ -73,7 +73,7 @@ impl CrudService {
           .patch(entity, id, patch)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::updated("Patched", result))
+        Ok(Response::updated(result, "Patched"))
       }
       "delete" => {
         let id = id.ok_or("ID required for delete")?;
@@ -82,7 +82,7 @@ impl CrudService {
           .delete(entity, id)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::deleted("Deleted", Value::Null))
+        Ok(Response::deleted(Value::Null, "Deleted"))
       }
       "count" => {
         let count = self
@@ -90,7 +90,7 @@ impl CrudService {
           .count(entity, None)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::success("Count", Value::Number(count.into())))
+        Ok(Response::success(Value::Number(count.into()), "Count"))
       }
       "exists" => {
         let id = id.ok_or("ID required for exists")?;
@@ -100,8 +100,8 @@ impl CrudService {
           .await
           .map_err(|e| e.to_string())?;
         Ok(Response::success(
-          if exists { "Exists" } else { "Not found" },
           Value::Bool(exists),
+          if exists { "Exists" } else { "Not found" },
         ))
       }
       _ => Err(format!("Unknown operation: {}", operation)),

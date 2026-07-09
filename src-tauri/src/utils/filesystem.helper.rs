@@ -249,14 +249,14 @@ pub fn clean_cache_dir(path: &Path, name: &str) -> Result<Response<serde_json::V
   use crate::utils::response_helper::{data_string, success_response};
   if !path.exists() {
     return Ok(success_response(
-      format!("{} cache is empty", name),
       data_string("0".to_string()),
+      format!("{} cache is empty", name),
     ));
   }
   match remove_dir_contents(path) {
     Ok(count) => Ok(success_response(
-      format!("Cleaned {} cache ({} items)", name, count),
       data_string(count.to_string()),
+      format!("Cleaned {} cache ({} items)", name, count),
     )),
     Err(e) => Err(AppError::message(format!(
       "Failed to clean {} cache: {}",

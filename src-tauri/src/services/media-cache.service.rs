@@ -69,14 +69,14 @@ impl MediaCacheService {
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !shader_path.exists() {
       return Ok(success_response(
-        "No Steam shader cache found",
         data_empty_string(),
+        "No Steam shader cache found",
       ));
     }
     let cleared = remove_dir_contents(&shader_path)?;
     Ok(success_response(
-      format!("Steam shader cache cleared: {}", format_size(cleared)),
       data_empty_string(),
+      format!("Steam shader cache cleared: {}", format_size(cleared)),
     ))
   }
   service_method_full!(clean_steam_download_cache => clean_steam_download_cache_inner);
@@ -86,14 +86,14 @@ impl MediaCacheService {
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !download_path.exists() {
       return Ok(success_response(
-        "No Steam download cache found",
         data_empty_string(),
+        "No Steam download cache found",
       ));
     }
     let cleared = remove_dir_contents(&download_path)?;
     Ok(success_response(
-      format!("Steam download cache cleared: {}", format_size(cleared)),
       data_empty_string(),
+      format!("Steam download cache cleared: {}", format_size(cleared)),
     ))
   }
   pub fn get_spotify_cache_size(&self) -> u64 {
@@ -117,8 +117,8 @@ impl MediaCacheService {
       cleared += remove_dir_contents(&local_share)?;
     }
     Ok(success_response(
-      format!("Spotify cache cleared: {}", format_size(cleared)),
       data_empty_string(),
+      format!("Spotify cache cleared: {}", format_size(cleared)),
     ))
   }
   pub fn get_vlc_cache_size(&self) -> u64 {
@@ -142,8 +142,8 @@ impl MediaCacheService {
       cleared += remove_dir_contents(&config_path)?;
     }
     Ok(success_response(
-      format!("VLC cache cleared: {}", format_size(cleared)),
       data_empty_string(),
+      format!("VLC cache cleared: {}", format_size(cleared)),
     ))
   }
   pub fn get_thumbnail_cache_size(&self) -> u64 {
@@ -157,14 +157,14 @@ impl MediaCacheService {
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !thumb_path.exists() {
       return Ok(success_response(
-        "No thumbnail cache found",
         data_empty_string(),
+        "No thumbnail cache found",
       ));
     }
     let cleared = remove_dir_contents(&thumb_path)?;
     Ok(success_response(
-      format!("Thumbnail cache cleared: {}", format_size(cleared)),
       data_empty_string(),
+      format!("Thumbnail cache cleared: {}", format_size(cleared)),
     ))
   }
   pub fn get_icon_cache_size(&self) -> u64 {
@@ -177,12 +177,12 @@ impl MediaCacheService {
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !icon_path.exists() {
-      return Ok(success_response("No icon cache found", data_empty_string()));
+      return Ok(success_response(data_empty_string(), "No icon cache found"));
     }
     let cleared = remove_dir_contents(&icon_path)?;
     Ok(success_response(
-      format!("Icon cache cleared: {}", format_size(cleared)),
       data_empty_string(),
+      format!("Icon cache cleared: {}", format_size(cleared)),
     ))
   }
   pub fn get_media_cache_summary(&self) -> Response<Value> {

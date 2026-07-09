@@ -116,8 +116,8 @@ impl ScannerService {
         "total_wasted_space": total_wasted
     });
     Ok(Response::success(
-      format!("Found {} duplicate groups", duplicate_groups.len()),
       result,
+      format!("Found {} duplicate groups", duplicate_groups.len()),
     ))
   }
 }

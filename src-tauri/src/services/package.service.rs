@@ -50,8 +50,8 @@ impl PackageService {
       })
       .collect();
     Ok(success_response(
-      "Package cache info retrieved successfully",
       Value::Array(data),
+      "Package cache info retrieved successfully",
     ))
   }
   fn calculate_deb_size(path: &Path) -> u64 {
@@ -146,11 +146,11 @@ impl PackageService {
       }
     }
     Ok(success_response(
+      data_string(removed_count.to_string()),
       format!(
         "Snap cleanup completed, removed {} revisions",
         removed_count
       ),
-      data_string(removed_count.to_string()),
     ))
   }
   fn clean_flatpak() -> Result<Response<Value>, AppError> {
@@ -160,14 +160,14 @@ impl PackageService {
       .map_err(|e| AppError::message(format!("Failed to run flatpak uninstall: {}", e)))?;
     if output.status.success() {
       Ok(success_response(
-        "Flatpak unused packages cleaned successfully",
         data_string("flatpak"),
+        "Flatpak unused packages cleaned successfully",
       ))
     } else {
       let stderr = stderr_string(&output);
       Ok(crate::utils::info_response(
-        format!("Flatpak cleanup: {}", stderr),
         data_string("flatpak"),
+        format!("Flatpak cleanup: {}", stderr),
       ))
     }
   }
@@ -178,8 +178,8 @@ impl PackageService {
       .map_err(|e| AppError::message(format!("Failed to run yum clean: {}", e)))?;
     if output.status.success() {
       Ok(success_response(
-        "YUM cache cleaned successfully",
         data_string("yum"),
+        "YUM cache cleaned successfully",
       ))
     } else {
       let stderr = stderr_string(&output);

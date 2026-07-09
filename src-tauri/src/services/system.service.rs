@@ -21,8 +21,8 @@ impl SystemService {
     let output = pkexec("systemctl", &["stop", service])?;
     if output.status.success() {
       Ok(Response::success(
-        format!("Service {} stopped", service),
         serde_json::Value::String(service.to_string()),
+        format!("Service {} stopped", service),
       ))
     } else {
       Err(AppError::ServiceNotFound(format!(
@@ -46,8 +46,8 @@ impl SystemService {
   ) -> ServiceResult<Response<serde_json::Value>> {
     if services.is_empty() {
       return Ok(Response::success(
-        "No services selected".to_string(),
         serde_json::Value::Array(vec![]),
+        "No services selected".to_string(),
       ));
     }
     let service_count = services.len();
@@ -56,13 +56,13 @@ impl SystemService {
     let output = pkexec_with_args("systemctl", args)?;
     if output.status.success() {
       Ok(Response::success(
-        format!("Stopped {} services successfully", service_count),
         serde_json::Value::Array(
           services
             .into_iter()
             .map(serde_json::Value::String)
             .collect(),
         ),
+        format!("Stopped {} services successfully", service_count),
       ))
     } else {
       Err(AppError::ServiceNotFound(format!(
@@ -96,8 +96,8 @@ impl SystemService {
     cmd.arg(path);
     match cmd.spawn() {
       Ok(_) => Ok(Response::success(
-        format!("Started editor for file: {}", path),
         serde_json::Value::String(path.to_string()),
+        format!("Started editor for file: {}", path),
       )),
       Err(e) => Err(AppError::Unknown(format!("Failed to start editor: {}", e))),
     }
@@ -141,8 +141,8 @@ impl SystemService {
       })
       .collect();
     Ok(Response::success(
+      serde_json::Value::Array(services.clone()),
       format!("Found {} services", services.len()),
-      serde_json::Value::Array(services),
     ))
   }
   pub fn enable_service(
@@ -157,8 +157,8 @@ impl SystemService {
     let output = pkexec("systemctl", &["enable", service])?;
     if output.status.success() {
       Ok(Response::success(
-        format!("Service {} enabled", service),
         serde_json::Value::String(service.to_string()),
+        format!("Service {} enabled", service),
       ))
     } else {
       Err(AppError::ServiceNotFound(stderr_string(&output)))
@@ -176,8 +176,8 @@ impl SystemService {
     let output = pkexec("systemctl", &["start", service])?;
     if output.status.success() {
       Ok(Response::success(
-        format!("Service {} started", service),
         serde_json::Value::String(service.to_string()),
+        format!("Service {} started", service),
       ))
     } else {
       Err(AppError::ServiceNotFound(stderr_string(&output)))
@@ -197,8 +197,8 @@ impl SystemService {
   ) -> ServiceResult<Response<serde_json::Value>> {
     if services.is_empty() {
       return Ok(Response::success(
-        "No services selected".to_string(),
         serde_json::Value::Array(vec![]),
+        "No services selected".to_string(),
       ));
     }
     let service_count = services.len();
@@ -207,13 +207,13 @@ impl SystemService {
     let output = pkexec_with_args("systemctl", args)?;
     if output.status.success() {
       Ok(Response::success(
-        format!("Enabled {} services successfully", service_count),
         serde_json::Value::Array(
           services
             .into_iter()
             .map(serde_json::Value::String)
             .collect(),
         ),
+        format!("Enabled {} services successfully", service_count),
       ))
     } else {
       Err(AppError::ServiceNotFound(format!(

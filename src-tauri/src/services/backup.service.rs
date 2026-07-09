@@ -38,8 +38,8 @@ impl BackupService {
     let metadata = fs::metadata(archive_path)?;
     let size = metadata.len();
     Ok(success_response(
-      format!("Backup created successfully: {} bytes", size),
       data_string(size.to_string()),
+      format!("Backup created successfully: {} bytes", size),
     ))
   }
   pub fn restore_backup(
@@ -56,8 +56,8 @@ impl BackupService {
     fs::create_dir_all(dest_path)?;
     archive.unpack(dest_path)?;
     Ok(success_response(
-      format!("Backup restored to {}", destination),
       data_empty_string(),
+      format!("Backup restored to {}", destination),
     ))
   }
   pub fn list_backups() -> Result<Response<Value>, Response<Value>> {
@@ -66,7 +66,7 @@ impl BackupService {
   fn list_backups_inner() -> BackupResult<Response<Value>> {
     let backup_dir = Self::get_backup_dir()?;
     if !backup_dir.exists() {
-      return Ok(success_response("No backups found", Value::Array(vec![])));
+      return Ok(success_response(Value::Array(vec![]), "No backups found"));
     }
     let mut backups: Vec<serde_json::Value> = Vec::new();
     let entries = fs::read_dir(&backup_dir)?;
@@ -100,8 +100,8 @@ impl BackupService {
       b_time.cmp(a_time)
     });
     Ok(success_response(
+      Value::Array(backups.clone()),
       format!("Found {} backups", backups.len()),
-      Value::Array(backups),
     ))
   }
   pub fn delete_backup(archive_path: &str) -> Result<Response<Value>, Response<Value>> {
@@ -114,8 +114,8 @@ impl BackupService {
     }
     fs::remove_file(path)?;
     Ok(success_response(
-      "Backup deleted successfully",
       data_empty_string(),
+      "Backup deleted successfully",
     ))
   }
   fn get_backup_dir() -> BackupResult<std::path::PathBuf> {

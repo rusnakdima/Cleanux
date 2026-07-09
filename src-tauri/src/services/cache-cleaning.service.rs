@@ -30,7 +30,7 @@ impl CacheCleaningService {
     });
     let data = serde_json::to_value(paginated)
       .map_err(|e| AppError::Unknown(format!("Failed to serialize cache data: {}", e)))?;
-    Ok(success_response("Cache files retrieved successfully", data))
+    Ok(success_response(data, "Cache files retrieved successfully"))
   }
   pub fn clear_selected_cache_files(
     &self,
@@ -39,8 +39,8 @@ impl CacheCleaningService {
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
       Ok(success_response(
-        format!("Successfully cleared {} cache files", outcome.cleared),
         data_empty_string(),
+        format!("Successfully cleared {} cache files", outcome.cleared),
       ))
     } else {
       Err(
@@ -64,14 +64,14 @@ impl CacheCleaningService {
         Ok(_) => {
           let _ = fs::create_dir_all(&cache_dir);
           Ok(success_response(
-            "Cache directory cleared successfully",
             data_empty_string(),
+            "Cache directory cleared successfully",
           ))
         }
         Err(e) => Err(AppError::from(e).into()),
       }
     } else {
-      Ok(success_response("No cache to clear", data_empty_string()))
+      Ok(success_response(data_empty_string(), "No cache to clear"))
     }
   }
 }

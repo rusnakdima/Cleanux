@@ -9,5 +9,5 @@ pub use crate::errors::AppError;
 pub use cleaner_model::{
   CacheFileModel, CleaningProfile, LargeFileModel, LogFileModel, ScanSummaryModel, TrashFileModel,
 };
-pub use response::{Response, Status};
+pub use response::{Response, ResponseModel, Status};
 pub use system_model::SystemServiceModel;
