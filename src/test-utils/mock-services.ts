@@ -5,22 +5,20 @@ export const mockApiService = {
   listen: vi.fn(),
 };
 
-export const mockTauriApiService = {
+export const mockInvokeWrapperService = {
   invoke: vi.fn(),
-  listen: vi.fn(),
 };
 
 export function setupMockInvoke<T>(mockReturn: T) {
-  (mockTauriApiService.invoke as ReturnType<typeof vi.fn>).mockResolvedValue(mockReturn);
+  (mockInvokeWrapperService.invoke as ReturnType<typeof vi.fn>).mockResolvedValue(mockReturn);
 }
 
 export function setupMockInvokeRejected(error: unknown) {
-  (mockTauriApiService.invoke as ReturnType<typeof vi.fn>).mockRejectedValue(error);
+  (mockInvokeWrapperService.invoke as ReturnType<typeof vi.fn>).mockRejectedValue(error);
 }
 
 export function resetMockInvoke() {
-  (mockTauriApiService.invoke as ReturnType<typeof vi.fn>).mockReset();
-  (mockTauriApiService.listen as ReturnType<typeof vi.fn>).mockReset();
+  (mockInvokeWrapperService.invoke as ReturnType<typeof vi.fn>).mockReset();
 }
 
 export function createMockResponse<T>(
