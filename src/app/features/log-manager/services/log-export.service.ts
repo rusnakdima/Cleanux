@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { LogStorageService } from '@services/log-storage.service';
 import { LogEntry, LogFilter } from '@entities/log-manager.model';
 
@@ -38,7 +38,7 @@ export interface ProblemEntry {
   providedIn: 'root',
 })
 export class LogExportService {
-  constructor(private storage: LogStorageService) {}
+  private storage = inject(LogStorageService);
 
   async exportToJson(filter?: LogFilter): Promise<string> {
     const logs = await this.storage.getLogs(filter, 10000);

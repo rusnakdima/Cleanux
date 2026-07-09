@@ -4,11 +4,10 @@ import {
   signal,
   computed,
   HostListener,
-  Input,
+  input,
   Output,
   EventEmitter,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogConfig, DEFAULT_DIALOG_CONFIG } from './confirm-dialog.config';
 
@@ -16,15 +15,15 @@ import { ConfirmDialogConfig, DEFAULT_DIALOG_CONFIG } from './confirm-dialog.con
   selector: 'app-confirm-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './confirm-dialog.component.html',
 })
 export class ConfirmDialogComponent {
-  @Input() config: ConfirmDialogConfig = {
+  config = input<ConfirmDialogConfig>({
     ...DEFAULT_DIALOG_CONFIG,
     title: 'Confirm',
     message: 'Are you sure?',
-  } as ConfirmDialogConfig;
+  } as ConfirmDialogConfig);
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -32,20 +31,20 @@ export class ConfirmDialogComponent {
   checkboxChecked = signal(false);
 
   canConfirm = computed(() => {
-    if (this.config.requireYesToConfirm) {
+    if (this.config().requireYesToConfirm) {
       return this.yesInput().trim().toUpperCase() === 'YES';
     }
-    if (this.config.showCheckbox) {
+    if (this.config().showCheckbox) {
       return this.checkboxChecked();
     }
     return true;
   });
 
   shouldCloseOnEscape = computed(() => {
-    if (this.config.dangerous && this.config.requireYesToConfirm) {
+    if (this.config().dangerous && this.config().requireYesToConfirm) {
       return false;
     }
-    return this.config.closeOnEscape !== false;
+    return this.config().closeOnEscape !== false;
   });
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -67,7 +66,7 @@ export class ConfirmDialogComponent {
   }
 
   onBackdropClick(event: MouseEvent): void {
-    if (this.config.closeOnClickOutside !== false && !this.config.dangerous) {
+    if (this.config().closeOnClickOutside !== false && !this.config().dangerous) {
       this.onCancel();
     }
   }
@@ -78,10 +77,10 @@ export class ConfirmDialogComponent {
 
   getConfirmBtnClass(): string {
     const base = 'text-white border-transparent';
-    if (this.config.confirmColor === 'accent') {
+    if (this.config().confirmColor === 'accent') {
       return `btn-accent bg-[var(--accent-secondary)] ${base}`;
     }
-    if (this.config.confirmColor === 'warn') {
+    if (this.config().confirmColor === 'warn') {
       return `btn-warn bg-[var(--color-error)] ${base}`;
     }
     return `btn-primary bg-[var(--accent-primary)] ${base}`;

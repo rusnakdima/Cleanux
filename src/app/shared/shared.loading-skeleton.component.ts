@@ -1,11 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-loading-skeleton',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './loading-skeleton.component.html',
 })
 export class LoadingSkeletonComponent {
@@ -30,7 +29,7 @@ export class LoadingSkeletonComponent {
   selector: 'app-loading-placeholder',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LoadingSkeletonComponent],
+  imports: [LoadingSkeletonComponent],
   templateUrl: './loading-placeholder.component.html',
 })
 export class LoadingPlaceholderComponent {

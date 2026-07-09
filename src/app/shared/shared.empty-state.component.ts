@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -7,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
   selector: 'app-empty-state',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule, MatButtonModule],
+  imports: [MatIconModule, MatButtonModule],
   templateUrl: './empty-state.component.html',
 })
 export class EmptyStateComponent {
@@ -31,7 +30,7 @@ export class EmptyStateComponent {
   selector: 'app-empty-table',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconModule],
+  imports: [MatIconModule],
   templateUrl: './empty-table.component.html',
 })
 export class EmptyTableComponent {

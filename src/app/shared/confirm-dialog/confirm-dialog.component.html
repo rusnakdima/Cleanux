@@ -4,12 +4,12 @@
 >
   <div
     class="bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl min-w-[360px] max-w-[480px] p-5 shadow-2xl animate-slide-in"
-    [class.border-[var(--color-error)]]="config.dangerous"
-    [class.shadow-[0_0_20px_rgba(239,68,68,0.2)]]="config.dangerous"
+    [class.border-[var(--color-error)]]="config().dangerous"
+    [class.shadow-[0_0_20px_rgba(239,68,68,0.2)]]="config().dangerous"
     (click)="$event.stopPropagation()"
   >
     <div class="flex items-center gap-3 mb-4">
-      @if (config.dangerous) {
+      @if (config().dangerous) {
         <svg
           class="w-6 h-6 text-[var(--color-error)] flex-shrink-0"
           viewBox="0 0 24 24"
@@ -25,7 +25,7 @@
         </svg>
       }
       <h2 class="flex-1 text-lg font-semibold text-[var(--text-primary)] m-0">
-        {{ config.title }}
+        {{ config().title }}
       </h2>
       <button
         class="bg-transparent border-none p-1 cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
@@ -40,9 +40,9 @@
     </div>
 
     <div class="mb-5">
-      <p class="text-[var(--text-secondary)] text-sm leading-relaxed m-0">{{ config.message }}</p>
+      <p class="text-[var(--text-secondary)] text-sm leading-relaxed m-0">{{ config().message }}</p>
 
-      @if (config.showCheckbox) {
+      @if (config().showCheckbox) {
         <label
           class="flex items-center gap-[10px] mt-4 cursor-pointer text-[var(--text-secondary)] text-sm"
         >
@@ -52,11 +52,11 @@
             [checked]="checkboxChecked()"
             (change)="checkboxChecked.set(!checkboxChecked())"
           />
-          <span>{{ config.checkboxLabel }}</span>
+          <span>{{ config().checkboxLabel }}</span>
         </label>
       }
 
-      @if (config.requireYesToConfirm) {
+      @if (config().requireYesToConfirm) {
         <div class="mt-4">
           <label class="block text-[var(--text-secondary)] text-sm mb-2"
             >Type <strong class="text-[var(--color-error)]">YES</strong> to confirm:</label
@@ -78,21 +78,21 @@
         class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-color)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
         (click)="onCancel()"
       >
-        {{ config.cancelText }}
+        {{ config().cancelText }}
       </button>
       <button
         class="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all border-none"
         [class]="
-          config.confirmColor === 'primary' || !config.confirmColor
+          config().confirmColor === 'primary' || !config().confirmColor
             ? 'bg-[var(--accent-primary)] text-white hover:opacity-90'
-            : config.confirmColor === 'accent'
+            : config().confirmColor === 'accent'
               ? 'bg-[var(--accent-secondary)] text-white hover:opacity-90'
               : 'bg-[var(--color-error)] text-white hover:opacity-90'
         "
         [disabled]="!canConfirm()"
         (click)="onConfirm()"
       >
-        {{ config.confirmText }}
+        {{ config().confirmText }}
       </button>
     </div>
   </div>

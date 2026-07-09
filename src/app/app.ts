@@ -7,7 +7,6 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
@@ -23,7 +22,7 @@ import {
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, SchemaRouteViewerComponent],
+  imports: [SchemaRouteViewerComponent],
   templateUrl: './app.html',
 })
 export class App implements OnInit, OnDestroy {

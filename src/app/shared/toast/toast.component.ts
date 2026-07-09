@@ -1,17 +1,16 @@
-import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { ToastService } from '@tauri-front/shared';
 
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [MatIconModule],
   templateUrl: './toast.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToastComponent {
-  constructor(public toastService: ToastService) {}
+  toastService = inject(ToastService);
 
   getIcon(type: string): string {
     switch (type) {

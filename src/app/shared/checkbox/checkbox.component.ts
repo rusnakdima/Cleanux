@@ -1,32 +1,39 @@
 import {
   Component,
-  Input,
+  input,
   Output,
   EventEmitter,
   ChangeDetectionStrategy,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-checkbox',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatTooltipModule],
+  imports: [MatIconModule, MatTooltipModule],
   templateUrl: './checkbox.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckboxComponent {
-  @Input() checked = false;
-  @Input() indeterminate = false;
-  @Input() disabled = false;
-  @Input() tooltip = '';
+  checked = input(false);
+  indeterminate = input(false);
+  disabled = input(false);
+  tooltip = input('');
 
   @Output() changed = new EventEmitter<boolean>();
 
+  _checked = signal(false);
+  _indeterminate = signal(false);
+
+  constructor() {
+    this._checked.set(this.checked());
+    this._indeterminate.set(this.indeterminate());
+  }
+
   onClick(event: MouseEvent): void {
-    if (this.disabled) return;
+    if (this.disabled()) return;
     event.stopPropagation();
     this.toggle();
   }
@@ -39,10 +46,10 @@ export class CheckboxComponent {
   }
 
   private toggle(): void {
-    if (this.disabled) return;
-    const newValue = !this.checked;
-    this.checked = newValue;
-    this.indeterminate = false;
+    if (this.disabled()) return;
+    const newValue = !this._checked();
+    this._checked.set(newValue);
+    this._indeterminate.set(false);
     this.changed.emit(newValue);
   }
 }
