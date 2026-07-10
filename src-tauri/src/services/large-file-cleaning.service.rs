@@ -4,7 +4,7 @@ use crate::utils::{
   success_response,
 };
 /* models */
-use crate::models::Response;
+use crate::Response;
 /* errors */
 use crate::models::AppError;
 use serde_json::Value;

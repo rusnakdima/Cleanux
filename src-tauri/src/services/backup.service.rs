@@ -1,5 +1,5 @@
 use crate::models::AppError;
-use crate::models::Response;
+use crate::Response;
 use crate::utils::{data_empty_string, data_string, success_response};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;

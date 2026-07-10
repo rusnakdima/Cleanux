@@ -1,5 +1,6 @@
 /* models */
-use crate::models::{AppError, CleaningProfile, Response};
+use crate::models::{AppError, CleaningProfile};
+use crate::Response;
 /* helpers */
 use crate::utils::{data_empty_string, data_string, home_dir, success_response};
 /* sys lib */

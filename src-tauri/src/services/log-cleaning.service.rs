@@ -4,9 +4,10 @@ use crate::utils::{
   service_method_full, stderr_string, success_response,
 };
 /* models */
-use crate::models::{LogFileModel, Response};
+use crate::models::LogFileModel;
 /* errors */
 use crate::models::AppError;
+use crate::Response;
 use serde_json::Value;
 use std::path::Path;
 pub struct LogCleaningService;

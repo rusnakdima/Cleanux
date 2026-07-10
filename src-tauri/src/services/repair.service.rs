@@ -1,4 +1,4 @@
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 use crate::utils::{home_dir, stderr_string, stdout_string};
 use serde_json::Value;
 use std::fs;

@@ -5,9 +5,10 @@ use crate::utils::{
   service_method_full, success_response,
 };
 /* models */
-use crate::models::{Response, TrashFileModel};
+use crate::models::TrashFileModel;
 /* errors */
 use crate::models::AppError;
+use crate::Response;
 use std::fs;
 pub struct TrashCleaningService;
 type CleanResult<T> = Result<T, AppError>;

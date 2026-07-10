@@ -8,7 +8,7 @@ crud_get_all_command!(get_cleaning_profiles, "cleaning_profiles");
 crud_create_command!(create_cleaning_profile, "cleaning_profiles");
 crud_update_command!(update_cleaning_profile, "cleaning_profiles");
 crud_delete_command!(delete_cleaning_profile, "cleaning_profiles");
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
 #[tauri::command(rename_all = "camelCase")]

@@ -1,4 +1,4 @@
-use crate::models::Response;
+use crate::Response;
 use crate::services::health_history_service::{HealthHistoryService, HealthSnapshot};
 use crate::services::monitor_service::MonitorService;
 use crate::services::temperature_service::TemperatureService;

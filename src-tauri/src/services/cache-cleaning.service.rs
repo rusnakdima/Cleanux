@@ -1,5 +1,5 @@
 use crate::models::AppError;
-use crate::models::Response;
+use crate::Response;
 use crate::utils::{
   collect_cache_file_models, data_empty_string, remove_paths_with_errors, success_response,
 };

@@ -1,4 +1,4 @@
-use crate::models::Response;
+use crate::Response;
 use crate::services::dashboard_service::DashboardService;
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_system_services() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {

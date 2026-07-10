@@ -15,8 +15,7 @@ pub use tauri_shared::log_debug;
 pub use tauri_shared::log_error;
 pub use tauri_shared::log_info;
 pub use tauri_shared::log_warn;
-pub use tauri_shared::Response as TauriResponse;
-pub use tauri_shared::Status;
+pub use tauri_shared::response::{Response, Status};
 
 use crate::entities::automation_recipe_entity::AutomationRecipeEntity;
 use crate::entities::cleaning_profile_entity::CleaningProfileEntity;

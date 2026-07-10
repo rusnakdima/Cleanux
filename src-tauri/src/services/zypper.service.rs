@@ -1,5 +1,6 @@
 use crate::utils::{calculate_dir_size, run_command, success_response};
-use crate::models::{AppError, DataValue, Response};
+use crate::models::{AppError, DataValue};
+use crate::Response;
 use std::path::Path;
 pub struct ZypperService;
 impl ZypperService {

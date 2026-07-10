@@ -1,5 +1,5 @@
 /* models */
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 /* sys lib */
 use serde::Serialize;
 pub struct ResponseBuilder {

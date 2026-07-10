@@ -1,4 +1,4 @@
-use crate::models::Response;
+use crate::Response;
 use crate::services::app_residue_service::{AppResidueService, AppResidueSummary};
 use crate::services::automation_service::{AutomationRecipe, AutomationService};
 use crate::services::container_service::ContainerService;

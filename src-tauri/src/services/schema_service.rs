@@ -1,4 +1,4 @@
-use crate::models::response::{ResponseModel, Status};
+use crate::{Response, Status};
 use nosql_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -155,18 +155,18 @@ impl SchemaService {
     Self { provider }
   }
 
-  pub async fn get_schema(&self, id: &str) -> Result<ResponseModel, String> {
+  pub async fn get_schema(&self, id: &str) -> Result<Response<serde_json::Value>, String> {
     match self.provider.find_by_id("schemas", id).await {
       Ok(Some(data)) => {
         let schema: UiSchema =
           serde_json::from_value(data).map_err(|e| format!("Invalid schema format: {}", e))?;
-        Ok(ResponseModel {
+        Ok(Response<serde_json::Value> {
           status: Status::Success,
           message: "Schema loaded".into(),
           data: serde_json::to_value(schema).unwrap_or_else(|_| serde_json::Value::Null),
         })
       }
-      Ok(None) => Ok(ResponseModel {
+      Ok(None) => Ok(Response<serde_json::Value> {
         status: Status::NotFound,
         message: format!("Schema {} not found", id),
         data: serde_json::Value::Null,
@@ -175,7 +175,7 @@ impl SchemaService {
     }
   }
 
-  pub async fn save_schema(&self, schema: UiSchema) -> Result<ResponseModel, String> {
+  pub async fn save_schema(&self, schema: UiSchema) -> Result<Response<serde_json::Value>, String> {
     let id = schema.schema_version.clone();
     let data =
       serde_json::to_value(&schema).map_err(|e| format!("Failed to serialize schema: {}", e))?;
@@ -198,16 +198,16 @@ impl SchemaService {
       Err(e) => return Err(e.to_string()),
     }
 
-    Ok(ResponseModel {
+    Ok(Response<serde_json::Value> {
       status: Status::Success,
       message: "Schema saved".into(),
       data: serde_json::json!({ "id": id }),
     })
   }
 
-  pub async fn get_all_schemas(&self) -> Result<ResponseModel, String> {
+  pub async fn get_all_schemas(&self) -> Result<Response<serde_json::Value>, String> {
     match self.provider.find_all("schemas").await {
-      Ok(items) => Ok(ResponseModel {
+      Ok(items) => Ok(Response<serde_json::Value> {
         status: Status::Success,
         message: format!("Found {} schemas", items.len()),
         data: serde_json::to_value(items).unwrap_or_else(|_| serde_json::Value::Null),
@@ -216,14 +216,14 @@ impl SchemaService {
     }
   }
 
-  pub async fn delete_schema(&self, id: &str) -> Result<ResponseModel, String> {
+  pub async fn delete_schema(&self, id: &str) -> Result<Response<serde_json::Value>, String> {
     match self.provider.delete("schemas", id).await {
-      Ok(true) => Ok(ResponseModel {
+      Ok(true) => Ok(Response<serde_json::Value> {
         status: Status::Deleted,
         message: format!("Schema {} deleted", id),
         data: serde_json::Value::Null,
       }),
-      Ok(false) => Ok(ResponseModel {
+      Ok(false) => Ok(Response<serde_json::Value> {
         status: Status::NotFound,
         message: format!("Schema {} not found", id),
         data: serde_json::Value::Null,

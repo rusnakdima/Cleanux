@@ -1,5 +1,5 @@
 /* models */
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 use crate::utils::validation_helper::validate_path;
 /* sys lib */
 use sha2::{Digest, Sha256};

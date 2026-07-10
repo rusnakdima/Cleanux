@@ -8,7 +8,7 @@ crud_get_all_command!(get_automation_recipes, "automation_recipes");
 crud_create_command!(create_automation_recipe, "automation_recipes");
 crud_update_command!(update_automation_recipe, "automation_recipes");
 crud_delete_command!(delete_automation_recipe, "automation_recipes");
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
 #[tauri::command(rename_all = "camelCase")]

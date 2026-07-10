@@ -1,4 +1,5 @@
-use crate::models::{AppError, Response, Status};
+use crate::models::AppError;
+use crate::{Response, Status};
 use crate::services::app_residue::AppDetector;
 use crate::utils::{calculate_dir_size, home_dir, models_into_data_array, success_response};
 use serde_json::Value;

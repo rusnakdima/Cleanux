@@ -4,8 +4,8 @@ macro_rules! service_method_full {
     pub fn $method(
       &self,
     ) -> ::std::result::Result<
-      $crate::models::Response<serde_json::Value>,
-      $crate::models::Response<serde_json::Value>,
+      $crate::Response<serde_json::Value>,
+      $crate::Response<serde_json::Value>,
     > {
       self.$inner().map_err(|e| e.into_response())
     }

@@ -1,5 +1,5 @@
-use crate::models::response::ResponseModel;
 use crate::services::schema_service::{SchemaService, UiSchema};
+use crate::Response;
 use std::sync::Arc;
 use tauri::State;
 
@@ -7,7 +7,7 @@ use tauri::State;
 pub async fn get_schema(
   state: State<'_, SchemaState>,
   id: String,
-) -> Result<ResponseModel, String> {
+) -> Result<Response<serde_json::Value>, String> {
   state.schema_service.get_schema(&id).await
 }
 
@@ -15,12 +15,12 @@ pub async fn get_schema(
 pub async fn save_schema(
   state: State<'_, SchemaState>,
   schema: UiSchema,
-) -> Result<ResponseModel, String> {
+) -> Result<Response<serde_json::Value>, String> {
   state.schema_service.save_schema(schema).await
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn get_all_schemas(state: State<'_, SchemaState>) -> Result<ResponseModel, String> {
+pub async fn get_all_schemas(state: State<'_, SchemaState>) -> Result<Response<serde_json::Value>, String> {
   state.schema_service.get_all_schemas().await
 }
 
@@ -28,7 +28,7 @@ pub async fn get_all_schemas(state: State<'_, SchemaState>) -> Result<ResponseMo
 pub async fn delete_schema(
   state: State<'_, SchemaState>,
   id: String,
-) -> Result<ResponseModel, String> {
+) -> Result<Response<serde_json::Value>, String> {
   state.schema_service.delete_schema(&id).await
 }
 

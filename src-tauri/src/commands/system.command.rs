@@ -1,4 +1,4 @@
-use crate::models::Response;
+use crate::Response;
 use crate::services::kernel_cleaner_service::KernelCleanerService;
 use crate::services::memory_service::MemoryService;
 use crate::services::power_service::PowerService;

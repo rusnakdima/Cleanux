@@ -82,8 +82,8 @@ impl AppError {
   pub fn permission_denied(path: &str) -> Self {
     Self::PermissionDenied(path.into())
   }
-  pub fn into_response(self) -> crate::models::Response<serde_json::Value> {
-    use crate::models::{Response, Status};
+  pub fn into_response(self) -> crate::Response<serde_json::Value> {
+    use crate::{Response, Status};
     match self {
       Self::NotFound(msg) => Response::error(Status::NotFound, format!("Not found: {}", msg)),
       Self::ValidationError(msg) => Response::error(

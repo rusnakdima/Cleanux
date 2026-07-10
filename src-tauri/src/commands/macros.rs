@@ -7,10 +7,10 @@ macro_rules! crud_get_command {
       state: tauri::State<'_, crate::AppState>,
       id: Option<String>,
     ) -> Result<
-      crate::models::Response<serde_json::Value>,
-      crate::models::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
     > {
-      use crate::models::{Response, Status};
+      use crate::{Response, Status};
       if let Some(id) = id {
         let doc = state
           .data
@@ -36,10 +36,10 @@ macro_rules! crud_get_all_command {
       page: Option<u64>,
       limit: Option<u64>,
     ) -> Result<
-      crate::models::Response<Vec<serde_json::Value>>,
-      crate::models::Response<serde_json::Value>,
+      crate::Response<Vec<serde_json::Value>>,
+      crate::Response<serde_json::Value>,
     > {
-      use crate::models::{Response, Status};
+      use crate::{Response, Status};
       let docs = state
         .data
         .repository_service
@@ -59,10 +59,10 @@ macro_rules! crud_create_command {
       state: tauri::State<'_, crate::AppState>,
       data: serde_json::Value,
     ) -> Result<
-      crate::models::Response<serde_json::Value>,
-      crate::models::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
     > {
-      use crate::models::{Response, Status};
+      use crate::{Response, Status};
       let doc = state
         .data
         .repository_service
@@ -83,10 +83,10 @@ macro_rules! crud_update_command {
       id: String,
       data: serde_json::Value,
     ) -> Result<
-      crate::models::Response<serde_json::Value>,
-      crate::models::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
     > {
-      use crate::models::{Response, Status};
+      use crate::{Response, Status};
       let doc = state
         .data
         .repository_service
@@ -106,10 +106,10 @@ macro_rules! crud_delete_command {
       state: tauri::State<'_, crate::AppState>,
       id: String,
     ) -> Result<
-      crate::models::Response<serde_json::Value>,
-      crate::models::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
     > {
-      use crate::models::{Response, Status};
+      use crate::{Response, Status};
       let _ = state
         .data
         .repository_service
@@ -130,10 +130,10 @@ macro_rules! crud_patch_command {
       id: String,
       patch: serde_json::Value,
     ) -> Result<
-      crate::models::Response<serde_json::Value>,
-      crate::models::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
+      crate::Response<serde_json::Value>,
     > {
-      use crate::models::{Response, Status};
+      use crate::{Response, Status};
       let doc = state
         .data
         .repository_service

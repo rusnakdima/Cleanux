@@ -1,4 +1,5 @@
-use crate::models::{AppError, Response, Status};
+use crate::models::AppError;
+use crate::{Response, Status};
 use serde_json::Value;
 use sysinfo::System;
 pub struct ProcessService;

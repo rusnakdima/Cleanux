@@ -1,4 +1,4 @@
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 use crate::utils::home_dir;
 use std::fs;
 use std::path::{Path, PathBuf};

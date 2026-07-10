@@ -4,8 +4,6 @@ pub mod automation_command;
 pub mod cleaner_command;
 #[path = "crud_command.rs"]
 pub mod crud_command;
-#[path = "crud.macro.rs"]
-pub mod crud_macro;
 #[path = "macros.rs"]
 pub mod crud_macros;
 #[path = "dashboard.command.rs"]

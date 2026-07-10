@@ -11,7 +11,8 @@ fn is_cache_file(name: &OsStr) -> bool {
     || name_str.ends_with(".log")
 }
 /* models */
-use crate::models::{Response, ScanSummaryModel, SystemServiceModel};
+use crate::models::{ScanSummaryModel, SystemServiceModel};
+use crate::Response;
 use serde_json::Value;
 /* helpers */
 use crate::utils::{home_dir, stderr_string, stdout_string, ResponseBuilder};

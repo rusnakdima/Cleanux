@@ -4,7 +4,7 @@ use crate::crud_get_command;
 crud_get_command!(crud_get_health_snapshot, "health_snapshots");
 crud_get_all_command!(crud_get_health_snapshots, "health_snapshots");
 crud_create_command!(crud_create_health_snapshot, "health_snapshots");
-use crate::models::{Response, Status};
+use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
 #[tauri::command(rename_all = "camelCase")]

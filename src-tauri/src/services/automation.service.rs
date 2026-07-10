@@ -1,4 +1,5 @@
-use crate::models::{AppError, Response};
+use crate::models::AppError;
+use crate::Response;
 use crate::services::profile_service::ProfileService;
 use crate::utils::{data_string, stderr_string, success_response};
 use serde::{Deserialize, Serialize};

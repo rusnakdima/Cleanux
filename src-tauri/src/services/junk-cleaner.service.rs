@@ -1,7 +1,8 @@
 /* helpers */
 use crate::utils::{data_string, service_method_full, success_response};
 /* models */
-use crate::models::{AppError, Response};
+use crate::models::AppError;
+use crate::Response;
 /* services::junk */
 use crate::services::junk::{
   app_cache_scanner::ApplicationCacheScanner, browser_scanner::BrowserCacheScanner,
