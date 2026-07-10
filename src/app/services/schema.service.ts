@@ -19,11 +19,8 @@ export class SchemaService {
 
       if (response?.data) {
         this.schemaRouter.setSchema(response.data);
-        console.log('Schema loaded successfully:', SCHEMA_ID);
       }
-    } catch (error) {
-      console.warn('Failed to load schema from DB, schema will be loaded on-demand:', error);
-    }
+    } catch (error) {}
   }
 
   async saveSchema(schema: UiSchema): Promise<void> {
