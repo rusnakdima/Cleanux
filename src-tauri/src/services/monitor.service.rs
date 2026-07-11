@@ -1,9 +1,9 @@
 /* sys lib */
-use crate::{Response, Status};
 use serde_json::Value;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use sysinfo::System;
+use tauri_shared::response::{Response, Status};
 static MONITORING_ACTIVE: AtomicBool = AtomicBool::new(false);
 static SYSTEM: Mutex<Option<System>> = Mutex::new(None);
 pub struct MonitorService;
@@ -62,7 +62,7 @@ impl MonitorService {
     Ok(Response {
       status: Status::Success,
       message: "System stats retrieved successfully".to_string(),
-      data: serde_json::to_value(stats).map_err(|e| e.to_string())?,
+      data: Some(serde_json::to_value(stats).map_err(|e| Response::error(e.to_string()))?),
     })
   }
   pub fn start_monitoring() -> Result<Response<Value>, Response<Value>> {
@@ -70,7 +70,7 @@ impl MonitorService {
     Ok(Response {
       status: Status::Success,
       message: "Monitoring started".to_string(),
-      data: Value::Bool(true),
+      data: Some(Value::Bool(true)),
     })
   }
   pub fn stop_monitoring() -> Result<Response<Value>, Response<Value>> {
@@ -78,7 +78,7 @@ impl MonitorService {
     Ok(Response {
       status: Status::Success,
       message: "Monitoring stopped".to_string(),
-      data: Value::Bool(false),
+      data: Some(Value::Bool(false)),
     })
   }
 }

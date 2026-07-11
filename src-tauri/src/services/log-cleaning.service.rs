@@ -31,7 +31,7 @@ impl LogCleaningService {
       ));
     }
     let output = pkexec_rm_paths(&paths)
-      .map_err(|e| AppError::Unknown(format!("Failed to run pkexec: {}", e)))?;
+      .map_err(|e| Response::error(format!("Failed to run pkexec: {}", e)))?;
     if output.status.success() {
       Ok(success_response(
         data_empty_string(),
@@ -58,7 +58,7 @@ impl LogCleaningService {
     }
     let paths: Vec<String> = files.iter().map(|f| f.path.clone()).collect();
     let output = pkexec_rm_paths(&paths)
-      .map_err(|e| AppError::Unknown(format!("Failed to run pkexec: {}", e)))?;
+      .map_err(|e| Response::error(format!("Failed to run pkexec: {}", e)))?;
     if output.status.success() {
       Ok(success_response(
         data_string(files.len().to_string()),

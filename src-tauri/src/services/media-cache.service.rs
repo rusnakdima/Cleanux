@@ -7,9 +7,9 @@ use crate::utils::{
 /* models */
 use crate::models::AppError;
 /* errors */
-use crate::{Response, Status};
 use serde_json::Value;
 use std::fs;
+use tauri_shared::response::{Response, Status};
 pub struct MediaCacheService;
 #[derive(Debug, Clone)]
 pub struct SteamInfo {
@@ -190,7 +190,7 @@ impl MediaCacheService {
     Response {
       status: Status::Success,
       message: "Media cache summary retrieved".to_string(),
-      data: serde_json::json!({
+      data: Some(serde_json::json!({
           "steam_shader_size": steam_info.shader_cache_size,
           "steam_download_size": steam_info.download_cache_size,
           "steam_game_count": steam_info.game_count,
@@ -198,7 +198,7 @@ impl MediaCacheService {
           "vlc_cache_size": self.get_vlc_cache_size(),
           "thumbnail_cache_size": self.get_thumbnail_cache_size(),
           "icon_cache_size": self.get_icon_cache_size(),
-      }),
+      })),
     }
   }
 }

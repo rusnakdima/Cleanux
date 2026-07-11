@@ -1,10 +1,10 @@
-use crate::Response;
 use crate::services::kernel_cleaner_service::KernelCleanerService;
 use crate::services::memory_service::MemoryService;
 use crate::services::power_service::PowerService;
 use crate::services::process_service::ProcessService;
 use crate::services::system_service::SystemService;
 use crate::utils::ResponseBuilder;
+use crate::Response;
 static KERNEL_SERVICE: std::sync::OnceLock<KernelCleanerService> = std::sync::OnceLock::new();
 fn get_kernel_service() -> &'static KernelCleanerService {
   KERNEL_SERVICE.get_or_init(|| KernelCleanerService)

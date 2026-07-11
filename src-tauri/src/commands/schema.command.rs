@@ -20,7 +20,9 @@ pub async fn save_schema(
 }
 
 #[tauri::command(rename_all = "camelCase")]
-pub async fn get_all_schemas(state: State<'_, SchemaState>) -> Result<Response<serde_json::Value>, String> {
+pub async fn get_all_schemas(
+  state: State<'_, SchemaState>,
+) -> Result<Response<serde_json::Value>, String> {
   state.schema_service.get_all_schemas().await
 }
 

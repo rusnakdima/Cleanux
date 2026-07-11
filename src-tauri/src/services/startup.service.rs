@@ -1,7 +1,7 @@
-use crate::{Response, Status};
 use crate::utils::home_dir;
 use std::fs;
 use std::path::{Path, PathBuf};
+use tauri_shared::response::{Response, Status};
 pub struct StartupService;
 #[derive(Debug, serde::Serialize)]
 pub struct StartupItem {
@@ -75,7 +75,7 @@ impl StartupService {
     }
     Ok(Response::success(
       serde_json::to_value(&items).unwrap_or(serde_json::Value::Null),
-      format!("Found {} startup items", items.len()),
+      Some(&format!("Found {} startup items", items.len())),
     ))
   }
   pub fn disable_startup_item(
@@ -83,37 +83,27 @@ impl StartupService {
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let path_buf = PathBuf::from(path);
     if !is_in_autostart_dir(&path_buf) {
-      return Err(Response::error(
-        Status::Error,
-        format!("Path is not in autostart directory: {}", path),
-      ));
+      return Err(Response::error(format!(
+        "Path is not in autostart directory: {}",
+        path
+      )));
     }
     if !path_buf.exists() {
-      return Err(Response::error(
-        Status::Error,
-        format!("File not found: {}", path),
-      ));
+      return Err(Response::error(format!("File not found: {}", path)));
     }
     if !path_buf
       .extension()
       .map(|e| e == "desktop")
       .unwrap_or(false)
     {
-      return Err(Response::error(
-        Status::Error,
-        format!("Not a .desktop file: {}", path),
-      ));
+      return Err(Response::error(format!("Not a .desktop file: {}", path)));
     }
     let disabled_path = PathBuf::from(format!("{}.disabled", path));
-    fs::rename(&path_buf, &disabled_path).map_err(|e| {
-      Response::error(
-        Status::Error,
-        format!("Failed to disable startup item: {}", e),
-      )
-    })?;
+    fs::rename(&path_buf, &disabled_path)
+      .map_err(|e| Response::error(format!("Failed to disable startup item: {}", e)))?;
     Ok(Response::success(
       serde_json::Value::String(disabled_path.to_string_lossy().into_owned()),
-      format!("Disabled startup item: {}", path),
+      Some(&format!("Disabled startup item: {}", path)),
     ))
   }
   pub fn enable_startup_item(
@@ -121,10 +111,10 @@ impl StartupService {
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let path_buf = PathBuf::from(path);
     if !is_in_autostart_dir(&path_buf) {
-      return Err(Response::error(
-        Status::Error,
-        format!("Path is not in autostart directory: {}", path),
-      ));
+      return Err(Response::error(format!(
+        "Path is not in autostart directory: {}",
+        path
+      )));
     }
     let enabled_path = if path.ends_with(".disabled") {
       PathBuf::from(
@@ -137,30 +127,26 @@ impl StartupService {
       path_buf.clone()
     };
     if !enabled_path.exists() {
-      return Err(Response::error(
-        Status::Error,
-        format!("Original file not found: {}", enabled_path.display()),
-      ));
+      return Err(Response::error(format!(
+        "Original file not found: {}",
+        enabled_path.display()
+      )));
     }
     if !enabled_path
       .extension()
       .map(|e| e == "desktop")
       .unwrap_or(false)
     {
-      return Err(Response::error(
-        Status::Error,
-        format!("Not a .desktop file: {}", enabled_path.display()),
-      ));
+      return Err(Response::error(format!(
+        "Not a .desktop file: {}",
+        enabled_path.display()
+      )));
     }
-    fs::rename(&path_buf, &enabled_path).map_err(|e| {
-      Response::error(
-        Status::Error,
-        format!("Failed to enable startup item: {}", e),
-      )
-    })?;
+    fs::rename(&path_buf, &enabled_path)
+      .map_err(|e| Response::error(format!("Failed to enable startup item: {}", e)))?;
     Ok(Response::success(
       serde_json::Value::String(enabled_path.to_string_lossy().into_owned()),
-      format!("Enabled startup item: {}", enabled_path.display()),
+      Some(&format!("Enabled startup item: {}", enabled_path.display())),
     ))
   }
 }

@@ -1,8 +1,8 @@
 use crate::models::AppError;
-use crate::{Response, Status};
 use serde_json::Value;
 use std::sync::Mutex;
 use sysinfo::System;
+use tauri_shared::response::{Response, Status};
 static PROCESS_SYSTEM: Mutex<Option<System>> = Mutex::new(None);
 pub struct MemoryService;
 #[derive(Debug, Clone, serde::Serialize)]
@@ -74,7 +74,7 @@ impl MemoryService {
     Ok(Response {
       status: Status::Success,
       message: "Memory info retrieved".to_string(),
-      data: serde_json::to_value(memory_info).map_err(|e| e.to_string())?,
+      data: Some(serde_json::to_value(memory_info).map_err(|e| Response::error(e.to_string()))?),
     })
   }
   pub fn get_swap_info() -> Result<Response<Value>, Response<Value>> {
@@ -82,7 +82,7 @@ impl MemoryService {
     Ok(Response {
       status: Status::Success,
       message: "Swap info retrieved".to_string(),
-      data: serde_json::to_value(swap_info).map_err(|e| e.to_string())?,
+      data: Some(serde_json::to_value(swap_info).map_err(|e| Response::error(e.to_string()))?),
     })
   }
   pub fn get_process_memory() -> Result<Response<Value>, Response<Value>> {
@@ -115,13 +115,13 @@ impl MemoryService {
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} processes", processes.len()),
-      data: Value::Array(
+      data: Some(Value::Array(
         processes
           .into_iter()
           .map(serde_json::to_value)
           .filter_map(Result::ok)
           .collect(),
-      ),
+      )),
     })
   }
   pub fn optimize_memory() -> Result<Response<Value>, Response<Value>> {
@@ -130,7 +130,7 @@ impl MemoryService {
     Ok(Response {
       status: Status::Success,
       message: "Memory caches dropped successfully".to_string(),
-      data: Value::Bool(true),
+      data: Some(Value::Bool(true)),
     })
   }
 }

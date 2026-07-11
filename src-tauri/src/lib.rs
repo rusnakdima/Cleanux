@@ -46,7 +46,8 @@ pub fn run() {
       let crud_service = Arc::new(services::crud_service::CrudService::new(
         json_provider.clone(),
       ));
-      let schema_state = commands::schema_command::SchemaState::new(Arc::new(json_provider.clone()));
+      let schema_state =
+        commands::schema_command::SchemaState::new(Arc::new(json_provider.clone()));
       app.manage(AppState {
         data: DataState {
           repository_service,

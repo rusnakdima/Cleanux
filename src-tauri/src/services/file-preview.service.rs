@@ -1,7 +1,7 @@
 /* helpers */
 use crate::utils::{data_empty_string, error_response};
 /* models */
-use crate::{Response, Status};
+use tauri_shared::response::{Response, Status};
 /* sys lib */
 use base64::{engine::general_purpose::STANDARD, Engine};
 use serde_json::json;
@@ -83,7 +83,7 @@ impl FilePreviewService {
     Ok(Response {
       status: Status::Success,
       message: "File preview retrieved".to_string(),
-      data: response_data,
+      data: Some(response_data),
     })
   }
 }

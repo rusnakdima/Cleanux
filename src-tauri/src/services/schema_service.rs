@@ -1,7 +1,7 @@
-use crate::{Response, Status};
 use nosql_orm::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use tauri_shared::response::{Response, Status};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -160,16 +160,16 @@ impl SchemaService {
       Ok(Some(data)) => {
         let schema: UiSchema =
           serde_json::from_value(data).map_err(|e| format!("Invalid schema format: {}", e))?;
-        Ok(Response<serde_json::Value> {
+        Ok(Response {
           status: Status::Success,
           message: "Schema loaded".into(),
-          data: serde_json::to_value(schema).unwrap_or_else(|_| serde_json::Value::Null),
+          data: Some(serde_json::to_value(schema).unwrap_or_else(|_| serde_json::Value::Null)),
         })
       }
-      Ok(None) => Ok(Response<serde_json::Value> {
+      Ok(None) => Ok(Response {
         status: Status::NotFound,
         message: format!("Schema {} not found", id),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       }),
       Err(e) => Err(e.to_string()),
     }
@@ -198,19 +198,19 @@ impl SchemaService {
       Err(e) => return Err(e.to_string()),
     }
 
-    Ok(Response<serde_json::Value> {
+    Ok(Response {
       status: Status::Success,
       message: "Schema saved".into(),
-      data: serde_json::json!({ "id": id }),
+      data: Some(serde_json::json!({ "id": id })),
     })
   }
 
   pub async fn get_all_schemas(&self) -> Result<Response<serde_json::Value>, String> {
     match self.provider.find_all("schemas").await {
-      Ok(items) => Ok(Response<serde_json::Value> {
+      Ok(items) => Ok(Response {
         status: Status::Success,
         message: format!("Found {} schemas", items.len()),
-        data: serde_json::to_value(items).unwrap_or_else(|_| serde_json::Value::Null),
+        data: Some(serde_json::to_value(items).unwrap_or_else(|_| serde_json::Value::Null)),
       }),
       Err(e) => Err(e.to_string()),
     }
@@ -218,15 +218,15 @@ impl SchemaService {
 
   pub async fn delete_schema(&self, id: &str) -> Result<Response<serde_json::Value>, String> {
     match self.provider.delete("schemas", id).await {
-      Ok(true) => Ok(Response<serde_json::Value> {
+      Ok(true) => Ok(Response {
         status: Status::Deleted,
         message: format!("Schema {} deleted", id),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       }),
-      Ok(false) => Ok(Response<serde_json::Value> {
+      Ok(false) => Ok(Response {
         status: Status::NotFound,
         message: format!("Schema {} not found", id),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       }),
       Err(e) => Err(e.to_string()),
     }

@@ -1,7 +1,7 @@
 use crate::models::AppError;
-use crate::Response;
 use crate::services::profile_service::ProfileService;
 use crate::utils::{data_string, stderr_string, success_response};
+use crate::Response;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs;

@@ -8,16 +8,16 @@ use crate::utils::{
 use crate::models::TrashFileModel;
 /* errors */
 use crate::models::AppError;
-use crate::Response;
 use std::fs;
+use tauri_shared::response::Response;
 pub struct TrashCleaningService;
 type CleanResult<T> = Result<T, AppError>;
 impl TrashCleaningService {
   service_method_full!(get_trash_files => get_trash_files_inner);
   fn get_trash_files_inner(&self) -> CleanResult<Response<serde_json::Value>> {
-    let trash_dir = CommonPath::TrashFiles
-      .path()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+    let trash_dir = CommonPath::TrashFiles.path().ok_or(AppError::InvalidPath(
+      "Home directory not found".to_string(),
+    ))?;
     let trash_files: Vec<TrashFileModel> = collect_trash_file_models(&trash_dir);
     let data = models_into_data_array(trash_files)?;
     Ok(success_response(data, "Trash files retrieved successfully"))
@@ -46,7 +46,7 @@ impl TrashCleaningService {
   pub fn clear_trash(&self) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let trash_dir = CommonPath::TrashFiles
       .path()
-      .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
+      .ok_or_else(|| Response::error("Home directory not found".to_string()))?;
     match fs::read_dir(&trash_dir) {
       Ok(entries) => {
         for entry in entries.flatten() {

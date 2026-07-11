@@ -8,9 +8,9 @@ crud_get_all_command!(get_cleaning_profiles, "cleaning_profiles");
 crud_create_command!(create_cleaning_profile, "cleaning_profiles");
 crud_update_command!(update_cleaning_profile, "cleaning_profiles");
 crud_delete_command!(delete_cleaning_profile, "cleaning_profiles");
-use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
+use tauri_shared::response::{Response, Status};
 #[tauri::command(rename_all = "camelCase")]
 pub async fn apply_cleaning_profile(
   state: State<'_, AppState>,
@@ -19,18 +19,18 @@ pub async fn apply_cleaning_profile(
   let filter = serde_json::json!({
       "name": name
   });
-  let filter = nosql_orm::query::Filter::from_json(&filter)
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+  let filter =
+    nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let profiles = state
     .data
     .repository_service
     .find_many("cleaning_profiles", Some(filter), None, Some(1), None, true)
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?;
   let profile = profiles
     .into_iter()
     .next()
-    .ok_or_else(|| Response::error(Status::NotFound, "Profile not found".to_string()))?;
+    .ok_or_else(|| Response::error("Profile not found".to_string()))?;
   let clean_cache = profile
     .get("clean_cache")
     .and_then(|v| v.as_bool())
@@ -94,6 +94,10 @@ pub async fn apply_cleaning_profile(
   }
   Ok(Response::success(
     serde_json::json!({ "applied": true, "results": results }),
-    format!("Profile '{}' applied: {}", name, results.join(", ")),
+    Some(&format!(
+      "Profile '{}' applied: {}",
+      name,
+      results.join(", ")
+    )),
   ))
 }

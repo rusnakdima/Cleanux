@@ -1,7 +1,7 @@
 /* sys lib */
 use crate::models::AppError;
-use crate::{Response, Status};
 use crate::utils::{run_command_ignore_error, run_command_raw, stderr_string, stdout_string};
+use tauri_shared::response::{Response, Status};
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DockerInfo {
   pub installed: bool,
@@ -178,7 +178,7 @@ impl ContainerService {
       Ok(Response {
         status: Status::Success,
         message: format!("{} {} completed: {}", container_type, action, message),
-        data: serde_json::Value::String(message.to_string()),
+        data: Some(serde_json::Value::String(message.to_string())),
       })
     } else {
       Err(AppError::Unknown(format!(

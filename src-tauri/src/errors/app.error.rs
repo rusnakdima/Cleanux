@@ -83,37 +83,31 @@ impl AppError {
     Self::PermissionDenied(path.into())
   }
   pub fn into_response(self) -> crate::Response<serde_json::Value> {
-    use crate::{Response, Status};
+    use tauri_shared::response::{Response, Status};
     match self {
-      Self::NotFound(msg) => Response::error(Status::NotFound, format!("Not found: {}", msg)),
-      Self::ValidationError(msg) => Response::error(
-        Status::ValidationError,
-        format!("Validation error: {}", msg),
-      ),
-      Self::Duplicate(msg) => Response::error(Status::Error, format!("Duplicate: {}", msg)),
-      Self::Unauthorized => Response::error(Status::Unauthorized, "Unauthorized"),
-      Self::Forbidden => Response::error(Status::Forbidden, "Forbidden"),
-      Self::Internal(msg) => Response::error(Status::Error, format!("Internal error: {}", msg)),
-      Self::Database(msg) => Response::error(Status::Error, format!("Database error: {}", msg)),
-      Self::Network(msg) => Response::error(Status::Error, format!("Network error: {}", msg)),
-      Self::Io(msg) => Response::error(Status::Error, format!("IO error: {}", msg)),
-      Self::PermissionDenied(msg) => {
-        Response::error(Status::Error, format!("Permission denied: {}", msg))
+      Self::NotFound(msg) => Response::not_found(format!("Not found: {}", msg)),
+      Self::ValidationError(msg) => {
+        Response::validation_error(format!("Validation error: {}", msg))
       }
-      Self::InvalidPath(msg) => Response::error(Status::Error, format!("Invalid path: {}", msg)),
-      Self::PathOutsideAllowed(msg) => Response::error(
-        Status::Error,
-        format!("Path outside allowed directories: {}", msg),
-      ),
-      Self::ServiceNotFound(msg) => {
-        Response::error(Status::Error, format!("Service not found: {}", msg))
+      Self::Duplicate(msg) => {
+        Response::error_with_status(Status::Duplicate, format!("Duplicate: {}", msg))
       }
-      Self::ProcessNotFound(pid) => {
-        Response::error(Status::Error, format!("Process not found: {}", pid))
+      Self::Unauthorized => Response::unauthorized("Unauthorized"),
+      Self::Forbidden => Response::forbidden("Forbidden"),
+      Self::Internal(msg) => Response::error(format!("Internal error: {}", msg)),
+      Self::Database(msg) => Response::error(format!("Database error: {}", msg)),
+      Self::Network(msg) => Response::error(format!("Network error: {}", msg)),
+      Self::Io(msg) => Response::error(format!("IO error: {}", msg)),
+      Self::PermissionDenied(msg) => Response::error(format!("Permission denied: {}", msg)),
+      Self::InvalidPath(msg) => Response::error(format!("Invalid path: {}", msg)),
+      Self::PathOutsideAllowed(msg) => {
+        Response::error(format!("Path outside allowed directories: {}", msg))
       }
-      Self::BackupFailed(msg) => Response::error(Status::Error, format!("Backup failed: {}", msg)),
-      Self::Unknown(msg) => Response::error(Status::Error, format!("Unknown error: {}", msg)),
-      Self::Message(msg) => Response::error(Status::Error, msg),
+      Self::ServiceNotFound(msg) => Response::error(format!("Service not found: {}", msg)),
+      Self::ProcessNotFound(pid) => Response::error(format!("Process not found: {}", pid)),
+      Self::BackupFailed(msg) => Response::error(format!("Backup failed: {}", msg)),
+      Self::Unknown(msg) => Response::error(format!("Unknown error: {}", msg)),
+      Self::Message(msg) => Response::error(msg),
     }
   }
 }

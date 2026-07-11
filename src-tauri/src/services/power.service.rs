@@ -1,5 +1,4 @@
 /* sys lib */
-use crate::{Response, Status};
 use crate::utils::{stderr_string, stdout_string};
 use serde_json::Value;
 use std::fs;
@@ -7,6 +6,7 @@ use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
+use tauri_shared::response::{Response, Status};
 const CACHE_TTL_SECS: u64 = 10;
 struct CachedBatteryInfo {
   info: Option<BatteryInfo>,
@@ -75,11 +75,12 @@ impl PowerService {
         info
       }
     };
-    let json_value = serde_json::to_value(&battery_info).map_err(|e| e.to_string())?;
+    let json_value =
+      serde_json::to_value(&battery_info).map_err(|e| Response::error(e.to_string()))?;
     Ok(Response {
       status: Status::Success,
       message: "Battery info retrieved successfully".to_string(),
-      data: json_value,
+      data: Some(json_value),
     })
   }
   fn collect_battery_info() -> Option<BatteryInfo> {
@@ -210,7 +211,7 @@ impl PowerService {
     Ok(Response {
       status: Status::Success,
       message: "Power profiles retrieved successfully".to_string(),
-      data: Value::Array(json_values),
+      data: Some(Value::Array(json_values)),
     })
   }
   fn collect_power_profiles() -> Vec<PowerProfile> {
@@ -283,7 +284,7 @@ impl PowerService {
       return Ok(Response {
         status: Status::Error,
         message: format!("Invalid power profile: {}", profile),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       });
     }
     let result = Command::new("powerprofilesctl")
@@ -296,7 +297,7 @@ impl PowerService {
           Ok(Response {
             status: Status::Success,
             message: format!("Power profile set to {}", profile),
-            data: Value::Bool(true),
+            data: Some(Value::Bool(true)),
           })
         } else {
           let stderr = stderr_string(&output);
@@ -306,7 +307,7 @@ impl PowerService {
             Ok(Response {
               status: Status::Error,
               message: format!("Failed to set power profile: {}", stderr),
-              data: Value::Bool(false),
+              data: Some(Value::Bool(false)),
             })
           }
         }
@@ -318,7 +319,7 @@ impl PowerService {
     Ok(Response {
       status: Status::Success,
       message: format!("Power profile set to {} (systemd)", profile),
-      data: Value::Bool(true),
+      data: Some(Value::Bool(true)),
     })
   }
   pub fn get_thermal_info() -> Result<Response<Value>, Response<Value>> {
@@ -330,7 +331,7 @@ impl PowerService {
     Ok(Response {
       status: Status::Success,
       message: "Thermal info retrieved successfully".to_string(),
-      data: Value::Array(json_values),
+      data: Some(Value::Array(json_values)),
     })
   }
   fn collect_thermal_info() -> Vec<ThermalInfo> {

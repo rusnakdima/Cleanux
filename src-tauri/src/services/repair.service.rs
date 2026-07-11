@@ -1,9 +1,9 @@
-use crate::{Response, Status};
 use crate::utils::{home_dir, stderr_string, stdout_string};
 use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri_shared::response::{Response, Status};
 use walkdir::WalkDir;
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct RepairItem {
@@ -59,13 +59,13 @@ impl RepairService {
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} broken symlinks", broken_links.len()),
-      data: Value::Array(
+      data: Some(Value::Array(
         broken_links
           .into_iter()
           .map(serde_json::to_value)
           .filter_map(|r| r.ok())
           .collect(),
-      ),
+      )),
     })
   }
   pub fn find_orphaned_packages() -> Result<Response<Value>, Response<Value>> {
@@ -129,13 +129,13 @@ impl RepairService {
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} orphaned packages", orphaned.len()),
-      data: Value::Array(
+      data: Some(Value::Array(
         orphaned
           .into_iter()
           .map(serde_json::to_value)
           .filter_map(|r| r.ok())
           .collect(),
-      ),
+      )),
     })
   }
   pub fn clean_font_cache() -> Result<Response<Value>, Response<Value>> {
@@ -147,7 +147,7 @@ impl RepairService {
       return Ok(Response {
         status: Status::Success,
         message: "Font cache directory does not exist".to_string(),
-        data: Value::Array(vec![]),
+        data: Some(Value::Array(vec![])),
       });
     }
     let mut removed_count = 0;
@@ -175,13 +175,13 @@ impl RepairService {
       Ok(Response {
         status: Status::Success,
         message: format!("Cleaned {} font cache files", removed_count),
-        data: result,
+        data: Some(result),
       })
     } else {
       Ok(Response {
         status: Status::Success,
         message: format!("Cleaned {} files, {} failed", removed_count, failed.len()),
-        data: result,
+        data: Some(result),
       })
     }
   }
@@ -225,13 +225,13 @@ impl RepairService {
       Ok(Response {
         status: Status::Success,
         message: format!("Cleaned {} icon cache files", removed_count),
-        data: result,
+        data: Some(result),
       })
     } else {
       Ok(Response {
         status: Status::Success,
         message: format!("Cleaned {} files, {} failed", removed_count, failed.len()),
-        data: result,
+        data: Some(result),
       })
     }
   }
@@ -271,13 +271,13 @@ impl RepairService {
       Ok(Response {
         status: Status::Success,
         message: format!("Repaired permissions for {} items", repaired_count),
-        data: result,
+        data: Some(result),
       })
     } else {
       Ok(Response {
         status: Status::Success,
         message: format!("Repaired {} items, {} failed", repaired_count, failed.len()),
-        data: result,
+        data: Some(result),
       })
     }
   }
@@ -287,26 +287,26 @@ impl RepairService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       });
     }
     if !symlink_path.is_symlink() {
       return Err(Response {
         status: Status::Error,
         message: format!("Path is not a symlink: {}", path),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       });
     }
     match fs::remove_file(path) {
       Ok(_) => Ok(Response {
         status: Status::Success,
         message: format!("Removed broken symlink: {}", path),
-        data: Value::Bool(true),
+        data: Some(Value::Bool(true)),
       }),
       Err(e) => Err(Response {
         status: Status::Error,
         message: format!("Failed to remove symlink: {} - {}", path, e),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       }),
     }
   }
@@ -318,7 +318,7 @@ impl RepairService {
       return Err(Response {
         status: Status::Error,
         message: format!("Invalid package name format: {}", path),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       });
     }
     let output = Command::new("dpkg").args(["--purge", path]).output();
@@ -328,21 +328,21 @@ impl RepairService {
           Ok(Response {
             status: Status::Success,
             message: format!("Purged package: {}", path),
-            data: Value::Bool(true),
+            data: Some(Value::Bool(true)),
           })
         } else {
           let stderr = stderr_string(&result);
           Err(Response {
             status: Status::Error,
             message: format!("Failed to purge package {}: {}", path, stderr),
-            data: Value::Bool(false),
+            data: Some(Value::Bool(false)),
           })
         }
       }
       Err(e) => Err(Response {
         status: Status::Error,
         message: format!("Failed to execute dpkg: {}", e),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       }),
     }
   }

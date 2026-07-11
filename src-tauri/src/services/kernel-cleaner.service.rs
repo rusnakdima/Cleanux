@@ -1,11 +1,11 @@
 use crate::models::AppError;
-use crate::{Response, Status};
 use crate::utils::{
   calculate_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri_shared::response::{Response, Status};
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KernelInfo {
   pub version: String,
@@ -119,14 +119,12 @@ impl KernelCleanerService {
     let current = self.get_current_kernel();
     if version == current {
       return Err(Response::error(
-        Status::Error,
         "Cannot remove the currently running kernel!".to_string(),
       ));
     }
     let all_kernels = self.get_installed_kernels();
     if all_kernels.len() <= 1 {
       return Err(Response::error(
-        Status::Error,
         "Cannot remove the last remaining kernel!".to_string(),
       ));
     }
@@ -136,16 +134,15 @@ impl KernelCleanerService {
       .unwrap_or_default();
     if version == latest_version {
       return Err(Response::error(
-        Status::Error,
         "Cannot remove the latest kernel (fallback kernel). Remove old kernels first.".to_string(),
       ));
     }
     let kernel_exists = all_kernels.iter().any(|k| k.version == version);
     if !kernel_exists {
-      return Err(Response::error(
-        Status::Error,
-        format!("Kernel version {} not found", version),
-      ));
+      return Err(Response::error(format!(
+        "Kernel version {} not found",
+        version
+      )));
     }
     let mut removed_items: Vec<String> = Vec::new();
     let mut failed_items: Vec<String> = Vec::new();
@@ -195,11 +192,11 @@ impl KernelCleanerService {
             "removed": removed_items,
             "failed": failed_items
         }),
-        format!(
+        Some(&format!(
           "Successfully removed kernel {} ({} items removed)",
           version,
           removed_items.len()
-        ),
+        )),
       ))
     } else {
       Ok(Response::success(
@@ -207,11 +204,11 @@ impl KernelCleanerService {
             "removed": removed_items,
             "failed": failed_items
         }),
-        format!(
+        Some(&format!(
           "Removed kernel {} with {} failures",
           version,
           failed_items.len()
-        ),
+        )),
       ))
     }
   }
@@ -278,7 +275,7 @@ impl KernelCleanerService {
             "removed": removed.len(),
             "files": removed
         }),
-        format!("Removed {} initramfs files", removed.len()),
+        Some(&format!("Removed {} initramfs files", removed.len())),
       ))
     } else {
       Ok(Response::success(
@@ -288,7 +285,11 @@ impl KernelCleanerService {
             "files": removed,
             "errors": failed
         }),
-        format!("Removed {} files, {} failed", removed.len(), failed.len()),
+        Some(&format!(
+          "Removed {} files, {} failed",
+          removed.len(),
+          failed.len()
+        )),
       ))
     }
   }
@@ -340,10 +341,7 @@ impl KernelCleanerService {
     } else if Path::new("/usr/sbin/grub-mkconfig").exists() {
       ("grub-mkconfig", vec!["-o", "/boot/grub/grub.cfg"])
     } else {
-      return Err(Response::error(
-        Status::Error,
-        "No GRUB update tool found".to_string(),
-      ));
+      return Err(Response::error("No GRUB update tool found".to_string()));
     };
     let output = if update_cmd.1.is_empty() {
       Command::new("pkexec").arg(update_cmd.0).output()
@@ -358,20 +356,17 @@ impl KernelCleanerService {
         if result.status.success() {
           Ok(Response::success(
             serde_json::Value::Bool(true),
-            "GRUB configuration updated successfully".to_string(),
+            Some("GRUB configuration updated successfully"),
           ))
         } else {
           let stderr = stderr_string(&result);
-          Err(Response::error(
-            Status::Error,
-            format!("GRUB update failed: {}", stderr),
-          ))
+          Err(Response::error(format!("GRUB update failed: {}", stderr)))
         }
       }
-      Err(e) => Err(Response::error(
-        Status::Error,
-        format!("Failed to execute GRUB update: {}", e),
-      )),
+      Err(e) => Err(Response::error(format!(
+        "Failed to execute GRUB update: {}",
+        e
+      ))),
     }
   }
   pub fn get_installed_kernels_response(

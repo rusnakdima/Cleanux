@@ -1,7 +1,7 @@
-use crate::{Response, Status};
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
+use tauri_shared::response::{Response, Status};
 use walkdir::WalkDir;
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct EmptyDirectory {
@@ -26,7 +26,7 @@ impl DirectoryService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: Value::Array(vec![]),
+        data: Some(Value::Array(vec![])),
       });
     }
     let tree = Self::build_directory_tree(start_path, max_depth)?;
@@ -38,7 +38,7 @@ impl DirectoryService {
     Ok(Response {
       status: Status::Success,
       message: "Directory scanned successfully".to_string(),
-      data: result,
+      data: Some(result),
     })
   }
   pub fn get_directory_size(path: &str) -> Result<Response<Value>, Response<Value>> {
@@ -47,7 +47,7 @@ impl DirectoryService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       });
     }
     let mut total_size: u64 = 0;
@@ -69,7 +69,7 @@ impl DirectoryService {
     Ok(Response {
       status: Status::Success,
       message: format!("Size: {} bytes", total_size),
-      data: result,
+      data: Some(result),
     })
   }
   fn build_directory_tree(path: &Path, max_depth: u32) -> Result<DirectoryNode, Response<Value>> {
@@ -123,7 +123,7 @@ impl DirectoryService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: Value::Array(vec![]),
+        data: Some(Value::Array(vec![])),
       });
     }
     let mut empty_dirs: Vec<EmptyDirectory> = Vec::new();
@@ -141,7 +141,7 @@ impl DirectoryService {
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} empty directories", result.len()),
-      data: Value::Array(result),
+      data: Some(Value::Array(result)),
     })
   }
   fn collect_empty_directories(path: &Path, depth: u32, empty_dirs: &mut Vec<EmptyDirectory>) {
@@ -171,7 +171,7 @@ impl DirectoryService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: Value::Array(vec![]),
+        data: Some(Value::Array(vec![])),
       });
     }
     let mut nested_empty_dirs: Vec<EmptyDirectory> = Vec::new();
@@ -189,7 +189,7 @@ impl DirectoryService {
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} nested empty directories", result.len()),
-      data: Value::Array(result),
+      data: Some(Value::Array(result)),
     })
   }
   fn collect_nested_empty_directories(
@@ -235,14 +235,14 @@ impl DirectoryService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       });
     }
     if !dir_path.is_dir() {
       return Err(Response {
         status: Status::Error,
         message: format!("Path is not a directory: {}", path),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       });
     }
     if let Ok(entries) = fs::read_dir(dir_path) {
@@ -250,7 +250,7 @@ impl DirectoryService {
         return Err(Response {
           status: Status::Error,
           message: format!("Directory is not empty: {}", path),
-          data: serde_json::Value::Null,
+          data: Some(serde_json::Value::Null),
         });
       }
     }
@@ -258,12 +258,12 @@ impl DirectoryService {
       Ok(_) => Ok(Response {
         status: Status::Success,
         message: format!("Removed directory: {}", path),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       }),
       Err(e) => Err(Response {
         status: Status::Error,
         message: format!("Failed to remove directory: {} - {}", path, e),
-        data: serde_json::Value::Null,
+        data: Some(serde_json::Value::Null),
       }),
     }
   }
@@ -296,7 +296,7 @@ impl DirectoryService {
       Ok(Response {
         status: Status::Success,
         message: format!("Successfully removed {} directories", removed_count),
-        data: result,
+        data: Some(result),
       })
     } else {
       Ok(Response {
@@ -306,7 +306,7 @@ impl DirectoryService {
           removed_count,
           failed.len()
         ),
-        data: result,
+        data: Some(result),
       })
     }
   }

@@ -1,8 +1,8 @@
 use crate::models::AppError;
-use crate::Response;
 use crate::utils::{
   collect_cache_file_models, data_empty_string, remove_paths_with_errors, success_response,
 };
+use crate::Response;
 use serde_json::Value;
 use std::fs;
 pub struct CacheCleaningService;
@@ -21,7 +21,8 @@ impl CacheCleaningService {
     offset: Option<usize>,
   ) -> CleanResult<Response<Value>> {
     let cache_dir = dirs::cache_dir()
-      .ok_or_else(|| AppError::InvalidPath("Cache directory not found".to_string()))?;
+      .ok_or_else(|| "Cache directory not found".to_string())
+      .map_err(Response::error)?;
     let (files, has_more, total) = collect_cache_file_models(cache_dir, offset, limit);
     let paginated = serde_json::json!({
         "data": files,
@@ -29,7 +30,7 @@ impl CacheCleaningService {
         "total": total
     });
     let data = serde_json::to_value(paginated)
-      .map_err(|e| AppError::Unknown(format!("Failed to serialize cache data: {}", e)))?;
+      .map_err(|e| Response::error(format!("Failed to serialize cache data: {}", e)))?;
     Ok(success_response(data, "Cache files retrieved successfully"))
   }
   pub fn clear_selected_cache_files(
@@ -58,7 +59,8 @@ impl CacheCleaningService {
   }
   fn clear_cache_inner(&self) -> CleanResult<Response<Value>> {
     let cache_dir = dirs::cache_dir()
-      .ok_or_else(|| AppError::InvalidPath("Cache directory not found".to_string()))?;
+      .ok_or_else(|| "Cache directory not found".to_string())
+      .map_err(Response::error)?;
     if cache_dir.exists() {
       match fs::remove_dir_all(&cache_dir) {
         Ok(_) => {
@@ -68,7 +70,7 @@ impl CacheCleaningService {
             "Cache directory cleared successfully",
           ))
         }
-        Err(e) => Err(AppError::from(e).into()),
+        Err(e) => Err(Response::error(e.to_string())),
       }
     } else {
       Ok(success_response(data_empty_string(), "No cache to clear"))

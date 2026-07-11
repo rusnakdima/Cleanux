@@ -1,11 +1,11 @@
 /* sys lib */
-use crate::Response;
 use crate::utils::stdout_string;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
+use tauri_shared::response::Response;
 const CACHE_TTL_SECS: u64 = 5;
 struct CachedTemperature {
   readings: Vec<TemperatureInfo>,
@@ -105,7 +105,7 @@ impl TemperatureService {
       .collect();
     Ok(Response::success(
       serde_json::Value::Array(json_values),
-      "Temperatures retrieved successfully".to_string(),
+      Some("Temperatures retrieved successfully"),
     ))
   }
   fn read_thermal_zones() -> Vec<TemperatureInfo> {
@@ -278,7 +278,7 @@ impl TemperatureService {
     if let Some(cpu) = cpu_temps.first() {
       Ok(Response::success(
         serde_json::to_value(cpu).unwrap_or(serde_json::Value::Null),
-        "CPU temperature retrieved successfully".to_string(),
+        Some("CPU temperature retrieved successfully"),
       ))
     } else {
       Ok(Response::success(
@@ -289,7 +289,7 @@ impl TemperatureService {
           max_temp: 100.0,
         })
         .unwrap_or(serde_json::Value::Null),
-        "No CPU temperature found".to_string(),
+        Some("No CPU temperature found"),
       ))
     }
   }
@@ -314,7 +314,7 @@ impl TemperatureService {
     if let Some(gpu) = gpu_temps.first() {
       Ok(Response::success(
         serde_json::to_value(gpu).unwrap_or(serde_json::Value::Null),
-        "GPU temperature retrieved successfully".to_string(),
+        Some("GPU temperature retrieved successfully"),
       ))
     } else {
       Ok(Response::success(
@@ -325,7 +325,7 @@ impl TemperatureService {
           max_temp: 100.0,
         })
         .unwrap_or(serde_json::Value::Null),
-        "No GPU temperature found".to_string(),
+        Some("No GPU temperature found"),
       ))
     }
   }

@@ -32,7 +32,7 @@ impl DashboardService {
           "--plain",
         ])
         .output()
-        .map_err(|e| format!("Failed to run systemctl: {}", e))?;
+        .map_err(|e| Response::error(format!("Failed to run systemctl: {}", e)))?;
       if !output.status.success() {
         return Err(
           ResponseBuilder::new()
@@ -66,7 +66,10 @@ impl DashboardService {
           .data(Value::Array(
             services
               .into_iter()
-              .map(|s| serde_json::to_value(s).map_err(|e| format!("Serialization error: {}", e)))
+              .map(|s| {
+                serde_json::to_value(s)
+                  .map_err(|e| Response::error(format!("Serialization error: {}", e)))
+              })
               .collect::<Result<Vec<_>, _>>()?,
           ))
           .build(),
@@ -74,7 +77,9 @@ impl DashboardService {
     }
   }
   pub fn get_cache_summary(&self) -> Result<Response<Value>, Response<Value>> {
-    let cache_dir = dirs::cache_dir().ok_or("Cache directory not found")?;
+    let cache_dir = dirs::cache_dir()
+      .ok_or_else(|| "Cache directory not found".to_string())
+      .map_err(Response::error)?;
     let entries: Vec<_> = WalkDir::new(cache_dir)
       .max_depth(4)
       .into_iter()
@@ -97,12 +102,15 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Large files summary retrieved successfully")
-        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
+        .data(
+          serde_json::to_value(summary)
+            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+        )
         .build(),
     )
   }
   pub fn get_trash_summary(&self) -> Result<Response<Value>, Response<Value>> {
-    let home = home_dir().map_err(|_| "Home directory not found")?;
+    let home = home_dir().map_err(|_| Response::error("Home directory not found"))?;
     let trash_dir = home.join(".local/share/Trash/files");
     let mut total_size = 0;
     let mut file_count = 0;
@@ -121,7 +129,10 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Trash summary retrieved successfully")
-        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
+        .data(
+          serde_json::to_value(summary)
+            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+        )
         .build(),
     )
   }
@@ -153,12 +164,15 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Log summary retrieved successfully")
-        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
+        .data(
+          serde_json::to_value(summary)
+            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+        )
         .build(),
     )
   }
   pub fn get_large_files_summary(&self) -> Result<Response<Value>, Response<Value>> {
-    let home = home_dir().map_err(|_| "Home directory not found")?;
+    let home = home_dir().map_err(|_| Response::error("Home directory not found"))?;
     let threshold = 100 * 1024 * 1024;
     let dirs_to_scan = vec![
       home.join("Downloads"),
@@ -196,7 +210,10 @@ impl DashboardService {
     Ok(
       ResponseBuilder::new()
         .success("Large files summary retrieved successfully")
-        .data(serde_json::to_value(summary).map_err(|e| format!("Serialization error: {}", e))?)
+        .data(
+          serde_json::to_value(summary)
+            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+        )
         .build(),
     )
   }

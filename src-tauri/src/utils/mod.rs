@@ -5,8 +5,6 @@ pub mod common_paths;
 pub mod filesystem_helper;
 #[path = "process.helper.rs"]
 pub mod process_helper;
-#[path = "response.utils.rs"]
-pub mod response;
 #[path = "response.helper.rs"]
 pub mod response_helper;
 #[path = "validation.helper.rs"]

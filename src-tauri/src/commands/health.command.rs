@@ -4,9 +4,9 @@ use crate::crud_get_command;
 crud_get_command!(crud_get_health_snapshot, "health_snapshots");
 crud_get_all_command!(crud_get_health_snapshots, "health_snapshots");
 crud_create_command!(crud_create_health_snapshot, "health_snapshots");
-use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
+use tauri_shared::response::{Response, Status};
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_health_history(
   state: State<'_, AppState>,
@@ -18,8 +18,8 @@ pub async fn crud_get_health_history(
   let filter = serde_json::json!({
       "timestamp": { "$gte": cutoff_str }
   });
-  let filter = nosql_orm::query::Filter::from_json(&filter)
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+  let filter =
+    nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let docs = state
     .data
     .repository_service
@@ -32,10 +32,10 @@ pub async fn crud_get_health_history(
       true,
     )
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?;
   Ok(Response::success(
     serde_json::to_value(docs).unwrap_or(serde_json::Value::Null),
-    "Health history retrieved".to_string(),
+    Some("Health history retrieved"),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -50,8 +50,8 @@ pub async fn crud_get_health_trends(
   let filter = serde_json::json!({
       "timestamp": { "$gte": cutoff_str }
   });
-  let filter = nosql_orm::query::Filter::from_json(&filter)
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+  let filter =
+    nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let docs = state
     .data
     .repository_service
@@ -64,7 +64,7 @@ pub async fn crud_get_health_trends(
       true,
     )
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?;
   if docs.len() < 2 {
     let trend = HealthTrendEntity {
       trend: "insufficient_data".to_string(),
@@ -73,7 +73,7 @@ pub async fn crud_get_health_trends(
     };
     return Ok(Response::success(
       serde_json::to_value(trend).unwrap_or_default(),
-      "Health trends calculated".to_string(),
+      Some("Health trends calculated"),
     ));
   }
   let first = &docs[0];
@@ -105,7 +105,7 @@ pub async fn crud_get_health_trends(
   };
   Ok(Response::success(
     serde_json::to_value(trend_entity).unwrap_or_default(),
-    "Health trends calculated".to_string(),
+    Some("Health trends calculated"),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -118,6 +118,6 @@ pub async fn crud_save_health_snapshot(
     .repository_service
     .insert("health_snapshots", data)
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-  Ok(Response::success(doc, "Health snapshot saved".to_string()))
+    .map_err(|e| Response::error(e.to_string()))?;
+  Ok(Response::success(doc, Some("Health snapshot saved")))
 }

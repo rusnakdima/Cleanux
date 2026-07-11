@@ -1,6 +1,6 @@
 /* models */
-use crate::{Response, Status};
 use crate::utils::validation_helper::validate_path;
+use tauri_shared::response::{Response, Status};
 /* sys lib */
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -31,7 +31,7 @@ impl ScannerService {
     let validated_path = match validate_path(path) {
       Ok(p) => p,
       Err(e) => {
-        return Err(Response::error(Status::Error, e.to_string()));
+        return Err(Response::error(e.to_string()));
       }
     };
     let start_path = Path::new(&validated_path);
@@ -117,7 +117,10 @@ impl ScannerService {
     });
     Ok(Response::success(
       result,
-      format!("Found {} duplicate groups", duplicate_groups.len()),
+      Some(&format!(
+        "Found {} duplicate groups",
+        duplicate_groups.len()
+      )),
     ))
   }
 }

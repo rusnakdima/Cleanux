@@ -2,11 +2,11 @@
 use std::path::PathBuf;
 /* models */
 use crate::models::AppError;
-use crate::Response;
 use crate::security::allowlist::is_path_allowed;
 use crate::utils::service_method_full;
 use crate::utils::{pkexec, pkexec_with_args, run_command_raw};
 use crate::utils::{stderr_string, stdout_string};
+use tauri_shared::response::Response;
 pub struct SystemService;
 type ServiceResult<T> = Result<T, AppError>;
 impl SystemService {
@@ -23,7 +23,7 @@ impl SystemService {
     if output.status.success() {
       Ok(Response::success(
         serde_json::Value::String(service.to_string()),
-        format!("Service {} stopped", service),
+        Some(&format!("Service {} stopped", service)),
       ))
     } else {
       Err(AppError::ServiceNotFound(format!(
@@ -48,7 +48,7 @@ impl SystemService {
     if services.is_empty() {
       return Ok(Response::success(
         serde_json::Value::Array(vec![]),
-        "No services selected".to_string(),
+        Some("No services selected"),
       ));
     }
     let service_count = services.len();
@@ -63,7 +63,7 @@ impl SystemService {
             .map(serde_json::Value::String)
             .collect(),
         ),
-        format!("Stopped {} services successfully", service_count),
+        Some(&format!("Stopped {} services successfully", service_count)),
       ))
     } else {
       Err(AppError::ServiceNotFound(format!(
@@ -98,7 +98,7 @@ impl SystemService {
     match cmd.spawn() {
       Ok(_) => Ok(Response::success(
         serde_json::Value::String(path.to_string()),
-        format!("Started editor for file: {}", path),
+        Some(&format!("Started editor for file: {}", path)),
       )),
       Err(e) => Err(AppError::Unknown(format!("Failed to start editor: {}", e))),
     }
@@ -143,7 +143,7 @@ impl SystemService {
       .collect();
     Ok(Response::success(
       serde_json::Value::Array(services.clone()),
-      format!("Found {} services", services.len()),
+      Some(&format!("Found {} services", services.len())),
     ))
   }
   pub fn enable_service(
@@ -159,7 +159,7 @@ impl SystemService {
     if output.status.success() {
       Ok(Response::success(
         serde_json::Value::String(service.to_string()),
-        format!("Service {} enabled", service),
+        Some(&format!("Service {} enabled", service)),
       ))
     } else {
       Err(AppError::ServiceNotFound(stderr_string(&output)))
@@ -178,7 +178,7 @@ impl SystemService {
     if output.status.success() {
       Ok(Response::success(
         serde_json::Value::String(service.to_string()),
-        format!("Service {} started", service),
+        Some(&format!("Service {} started", service)),
       ))
     } else {
       Err(AppError::ServiceNotFound(stderr_string(&output)))
@@ -199,7 +199,7 @@ impl SystemService {
     if services.is_empty() {
       return Ok(Response::success(
         serde_json::Value::Array(vec![]),
-        "No services selected".to_string(),
+        Some("No services selected"),
       ));
     }
     let service_count = services.len();
@@ -214,7 +214,7 @@ impl SystemService {
             .map(serde_json::Value::String)
             .collect(),
         ),
-        format!("Enabled {} services successfully", service_count),
+        Some(&format!("Enabled {} services successfully", service_count)),
       ))
     } else {
       Err(AppError::ServiceNotFound(format!(

@@ -6,22 +6,19 @@ macro_rules! crud_get_command {
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       id: Option<String>,
-    ) -> Result<
-      crate::Response<serde_json::Value>,
-      crate::Response<serde_json::Value>,
-    > {
-      use crate::{Response, Status};
+    ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use tauri_shared::response::{Response, Status};
       if let Some(id) = id {
         let doc = state
           .data
           .repository_service
           .find_by_id($table, &id)
           .await
-          .map_err(|e| Response::error(Status::Error, e.to_string()))?
-          .ok_or_else(|| Response::error(Status::NotFound, "Entity not found"))?;
-        Ok(Response::success(doc, "Entity found"))
+          .map_err(|e| Response::error(e.to_string()))?
+          .ok_or_else(|| Response::error("Entity not found"))?;
+        Ok(Response::success(doc, Some("Entity found")))
       } else {
-        Err(Response::error(Status::Error, "ID is required"))
+        Err(Response::error("ID is required"))
       }
     }
   };
@@ -35,18 +32,15 @@ macro_rules! crud_get_all_command {
       state: tauri::State<'_, crate::AppState>,
       page: Option<u64>,
       limit: Option<u64>,
-    ) -> Result<
-      crate::Response<Vec<serde_json::Value>>,
-      crate::Response<serde_json::Value>,
-    > {
-      use crate::{Response, Status};
+    ) -> Result<crate::Response<Vec<serde_json::Value>>, crate::Response<serde_json::Value>> {
+      use tauri_shared::response::{Response, Status};
       let docs = state
         .data
         .repository_service
         .find_many($table, None, page, limit, None, true)
         .await
-        .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success(docs, "Entities retrieved"))
+        .map_err(|e| Response::error(e.to_string()))?;
+      Ok(Response::success(docs, Some("Entities retrieved")))
     }
   };
 }
@@ -58,18 +52,15 @@ macro_rules! crud_create_command {
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       data: serde_json::Value,
-    ) -> Result<
-      crate::Response<serde_json::Value>,
-      crate::Response<serde_json::Value>,
-    > {
-      use crate::{Response, Status};
+    ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use tauri_shared::response::{Response, Status};
       let doc = state
         .data
         .repository_service
         .insert($table, data)
         .await
-        .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success(doc, "Entity created"))
+        .map_err(|e| Response::error(e.to_string()))?;
+      Ok(Response::success(doc, Some("Entity created")))
     }
   };
 }
@@ -82,18 +73,15 @@ macro_rules! crud_update_command {
       state: tauri::State<'_, crate::AppState>,
       id: String,
       data: serde_json::Value,
-    ) -> Result<
-      crate::Response<serde_json::Value>,
-      crate::Response<serde_json::Value>,
-    > {
-      use crate::{Response, Status};
+    ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use tauri_shared::response::{Response, Status};
       let doc = state
         .data
         .repository_service
         .update($table, &id, data)
         .await
-        .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success(doc, "Entity updated"))
+        .map_err(|e| Response::error(e.to_string()))?;
+      Ok(Response::success(doc, Some("Entity updated")))
     }
   };
 }
@@ -105,18 +93,18 @@ macro_rules! crud_delete_command {
     pub async fn $route(
       state: tauri::State<'_, crate::AppState>,
       id: String,
-    ) -> Result<
-      crate::Response<serde_json::Value>,
-      crate::Response<serde_json::Value>,
-    > {
-      use crate::{Response, Status};
+    ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use tauri_shared::response::{Response, Status};
       let _ = state
         .data
         .repository_service
         .delete($table, &id)
         .await
-        .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success(serde_json::Value::Null, "Entity deleted"))
+        .map_err(|e| Response::error(e.to_string()))?;
+      Ok(Response::success(
+        serde_json::Value::Null,
+        Some("Entity deleted"),
+      ))
     }
   };
 }
@@ -129,18 +117,15 @@ macro_rules! crud_patch_command {
       state: tauri::State<'_, crate::AppState>,
       id: String,
       patch: serde_json::Value,
-    ) -> Result<
-      crate::Response<serde_json::Value>,
-      crate::Response<serde_json::Value>,
-    > {
-      use crate::{Response, Status};
+    ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use tauri_shared::response::{Response, Status};
       let doc = state
         .data
         .repository_service
         .patch($table, &id, patch)
         .await
-        .map_err(|e| Response::error(Status::Error, e.to_string()))?;
-      Ok(Response::success(doc, "Entity patched"))
+        .map_err(|e| Response::error(e.to_string()))?;
+      Ok(Response::success(doc, Some("Entity patched")))
     }
   };
 }

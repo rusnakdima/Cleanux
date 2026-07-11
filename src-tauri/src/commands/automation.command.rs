@@ -8,9 +8,9 @@ crud_get_all_command!(get_automation_recipes, "automation_recipes");
 crud_create_command!(create_automation_recipe, "automation_recipes");
 crud_update_command!(update_automation_recipe, "automation_recipes");
 crud_delete_command!(delete_automation_recipe, "automation_recipes");
-use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
+use tauri_shared::response::{Response, Status};
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_execution_history(
   state: State<'_, AppState>,
@@ -29,10 +29,10 @@ pub async fn crud_get_execution_history(
       false,
     )
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?;
   Ok(Response::success(
     serde_json::to_value(docs).unwrap_or(serde_json::Value::Null),
-    "Execution history retrieved".to_string(),
+    Some("Execution history retrieved"),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -42,7 +42,7 @@ pub async fn crud_get_quick_actions(
   let actions = AutomationService::get_quick_actions_list();
   Ok(Response::success(
     serde_json::to_value(actions).unwrap_or_default(),
-    "Quick actions retrieved".to_string(),
+    Some("Quick actions retrieved"),
   ))
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -61,8 +61,8 @@ pub async fn crud_execute_recipe(
   let filter = serde_json::json!({
       "id": recipe_id
   });
-  let filter = nosql_orm::query::Filter::from_json(&filter)
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+  let filter =
+    nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let recipes = state
     .data
     .repository_service
@@ -75,11 +75,10 @@ pub async fn crud_execute_recipe(
       true,
     )
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?;
   let recipe = recipes
     .into_iter()
     .next()
-    .ok_or_else(|| Response::error(Status::Error, "Recipe not found".to_string()))?;
-  AutomationService::execute_recipe_from_entity(recipe)
-    .map_err(|e| Response::error(Status::Error, e.to_string()))
+    .ok_or_else(|| Response::error("Recipe not found".to_string()))?;
+  AutomationService::execute_recipe_from_entity(recipe).map_err(|e| Response::error(e.to_string()))
 }

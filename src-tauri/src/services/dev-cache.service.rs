@@ -305,7 +305,7 @@ impl DevCacheService {
     }
   }
   fn extract_count_from_response(response: &Response<Value>) -> Option<u32> {
-    if let serde_json::Value::String(s) = &response.data {
+    if let Some(serde_json::Value::String(s)) = &response.data {
       s.parse().ok()
     } else {
       None

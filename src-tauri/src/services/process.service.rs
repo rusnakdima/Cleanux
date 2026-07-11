@@ -1,7 +1,7 @@
 use crate::models::AppError;
-use crate::{Response, Status};
 use serde_json::Value;
 use sysinfo::System;
+use tauri_shared::response::{Response, Status};
 pub struct ProcessService;
 type ProcessResult<T> = Result<T, AppError>;
 #[derive(serde::Serialize)]
@@ -31,13 +31,13 @@ impl ProcessService {
     Ok(Response {
       status: Status::Success,
       message: format!("Found {} processes", processes.len()),
-      data: Value::Array(
+      data: Some(Value::Array(
         processes
           .into_iter()
           .map(serde_json::to_value)
           .filter_map(Result::ok)
           .collect(),
-      ),
+      )),
     })
   }
   pub fn kill_process(pid: u32) -> Result<Response<Value>, Response<Value>> {
@@ -52,7 +52,7 @@ impl ProcessService {
         Ok(Response {
           status: Status::Success,
           message: format!("Process {} killed", pid),
-          data: Value::String(pid.to_string()),
+          data: Some(Value::String(pid.to_string())),
         })
       } else {
         Err(AppError::ProcessNotFound(pid))

@@ -4,9 +4,9 @@ use crate::crud_get_command;
 crud_get_command!(get_cleaning_report, "cleaning_reports");
 crud_get_all_command!(get_cleaning_reports, "cleaning_reports");
 crud_create_command!(create_cleaning_report, "cleaning_reports");
-use crate::{Response, Status};
 use crate::AppState;
 use tauri::State;
+use tauri_shared::response::{Response, Status};
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_generate_cleaning_report(
   state: State<'_, AppState>,
@@ -27,8 +27,8 @@ pub async fn crud_generate_cleaning_report(
     .repository_service
     .insert("cleaning_reports", data)
     .await
-    .map(|doc| Response::success(doc, "Report generated".to_string()))
-    .map_err(|e| Response::error(Status::Error, e.to_string()))
+    .map(|doc| Response::success(doc, Some("Report generated")))
+    .map_err(|e| Response::error(e.to_string()))
 }
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_cleaning_history(
@@ -43,10 +43,10 @@ pub async fn crud_get_cleaning_history(
     .map(|docs| {
       Response::success(
         serde_json::to_value(docs).unwrap_or(serde_json::Value::Null),
-        "Cleaning history retrieved".to_string(),
+        Some("Cleaning history retrieved"),
       )
     })
-    .map_err(|e| Response::error(Status::Error, e.to_string()))
+    .map_err(|e| Response::error(e.to_string()))
 }
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_compare_snapshots(
@@ -60,15 +60,15 @@ pub async fn crud_compare_snapshots(
     .repository_service
     .find_by_id("cleaning_reports", &before_id)
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?
-    .ok_or_else(|| Response::error(Status::NotFound, "Before report not found".to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?
+    .ok_or_else(|| Response::error("Before report not found".to_string()))?;
   let after_doc = state
     .data
     .repository_service
     .find_by_id("cleaning_reports", &after_id)
     .await
-    .map_err(|e| Response::error(Status::Error, e.to_string()))?
-    .ok_or_else(|| Response::error(Status::NotFound, "After report not found".to_string()))?;
+    .map_err(|e| Response::error(e.to_string()))?
+    .ok_or_else(|| Response::error("After report not found".to_string()))?;
   let before_space = before_doc
     .get("space_reclaimed")
     .and_then(|v| v.as_u64())
@@ -102,7 +102,7 @@ pub async fn crud_compare_snapshots(
   };
   Ok(Response::success(
     serde_json::to_value(comparison).unwrap_or_default(),
-    "Snapshots compared".to_string(),
+    Some("Snapshots compared"),
   ))
 }
 fn get_category_change(

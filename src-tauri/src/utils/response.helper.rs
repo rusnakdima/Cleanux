@@ -1,5 +1,5 @@
 /* models */
-use crate::{Response, Status};
+use tauri_shared::response::{Response, Status};
 /* sys lib */
 use serde::Serialize;
 pub struct ResponseBuilder {
@@ -41,9 +41,9 @@ impl ResponseBuilder {
       .data
       .unwrap_or(serde_json::Value::String(String::new()));
     if status == Status::Success {
-      Response::success(data, message)
+      Response::success(data, Some(&message))
     } else {
-      Response::error(status, message)
+      Response::error_with_status(status, message)
     }
   }
 }
@@ -56,19 +56,19 @@ pub fn success_response(
   data: serde_json::Value,
   message: impl Into<String>,
 ) -> Response<serde_json::Value> {
-  Response::success(data, message)
+  Response::success(data, Some(&message.into()))
 }
 pub fn info_response(
   data: serde_json::Value,
   message: impl Into<String>,
 ) -> Response<serde_json::Value> {
-  Response::success(data, message)
+  Response::success(data, Some(&message.into()))
 }
 pub fn error_response(
   message: impl Into<String>,
   _data: serde_json::Value,
 ) -> Response<serde_json::Value> {
-  Response::error(Status::Error, message)
+  Response::error_with_status(Status::Error, message)
 }
 pub fn data_empty_string() -> serde_json::Value {
   serde_json::Value::String(String::new())
@@ -84,8 +84,13 @@ pub fn array_response<T: Serialize>(
     .into_iter()
     .map(|item| serde_json::to_value(item))
     .collect::<Result<_, _>>()
-    .map_err(|e| Response::error(Status::Error, format!("Serialization error: {}", e)))?;
-  Ok(Response::success(serde_json::Value::Array(data), message))
+    .map_err(|e| {
+      Response::error_with_status(Status::Error, format!("Serialization error: {}", e))
+    })?;
+  Ok(Response::success(
+    serde_json::Value::Array(data),
+    Some(&message.into()),
+  ))
 }
 /// Serialize models to JSON values; propagates first serialization failure instead of swallowing it.
 pub fn models_into_data_array<T: Serialize>(

@@ -1,5 +1,4 @@
 use crate::models::AppError;
-use crate::{Response, Status};
 use crate::services::app_residue::AppDetector;
 use crate::utils::{calculate_dir_size, home_dir, models_into_data_array, success_response};
 use serde_json::Value;
@@ -7,6 +6,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri_shared::response::{Response, Status};
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct AppResidue {
   pub path: String,
@@ -270,7 +270,7 @@ impl AppResidueService {
       return Err(Response {
         status: Status::Error,
         message: format!("Path does not exist: {}", path),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       });
     }
     let result = if path_obj.is_dir() {
@@ -282,12 +282,12 @@ impl AppResidueService {
       Ok(_) => Ok(Response {
         status: Status::Success,
         message: format!("Removed residue: {}", path),
-        data: Value::Bool(true),
+        data: Some(Value::Bool(true)),
       }),
       Err(e) => Err(Response {
         status: Status::Error,
         message: format!("Failed to remove {}: {}", path, e),
-        data: Value::Bool(false),
+        data: Some(Value::Bool(false)),
       }),
     }
   }
@@ -321,13 +321,13 @@ impl AppResidueService {
       Ok(Response {
         status: Status::Success,
         message: format!("Cleaned {} residue items", removed),
-        data: result,
+        data: Some(result),
       })
     } else {
       Ok(Response {
         status: Status::Success,
         message: format!("Cleaned {} items, {} failed", removed, failed.len()),
-        data: result,
+        data: Some(result),
       })
     }
   }

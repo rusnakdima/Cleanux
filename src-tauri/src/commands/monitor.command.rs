@@ -1,8 +1,8 @@
-use crate::Response;
 use crate::services::health_history_service::{HealthHistoryService, HealthSnapshot};
 use crate::services::monitor_service::MonitorService;
 use crate::services::temperature_service::TemperatureService;
 use crate::utils::{array_response, ResponseBuilder};
+use crate::Response;
 static HEALTH_SERVICE: std::sync::OnceLock<HealthHistoryService> = std::sync::OnceLock::new();
 fn get_health_service() -> &'static HealthHistoryService {
   HEALTH_SERVICE.get_or_init(|| {
@@ -78,7 +78,10 @@ pub fn get_health_trends(
     Ok(trend) => Ok(
       ResponseBuilder::new()
         .success("Health trends retrieved successfully")
-        .data(serde_json::to_value(trend).map_err(|e| format!("Serialization error: {}", e))?)
+        .data(
+          serde_json::to_value(trend)
+            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+        )
         .build(),
     ),
     Err(e) => Err(

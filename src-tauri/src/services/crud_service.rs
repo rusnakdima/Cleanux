@@ -1,7 +1,7 @@
-use crate::utils::response::Response;
 use nosql_orm::prelude::*;
 use serde_json::Value;
 use std::sync::Arc;
+use tauri_shared::response::{Response, Status};
 
 pub struct CrudService {
   provider: Arc<JsonProvider>,
@@ -31,7 +31,7 @@ impl CrudService {
           .await
           .map_err(|e| e.to_string())?;
         match result {
-          Some(data) => Ok(Response::success(data, "Found")),
+          Some(data) => Ok(Response::success(data, Some("Found"))),
           None => Ok(Response::not_found(entity)),
         }
       }
@@ -41,7 +41,7 @@ impl CrudService {
           .find_all(entity)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::success(Value::Array(results), "Found"))
+        Ok(Response::success(Value::Array(results), Some("Found")))
       }
       "create" | "save" => {
         let data = data.ok_or("Data required for create")?;
@@ -50,7 +50,7 @@ impl CrudService {
           .insert(entity, data)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::created(result, "Created"))
+        Ok(Response::created(result))
       }
       "update" => {
         let id = id.ok_or("ID required for update")?;
@@ -63,7 +63,7 @@ impl CrudService {
           .update(entity, id, data)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::updated(result, "Updated"))
+        Ok(Response::updated(result))
       }
       "patch" => {
         let id = id.ok_or("ID required for patch")?;
@@ -73,7 +73,7 @@ impl CrudService {
           .patch(entity, id, patch)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::updated(result, "Patched"))
+        Ok(Response::updated(result))
       }
       "delete" => {
         let id = id.ok_or("ID required for delete")?;
@@ -82,7 +82,7 @@ impl CrudService {
           .delete(entity, id)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::deleted(Value::Null, "Deleted"))
+        Ok(Response::deleted(Value::Null))
       }
       "count" => {
         let count = self
@@ -90,7 +90,10 @@ impl CrudService {
           .count(entity, None)
           .await
           .map_err(|e| e.to_string())?;
-        Ok(Response::success(Value::Number(count.into()), "Count"))
+        Ok(Response::success(
+          Value::Number(count.into()),
+          Some("Count"),
+        ))
       }
       "exists" => {
         let id = id.ok_or("ID required for exists")?;
@@ -101,7 +104,7 @@ impl CrudService {
           .map_err(|e| e.to_string())?;
         Ok(Response::success(
           Value::Bool(exists),
-          if exists { "Exists" } else { "Not found" },
+          Some(if exists { "Exists" } else { "Not found" }),
         ))
       }
       _ => Err(format!("Unknown operation: {}", operation)),

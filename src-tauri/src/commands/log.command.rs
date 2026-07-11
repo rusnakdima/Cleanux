@@ -1,6 +1,6 @@
-use crate::Response;
 use crate::services::log_manager_service::LogManagerService;
 use crate::utils::{array_response, ResponseBuilder};
+use crate::Response;
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub fn get_journal_size() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
