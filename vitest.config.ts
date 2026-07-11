@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitest/config';
-import { resolve } from 'path';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
     globals: true,
     environment: 'jsdom',
@@ -13,24 +14,6 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       include: ['src/app/**/*.ts'],
       exclude: ['src/**/*.module.ts', 'src/**/*.routes.ts'],
-    },
-  },
-  resolve: {
-    alias: {
-      '@components': resolve(__dirname, 'src/app/components'),
-      '@views': resolve(__dirname, 'src/app/views'),
-      '@models': resolve(__dirname, 'src/app/models'),
-      '@services': resolve(__dirname, 'src/app/services'),
-      '@helpers': resolve(__dirname, 'src/app/helpers'),
-      '@guards': resolve(__dirname, 'src/app/guards'),
-      '@shared': resolve(__dirname, 'src/app/shared'),
-      '@app': resolve(__dirname, 'src/app'),
-      '@assets': resolve(__dirname, 'src/assets'),
-      '@styles': resolve(__dirname, 'src/styles'),
-      '@env': resolve(__dirname, 'src/environments'),
-      '@api': resolve(__dirname, 'src/app/api'),
-      '@stores': resolve(__dirname, 'src/app/stores'),
-      '@test-utils': resolve(__dirname, 'src/test-utils'),
     },
   },
 });
