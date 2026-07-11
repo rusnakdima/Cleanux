@@ -4,7 +4,7 @@ import {
   EntityFilter,
   PaginationParams,
 } from '../../services/storage-entity.service';
-import { StorageCacheService } from './storage-cache.service';
+import { StorageCacheService } from '@tauri-front/shared';
 
 export interface QueryOptions {
   useCache?: boolean;

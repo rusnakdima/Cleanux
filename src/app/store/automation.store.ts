@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { UnifiedStorageService } from '@app/core/services/unified-storage.service';
+import { StorageEntityService } from '@app/services/storage-entity.service';
+import { StorageQueryService } from '@app/core/services/storage-query.service';
 import {
   QuickAction,
   ActionStep,
@@ -11,7 +12,8 @@ export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry }
 
 @Injectable({ providedIn: 'root' })
 export class AutomationStore {
-  private storage = inject(UnifiedStorageService);
+  private entity = inject(StorageEntityService);
+  private query = inject(StorageQueryService);
 
   private _quickActions = signal<QuickAction[]>([]);
   private _recipes = signal<AutomationRecipe[]>([]);
@@ -32,7 +34,7 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      const actions = await this.storage.entity.findMany<QuickAction>('quick_actions');
+      const actions = await this.entity.findMany<QuickAction>('quick_actions');
       this._quickActions.set(actions);
       return actions;
     } catch (e) {
@@ -47,7 +49,7 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      return await this.storage.entity
+      return await this.entity
         .findMany<{ result: string }>('execute_action', { actionId })
         .then(() => 'executed');
     } catch (e) {
@@ -63,7 +65,7 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      const recipes = await this.storage.findMany<AutomationRecipe>('automation_recipes');
+      const recipes = await this.query.query<AutomationRecipe>('automation_recipes');
       this._recipes.set(recipes);
       return recipes;
     } catch (e) {
@@ -78,11 +80,14 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      const saved = await this.storage.save<AutomationRecipe>(
-        'automation_recipes',
-        recipe,
-        recipe.id || undefined
-      );
+      let saved: AutomationRecipe;
+      if (recipe.id) {
+        saved = await this.entity.update<AutomationRecipe>('automation_recipes', recipe.id, recipe);
+        this.query.invalidate('automation_recipes', recipe.id);
+      } else {
+        saved = await this.entity.create<AutomationRecipe>('automation_recipes', recipe);
+        this.query.invalidate('automation_recipes');
+      }
       return saved.id || '';
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to save recipe';
@@ -97,7 +102,8 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      await this.storage.delete('automation_recipes', recipeId);
+      await this.entity.delete('automation_recipes', recipeId);
+      this.query.invalidate('automation_recipes', recipeId);
       return 'deleted';
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to delete recipe';
@@ -112,7 +118,7 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      return await this.storage.entity
+      return await this.entity
         .findMany<{ result: string }>('execute_recipe', { recipeId })
         .then(() => 'executed');
     } catch (e) {
@@ -128,7 +134,7 @@ export class AutomationStore {
     this._loading.set(true);
     this._error.set(null);
     try {
-      const history = await this.storage.findMany<ExecutionHistoryEntry>('execution_history');
+      const history = await this.query.query<ExecutionHistoryEntry>('execution_history');
       this._executionHistory.set(history);
       return history;
     } catch (e) {

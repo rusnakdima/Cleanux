@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { StorageCacheService } from '@app/core/services/storage-cache.service';
+import { StorageCacheService } from '@tauri-front/shared';
 
 export interface AppState {
   initialized: boolean;
