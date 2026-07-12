@@ -45,6 +45,7 @@
             "outputPath": "dist/cleanux",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -60,7 +61,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "600kB",
+                  "maximumWarning": "870kB",
                   "maximumError": "1.2MB"
                 },
                 {
