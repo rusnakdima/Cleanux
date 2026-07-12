@@ -1,8 +1,8 @@
-import { Response } from '@entities/response.model';
+import { Response, ResponseStatus } from '@tauri-front/shared';
 
 export function createSuccessResponse<T>(data: T, message = 'Success'): Response<T> {
   return {
-    status: 'success',
+    status: ResponseStatus.Success,
     message,
     data,
   };
@@ -10,7 +10,7 @@ export function createSuccessResponse<T>(data: T, message = 'Success'): Response
 
 export function createErrorResponse(message = 'Error'): Response<null> {
   return {
-    status: 'error',
+    status: ResponseStatus.Error,
     message,
     data: null,
   };

@@ -1,3 +1,8 @@
+/**
+ * Local StorageQueryService — kept instead of using @tauri-front/shared's StorageQueryService.
+ * Reason: This is a data-access layer wrapping StorageEntityService + StorageCacheService for
+ * DB queries with caching, not a pure in-memory filter utility like the library version.
+ */
 import { Injectable, inject } from '@angular/core';
 import {
   StorageEntityService,

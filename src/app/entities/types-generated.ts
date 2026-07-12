@@ -4,19 +4,7 @@
  * snake_case in Rust → camelCase in TypeScript
  */
 
-// ============================================================
-// src-tauri/src/models/response.model.rs
-// ============================================================
-
-export type ResponseStatus = 'success' | 'info' | 'warning' | 'error';
-
-export type DataValue = string | number | boolean | unknown[] | Record<string, unknown> | null;
-
-export interface Response<T = unknown> {
-  status: ResponseStatus;
-  message: string;
-  data: T;
-}
+import { Response } from '@tauri-front/shared';
 
 export interface PaginatedData<T> {
   data: T[];
@@ -24,20 +12,13 @@ export interface PaginatedData<T> {
   total: number;
 }
 
-export function isSuccess(response: Response): boolean {
-  return response.status === 'success';
-}
-
-export function isError(response: Response): boolean {
-  return response.status === 'error';
-}
-
-export function getData<T>(response: Response<unknown>): T | null {
-  if (response.data === null || response.data === undefined) {
-    return null;
-  }
-  return response.data as T;
-}
+export {
+  isSuccess,
+  isError,
+  getErrorMessage,
+  unwrapResponse,
+  mapResponse,
+} from '@tauri-front/shared';
 
 // ============================================================
 // src-tauri/src/models/cleaner.model.rs

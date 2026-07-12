@@ -1,7 +1,6 @@
-/* sys lib */
+/* angular */
 import { ApplicationConfig, provideAppInitializer, inject } from '@angular/core';
 import { provideUnifiedApp } from '@tauri-front/shared';
-import { withXhr } from '@angular/common/http';
 
 /* services */
 import { StyleThemeService } from '@tauri-front/shared';
@@ -20,7 +19,6 @@ export const appConfig: ApplicationConfig = {
       enableBrowserErrorListeners: true,
       enableZoneChangeDetection: true,
     }),
-    { provide: 'httpClientOptions', useValue: withXhr() },
     CleanerStore,
     SystemStore,
     MonitorStore,

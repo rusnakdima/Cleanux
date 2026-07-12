@@ -1,4 +1,4 @@
-/* sys lib */
+/* angular */
 import { Injectable, inject } from '@angular/core';
 
 /* services */

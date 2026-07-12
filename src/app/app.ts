@@ -1,10 +1,10 @@
-/* sys lib */
+/* angular */
 import { Component, inject, ChangeDetectionStrategy, OnDestroy, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-/* shared */
+/* library */
 import {
   SchemaRouterService,
   SchemaRouteViewerComponent,
@@ -35,7 +35,7 @@ export class App implements OnInit, OnDestroy {
 
     this.setup.setup('cleanux', {
       initialRoute: '/dashboard',
-      autoRegisterRoutes: false,
+      autoRegisterRoutes: true,
     });
   }
 
