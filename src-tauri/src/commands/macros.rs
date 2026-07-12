@@ -7,7 +7,7 @@ macro_rules! crud_get_command {
       state: tauri::State<'_, crate::AppState>,
       id: Option<String>,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
-      use tauri_shared::response::{Response, Status};
+      use tauri_shared::response::Response;
       if let Some(id) = id {
         let doc = state
           .data
@@ -33,7 +33,7 @@ macro_rules! crud_get_all_command {
       page: Option<u64>,
       limit: Option<u64>,
     ) -> Result<crate::Response<Vec<serde_json::Value>>, crate::Response<serde_json::Value>> {
-      use tauri_shared::response::{Response, Status};
+      use tauri_shared::response::Response;
       let docs = state
         .data
         .repository_service
@@ -53,7 +53,7 @@ macro_rules! crud_create_command {
       state: tauri::State<'_, crate::AppState>,
       data: serde_json::Value,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
-      use tauri_shared::response::{Response, Status};
+      use tauri_shared::response::Response;
       let doc = state
         .data
         .repository_service
@@ -74,7 +74,7 @@ macro_rules! crud_update_command {
       id: String,
       data: serde_json::Value,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
-      use tauri_shared::response::{Response, Status};
+      use tauri_shared::response::Response;
       let doc = state
         .data
         .repository_service
@@ -94,7 +94,7 @@ macro_rules! crud_delete_command {
       state: tauri::State<'_, crate::AppState>,
       id: String,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
-      use tauri_shared::response::{Response, Status};
+      use tauri_shared::response::Response;
       let _ = state
         .data
         .repository_service

@@ -1,6 +1,6 @@
 /* models */
 use crate::utils::validation_helper::validate_path;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 /* sys lib */
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;

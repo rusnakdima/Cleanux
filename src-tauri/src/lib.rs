@@ -215,6 +215,10 @@ pub fn run() {
       commands::schema_command::delete_schema,
       tauri_shared::get_ui_schema,
       tauri_shared::save_ui_schema,
+      tauri_shared::check_for_update_command,
+      tauri_shared::download_update_command,
+      tauri_shared::install_update_command,
+      tauri_shared::get_current_version,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|_e| {

@@ -1,7 +1,7 @@
 use nosql_orm::prelude::*;
 use serde_json::Value;
 use std::sync::Arc;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 
 pub struct CrudService {
   provider: Arc<JsonProvider>,

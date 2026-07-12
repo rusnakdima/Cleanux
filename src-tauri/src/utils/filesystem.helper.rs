@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 /* response helper */
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 pub fn home_dir() -> Result<PathBuf, AppError> {
   dirs::home_dir().ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))

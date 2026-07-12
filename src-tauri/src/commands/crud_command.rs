@@ -1,7 +1,7 @@
 use crate::services::crud_service::CrudService;
 use std::sync::Arc;
 use tauri::State;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 
 #[tauri::command]
 pub async fn crud_execute(

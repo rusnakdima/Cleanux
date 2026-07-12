@@ -6,7 +6,7 @@ crud_get_all_command!(crud_get_health_snapshots, "health_snapshots");
 crud_create_command!(crud_create_health_snapshot, "health_snapshots");
 use crate::AppState;
 use tauri::State;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_health_history(
   state: State<'_, AppState>,

@@ -1,7 +1,7 @@
 use crate::utils::home_dir;
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 pub struct StartupService;
 #[derive(Debug, serde::Serialize)]
 pub struct StartupItem {

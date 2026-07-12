@@ -6,7 +6,7 @@ crud_get_all_command!(get_cleaning_reports, "cleaning_reports");
 crud_create_command!(create_cleaning_report, "cleaning_reports");
 use crate::AppState;
 use tauri::State;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_generate_cleaning_report(
   state: State<'_, AppState>,

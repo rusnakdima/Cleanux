@@ -10,7 +10,7 @@ crud_update_command!(update_automation_recipe, "automation_recipes");
 crud_delete_command!(delete_automation_recipe, "automation_recipes");
 use crate::AppState;
 use tauri::State;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 #[tauri::command(rename_all = "camelCase")]
 pub async fn crud_get_execution_history(
   state: State<'_, AppState>,

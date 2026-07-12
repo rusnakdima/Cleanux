@@ -5,7 +5,7 @@ use crate::utils::{
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KernelInfo {
   pub version: String,

@@ -10,7 +10,7 @@ crud_update_command!(update_cleaning_profile, "cleaning_profiles");
 crud_delete_command!(delete_cleaning_profile, "cleaning_profiles");
 use crate::AppState;
 use tauri::State;
-use tauri_shared::response::{Response, Status};
+use tauri_shared::response::Response;
 #[tauri::command(rename_all = "camelCase")]
 pub async fn apply_cleaning_profile(
   state: State<'_, AppState>,
