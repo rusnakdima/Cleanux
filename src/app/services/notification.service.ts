@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { getErrorMessage } from '@tauri-front/shared/utils/error';
+import { parseError, formatError } from '@tauri-front/shared';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class NotificationService {
   }
 
   error(title: string, error: unknown): void {
-    const message = getErrorMessage(error);
+    const message = formatError(parseError(error));
     this.alert(`${title}: ${message}`);
   }
 

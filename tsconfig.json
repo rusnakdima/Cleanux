@@ -1,7 +1,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
     "baseUrl": "./",
     "paths": {
       "@components/*": [
@@ -47,10 +46,10 @@
         "src/app/resolvers/*"
       ],
       "@tauri-front/shared": [
-        "../tauri-front-shared/projects/shared/src"
+        "../tauri-front-shared/projects/shared/dist"
       ],
       "@tauri-front/shared/*": [
-        "../tauri-front-shared/projects/shared/src/*"
+        "../tauri-front-shared/projects/shared/dist/*"
       ]
     },
     "strict": true,
