@@ -1,10 +1,10 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
-/* app */
+/* app:models */
 import { CleaningReport, SnapshotComparison } from '@entities/report.model';
 
 @Injectable({

@@ -1,26 +1,25 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
-/* app */
+/* app:models */
 import {
   CacheFileItem,
-  TrashFileItem,
-  LogFileItem,
   LargeFileItem,
-  ScanSummary,
+  LogFileItem,
   PaginatedData,
+  ScanSummary,
+  TrashFileItem,
 } from '@entities/system.model';
-
 export type {
   CacheFileItem,
-  TrashFileItem,
-  LogFileItem,
   LargeFileItem,
-  ScanSummary,
+  LogFileItem,
   PaginatedData,
+  ScanSummary,
+  TrashFileItem,
 } from '@entities/system.model';
 
 export interface FilePreviewResult {

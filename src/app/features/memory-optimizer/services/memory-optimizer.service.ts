@@ -1,11 +1,11 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
-/* app */
-import { MemoryInfo, SwapInfo, ProcessMemory } from '@entities/memory.model';
+/* app:models */
+import { MemoryInfo, ProcessMemory, SwapInfo } from '@entities/memory.model';
 
 @Injectable({
   providedIn: 'root',

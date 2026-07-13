@@ -1,10 +1,10 @@
 /* angular */
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
-/* app */
+/* app:models */
 import { PackageCacheInfo } from '@entities/package-manager.model';
 
 @Injectable({

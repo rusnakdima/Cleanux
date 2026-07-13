@@ -1,23 +1,27 @@
 /* angular */
 import { Injectable, signal, computed, inject } from '@angular/core';
+
 /* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
-/* app */
-import { FileService } from '@services/file.service';
-import { BackupService } from '@features/backup/services/backup.service';
-import { PackageManagerService } from '@services/package-manager.service';
-import { NotificationService } from '@services/notification.service';
-import { ConfirmDialogService } from '@shared/confirm-dialog';
+
+/* app:models */
+import { CleanerTabId } from '@entities/cleaner.model';
 import {
   CacheFileItem,
-  TrashFileItem,
-  LogFileItem,
   LargeFileItem,
-  ScanSummary,
+  LogFileItem,
   PaginatedData,
+  ScanSummary,
+  TrashFileItem,
 } from '@entities/system.model';
 import { PackageCacheInfo } from '@entities/package-manager.model';
-import { CleanerTabId } from '@entities/cleaner.model';
+
+/* app:services */
+import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { BackupService } from '@features/backup/services/backup.service';
+import { FileService } from '@services/file.service';
+import { NotificationService } from '@services/notification.service';
+import { PackageManagerService } from '@services/package-manager.service';
 
 @Injectable({ providedIn: 'root' })
 export class CleanerStore {

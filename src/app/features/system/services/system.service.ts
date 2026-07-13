@@ -1,13 +1,12 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
-/* app */
-import { SystemServiceItem, ProcessItem } from '@entities/system.model';
-
-export type { SystemServiceItem, ProcessItem } from '@entities/system.model';
+/* app:models */
+import { ProcessItem, SystemServiceItem } from '@entities/system.model';
+export type { ProcessItem, SystemServiceItem } from '@entities/system.model';
 
 @Injectable({
   providedIn: 'root',

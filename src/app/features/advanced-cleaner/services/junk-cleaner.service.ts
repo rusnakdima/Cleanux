@@ -1,10 +1,10 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
-/* app */
+/* app:models */
 import { JunkCategorySummary, JunkItem } from '@entities/junk-cleaner.model';
 
 @Injectable({

@@ -1,9 +1,11 @@
 /* angular */
 import { Injectable, signal, computed, inject } from '@angular/core';
+
 /* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
-/* app */
-import { SystemServiceItem, ProcessItem } from '@entities/system.model';
+
+/* app:models */
+import { ProcessItem, SystemServiceItem } from '@entities/system.model';
 
 @Injectable({ providedIn: 'root' })
 export class SystemStore {
