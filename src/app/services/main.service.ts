@@ -1,4 +1,6 @@
+/* angular */
 import { Injectable, inject, signal, computed } from '@angular/core';
+/* library */
 import { StorageCacheService } from '@tauri-front/shared';
 
 export interface AppState {

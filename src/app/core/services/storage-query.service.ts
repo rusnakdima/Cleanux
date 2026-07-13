@@ -1,13 +1,13 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
-
+/* library */
+import { StorageCacheService } from '@tauri-front/shared';
 /* app */
 import {
   StorageEntityService,
   EntityFilter,
   PaginationParams,
 } from '../../services/storage-entity.service';
-import { StorageCacheService } from '@tauri-front/shared';
 
 export interface QueryOptions {
   useCache?: boolean;

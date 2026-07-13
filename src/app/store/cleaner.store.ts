@@ -1,5 +1,8 @@
+/* angular */
 import { Injectable, signal, computed, inject } from '@angular/core';
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
+/* app */
 import { FileService } from '@services/file.service';
 import { BackupService } from '@features/backup/services/backup.service';
 import { PackageManagerService } from '@services/package-manager.service';

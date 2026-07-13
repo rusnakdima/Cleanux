@@ -1,7 +1,8 @@
 import { Injectable, signal, inject, OnDestroy, OnInit, computed, NgZone } from '@angular/core';
 import { listen } from '@tauri-apps/api/event';
-import { formatBytes } from '@tauri-front/shared';
-import { InvokeWrapperService } from '@tauri-front/shared';
+/* library */
+import { formatBytes, InvokeWrapperService } from '@tauri-front/shared';
+/* app */
 import { POLL_INTERVAL_MS } from '@shared/utils/constants';
 import { TEMPERATURE_REFRESH_INTERVAL_MS } from '@shared/constants/timeout.constants';
 
