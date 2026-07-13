@@ -47,10 +47,10 @@
         "src/app/resolvers/*"
       ],
       "@tauri-front/shared": [
-        "../tauri-front-shared/projects/shared/dist"
+        "../tauri-front-shared/projects/shared/src"
       ],
       "@tauri-front/shared/*": [
-        "../tauri-front-shared/projects/shared/dist/*"
+        "../tauri-front-shared/projects/shared/src/*"
       ]
     },
     "strict": true,

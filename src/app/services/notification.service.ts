@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { getErrorMessage } from '@shared/utils/error.util';
+import { getErrorMessage } from '@tauri-front/shared/utils/error';
 
 @Injectable({
   providedIn: 'root',
