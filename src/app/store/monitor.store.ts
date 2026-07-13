@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, OnDestroy, OnInit, computed, NgZone } from '@angular/core';
 import { listen } from '@tauri-apps/api/event';
-import { formatSize } from '@shared/utils/format.util';
+import { formatBytes } from '@tauri-front/shared';
 import { InvokeWrapperService } from '@tauri-front/shared';
 import { POLL_INTERVAL_MS } from '@shared/utils/constants';
 import { TEMPERATURE_REFRESH_INTERVAL_MS } from '@shared/constants/timeout.constants';
@@ -75,10 +75,10 @@ export class MonitorStore implements OnInit, OnDestroy {
   readonly isMonitoring = signal(false);
   readonly error = signal<string | null>(null);
 
-  readonly memoryUsedFormatted = computed(() => formatSize(this.systemStats().memoryUsed ?? 0));
-  readonly memoryTotalFormatted = computed(() => formatSize(this.systemStats().memoryTotal ?? 0));
-  readonly diskUsedFormatted = computed(() => formatSize(this.systemStats().diskUsed ?? 0));
-  readonly diskTotalFormatted = computed(() => formatSize(this.systemStats().diskTotal ?? 0));
+  readonly memoryUsedFormatted = computed(() => formatBytes(this.systemStats().memoryUsed ?? 0));
+  readonly memoryTotalFormatted = computed(() => formatBytes(this.systemStats().memoryTotal ?? 0));
+  readonly diskUsedFormatted = computed(() => formatBytes(this.systemStats().diskUsed ?? 0));
+  readonly diskTotalFormatted = computed(() => formatBytes(this.systemStats().diskTotal ?? 0));
 
   constructor() {}
 

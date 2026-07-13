@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { StorageEntityService } from '@app/services/storage-entity.service';
-import { StorageQueryService } from '@app/core/services/storage-query.service';
+import { CleanuxQueryService } from '@app/core/services/storage-query.service';
 import {
   QuickAction,
   ActionStep,
@@ -13,7 +13,7 @@ export type { QuickAction, ActionStep, AutomationRecipe, ExecutionHistoryEntry }
 @Injectable({ providedIn: 'root' })
 export class AutomationStore {
   private entity = inject(StorageEntityService);
-  private query = inject(StorageQueryService);
+  private query = inject(CleanuxQueryService);
 
   private _quickActions = signal<QuickAction[]>([]);
   private _recipes = signal<AutomationRecipe[]>([]);

@@ -1,9 +1,7 @@
-/**
- * Local StorageQueryService — kept instead of using @tauri-front/shared's StorageQueryService.
- * Reason: This is a data-access layer wrapping StorageEntityService + StorageCacheService for
- * DB queries with caching, not a pure in-memory filter utility like the library version.
- */
+/* angular */
 import { Injectable, inject } from '@angular/core';
+
+/* app */
 import {
   StorageEntityService,
   EntityFilter,
@@ -18,7 +16,7 @@ export interface QueryOptions {
 }
 
 @Injectable({ providedIn: 'root' })
-export class StorageQueryService {
+export class CleanuxQueryService {
   private entityService = inject(StorageEntityService);
   private cacheService = inject(StorageCacheService);
 
