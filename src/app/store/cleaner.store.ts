@@ -17,7 +17,7 @@ import {
 import { PackageCacheInfo } from '@entities/package-manager.model';
 
 /* app:services */
-import { ConfirmDialogService } from '@shared/confirm-dialog';
+import { ConfirmDialogService } from '@shared/confirm-dialog/confirm-dialog.service';
 import { BackupService } from '@features/backup/services/backup.service';
 import { FileService } from '@services/file.service';
 import { NotificationService } from '@services/notification.service';
