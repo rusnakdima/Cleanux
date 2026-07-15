@@ -1,7 +1,7 @@
 /* angular */
 import { Injectable, inject } from '@angular/core';
 
-/* services */
+/* library */
 import { InvokeWrapperService } from '@tauri-front/shared';
 
 export interface BackupItem {

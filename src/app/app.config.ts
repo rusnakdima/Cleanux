@@ -2,7 +2,7 @@
 import { ApplicationConfig, provideAppInitializer, inject } from '@angular/core';
 import { provideUnifiedApp } from '@tauri-front/shared';
 
-/* services */
+/* library */
 import { StyleThemeService } from '@tauri-front/shared';
 
 /* stores */
