@@ -1,8 +1,38 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@tauri-front/shared');
-vi.mock('@services/file.service');
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+const mockInvokeWrapperService = { invoke: vi.fn(), listen: vi.fn().mockResolvedValue(() => {}) };
+vi.mock('@tauri-front/shared', () => ({
+  InvokeWrapperService: mockInvokeWrapperService,
+}));
+
+vi.mock('./log-storage.service', () => ({
+  LogStorageService: class {
+    init = vi.fn();
+    addLog = vi.fn();
+    getLogs = vi.fn();
+    getStats = vi.fn();
+    clearLogs = vi.fn();
+    getErrors = vi.fn();
+  },
+}));
+
+vi.mock('@app/services/storage-entity.service', () => ({
+  StorageEntityService: class {
+    findById = vi.fn();
+    findMany = vi.fn();
+    create = vi.fn();
+    update = vi.fn();
+    patch = vi.fn();
+    delete = vi.fn();
+    count = vi.fn();
+    query = vi.fn();
+  },
+}));
 
 describe('CleanerStore', () => {
   let injector: Injector;

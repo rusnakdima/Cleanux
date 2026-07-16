@@ -2,7 +2,22 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Injector, runInInjectionContext, NgZone } from '@angular/core';
 import { formatSize } from '@shared/utils/format.util';
 
-vi.mock('@tauri-front/shared');
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+  listen: vi.fn(),
+}));
+
+const mockInvokeWrapperService = { invoke: vi.fn(), listen: vi.fn().mockResolvedValue(() => {}) };
+vi.mock('@tauri-front/shared', () => ({
+  InvokeWrapperService: mockInvokeWrapperService,
+  formatBytes: vi.fn((bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }),
+}));
 
 describe('MonitorStore', () => {
   let injector: Injector;

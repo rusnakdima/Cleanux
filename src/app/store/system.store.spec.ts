@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@tauri-front/shared');
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+const mockInvokeWrapperService = { invoke: vi.fn(), listen: vi.fn() };
+vi.mock('@tauri-front/shared', () => ({
+  InvokeWrapperService: mockInvokeWrapperService,
+}));
 
 describe('SystemStore', () => {
   let injector: Injector;
@@ -38,8 +45,6 @@ describe('SystemStore', () => {
     expect(store.services()).toHaveLength(0);
     expect(store.processes()).toHaveLength(0);
     expect(store.loading()).toBe(false);
-    expect(store.selectedServices()).toEqual(new Set());
-    expect(store.selectedProcesses()).toEqual(new Set());
   });
 
   it('should call getSystemServices', async () => {

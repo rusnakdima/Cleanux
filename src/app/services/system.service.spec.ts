@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@services/api.service');
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+const mockInvokeWrapperService = { invoke: vi.fn(), listen: vi.fn() };
+vi.mock('@tauri-front/shared', () => ({
+  InvokeWrapperService: mockInvokeWrapperService,
+}));
 
 describe('SystemService', () => {
   let injector: Injector;

@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@services/api.service');
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+const mockInvokeWrapperService = { invoke: vi.fn(), listen: vi.fn() };
+vi.mock('@tauri-front/shared', () => ({
+  InvokeWrapperService: mockInvokeWrapperService,
+}));
 
 describe('PackageManagerService', () => {
   let injector: Injector;
@@ -44,14 +51,15 @@ describe('PackageManagerService', () => {
 
     const service = runInInjectionContext(injector, () => new PackageManagerService());
 
-    let loadingDuringCall = false;
-    service.loading.subscribe((v) => {
-      if (v) loadingDuringCall = true;
-    });
+    expect(service.loading()).toBe(false);
 
-    await service.getPackageCacheInfo();
+    const loadingPromise = service.getPackageCacheInfo();
 
-    expect(loadingDuringCall).toBe(true);
+    // Signal is set to true while the call is in progress
+    expect(service.loading()).toBe(true);
+
+    await loadingPromise;
+
     expect(service.loading()).toBe(false);
   });
 
@@ -63,7 +71,14 @@ describe('PackageManagerService', () => {
       message: 'OK',
       data: [{ name: 'npm', cachePath: '/npm', size: 100, description: 'desc' }],
     };
-    mockApi.invoke.mockResolvedValueOnce(mockCacheInfo).mockResolvedValueOnce(mockResponse);
+    // cleanPackageCache internally calls getPackageCacheInfo(), so we need 3 mock values:
+    // 1. get_package_cache_info (direct call)
+    // 2. clean_package_cache
+    // 3. get_package_cache_info (internal call inside cleanPackageCache)
+    mockApi.invoke
+      .mockResolvedValueOnce(mockCacheInfo)
+      .mockResolvedValueOnce(mockResponse)
+      .mockResolvedValueOnce(mockCacheInfo);
 
     const service = runInInjectionContext(injector, () => new PackageManagerService());
     await service.getPackageCacheInfo();
@@ -101,9 +116,13 @@ describe('PackageManagerService', () => {
       ],
     };
     const mockCleanResponse = { status: 'success', message: 'Cleaned' };
+    // Call sequence: getPackageCacheInfo (direct) + cleanPackageCache(npm) [which calls getPackageCacheInfo again] + cleanPackageCache(yarn) [which calls getPackageCacheInfo again]
     mockApi.invoke
       .mockResolvedValueOnce(mockCacheInfo)
       .mockResolvedValueOnce(mockCleanResponse)
+      .mockResolvedValueOnce(mockCacheInfo)
+      .mockResolvedValueOnce(mockCleanResponse)
+      .mockResolvedValueOnce(mockCacheInfo)
       .mockResolvedValueOnce(mockCleanResponse);
 
     const service = runInInjectionContext(injector, () => new PackageManagerService());

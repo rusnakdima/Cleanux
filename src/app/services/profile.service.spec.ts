@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 
-vi.mock('@services/api.service');
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+const mockInvokeWrapperService = { invoke: vi.fn(), listen: vi.fn() };
+vi.mock('@tauri-front/shared', () => ({
+  InvokeWrapperService: mockInvokeWrapperService,
+}));
 
 describe('ProfileService', () => {
   let injector: Injector;
@@ -89,7 +96,9 @@ describe('ProfileService', () => {
   it('should parse valid profile file', async () => {
     const { ProfileService } = await import('@services/profile.service');
     const profile = createMockProfile('Imported Profile');
-    const file = new File([JSON.stringify(profile)], 'profile.json', { type: 'application/json' });
+    const file = {
+      text: async () => JSON.stringify(profile),
+    } as File;
 
     const service = runInInjectionContext(injector, () => new ProfileService(mockApi as any));
     const result = await service.importProfile(file);
@@ -99,7 +108,9 @@ describe('ProfileService', () => {
 
   it('should reject invalid profile file', async () => {
     const { ProfileService } = await import('@services/profile.service');
-    const file = new File(['invalid json'], 'profile.json', { type: 'application/json' });
+    const file = {
+      text: async () => 'invalid json',
+    } as File;
 
     const service = runInInjectionContext(injector, () => new ProfileService(mockApi as any));
     await expect(service.importProfile(file)).rejects.toThrow('Invalid profile file');

@@ -1,6 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NotificationService } from './notification.service';
 
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn(),
+}));
+
+vi.mock('@tauri-front/shared', () => ({
+  formatError: vi.fn((e: unknown) => (e instanceof Error ? e.message : String(e))),
+  parseError: vi.fn((e: unknown) => {
+    if (e === null || e === undefined) return 'Unknown error';
+    if (e instanceof Error) return e.message;
+    return String(e);
+  }),
+}));
+
 describe('NotificationService', () => {
   let originalAlert: typeof window.alert;
   let originalConfirm: typeof window.confirm;
