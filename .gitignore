@@ -48,3 +48,5 @@ Thumbs.db
 /src-tauri/capabilities/mcp-bridge.json
 
 docs/
+# Angular cache (nested)
+**/.angular/
