@@ -11,7 +11,7 @@ vi.mock('@tauri-front/shared', () => ({
 }));
 
 vi.mock('@app/services/storage-entity.service', () => ({
-  StorageEntityService: function() {
+  StorageEntityService: function () {
     this.findById = vi.fn();
     this.findMany = vi.fn();
     this.create = vi.fn();
@@ -24,7 +24,7 @@ vi.mock('@app/services/storage-entity.service', () => ({
 }));
 
 vi.mock('@app/core/services/storage-query.service', () => ({
-  CleanuxQueryService: function() {
+  CleanuxQueryService: function () {
     this.query = vi.fn();
     this.queryById = vi.fn();
     this.invalidate = vi.fn();
@@ -33,7 +33,7 @@ vi.mock('@app/core/services/storage-query.service', () => ({
 }));
 
 vi.mock('@services/notification.service', () => ({
-  NotificationService: function() {
+  NotificationService: function () {
     this.alert = vi.fn();
     this.confirm = vi.fn(() => true);
     this.error = vi.fn();
@@ -43,7 +43,7 @@ vi.mock('@services/notification.service', () => ({
 }));
 
 vi.mock('./log-storage.service', () => ({
-  LogStorageService: function() {
+  LogStorageService: function () {
     this.init = vi.fn();
     this.addLog = vi.fn();
     this.getLogs = vi.fn();
@@ -78,7 +78,13 @@ describe('AutomationStore', () => {
     const { AutomationStore } = await import('./automation.store');
     const store = runInInjectionContext(injector, () => new AutomationStore());
     const mockActions = [
-      { id: 'qa1', name: 'Quick Clean', description: 'Clean', icon: 'broom', actions: [{ CleanCategory: { category: 'cache' } }] },
+      {
+        id: 'qa1',
+        name: 'Quick Clean',
+        description: 'Clean',
+        icon: 'broom',
+        actions: [{ CleanCategory: { category: 'cache' } }],
+      },
     ];
     mockApi.invoke.mockResolvedValue(mockActions);
 
@@ -103,7 +109,13 @@ describe('AutomationStore', () => {
     const { AutomationStore } = await import('./automation.store');
     const store = runInInjectionContext(injector, () => new AutomationStore());
     const mockRecipes = [
-      { id: 'rec1', name: 'Morning Cleanup', steps: [{ CleanCategory: { category: 'cache' } }], enabled: true, trigger: 'Scheduled' as const },
+      {
+        id: 'rec1',
+        name: 'Morning Cleanup',
+        steps: [{ CleanCategory: { category: 'cache' } }],
+        enabled: true,
+        trigger: 'Scheduled' as const,
+      },
     ];
     mockApi.invoke.mockResolvedValue(mockRecipes);
 
@@ -117,7 +129,13 @@ describe('AutomationStore', () => {
     const { AutomationStore } = await import('./automation.store');
     const store = runInInjectionContext(injector, () => new AutomationStore());
     mockApi.invoke.mockResolvedValue('Recipe saved');
-    const recipe = { id: 'rec1', name: 'Morning Cleanup', steps: [{ CleanCategory: { category: 'cache' } }], enabled: true, trigger: 'Scheduled' as const };
+    const recipe = {
+      id: 'rec1',
+      name: 'Morning Cleanup',
+      steps: [{ CleanCategory: { category: 'cache' } }],
+      enabled: true,
+      trigger: 'Scheduled' as const,
+    };
 
     const result = await store.saveRecipe(recipe);
 
@@ -151,7 +169,15 @@ describe('AutomationStore', () => {
     const { AutomationStore } = await import('./automation.store');
     const store = runInInjectionContext(injector, () => new AutomationStore());
     const mockHistory = [
-      { id: 'exec1', name: 'Morning Cleanup', status: 'completed', startedAt: new Date(Date.now() - 3600000).toISOString(), completedAt: new Date(Date.now() - 3500000).toISOString(), stepsExecuted: 3, totalSteps: 3 },
+      {
+        id: 'exec1',
+        name: 'Morning Cleanup',
+        status: 'completed',
+        startedAt: new Date(Date.now() - 3600000).toISOString(),
+        completedAt: new Date(Date.now() - 3500000).toISOString(),
+        stepsExecuted: 3,
+        totalSteps: 3,
+      },
     ];
     mockApi.invoke.mockResolvedValue(mockHistory);
 

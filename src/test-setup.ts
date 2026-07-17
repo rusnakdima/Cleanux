@@ -12,7 +12,7 @@ if (typeof indexedDB === 'undefined') {
       }),
     }),
   };
-  (global as any).indexedDB = {
+  (globalThis as any).indexedDB = {
     open: () => ({ onerror: null, onsuccess: null, result: mockDB }),
   };
 }
