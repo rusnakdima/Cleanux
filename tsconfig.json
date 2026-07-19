@@ -2,7 +2,6 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@components/*": [
         "src/app/components/*"
@@ -47,10 +46,10 @@
         "src/app/resolvers/*"
       ],
       "@tauri-front/shared": [
-        "../tauri-front-shared/projects/shared/dist"
+        "node_modules/@tauri-front/shared"
       ],
       "@tauri-front/shared/*": [
-        "../tauri-front-shared/projects/shared/dist/*"
+        "node_modules/@tauri-front/shared/*"
       ]
     },
     "strict": true,
@@ -65,13 +64,15 @@
     "emitDecoratorMetadata": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "ignoreDeprecations": "6.0"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "disableTypeScriptVersionCheck": true
   },
   "files": [],
   "references": [
