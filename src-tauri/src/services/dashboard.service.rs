@@ -15,7 +15,7 @@ use crate::models::{ScanSummaryModel, SystemServiceModel};
 use crate::Response;
 use serde_json::Value;
 /* helpers */
-use crate::utils::{home_dir, stderr_string, stdout_string, ResponseBuilder};
+use crate::utils::{home_dir, stderr_string, stdout_string};
 use rayon::prelude::*;
 use walkdir::WalkDir;
 pub struct DashboardService;
@@ -34,11 +34,7 @@ impl DashboardService {
         .output()
         .map_err(|e| Response::error(format!("Failed to run systemctl: {}", e)))?;
       if !output.status.success() {
-        return Err(
-          ResponseBuilder::new()
-            .error(&stderr_string(&output))
-            .build(),
-        );
+        return Err(Response::error(stderr_string(&output)));
       }
       let stdout = stdout_string(&output);
       let mut services = Vec::new();
@@ -60,20 +56,18 @@ impl DashboardService {
           });
         }
       }
-      Ok(
-        ResponseBuilder::new()
-          .success("Running services retrieved successfully")
-          .data(Value::Array(
-            services
-              .into_iter()
-              .map(|s| {
-                serde_json::to_value(s)
-                  .map_err(|e| Response::error(format!("Serialization error: {}", e)))
-              })
-              .collect::<Result<Vec<_>, _>>()?,
-          ))
-          .build(),
-      )
+      Ok(Response::success(
+        Value::Array(
+          services
+            .into_iter()
+            .map(|s| {
+              serde_json::to_value(s)
+                .map_err(|e| Response::error(format!("Serialization error: {}", e)))
+            })
+            .collect::<Result<Vec<_>, _>>()?,
+        ),
+        Some("Running services retrieved successfully"),
+      ))
     }
   }
   pub fn get_cache_summary(&self) -> Result<Response<Value>, Response<Value>> {
@@ -99,15 +93,11 @@ impl DashboardService {
       file_count,
       total_size,
     };
-    Ok(
-      ResponseBuilder::new()
-        .success("Large files summary retrieved successfully")
-        .data(
-          serde_json::to_value(summary)
-            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
-        )
-        .build(),
-    )
+    Ok(Response::success(
+      serde_json::to_value(summary)
+        .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+      Some("Large files summary retrieved successfully"),
+    ))
   }
   pub fn get_trash_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let home = home_dir().map_err(|_| Response::error("Home directory not found"))?;
@@ -126,15 +116,11 @@ impl DashboardService {
       total_size,
       file_count,
     };
-    Ok(
-      ResponseBuilder::new()
-        .success("Trash summary retrieved successfully")
-        .data(
-          serde_json::to_value(summary)
-            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
-        )
-        .build(),
-    )
+    Ok(Response::success(
+      serde_json::to_value(summary)
+        .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+      Some("Trash summary retrieved successfully"),
+    ))
   }
   pub fn get_log_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let log_dir = Path::new("/var/log");
@@ -161,15 +147,11 @@ impl DashboardService {
       total_size,
       file_count,
     };
-    Ok(
-      ResponseBuilder::new()
-        .success("Log summary retrieved successfully")
-        .data(
-          serde_json::to_value(summary)
-            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
-        )
-        .build(),
-    )
+    Ok(Response::success(
+      serde_json::to_value(summary)
+        .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+      Some("Log summary retrieved successfully"),
+    ))
   }
   pub fn get_large_files_summary(&self) -> Result<Response<Value>, Response<Value>> {
     let home = home_dir().map_err(|_| Response::error("Home directory not found"))?;
@@ -207,14 +189,10 @@ impl DashboardService {
       total_size,
       file_count,
     };
-    Ok(
-      ResponseBuilder::new()
-        .success("Large files summary retrieved successfully")
-        .data(
-          serde_json::to_value(summary)
-            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
-        )
-        .build(),
-    )
+    Ok(Response::success(
+      serde_json::to_value(summary)
+        .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+      Some("Large files summary retrieved successfully"),
+    ))
   }
 }

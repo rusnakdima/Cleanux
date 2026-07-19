@@ -1,7 +1,7 @@
-use cleanux_lib::helpers::filesystem_helper::{
+use cleanux_lib::utils::filesystem_helper::{
   calculate_dir_size, format_size, get_dir_size, remove_dir_contents,
 };
-use cleanux_lib::helpers::validation_helper::{is_allowed_path, validate_path};
+use cleanux_lib::utils::validation_helper::{is_allowed_path, validate_path};
 use std::fs;
 use std::path::PathBuf;
 #[test]

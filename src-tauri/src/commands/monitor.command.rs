@@ -1,7 +1,7 @@
 use crate::services::health_history_service::{HealthHistoryService, HealthSnapshot};
 use crate::services::monitor_service::MonitorService;
 use crate::services::temperature_service::TemperatureService;
-use crate::utils::{array_response, ResponseBuilder};
+use crate::utils::array_response;
 use crate::Response;
 static HEALTH_SERVICE: std::sync::OnceLock<HealthHistoryService> = std::sync::OnceLock::new();
 fn get_health_service() -> &'static HealthHistoryService {
@@ -42,17 +42,14 @@ pub fn save_health_snapshot(
     large_files_count,
   };
   match get_health_service().save_health_snapshot(snapshot) {
-    Ok(id) => Ok(
-      ResponseBuilder::new()
-        .success("Health snapshot saved successfully")
-        .data(serde_json::json!({ "id": id }))
-        .build(),
-    ),
-    Err(e) => Err(
-      ResponseBuilder::new()
-        .error(&format!("Failed to save health snapshot: {}", e))
-        .build(),
-    ),
+    Ok(id) => Ok(Response::success(
+      serde_json::json!({ "id": id }),
+      Some("Health snapshot saved successfully"),
+    )),
+    Err(e) => Err(Response::error(format!(
+      "Failed to save health snapshot: {}",
+      e
+    ))),
   }
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -62,11 +59,10 @@ pub fn get_health_history(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   match get_health_service().get_health_history(days) {
     Ok(history) => array_response(history, "Health history retrieved successfully"),
-    Err(e) => Err(
-      ResponseBuilder::new()
-        .error(&format!("Failed to get health history: {}", e))
-        .build(),
-    ),
+    Err(e) => Err(Response::error(format!(
+      "Failed to get health history: {}",
+      e
+    ))),
   }
 }
 #[tauri::command(rename_all = "camelCase")]
@@ -75,20 +71,15 @@ pub fn get_health_trends(
   days: u32,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   match get_health_service().get_health_trends(days) {
-    Ok(trend) => Ok(
-      ResponseBuilder::new()
-        .success("Health trends retrieved successfully")
-        .data(
-          serde_json::to_value(trend)
-            .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
-        )
-        .build(),
-    ),
-    Err(e) => Err(
-      ResponseBuilder::new()
-        .error(&format!("Failed to get health trends: {}", e))
-        .build(),
-    ),
+    Ok(trend) => Ok(Response::success(
+      serde_json::to_value(trend)
+        .map_err(|e| Response::error(format!("Serialization error: {}", e)))?,
+      Some("Health trends retrieved successfully"),
+    )),
+    Err(e) => Err(Response::error(format!(
+      "Failed to get health trends: {}",
+      e
+    ))),
   }
 }
 #[tauri::command(rename_all = "camelCase")]

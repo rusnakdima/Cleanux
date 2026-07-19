@@ -3,7 +3,7 @@ use crate::services::memory_service::MemoryService;
 use crate::services::power_service::PowerService;
 use crate::services::process_service::ProcessService;
 use crate::services::system_service::SystemService;
-use crate::utils::ResponseBuilder;
+
 use crate::Response;
 static KERNEL_SERVICE: std::sync::OnceLock<KernelCleanerService> = std::sync::OnceLock::new();
 fn get_kernel_service() -> &'static KernelCleanerService {
@@ -45,40 +45,29 @@ pub fn kill_selected_processes(
       Err(_) => failed.push(pid),
     }
   }
+  let killed_len = killed.len();
+  let failed_len = failed.len();
   if failed.is_empty() {
-    Ok(
-      ResponseBuilder::new()
-        .success(&format!("Killed {} processes", killed.len()))
-        .data(serde_json::Value::Array(
-          killed.into_iter().map(serde_json::Value::from).collect(),
-        ))
-        .build(),
-    )
+    Ok(Response::success(
+      serde_json::Value::Array(killed.into_iter().map(serde_json::Value::from).collect()),
+      Some(&format!("Killed {} processes", killed_len)),
+    ))
   } else {
-    Err(
-      ResponseBuilder::new()
-        .error(&format!(
-          "Killed {} processes, failed to kill {}",
-          killed.len(),
-          failed.len()
-        ))
-        .data(serde_json::Value::Array(
-          failed.into_iter().map(serde_json::Value::from).collect(),
-        ))
-        .build(),
-    )
+    Err(Response::error_with_data(
+      serde_json::Value::Array(failed.into_iter().map(serde_json::Value::from).collect()),
+      format!(
+        "Killed {} processes, failed to kill {}",
+        killed_len, failed_len
+      ),
+    ))
   }
 }
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_current_kernel() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
-  Ok(
-    ResponseBuilder::new()
-      .success("Current kernel retrieved")
-      .data(serde_json::Value::String(
-        get_kernel_service().get_current_kernel(),
-      ))
-      .build(),
-  )
+  Ok(Response::success(
+    serde_json::Value::String(get_kernel_service().get_current_kernel()),
+    Some("Current kernel retrieved"),
+  ))
 }
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_installed_kernels() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -91,12 +80,10 @@ pub fn get_old_kernels() -> Result<Response<serde_json::Value>, Response<serde_j
 #[tauri::command(rename_all = "camelCase")]
 pub fn get_old_kernels_size() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let size = get_kernel_service().get_old_kernels_size();
-  Ok(
-    ResponseBuilder::new()
-      .success("Old kernels size retrieved")
-      .data(serde_json::json!({ "size": size }))
-      .build(),
-  )
+  Ok(Response::success(
+    serde_json::json!({ "size": size }),
+    Some("Old kernels size retrieved"),
+  ))
 }
 #[tauri::command(rename_all = "camelCase")]
 pub fn remove_kernel(

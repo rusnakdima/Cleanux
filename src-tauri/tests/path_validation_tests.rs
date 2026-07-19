@@ -1,4 +1,4 @@
-use cleanux_lib::helpers::validation_helper::{is_allowed_path, validate_path};
+use cleanux_lib::utils::validation_helper::{is_allowed_path, validate_path};
 use std::path::PathBuf;
 #[test]
 fn test_validate_path_nonexistent() {
