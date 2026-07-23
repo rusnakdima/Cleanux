@@ -1,11 +1,8 @@
-/* angular */
 import { ApplicationConfig, provideAppInitializer, inject } from '@angular/core';
-import { provideUnifiedApp } from '@tauri-front/shared';
-
-/* library */
+import { provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { StyleThemeService } from '@tauri-front/shared';
-
-/* stores */
+import { routes } from './app.routes';
 import { CleanerStore } from '@store/cleaner.store';
 import { SystemStore } from '@store/system.store';
 import { MonitorStore } from '@store/monitor.store';
@@ -13,12 +10,8 @@ import { AutomationStore } from '@store/automation.store';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    ...provideUnifiedApp({
-      enableAnimations: true,
-      enableHttpClient: true,
-      enableBrowserErrorListeners: true,
-      enableZoneChangeDetection: true,
-    }),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
     CleanerStore,
     SystemStore,
     MonitorStore,

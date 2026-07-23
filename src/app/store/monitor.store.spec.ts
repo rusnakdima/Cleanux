@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Injector, runInInjectionContext, NgZone } from '@angular/core';
-import { formatSize } from '@shared/utils/format.util';
+import { formatBytes } from '@tauri-front/shared';
 
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
@@ -71,11 +71,11 @@ describe('MonitorStore', () => {
   });
 
   it('should format bytes correctly', async () => {
-    expect(formatSize(0)).toBe('0 B');
-    expect(formatSize(1024)).toBe('1 KB');
-    expect(formatSize(1024 * 1024)).toBe('1 MB');
-    expect(formatSize(1024 * 1024 * 1024)).toBe('1 GB');
-    expect(formatSize(1.5 * 1024 * 1024 * 1024)).toBe('1.5 GB');
+    expect(formatBytes(0)).toBe('0 B');
+    expect(formatBytes(1024)).toBe('1 KB');
+    expect(formatBytes(1024 * 1024)).toBe('1 MB');
+    expect(formatBytes(1024 * 1024 * 1024)).toBe('1 GB');
+    expect(formatBytes(1.5 * 1024 * 1024 * 1024)).toBe('1.5 GB');
   });
 
   it('should return success for low usage', async () => {
