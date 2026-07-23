@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("automation_recipes")]
 #[index("name", 1)]
+#[serde(rename_all = "camelCase")]
 pub struct AutomationRecipeEntity {
   pub id: Option<String>,
   pub name: String,
@@ -16,6 +17,7 @@ pub struct AutomationRecipeEntity {
   pub updated_at: DateTime<Utc>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum ActionStep {
   CleanCategory { category: String },
   RunProfile { profile_name: String },
@@ -23,6 +25,7 @@ pub enum ActionStep {
   Wait { seconds: u32 },
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum RecipeTrigger {
   Manual,
   Scheduled,

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("health_snapshots")]
 #[index("timestamp", 1)]
+#[serde(rename_all = "camelCase")]
 pub struct HealthSnapshotEntity {
   pub id: Option<String>,
   #[timestamp]
@@ -15,6 +16,7 @@ pub struct HealthSnapshotEntity {
   pub large_files_count: i64,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct HealthTrendEntity {
   pub trend: String,
   pub change_percent: f64,

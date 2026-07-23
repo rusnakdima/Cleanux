@@ -1,0 +1,38 @@
+/* TailwindCSS v4 */
+@import "tailwindcss";
+
+/* Flowbite CSS */
+@import "flowbite/dist/flowbite.min.css";
+
+/* MDI Font */
+@import "@mdi/font/css/materialdesignicons.min.css";
+
+/* All 7 themes from shared library - dynamically selected via data-theme attribute */
+@import "@tauri-front/shared/styles/themes/index.css";
+
+/* UI System styles */
+@import "@tauri-front/shared/styles/ui-system.css";
+
+/* M3 semantic token utility classes */
+@import "@tauri-front/shared/styles/m3-tokens.css";
+
+/* Scan Flowbite source for classes */
+@source "../node_modules/flowbite";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+}

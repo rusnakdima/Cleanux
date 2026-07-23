@@ -9,6 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 /* response helper */
+use tauri_shared::quick_sort_by;
 use tauri_shared::response::Response;
 pub const LARGE_FILE_THRESHOLD_BYTES: u64 = 100 * 1024 * 1024;
 pub fn home_dir() -> Result<PathBuf, AppError> {
@@ -147,7 +148,7 @@ pub fn scan_large_file_models(
     })
     .flatten()
     .collect();
-  files.sort_by_key(|b| std::cmp::Reverse(b.size));
+  quick_sort_by(&mut files, |a, b| b.size.cmp(&a.size));
   let total = files.len();
   if let Some(max) = sort_truncate {
     if files.len() > max {
@@ -246,19 +247,19 @@ pub fn get_dir_size(path: &Path) -> u64 {
   calculate_dir_size(path).map(|(size, _)| size).unwrap_or(0)
 }
 pub fn clean_cache_dir(path: &Path, name: &str) -> Result<Response<serde_json::Value>, AppError> {
-  use crate::utils::response_helper::{data_string, success_response};
+  use tauri_shared::response::Response;
   if !path.exists() {
-    return Ok(success_response(
-      data_string("0".to_string()),
-      format!("{} cache is empty", name),
+    return Ok(Response::success(
+      serde_json::Value::String("0".to_string()),
+      Some(&format!("{} cache is empty", name)),
     ));
   }
   match remove_dir_contents(path) {
-    Ok(count) => Ok(success_response(
-      data_string(count.to_string()),
-      format!("Cleaned {} cache ({} items)", name, count),
+    Ok(count) => Ok(Response::success(
+      serde_json::Value::String(count.to_string()),
+      Some(&format!("Cleaned {} cache ({} items)", name, count)),
     )),
-    Err(e) => Err(AppError::message(format!(
+    Err(e) => Err(AppError::Internal(format!(
       "Failed to clean {} cache: {}",
       name, e
     ))),

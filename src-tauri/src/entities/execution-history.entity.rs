@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Model, Validate)]
 #[table_name("execution_history")]
 #[index("started_at", 1)]
+#[serde(rename_all = "camelCase")]
 pub struct ExecutionHistoryEntity {
   pub id: Option<String>,
   pub name: String,

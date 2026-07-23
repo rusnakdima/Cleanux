@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("cleaning_profiles")]
 #[index("name", 1)]
+#[serde(rename_all = "camelCase")]
 pub struct CleaningProfileEntity {
   pub id: Option<String>,
   pub name: String,

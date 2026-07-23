@@ -20,8 +20,12 @@ fn get_common_dirs() -> Vec<PathBuf> {
     dirs.push(home.join(".local/share"));
     dirs.push(home.join(".local/lib"));
   }
-  dirs.push(PathBuf::from("/usr/local/lib"));
-  dirs.push(PathBuf::from("/usr/lib"));
+  // Configurable via CLEANUX_LIB_SCAN_PATH env var (colon-separated paths)
+  if let Ok(extra) = std::env::var("CLEANUX_LIB_SCAN_PATH") {
+    for p in extra.split(':') {
+      dirs.push(PathBuf::from(p));
+    }
+  }
   dirs
 }
 #[allow(non_snake_case)]

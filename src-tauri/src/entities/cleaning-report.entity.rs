@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Model)]
 #[table_name("cleaning_reports")]
 #[index("date", 1)]
+#[serde(rename_all = "camelCase")]
 pub struct CleaningReportEntity {
   pub id: Option<String>,
   pub date: String,
@@ -12,6 +13,7 @@ pub struct CleaningReportEntity {
   pub categories: ReportCategories,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ReportCategories {
   pub cache: i64,
   pub trash: i64,
@@ -20,6 +22,7 @@ pub struct ReportCategories {
   pub duplicates: i64,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SnapshotComparison {
   pub before_id: String,
   pub after_id: String,
@@ -29,6 +32,7 @@ pub struct SnapshotComparison {
   pub details: ComparisonDetails,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ComparisonDetails {
   pub cache_change: i64,
   pub trash_change: i64,

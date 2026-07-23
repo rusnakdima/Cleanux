@@ -11,7 +11,7 @@ pub fn run_command(cmd: &str, args: &[&str]) -> Result<(bool, String, u64), AppE
   let output = Command::new(cmd)
     .args(args)
     .output()
-    .map_err(|e| AppError::message(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))?;
+    .map_err(|e| AppError::Internal(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))?;
   let stderr = stderr_string(&output);
   Ok((
     output.status.success(),
@@ -23,11 +23,11 @@ pub fn get_command_output(cmd: &str, args: &[&str]) -> Result<String, AppError> 
   let output = Command::new(cmd)
     .args(args)
     .output()
-    .map_err(|e| AppError::message(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))?;
+    .map_err(|e| AppError::Internal(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))?;
   if output.status.success() {
     Ok(stdout_string(&output))
   } else {
-    Err(AppError::message(stderr_string(&output)))
+    Err(AppError::Internal(stderr_string(&output)))
   }
 }
 pub fn pkexec_rm_paths(paths: &[String]) -> Result<Output, std::io::Error> {
@@ -42,14 +42,14 @@ pub fn run_command_raw(cmd: &str, args: &[&str]) -> Result<Output, AppError> {
   Command::new(cmd)
     .args(args)
     .output()
-    .map_err(|e| AppError::message(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))
+    .map_err(|e| AppError::Internal(format!("Failed to run {} {}: {}", cmd, args.join(" "), e)))
 }
 pub fn run_command_checked(cmd: &str, args: &[&str]) -> Result<Output, AppError> {
   let output = run_command_raw(cmd, args)?;
   if output.status.success() {
     Ok(output)
   } else {
-    Err(AppError::message(stderr_string(&output)))
+    Err(AppError::Internal(stderr_string(&output)))
   }
 }
 pub fn run_command_ignore_error(cmd: &str, args: &[&str]) -> Option<Output> {
@@ -62,7 +62,7 @@ pub fn pkexec(command: &str, args: &[&str]) -> Result<Output, AppError> {
     cmd.arg(arg);
   }
   cmd.output().map_err(|e| {
-    AppError::message(format!(
+    AppError::Internal(format!(
       "Failed to run pkexec {} {}: {}",
       command,
       args.join(" "),
