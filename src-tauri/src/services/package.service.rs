@@ -1,7 +1,5 @@
 use crate::models::AppError;
-use crate::utils::{
-  calculate_dir_size, data_string, stderr_string, stdout_string, success_response,
-};
+use crate::utils::{calculate_dir_size, stderr_string, stdout_string};
 use crate::Response;
 use serde_json::Value;
 use std::fs;
@@ -50,9 +48,9 @@ impl PackageService {
         })
       })
       .collect();
-    Ok(success_response(
+    Ok(Response::success(
       Value::Array(data),
-      "Package cache info retrieved successfully",
+      Some("Package cache info retrieved successfully"),
     ))
   }
   fn calculate_deb_size(path: &Path) -> u64 {
@@ -101,7 +99,7 @@ impl PackageService {
       "snap" => Self::clean_snap(),
       "flatpak" => Self::clean_flatpak(),
       "yum" => Self::clean_yum(),
-      _ => Err(AppError::message(format!(
+      _ => Err(AppError::Internal(format!(
         "Unknown package manager: {}",
         manager
       ))),
@@ -111,10 +109,10 @@ impl PackageService {
     let output = Command::new("snap")
       .args(["list", "--all"])
       .output()
-      .map_err(|e| AppError::message(format!("Failed to run snap list: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to run snap list: {}", e)))?;
     if !output.status.success() {
       let stderr = stderr_string(&output);
-      return Err(AppError::message(format!(
+      return Err(AppError::Internal(format!(
         "Failed to list snaps: {}",
         stderr
       )));
@@ -146,28 +144,28 @@ impl PackageService {
         }
       }
     }
-    Ok(success_response(
-      data_string(removed_count.to_string()),
-      format!(
+    Ok(Response::success(
+      serde_json::Value::String(removed_count.to_string()),
+      Some(&format!(
         "Snap cleanup completed, removed {} revisions",
         removed_count
-      ),
+      )),
     ))
   }
   fn clean_flatpak() -> Result<Response<Value>, AppError> {
     let output = Command::new("flatpak")
       .args(["uninstall", "--unused", "-y"])
       .output()
-      .map_err(|e| AppError::message(format!("Failed to run flatpak uninstall: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to run flatpak uninstall: {}", e)))?;
     if output.status.success() {
-      Ok(success_response(
-        data_string("flatpak"),
-        "Flatpak unused packages cleaned successfully",
+      Ok(Response::success(
+        serde_json::Value::String("flatpak".to_string()),
+        Some("Flatpak unused packages cleaned successfully"),
       ))
     } else {
       let stderr = stderr_string(&output);
-      Ok(crate::utils::info_response(
-        data_string("flatpak"),
+      Ok(Response::error_with_status(
+        tauri_shared::response::Status::Info,
         format!("Flatpak cleanup: {}", stderr),
       ))
     }
@@ -176,15 +174,15 @@ impl PackageService {
     let output = Command::new("yum")
       .args(["clean", "all"])
       .output()
-      .map_err(|e| AppError::message(format!("Failed to run yum clean: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to run yum clean: {}", e)))?;
     if output.status.success() {
-      Ok(success_response(
-        data_string("yum"),
-        "YUM cache cleaned successfully",
+      Ok(Response::success(
+        serde_json::Value::String("yum".to_string()),
+        Some("YUM cache cleaned successfully"),
       ))
     } else {
       let stderr = stderr_string(&output);
-      Err(AppError::message(format!(
+      Err(AppError::Internal(format!(
         "Failed to clean YUM cache: {}",
         stderr
       )))

@@ -1,4 +1,4 @@
-use crate::utils::{calculate_dir_size, get_command_output, run_command, success_response};
+use crate::utils::{calculate_dir_size, get_command_output, run_command};
 use crate::models::AppError;
 use crate::Response;
 use serde::{Deserialize, Serialize};
@@ -30,33 +30,33 @@ impl AptService {
     if success {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
+      Ok(Response::success(
         serde_json::json!({
             "command": "apt-get clean",
             "spaceFreed": freed,
             "message": "APT cache cleaned successfully"
         }),
-        format!("APT cache cleaned. Freed {} bytes", freed),
+        Some(&format!("APT cache cleaned. Freed {} bytes", freed)),
       ))
     } else {
       let err_msg = format!("Failed to clean APT cache: {}", stderr);
-      Err(AppError::message(err_msg))
+      Err(AppError::Internal(err_msg))
     }
   }
   pub fn autoremove() -> Result<Response<Value>, AppError> {
     let (success, stderr, _) = run_command("apt-get", &["autoremove", "-y"])?;
     if success {
-      Ok(success_response(
+      Ok(Response::success(
         serde_json::json!({
             "command": "apt-get autoremove -y",
             "spaceFreed": 0,
             "message": "APT autoremove completed successfully"
         }),
-        "APT autoremove completed successfully",
+        Some("APT autoremove completed successfully"),
       ))
     } else {
       let err_msg = format!("Failed to run apt-get autoremove: {}", stderr);
-      Err(AppError::message(err_msg))
+      Err(AppError::Internal(err_msg))
     }
   }
   pub fn autoclean() -> Result<Response<Value>, AppError> {
@@ -65,17 +65,17 @@ impl AptService {
     if success {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
+      Ok(Response::success(
         serde_json::json!({
             "command": "apt-get autoclean",
             "spaceFreed": freed,
             "message": "APT autoclean completed successfully"
         }),
-        format!("APT autoclean completed. Freed {} bytes", freed),
+        Some(&format!("APT autoclean completed. Freed {} bytes", freed)),
       ))
     } else {
       let err_msg = format!("Failed to run apt-get autoclean: {}", stderr);
-      Err(AppError::message(err_msg))
+      Err(AppError::Internal(err_msg))
     }
   }
   pub fn get_orphaned_packages() -> Vec<OrphanedPackage> {
@@ -106,13 +106,13 @@ impl AptService {
   pub fn remove_orphaned_package(name: &str) -> Result<Response<Value>, AppError> {
     let (success, stderr, _) = run_command("dpkg", &["--remove", name])?;
     if success {
-      Ok(success_response(
-        crate::utils::data_string(name),
-        format!("Removed orphaned package: {}", name),
+      Ok(Response::success(
+        serde_json::Value::String(name.to_string()),
+        Some(&format!("Removed orphaned package: {}", name)),
       ))
     } else {
       let err_msg = format!("Failed to remove package {}: {}", name, stderr);
-      Err(AppError::message(err_msg))
+      Err(AppError::Internal(err_msg))
     }
   }
   pub fn get_partial_downloads() -> Vec<String> {

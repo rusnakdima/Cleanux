@@ -1,7 +1,6 @@
 /* helpers */
 use crate::utils::{
-  calculate_dir_size, clean_cache_dir, data_string, home_dir, remove_dir_contents,
-  service_method_full, success_response,
+  calculate_dir_size, clean_cache_dir, home_dir, remove_dir_contents, service_method_full,
 };
 /* models */
 use crate::models::AppError;
@@ -44,9 +43,9 @@ impl DevCacheService {
     summary.insert("go".to_string(), serde_json::json!(go));
     summary.insert("maven".to_string(), serde_json::json!(maven));
     summary.insert("gradle".to_string(), serde_json::json!(gradle));
-    Ok(success_response(
+    Ok(Response::success(
       serde_json::Value::Object(summary),
-      "Dev cache summary retrieved successfully",
+      Some("Dev cache summary retrieved successfully"),
     ))
   }
   fn scan_npm_cache_inner(&self, home: &Path) -> DevCacheItem {
@@ -211,12 +210,12 @@ impl DevCacheService {
       }
     }
     if errors.is_empty() {
-      Ok(success_response(
-        data_string(cleaned_count.to_string()),
-        format!("Cleaned cargo cache ({} items)", cleaned_count),
+      Ok(Response::success(
+        serde_json::Value::String(cleaned_count.to_string()),
+        Some(&format!("Cleaned cargo cache ({} items)", cleaned_count)),
       ))
     } else {
-      Err(AppError::message(format!(
+      Err(AppError::Internal(format!(
         "Cleaned {}, errors: {}",
         cleaned_count,
         errors.join("; ")
@@ -292,12 +291,12 @@ impl DevCacheService {
       errors.push("gradle".to_string());
     }
     if errors.is_empty() {
-      Ok(success_response(
-        data_string(cleaned_total.to_string()),
-        format!("Cleaned all dev caches ({} items)", cleaned_total),
+      Ok(Response::success(
+        serde_json::Value::String(cleaned_total.to_string()),
+        Some(&format!("Cleaned all dev caches ({} items)", cleaned_total)),
       ))
     } else {
-      Err(AppError::message(format!(
+      Err(AppError::Internal(format!(
         "Cleaned {}, failed: {}",
         cleaned_total,
         errors.join(", ")

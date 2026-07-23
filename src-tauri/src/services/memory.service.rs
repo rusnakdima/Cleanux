@@ -57,7 +57,7 @@ fn parse_proc_swaps() -> SwapInfo {
 impl MemoryService {
   pub fn get_memory_info() -> Result<Response<Value>, Response<Value>> {
     let content = std::fs::read_to_string("/proc/meminfo")
-      .map_err(|e| AppError::message(format!("Failed to read meminfo: {}", e)).into_response())?;
+      .map_err(|e| AppError::Internal(format!("Failed to read meminfo: {}", e)).into_response())?;
     let total = parse_meminfo_value(&content, "MemTotal:");
     let free = parse_meminfo_value(&content, "MemFree:");
     let buffers = parse_meminfo_value(&content, "Buffers:");
@@ -126,7 +126,7 @@ impl MemoryService {
   }
   pub fn optimize_memory() -> Result<Response<Value>, Response<Value>> {
     std::fs::write("/proc/sys/vm/drop_caches", "3")
-      .map_err(|e| AppError::message(format!("Failed to drop caches: {}", e)).into_response())?;
+      .map_err(|e| AppError::Internal(format!("Failed to drop caches: {}", e)).into_response())?;
     Ok(Response {
       status: Status::Success,
       message: "Memory caches dropped successfully".to_string(),

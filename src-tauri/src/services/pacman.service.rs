@@ -1,4 +1,4 @@
-use crate::utils::{calculate_dir_size, get_command_output, run_command, success_response};
+use crate::utils::{calculate_dir_size, get_command_output, run_command};
 use crate::models::AppError;
 use crate::Response;
 use std::fs;
@@ -43,17 +43,17 @@ impl PacmanService {
     }
     let after_size = Self::get_cache_size_internal();
     let actual_freed = before_size.saturating_sub(after_size);
-    Ok(success_response(
+    Ok(Response::success(
       serde_json::json!({
           "command": format!("pacman cache clean (keep {})", keep_recent),
           "spaceFreed": actual_freed,
           "message": format!("Removed {} old packages", packages.len())
       }),
-      format!(
+      Some(&format!(
         "Pacman cache cleaned. Removed {} old packages. Freed {} bytes",
         packages.len(),
         actual_freed
-      ),
+      )),
     ))
   }
   pub fn full_clean() -> Result<Response<Value>, AppError> {
@@ -62,17 +62,17 @@ impl PacmanService {
     if success {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
+      Ok(Response::success(
         serde_json::json!({
             "command": "pacman -Scc --noconfirm",
             "spaceFreed": freed,
             "message": "Pacman full cache clean completed"
         }),
-        format!("Pacman full cache clean completed. Freed {} bytes", freed),
+        Some(&format!("Pacman full cache clean completed. Freed {} bytes", freed)),
       ))
     } else {
       let err_msg = format!("Failed to run pacman -Scc: {}", stderr);
-      Err(AppError::message(err_msg))
+      Err(AppError::Internal(err_msg))
     }
   }
 }

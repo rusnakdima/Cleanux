@@ -1,4 +1,4 @@
-use crate::utils::{calculate_dir_size, run_command, success_response};
+use crate::utils::{calculate_dir_size, run_command};
 use crate::models::{AppError, DataValue};
 use crate::Response;
 use std::path::Path;
@@ -20,17 +20,17 @@ impl DnfService {
     if success {
       let after_size = Self::get_cache_size_internal();
       let freed = before_size.saturating_sub(after_size);
-      Ok(success_response(
+      Ok(Response::success(
         DataValue::Object(serde_json::json!({
             "command": "dnf clean all",
             "spaceFreed": freed,
             "message": "DNF cache cleaned successfully"
         })),
-        format!("DNF cache cleaned. Freed {} bytes", freed),
+        Some(&format!("DNF cache cleaned. Freed {} bytes", freed)),
       ))
     } else {
       let err_msg = format!("Failed to clean DNF cache: {}", stderr);
-      Err(AppError::message(err_msg))
+      Err(AppError::Internal(err_msg))
     }
   }
 }

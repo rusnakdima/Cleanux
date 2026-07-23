@@ -100,7 +100,7 @@ impl SystemService {
         serde_json::Value::String(path.to_string()),
         Some(&format!("Started editor for file: {}", path)),
       )),
-      Err(e) => Err(AppError::Unknown(format!("Failed to start editor: {}", e))),
+      Err(e) => Err(AppError::Internal(format!("Failed to start editor: {}", e))),
     }
   }
   service_method_full!(get_all_services => get_all_services_inner);
@@ -116,7 +116,7 @@ impl SystemService {
       ],
     )?;
     if !output.status.success() {
-      return Err(AppError::Unknown(stderr_string(&output)));
+      return Err(AppError::Internal(stderr_string(&output)));
     }
     let stdout = stdout_string(&output);
     let services: Vec<serde_json::Value> = stdout

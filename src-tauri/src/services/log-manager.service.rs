@@ -1,10 +1,9 @@
 /* helpers */
-use crate::utils::{
-  data_string, format_size, get_dir_size, stderr_string, stdout_string, success_response,
-};
+use crate::utils::{format_size, get_dir_size, stderr_string, stdout_string};
 /* models */
 use crate::models::AppError;
 use crate::Response;
+use tauri_shared::quick_sort_by;
 /* services::logs */
 use crate::services::logs::RotatedLogHandler;
 /* sys lib */
@@ -168,17 +167,17 @@ impl LogManagerService {
       Ok(output) => {
         if output.status.success() {
           let before = Self::get_journal_size_inner().unwrap_or(0);
-          Ok(success_response(
-            data_string(format!("before:{}", before)),
-            format!("Journal vacuumed to {} MB", size_mb),
+          Ok(Response::success(
+            serde_json::Value::String(format!("before:{}", before)),
+            Some(&format!("Journal vacuumed to {} MB", size_mb)),
           ))
         } else {
           let stderr = stderr_string(&output);
-          Err(AppError::message(format!("Failed to vacuum journal: {}", stderr)).into_response())
+          Err(AppError::Internal(format!("Failed to vacuum journal: {}", stderr)).into_response())
         }
       }
       Err(e) => {
-        Err(AppError::message(format!("Failed to execute journalctl: {}", e)).into_response())
+        Err(AppError::Internal(format!("Failed to execute journalctl: {}", e)).into_response())
       }
     }
   }
@@ -193,17 +192,17 @@ impl LogManagerService {
       Ok(output) => {
         if output.status.success() {
           let before = Self::get_journal_size_inner().unwrap_or(0);
-          Ok(success_response(
-            data_string(format!("before:{}", before)),
-            format!("Journal vacuumed to {} days", days),
+          Ok(Response::success(
+            serde_json::Value::String(format!("before:{}", before)),
+            Some(&format!("Journal vacuumed to {} days", days)),
           ))
         } else {
           let stderr = stderr_string(&output);
-          Err(AppError::message(format!("Failed to vacuum journal: {}", stderr)).into_response())
+          Err(AppError::Internal(format!("Failed to vacuum journal: {}", stderr)).into_response())
         }
       }
       Err(e) => {
-        Err(AppError::message(format!("Failed to execute journalctl: {}", e)).into_response())
+        Err(AppError::Internal(format!("Failed to execute journalctl: {}", e)).into_response())
       }
     }
   }
@@ -219,16 +218,16 @@ impl LogManagerService {
     match RotatedLogHandler::clean_old_logs(days) {
       Ok((count, errors)) => {
         if errors.is_empty() {
-          Ok(success_response(
-            data_string(count.to_string()),
-            format!(
+          Ok(Response::success(
+            serde_json::Value::String(count.to_string()),
+            Some(&format!(
               "Cleaned {} rotated log files older than {} days",
               count, days
-            ),
+            )),
           ))
         } else {
           Err(
-            AppError::message(format!(
+            AppError::Internal(format!(
               "Cleaned {} files, errors: {}",
               count,
               errors.join("; ")
@@ -366,7 +365,7 @@ impl LogManagerService {
     if log_path.exists() {
       Self::collect_log_files(log_path, &mut files)?;
     }
-    files.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
+    quick_sort_by(&mut files, |a, b| b.size_bytes.cmp(&a.size_bytes));
     files.truncate(limit);
     Ok(files)
   }

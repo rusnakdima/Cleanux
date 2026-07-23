@@ -2,7 +2,7 @@
 use crate::models::{AppError, CleaningProfile};
 use crate::Response;
 /* helpers */
-use crate::utils::{data_empty_string, data_string, home_dir, success_response};
+use crate::utils::home_dir;
 /* sys lib */
 use std::fs;
 use std::path::PathBuf;
@@ -10,15 +10,15 @@ type ProfileResult<T> = Result<T, AppError>;
 pub struct ProfileService;
 impl ProfileService {
   fn get_profiles_dir() -> ProfileResult<PathBuf> {
-    let config_dir =
-      dirs::config_dir().ok_or_else(|| AppError::message("Config directory not found"))?;
+    let config_dir = dirs::config_dir()
+      .ok_or_else(|| AppError::Internal("Config directory not found".to_string()))?;
     Ok(config_dir.join("cleanux").join("profiles"))
   }
   fn ensure_profiles_dir() -> ProfileResult<PathBuf> {
     let dir = Self::get_profiles_dir()?;
     if !dir.exists() {
       fs::create_dir_all(&dir)
-        .map_err(|e| AppError::message(format!("Failed to create profiles directory: {}", e)))?;
+        .map_err(|e| AppError::Internal(format!("Failed to create profiles directory: {}", e)))?;
     }
     Ok(dir)
   }
@@ -35,12 +35,12 @@ impl ProfileService {
   fn save_profile_inner(profile: CleaningProfile) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(&profile.name)?;
     let json = serde_json::to_string_pretty(&profile)
-      .map_err(|e| AppError::message(format!("Failed to serialize profile: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to serialize profile: {}", e)))?;
     fs::write(&path, json)
-      .map_err(|e| AppError::message(format!("Failed to save profile: {}", e)))?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Profile '{}' saved successfully", profile.name),
+      .map_err(|e| AppError::Internal(format!("Failed to save profile: {}", e)))?;
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!("Profile '{}' saved successfully", profile.name)),
     ))
   }
   pub fn load_profile(
@@ -51,15 +51,15 @@ impl ProfileService {
   fn load_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
-      return Err(AppError::message("Profile not found"));
+      return Err(AppError::Internal("Profile not found".to_string()));
     }
     let json = fs::read_to_string(&path)
-      .map_err(|e| AppError::message(format!("Failed to read profile: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to read profile: {}", e)))?;
     let profile: CleaningProfile = serde_json::from_str(&json)
-      .map_err(|e| AppError::message(format!("Failed to parse profile: {}", e)))?;
-    Ok(success_response(
+      .map_err(|e| AppError::Internal(format!("Failed to parse profile: {}", e)))?;
+    Ok(Response::success(
       serde_json::to_value(&profile).unwrap_or(serde_json::Value::Null),
-      format!("Profile '{}' loaded successfully", name),
+      Some(&format!("Profile '{}' loaded successfully", name)),
     ))
   }
   pub fn list_profiles() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
@@ -70,7 +70,7 @@ impl ProfileService {
     let mut profiles: Vec<serde_json::Value> = Vec::new();
     if dir.exists() {
       let entries = fs::read_dir(&dir)
-        .map_err(|e| AppError::message(format!("Failed to read profiles directory: {}", e)))?;
+        .map_err(|e| AppError::Internal(format!("Failed to read profiles directory: {}", e)))?;
       for entry in entries.flatten() {
         let path = entry.path();
         if path.extension().and_then(|s| s.to_str()) == Some("json") {
@@ -92,9 +92,9 @@ impl ProfileService {
         }
       }
     }
-    Ok(success_response(
+    Ok(Response::success(
       serde_json::Value::Array(profiles.clone()),
-      format!("Found {} profiles", profiles.len()),
+      Some(&format!("Found {} profiles", profiles.len())),
     ))
   }
   pub fn delete_profile(
@@ -105,13 +105,13 @@ impl ProfileService {
   fn delete_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
-      return Err(AppError::message("Profile not found"));
+      return Err(AppError::Internal("Profile not found".to_string()));
     }
     fs::remove_file(&path)
-      .map_err(|e| AppError::message(format!("Failed to delete profile: {}", e)))?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Profile '{}' deleted successfully", name),
+      .map_err(|e| AppError::Internal(format!("Failed to delete profile: {}", e)))?;
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!("Profile '{}' deleted successfully", name)),
     ))
   }
   pub fn apply_profile(
@@ -123,12 +123,12 @@ impl ProfileService {
   fn apply_profile_inner(name: &str) -> ProfileResult<Response<serde_json::Value>> {
     let path = Self::get_profile_path(name)?;
     if !path.exists() {
-      return Err(AppError::message("Profile not found"));
+      return Err(AppError::Internal("Profile not found".to_string()));
     }
     let json = fs::read_to_string(&path)
-      .map_err(|e| AppError::message(format!("Failed to read profile: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to read profile: {}", e)))?;
     let profile: CleaningProfile = serde_json::from_str(&json)
-      .map_err(|e| AppError::message(format!("Failed to parse profile: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to parse profile: {}", e)))?;
     let mut results: Vec<String> = Vec::new();
     if profile.clean_cache {
       if let Some(cache_dir) = dirs::cache_dir() {
@@ -176,9 +176,13 @@ impl ProfileService {
         ));
       }
     }
-    Ok(success_response(
-      data_string(results.len().to_string()),
-      format!("Profile '{}' applied: {}", name, results.join(", ")),
+    Ok(Response::success(
+      serde_json::Value::String(results.len().to_string()),
+      Some(&format!(
+        "Profile '{}' applied: {}",
+        name,
+        results.join(", ")
+      )),
     ))
   }
 }

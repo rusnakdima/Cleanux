@@ -1,5 +1,5 @@
 /* helpers */
-use crate::utils::{data_string, service_method_full, success_response};
+use crate::utils::service_method_full;
 /* models */
 use crate::models::AppError;
 use crate::Response;
@@ -110,9 +110,9 @@ impl JunkCleanerService {
           "items": junk_items_to_json(&logs),
       }),
     );
-    Ok(success_response(
+    Ok(Response::success(
       Value::Object(summary),
-      "Junk summary retrieved successfully",
+      Some("Junk summary retrieved successfully"),
     ))
   }
   pub fn scan_browser_caches(&self) -> Result<Response<Value>, Response<Value>> {
@@ -120,7 +120,7 @@ impl JunkCleanerService {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
-        Ok(success_response(
+        Ok(Response::success(
           serde_json::json!({
             "category": "Browser",
             "total_size": size,
@@ -128,7 +128,11 @@ impl JunkCleanerService {
             "description": "Browser cache files (Firefox, Chrome, Brave, Edge)",
             "items": items,
           }),
-          format!("Found {} browser cache items ({} bytes)", items.len(), size),
+          Some(&format!(
+            "Found {} browser cache items ({} bytes)",
+            items.len(),
+            size
+          )),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -139,7 +143,7 @@ impl JunkCleanerService {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
-        Ok(success_response(
+        Ok(Response::success(
           serde_json::json!({
             "category": "Thumbnails",
             "total_size": size,
@@ -147,11 +151,11 @@ impl JunkCleanerService {
             "description": "Image thumbnail cache",
             "items": items,
           }),
-          format!(
+          Some(&format!(
             "Found {} thumbnail cache items ({} bytes)",
             items.len(),
             size
-          ),
+          )),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -162,7 +166,7 @@ impl JunkCleanerService {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
-        Ok(success_response(
+        Ok(Response::success(
           serde_json::json!({
             "category": "Applications",
             "total_size": size,
@@ -170,11 +174,11 @@ impl JunkCleanerService {
             "description": "Application caches (Flatpak, Snap, AppImage)",
             "items": items,
           }),
-          format!(
+          Some(&format!(
             "Found {} application cache items ({} bytes)",
             items.len(),
             size
-          ),
+          )),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -185,7 +189,7 @@ impl JunkCleanerService {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
-        Ok(success_response(
+        Ok(Response::success(
           serde_json::json!({
             "category": "System",
             "total_size": size,
@@ -193,7 +197,11 @@ impl JunkCleanerService {
             "description": "System temporary files (/tmp, /var/tmp)",
             "items": items,
           }),
-          format!("Found {} system temp items ({} bytes)", items.len(), size),
+          Some(&format!(
+            "Found {} system temp items ({} bytes)",
+            items.len(),
+            size
+          )),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -204,7 +212,7 @@ impl JunkCleanerService {
       Ok(items) => {
         let size: u64 = items.iter().map(|i| i.size).sum();
         let count: u32 = items.iter().map(|i| i.file_count).sum();
-        Ok(success_response(
+        Ok(Response::success(
           serde_json::json!({
             "category": "Logs",
             "total_size": size,
@@ -212,7 +220,11 @@ impl JunkCleanerService {
             "description": "Rotated and old log files",
             "items": items,
           }),
-          format!("Found {} log rotation items ({} bytes)", items.len(), size),
+          Some(&format!(
+            "Found {} log rotation items ({} bytes)",
+            items.len(),
+            size
+          )),
         ))
       }
       Err(e) => Err(e.into_response()),
@@ -231,7 +243,10 @@ impl JunkCleanerService {
       "system" => JunkCategory::System,
       "logs" => JunkCategory::Logs,
       _ => {
-        return Err(AppError::message(format!("Invalid category: {}", category)));
+        return Err(AppError::Internal(format!(
+          "Invalid category: {}",
+          category
+        )));
       }
     };
     match cat {
@@ -244,11 +259,11 @@ impl JunkCleanerService {
   }
   fn clean_browser_caches(&self) -> CleanerResult<Response<Value>> {
     match BrowserCacheScanner::clean() {
-      Ok(count) => Ok(success_response(
-        data_string(count.to_string()),
-        format!("Cleaned {} browser cache directories", count),
+      Ok(count) => Ok(Response::success(
+        serde_json::Value::String(count.to_string()),
+        Some(&format!("Cleaned {} browser cache directories", count)),
       )),
-      Err(e) => Err(AppError::message(format!(
+      Err(e) => Err(AppError::Internal(format!(
         "Failed to clean browser caches: {}",
         e
       ))),
@@ -256,11 +271,11 @@ impl JunkCleanerService {
   }
   fn clean_thumbnail_caches(&self) -> CleanerResult<Response<Value>> {
     match ThumbnailCacheScanner::clean() {
-      Ok(count) => Ok(success_response(
-        data_string(count.to_string()),
-        format!("Cleaned thumbnail cache ({} items)", count),
+      Ok(count) => Ok(Response::success(
+        serde_json::Value::String(count.to_string()),
+        Some(&format!("Cleaned thumbnail cache ({} items)", count)),
       )),
-      Err(e) => Err(AppError::message(format!(
+      Err(e) => Err(AppError::Internal(format!(
         "Failed to clean thumbnail cache: {}",
         e
       ))),
@@ -268,11 +283,11 @@ impl JunkCleanerService {
   }
   fn clean_application_caches(&self) -> CleanerResult<Response<Value>> {
     match ApplicationCacheScanner::clean() {
-      Ok(count) => Ok(success_response(
-        data_string(count.to_string()),
-        format!("Cleaned {} application cache directories", count),
+      Ok(count) => Ok(Response::success(
+        serde_json::Value::String(count.to_string()),
+        Some(&format!("Cleaned {} application cache directories", count)),
       )),
-      Err(e) => Err(AppError::message(format!(
+      Err(e) => Err(AppError::Internal(format!(
         "Failed to clean application caches: {}",
         e
       ))),
@@ -280,11 +295,11 @@ impl JunkCleanerService {
   }
   fn clean_system_temp(&self) -> CleanerResult<Response<Value>> {
     match SystemTempScanner::clean() {
-      Ok(count) => Ok(success_response(
-        data_string(count.to_string()),
-        format!("Cleaned {} temporary directories", count),
+      Ok(count) => Ok(Response::success(
+        serde_json::Value::String(count.to_string()),
+        Some(&format!("Cleaned {} temporary directories", count)),
       )),
-      Err(e) => Err(AppError::message(format!(
+      Err(e) => Err(AppError::Internal(format!(
         "Failed to clean system temp: {}",
         e
       ))),
@@ -292,11 +307,11 @@ impl JunkCleanerService {
   }
   fn clean_log_rotations(&self) -> CleanerResult<Response<Value>> {
     match LogRotationScanner::clean() {
-      Ok(count) => Ok(success_response(
-        data_string(count.to_string()),
-        format!("Cleaned {} rotated log files", count),
+      Ok(count) => Ok(Response::success(
+        serde_json::Value::String(count.to_string()),
+        Some(&format!("Cleaned {} rotated log files", count)),
       )),
-      Err(e) => Err(AppError::message(format!(
+      Err(e) => Err(AppError::Internal(format!(
         "Failed to clean log rotations: {}",
         e
       ))),

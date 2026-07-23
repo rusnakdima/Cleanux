@@ -1,6 +1,6 @@
 use crate::models::AppError;
 use crate::services::profile_service::ProfileService;
-use crate::utils::{data_string, stderr_string, success_response};
+use crate::utils::stderr_string;
 use crate::Response;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -12,7 +12,7 @@ fn get_timestamp_u64() -> u64 {
   use std::time::{SystemTime, UNIX_EPOCH};
   SystemTime::now()
     .duration_since(UNIX_EPOCH)
-    .map_err(|_| AppError::Unknown("Time went backwards".to_string()))
+    .map_err(|_| AppError::Internal("Time went backwards".to_string()))
     .unwrap_or_default()
     .as_secs()
 }
@@ -166,14 +166,17 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
         let _ = LargeFileCleaningService.clear_all_large_files();
         Ok("Large files cleared".to_string())
       }
-      _ => Err(AppError::message(format!("Unknown category: {}", category))),
+      _ => Err(AppError::Internal(format!(
+        "Unknown category: {}",
+        category
+      ))),
     },
     ActionStep::RunProfile { profile_name } => match ProfileService.apply_profile(profile_name) {
       Ok(result) => Ok(format!(
         "Profile '{}' applied: {}",
         profile_name, result.message
       )),
-      Err(e) => Err(AppError::message(format!(
+      Err(e) => Err(AppError::Internal(format!(
         "Failed to run profile: {}",
         e.message
       ))),
@@ -192,12 +195,12 @@ fn execute_action_step(step: &ActionStep) -> Result<String, AppError> {
         .arg("-c")
         .arg(command)
         .output()
-        .map_err(|e| AppError::message(format!("Failed to execute command: {}", e)))?;
+        .map_err(|e| AppError::Internal(format!("Failed to execute command: {}", e)))?;
       if output.status.success() {
         Ok(format!("Command executed: {}", command))
       } else {
         let stderr = stderr_string(&output);
-        Err(AppError::message(format!("Command failed: {}", stderr)))
+        Err(AppError::Internal(format!("Command failed: {}", stderr)))
       }
     }
     ActionStep::Wait { seconds } => {
@@ -213,9 +216,9 @@ fn add_to_history(entry: ExecutionHistoryEntry) -> Result<(), AppError> {
     history.truncate(100);
   }
   let json = serde_json::to_string_pretty(&history)
-    .map_err(|e| AppError::message(format!("Failed to serialize history: {}", e)))?;
+    .map_err(|e| AppError::Internal(format!("Failed to serialize history: {}", e)))?;
   fs::write(get_history_path(), json)
-    .map_err(|e| AppError::message(format!("Failed to write history: {}", e)))?;
+    .map_err(|e| AppError::Internal(format!("Failed to write history: {}", e)))?;
   Ok(())
 }
 fn get_execution_history() -> Result<Vec<ExecutionHistoryEntry>, AppError> {
@@ -224,9 +227,9 @@ fn get_execution_history() -> Result<Vec<ExecutionHistoryEntry>, AppError> {
     return Ok(Vec::new());
   }
   let content = fs::read_to_string(&path)
-    .map_err(|e| AppError::message(format!("Failed to read history: {}", e)))?;
+    .map_err(|e| AppError::Internal(format!("Failed to read history: {}", e)))?;
   let history: Vec<ExecutionHistoryEntry> = serde_json::from_str(&content)
-    .map_err(|e| AppError::message(format!("Failed to parse history: {}", e)))?;
+    .map_err(|e| AppError::Internal(format!("Failed to parse history: {}", e)))?;
   Ok(history)
 }
 impl AutomationService {
@@ -236,10 +239,10 @@ impl AutomationService {
   fn get_quick_actions_inner() -> Result<Response<Value>, AppError> {
     let actions = get_predefined_quick_actions();
     let json = serde_json::to_value(&actions)
-      .map_err(|e| AppError::message(format!("Failed to serialize actions: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to serialize actions: {}", e)))?;
     let data = serde_json::from_value(json)
-      .map_err(|e| AppError::message(format!("Failed to deserialize actions: {}", e)))?;
-    Ok(success_response(data, "Quick actions retrieved"))
+      .map_err(|e| AppError::Internal(format!("Failed to deserialize actions: {}", e)))?;
+    Ok(Response::success(data, Some("Quick actions retrieved")))
   }
   pub fn execute_action(action_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::execute_action_inner(action_id).map_err(|e| e.into_response())
@@ -249,7 +252,7 @@ impl AutomationService {
     let action = actions
       .into_iter()
       .find(|a| a.id == action_id)
-      .ok_or_else(|| AppError::message(format!("Action not found: {}", action_id)))?;
+      .ok_or_else(|| AppError::Internal(format!("Action not found: {}", action_id)))?;
     let start_time = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
     let total_steps = action.actions.len() as u32;
     let mut steps_executed = 0u32;
@@ -267,9 +270,9 @@ impl AutomationService {
       total_steps,
     };
     let _ = add_to_history(entry);
-    Ok(success_response(
-      data_string("executed"),
-      format!("Action '{}' executed successfully", action.name),
+    Ok(Response::success(
+      serde_json::Value::String("executed".to_string()),
+      Some(&format!("Action '{}' executed successfully", action.name)),
     ))
   }
   pub fn get_recipes() -> Result<Response<Value>, Response<Value>> {
@@ -278,17 +281,20 @@ impl AutomationService {
   fn get_recipes_inner() -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
-      return Ok(success_response(Value::Array(vec![]), "No recipes saved"));
+      return Ok(Response::success(
+        Value::Array(vec![]),
+        Some("No recipes saved"),
+      ));
     }
     let content = fs::read_to_string(&path)
-      .map_err(|e| AppError::message(format!("Failed to read recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to read recipes: {}", e)))?;
     let recipes: Vec<AutomationRecipe> = serde_json::from_str(&content)
-      .map_err(|e| AppError::message(format!("Failed to parse recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to parse recipes: {}", e)))?;
     let json = serde_json::to_value(&recipes)
-      .map_err(|e| AppError::message(format!("Failed to serialize recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to serialize recipes: {}", e)))?;
     let data = serde_json::from_value(json)
-      .map_err(|e| AppError::message(format!("Failed to deserialize recipes: {}", e)))?;
-    Ok(success_response(data, "Recipes retrieved"))
+      .map_err(|e| AppError::Internal(format!("Failed to deserialize recipes: {}", e)))?;
+    Ok(Response::success(data, Some("Recipes retrieved")))
   }
   pub fn save_recipe(recipe: AutomationRecipe) -> Result<Response<Value>, Response<Value>> {
     Self::save_recipe_inner(recipe).map_err(|e| e.into_response())
@@ -300,9 +306,9 @@ impl AutomationService {
     let path = get_recipes_path();
     let mut recipes: Vec<AutomationRecipe> = if path.exists() {
       let content = fs::read_to_string(&path)
-        .map_err(|e| AppError::message(format!("Failed to read recipes: {}", e)))?;
+        .map_err(|e| AppError::Internal(format!("Failed to read recipes: {}", e)))?;
       serde_json::from_str(&content)
-        .map_err(|e| AppError::message(format!("Failed to parse recipes: {}", e)))?
+        .map_err(|e| AppError::Internal(format!("Failed to parse recipes: {}", e)))?
     } else {
       Vec::new()
     };
@@ -312,12 +318,12 @@ impl AutomationService {
       recipes.push(recipe);
     }
     let json = serde_json::to_string_pretty(&recipes)
-      .map_err(|e| AppError::message(format!("Failed to serialize recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to serialize recipes: {}", e)))?;
     fs::write(&path, json)
-      .map_err(|e| AppError::message(format!("Failed to write recipes: {}", e)))?;
-    Ok(success_response(
-      data_string("saved"),
-      "Recipe saved successfully",
+      .map_err(|e| AppError::Internal(format!("Failed to write recipes: {}", e)))?;
+    Ok(Response::success(
+      serde_json::Value::String("saved".to_string()),
+      Some("Recipe saved successfully"),
     ))
   }
   pub fn delete_recipe(recipe_id: String) -> Result<Response<Value>, Response<Value>> {
@@ -326,21 +332,24 @@ impl AutomationService {
   fn delete_recipe_inner(recipe_id: String) -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
-      return Ok(success_response(
-        data_string("deleted"),
-        "No recipes to delete",
+      return Ok(Response::success(
+        serde_json::Value::String("deleted".to_string()),
+        Some("No recipes to delete"),
       ));
     }
     let content = fs::read_to_string(&path)
-      .map_err(|e| AppError::message(format!("Failed to read recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to read recipes: {}", e)))?;
     let mut recipes: Vec<AutomationRecipe> = serde_json::from_str(&content)
-      .map_err(|e| AppError::message(format!("Failed to parse recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to parse recipes: {}", e)))?;
     recipes.retain(|r| r.id != recipe_id);
     let json = serde_json::to_string_pretty(&recipes)
-      .map_err(|e| AppError::message(format!("Failed to serialize recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to serialize recipes: {}", e)))?;
     fs::write(&path, json)
-      .map_err(|e| AppError::message(format!("Failed to write recipes: {}", e)))?;
-    Ok(success_response(data_string("deleted"), "Recipe deleted"))
+      .map_err(|e| AppError::Internal(format!("Failed to write recipes: {}", e)))?;
+    Ok(Response::success(
+      serde_json::Value::String("deleted".to_string()),
+      Some("Recipe deleted"),
+    ))
   }
   pub fn execute_recipe(recipe_id: String) -> Result<Response<Value>, Response<Value>> {
     Self::execute_recipe_inner(recipe_id).map_err(|e| e.into_response())
@@ -348,16 +357,16 @@ impl AutomationService {
   fn execute_recipe_inner(recipe_id: String) -> Result<Response<Value>, AppError> {
     let path = get_recipes_path();
     if !path.exists() {
-      return Err(AppError::message("No recipes found"));
+      return Err(AppError::Internal("No recipes found".to_string()));
     }
     let content = fs::read_to_string(&path)
-      .map_err(|e| AppError::message(format!("Failed to read recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to read recipes: {}", e)))?;
     let recipes: Vec<AutomationRecipe> = serde_json::from_str(&content)
-      .map_err(|e| AppError::message(format!("Failed to parse recipes: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to parse recipes: {}", e)))?;
     let recipe = recipes
       .into_iter()
       .find(|r| r.id == recipe_id)
-      .ok_or_else(|| AppError::message(format!("Recipe not found: {}", recipe_id)))?;
+      .ok_or_else(|| AppError::Internal(format!("Recipe not found: {}", recipe_id)))?;
     let start_time = chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
     let total_steps = recipe.steps.len() as u32;
     let mut steps_executed = 0u32;
@@ -375,9 +384,9 @@ impl AutomationService {
       total_steps,
     };
     let _ = add_to_history(entry);
-    Ok(success_response(
-      data_string("executed"),
-      format!("Recipe '{}' executed successfully", recipe.name),
+    Ok(Response::success(
+      serde_json::Value::String("executed".to_string()),
+      Some(&format!("Recipe '{}' executed successfully", recipe.name)),
     ))
   }
   pub fn get_execution_history_list() -> Result<Response<Value>, Response<Value>> {
@@ -386,10 +395,10 @@ impl AutomationService {
   fn get_execution_history_inner() -> Result<Response<Value>, AppError> {
     let history = get_execution_history()?;
     let json = serde_json::to_value(&history)
-      .map_err(|e| AppError::message(format!("Failed to serialize history: {}", e)))?;
+      .map_err(|e| AppError::Internal(format!("Failed to serialize history: {}", e)))?;
     let data = serde_json::from_value(json)
-      .map_err(|e| AppError::message(format!("Failed to deserialize history: {}", e)))?;
-    Ok(success_response(data, "History retrieved"))
+      .map_err(|e| AppError::Internal(format!("Failed to deserialize history: {}", e)))?;
+    Ok(Response::success(data, Some("History retrieved")))
   }
   pub fn get_quick_actions_list() -> Vec<QuickAction> {
     get_predefined_quick_actions()
@@ -423,9 +432,9 @@ impl AutomationService {
       total_steps,
     };
     let _ = add_to_history(entry);
-    Ok(success_response(
-      data_string("executed"),
-      "Recipe executed successfully",
+    Ok(Response::success(
+      serde_json::Value::String("executed".to_string()),
+      Some("Recipe executed successfully"),
     ))
   }
 }

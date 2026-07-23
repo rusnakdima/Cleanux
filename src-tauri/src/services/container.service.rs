@@ -181,7 +181,7 @@ impl ContainerService {
         data: Some(serde_json::Value::String(message.to_string())),
       })
     } else {
-      Err(AppError::Unknown(format!(
+      Err(AppError::Internal(format!(
         "{} {} failed: {}",
         container_type, action, stderr
       )))
