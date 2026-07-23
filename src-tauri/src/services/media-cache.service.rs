@@ -1,9 +1,6 @@
 /* helpers */
 use crate::utils::common_paths::CommonPath;
-use crate::utils::{
-  data_empty_string, format_size, get_dir_size, remove_dir_contents, service_method_full,
-  success_response,
-};
+use crate::utils::{format_size, get_dir_size, remove_dir_contents, service_method_full};
 /* models */
 use crate::models::AppError;
 /* errors */
@@ -68,15 +65,18 @@ impl MediaCacheService {
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !shader_path.exists() {
-      return Ok(success_response(
-        data_empty_string(),
-        "No Steam shader cache found",
+      return Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some("No Steam shader cache found"),
       ));
     }
     let cleared = remove_dir_contents(&shader_path)?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Steam shader cache cleared: {}", format_size(cleared)),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!(
+        "Steam shader cache cleared: {}",
+        format_size(cleared)
+      )),
     ))
   }
   service_method_full!(clean_steam_download_cache => clean_steam_download_cache_inner);
@@ -85,15 +85,18 @@ impl MediaCacheService {
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !download_path.exists() {
-      return Ok(success_response(
-        data_empty_string(),
-        "No Steam download cache found",
+      return Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some("No Steam download cache found"),
       ));
     }
     let cleared = remove_dir_contents(&download_path)?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Steam download cache cleared: {}", format_size(cleared)),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!(
+        "Steam download cache cleared: {}",
+        format_size(cleared)
+      )),
     ))
   }
   pub fn get_spotify_cache_size(&self) -> u64 {
@@ -116,9 +119,9 @@ impl MediaCacheService {
     if local_share.exists() {
       cleared += remove_dir_contents(&local_share)?;
     }
-    Ok(success_response(
-      data_empty_string(),
-      format!("Spotify cache cleared: {}", format_size(cleared)),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!("Spotify cache cleared: {}", format_size(cleared))),
     ))
   }
   pub fn get_vlc_cache_size(&self) -> u64 {
@@ -141,9 +144,9 @@ impl MediaCacheService {
     if config_path.exists() {
       cleared += remove_dir_contents(&config_path)?;
     }
-    Ok(success_response(
-      data_empty_string(),
-      format!("VLC cache cleared: {}", format_size(cleared)),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!("VLC cache cleared: {}", format_size(cleared))),
     ))
   }
   pub fn get_thumbnail_cache_size(&self) -> u64 {
@@ -156,15 +159,18 @@ impl MediaCacheService {
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !thumb_path.exists() {
-      return Ok(success_response(
-        data_empty_string(),
-        "No thumbnail cache found",
+      return Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some("No thumbnail cache found"),
       ));
     }
     let cleared = remove_dir_contents(&thumb_path)?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Thumbnail cache cleared: {}", format_size(cleared)),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!(
+        "Thumbnail cache cleared: {}",
+        format_size(cleared)
+      )),
     ))
   }
   pub fn get_icon_cache_size(&self) -> u64 {
@@ -177,12 +183,15 @@ impl MediaCacheService {
       .path()
       .ok_or_else(|| AppError::InvalidPath("Home directory not found".to_string()))?;
     if !icon_path.exists() {
-      return Ok(success_response(data_empty_string(), "No icon cache found"));
+      return Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some("No icon cache found"),
+      ));
     }
     let cleared = remove_dir_contents(&icon_path)?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Icon cache cleared: {}", format_size(cleared)),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!("Icon cache cleared: {}", format_size(cleared))),
     ))
   }
   pub fn get_media_cache_summary(&self) -> Response<Value> {

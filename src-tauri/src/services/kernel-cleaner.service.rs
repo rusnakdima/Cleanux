@@ -1,10 +1,9 @@
 use crate::models::AppError;
-use crate::utils::{
-  calculate_dir_size, models_into_data_array, stderr_string, stdout_string, success_response,
-};
+use crate::utils::{calculate_dir_size, stderr_string, stdout_string};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri_shared::quick_sort_by;
 use tauri_shared::response::Response;
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KernelInfo {
@@ -240,7 +239,7 @@ impl KernelCleanerService {
         }
       }
     }
-    initramfs_files.sort_by_key(|b| std::cmp::Reverse(b.size));
+    quick_sort_by(&mut initramfs_files, |a, b| b.size.cmp(&a.size));
     initramfs_files
   }
   pub fn remove_initramfs(
@@ -373,30 +372,51 @@ impl KernelCleanerService {
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let kernels = self.get_installed_kernels();
-    let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(data, "Installed kernels retrieved"))
+    let data: Vec<serde_json::Value> = kernels
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some("Installed kernels retrieved"),
+    ))
   }
   pub fn get_old_kernels_response(
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let kernels = self.get_old_kernels();
-    let data = models_into_data_array(kernels).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(data, "Old kernels retrieved"))
+    let data: Vec<serde_json::Value> = kernels
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some("Old kernels retrieved"),
+    ))
   }
   pub fn get_old_initramfs_response(
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let initramfs = self.get_old_initramfs();
-    let data = models_into_data_array(initramfs).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(data, "Old initramfs retrieved"))
+    let data: Vec<serde_json::Value> = initramfs
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some("Old initramfs retrieved"),
+    ))
   }
   pub fn get_boot_space_info_response(
     &self,
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let info = self.get_boot_space_info();
-    Ok(success_response(
+    Ok(Response::success(
       serde_json::to_value(info).unwrap_or(serde_json::Value::Null),
-      "Boot space info retrieved",
+      Some("Boot space info retrieved"),
     ))
   }
 }

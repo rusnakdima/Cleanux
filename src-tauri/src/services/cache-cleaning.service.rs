@@ -1,7 +1,5 @@
 use crate::models::AppError;
-use crate::utils::{
-  collect_cache_file_models, data_empty_string, remove_paths_with_errors, success_response,
-};
+use crate::utils::{collect_cache_file_models, remove_paths_with_errors};
 use crate::Response;
 use serde_json::Value;
 use std::fs;
@@ -31,7 +29,10 @@ impl CacheCleaningService {
     });
     let data = serde_json::to_value(paginated)
       .map_err(|e| Response::error(format!("Failed to serialize cache data: {}", e)))?;
-    Ok(success_response(data, "Cache files retrieved successfully"))
+    Ok(Response::success(
+      data,
+      Some("Cache files retrieved successfully"),
+    ))
   }
   pub fn clear_selected_cache_files(
     &self,
@@ -39,13 +40,16 @@ impl CacheCleaningService {
   ) -> Result<Response<Value>, Response<Value>> {
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
-      Ok(success_response(
-        data_empty_string(),
-        format!("Successfully cleared {} cache files", outcome.cleared),
+      Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some(&format!(
+          "Successfully cleared {} cache files",
+          outcome.cleared
+        )),
       ))
     } else {
       Err(
-        AppError::Unknown(format!(
+        AppError::Internal(format!(
           "Cleared {} files, failed on: {}",
           outcome.cleared,
           outcome.errors.join("; ")
@@ -65,15 +69,18 @@ impl CacheCleaningService {
       match fs::remove_dir_all(&cache_dir) {
         Ok(_) => {
           let _ = fs::create_dir_all(&cache_dir);
-          Ok(success_response(
-            data_empty_string(),
-            "Cache directory cleared successfully",
+          Ok(Response::success(
+            serde_json::Value::String(String::new()),
+            Some("Cache directory cleared successfully"),
           ))
         }
         Err(e) => Err(Response::error(e.to_string())),
       }
     } else {
-      Ok(success_response(data_empty_string(), "No cache to clear"))
+      Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some("No cache to clear"),
+      ))
     }
   }
 }

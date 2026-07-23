@@ -1,8 +1,5 @@
 /* helpers */
-use crate::utils::{
-  data_empty_string, data_string, home_dir, remove_paths_with_errors, scan_large_file_models,
-  success_response,
-};
+use crate::utils::{home_dir, remove_paths_with_errors, scan_large_file_models};
 /* models */
 use crate::Response;
 /* errors */
@@ -33,7 +30,10 @@ impl LargeFileCleaningService {
     });
     let data = serde_json::to_value(paginated)
       .map_err(|e| Response::error(format!("Failed to serialize large files data: {}", e)))?;
-    Ok(success_response(data, "Large files retrieved successfully"))
+    Ok(Response::success(
+      data,
+      Some("Large files retrieved successfully"),
+    ))
   }
   pub fn clear_selected_large_files(
     &self,
@@ -41,13 +41,16 @@ impl LargeFileCleaningService {
   ) -> Result<Response<Value>, Response<Value>> {
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
-      Ok(success_response(
-        data_empty_string(),
-        format!("Successfully cleared {} large files", outcome.cleared),
+      Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some(&format!(
+          "Successfully cleared {} large files",
+          outcome.cleared
+        )),
       ))
     } else {
       Err(
-        AppError::Unknown(format!(
+        AppError::Internal(format!(
           "Cleared {} files, failed on: {}",
           outcome.cleared,
           outcome.errors.join("; ")
@@ -68,9 +71,9 @@ impl LargeFileCleaningService {
         cleared_count += 1;
       }
     }
-    Ok(success_response(
-      data_string(cleared_count.to_string()),
-      format!("Cleared {} large files", cleared_count),
+    Ok(Response::success(
+      serde_json::Value::String(cleared_count.to_string()),
+      Some(&format!("Cleared {} large files", cleared_count)),
     ))
   }
 }

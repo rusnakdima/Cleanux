@@ -1,7 +1,6 @@
 use crate::services::health_history_service::{HealthHistoryService, HealthSnapshot};
 use crate::services::monitor_service::MonitorService;
 use crate::services::temperature_service::TemperatureService;
-use crate::utils::array_response;
 use crate::Response;
 static HEALTH_SERVICE: std::sync::OnceLock<HealthHistoryService> = std::sync::OnceLock::new();
 fn get_health_service() -> &'static HealthHistoryService {
@@ -58,7 +57,17 @@ pub fn get_health_history(
   days: u32,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   match get_health_service().get_health_history(days) {
-    Ok(history) => array_response(history, "Health history retrieved successfully"),
+    Ok(history) => {
+      let data: Vec<serde_json::Value> = history
+        .into_iter()
+        .map(serde_json::to_value)
+        .collect::<Result<_, _>>()
+        .map_err(|e| Response::error(format!("Serialization error: {}", e)))?;
+      Ok(Response::success(
+        serde_json::Value::Array(data),
+        Some("Health history retrieved successfully"),
+      ))
+    }
     Err(e) => Err(Response::error(format!(
       "Failed to get health history: {}",
       e

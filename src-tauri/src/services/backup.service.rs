@@ -1,5 +1,4 @@
 use crate::models::AppError;
-use crate::utils::{data_empty_string, data_string, success_response};
 use crate::Response;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
@@ -37,9 +36,9 @@ impl BackupService {
     tar.finish()?;
     let metadata = fs::metadata(archive_path)?;
     let size = metadata.len();
-    Ok(success_response(
-      data_string(size.to_string()),
-      format!("Backup created successfully: {} bytes", size),
+    Ok(Response::success(
+      serde_json::Value::String(size.to_string()),
+      Some(&format!("Backup created successfully: {} bytes", size)),
     ))
   }
   pub fn restore_backup(
@@ -55,9 +54,9 @@ impl BackupService {
     let dest_path = Path::new(destination);
     fs::create_dir_all(dest_path)?;
     archive.unpack(dest_path)?;
-    Ok(success_response(
-      data_empty_string(),
-      format!("Backup restored to {}", destination),
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some(&format!("Backup restored to {}", destination)),
     ))
   }
   pub fn list_backups() -> Result<Response<Value>, Response<Value>> {
@@ -66,7 +65,10 @@ impl BackupService {
   fn list_backups_inner() -> BackupResult<Response<Value>> {
     let backup_dir = Self::get_backup_dir()?;
     if !backup_dir.exists() {
-      return Ok(success_response(Value::Array(vec![]), "No backups found"));
+      return Ok(Response::success(
+        Value::Array(vec![]),
+        Some("No backups found"),
+      ));
     }
     let mut backups: Vec<serde_json::Value> = Vec::new();
     let entries = fs::read_dir(&backup_dir)?;
@@ -99,9 +101,9 @@ impl BackupService {
       let b_time = b["modified"].as_str().unwrap_or("");
       b_time.cmp(a_time)
     });
-    Ok(success_response(
+    Ok(Response::success(
       Value::Array(backups.clone()),
-      format!("Found {} backups", backups.len()),
+      Some(&format!("Found {} backups", backups.len())),
     ))
   }
   pub fn delete_backup(archive_path: &str) -> Result<Response<Value>, Response<Value>> {
@@ -113,9 +115,9 @@ impl BackupService {
       return Err(AppError::BackupFailed("Backup file not found".to_string()));
     }
     fs::remove_file(path)?;
-    Ok(success_response(
-      data_empty_string(),
-      "Backup deleted successfully",
+    Ok(Response::success(
+      serde_json::Value::String(String::new()),
+      Some("Backup deleted successfully"),
     ))
   }
   fn get_backup_dir() -> BackupResult<std::path::PathBuf> {

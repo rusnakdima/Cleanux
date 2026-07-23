@@ -1,11 +1,12 @@
 use crate::models::AppError;
 use crate::services::app_residue::AppDetector;
-use crate::utils::{calculate_dir_size, home_dir, models_into_data_array, success_response};
+use crate::utils::{calculate_dir_size, home_dir};
 use serde_json::Value;
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri_shared::quick_sort_by;
 use tauri_shared::response::{Response, Status};
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct AppResidue {
@@ -72,7 +73,7 @@ impl AppResidueService {
         });
       }
     }
-    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
+    quick_sort_by(&mut residues, |a, b| b.size.cmp(&a.size));
     residues
   }
   pub fn scan_user_data(&self) -> Vec<AppResidue> {
@@ -129,7 +130,7 @@ impl AppResidueService {
         });
       }
     }
-    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
+    quick_sort_by(&mut residues, |a, b| b.size.cmp(&a.size));
     residues
   }
   pub fn scan_user_caches(&self) -> Vec<AppResidue> {
@@ -169,7 +170,7 @@ impl AppResidueService {
         });
       }
     }
-    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
+    quick_sort_by(&mut residues, |a, b| b.size.cmp(&a.size));
     residues
   }
   pub fn get_orphaned_configs(&self) -> Vec<OrphanedConfig> {
@@ -261,7 +262,7 @@ impl AppResidueService {
         }
       }
     }
-    residues.sort_by_key(|b| std::cmp::Reverse(b.size));
+    quick_sort_by(&mut residues, |a, b| b.size.cmp(&a.size));
     residues
   }
   pub fn clean_residue(&self, path: &str) -> Result<Response<Value>, Response<Value>> {
@@ -361,46 +362,66 @@ impl AppResidueService {
   pub fn scan_user_configs_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_user_configs();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(
-      data,
-      format!("Found {} config residues", count),
+    let data: Vec<serde_json::Value> = residues
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some(&format!("Found {} config residues", count)),
     ))
   }
   pub fn scan_user_data_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_user_data();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(
-      data,
-      format!("Found {} data residues", count),
+    let data: Vec<serde_json::Value> = residues
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some(&format!("Found {} data residues", count)),
     ))
   }
   pub fn scan_user_caches_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_user_caches();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(
-      data,
-      format!("Found {} cache residues", count),
+    let data: Vec<serde_json::Value> = residues
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some(&format!("Found {} cache residues", count)),
     ))
   }
   pub fn scan_home_residues_response(&self) -> Result<Response<Value>, Response<Value>> {
     let residues = self.scan_home_residues();
     let count = residues.len();
-    let data = models_into_data_array(residues).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(
-      data,
-      format!("Found {} home residues", count),
+    let data: Vec<serde_json::Value> = residues
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some(&format!("Found {} home residues", count)),
     ))
   }
   pub fn get_orphaned_configs_response(&self) -> Result<Response<Value>, Response<Value>> {
     let orphaned = self.get_orphaned_configs();
     let count = orphaned.len();
-    let data = models_into_data_array(orphaned).map_err(|e| AppError::from(e).into_response())?;
-    Ok(success_response(
-      data,
-      format!("Found {} orphaned configs", count),
+    let data: Vec<serde_json::Value> = orphaned
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()
+      .map_err(|e| AppError::from(e).into_response())?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some(&format!("Found {} orphaned configs", count)),
     ))
   }
 }

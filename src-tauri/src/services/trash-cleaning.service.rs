@@ -1,9 +1,6 @@
 /* helpers */
 use crate::utils::common_paths::CommonPath;
-use crate::utils::{
-  collect_trash_file_models, data_empty_string, models_into_data_array, remove_paths_with_errors,
-  service_method_full, success_response,
-};
+use crate::utils::{collect_trash_file_models, remove_paths_with_errors, service_method_full};
 /* models */
 use crate::models::TrashFileModel;
 /* errors */
@@ -19,8 +16,14 @@ impl TrashCleaningService {
       "Home directory not found".to_string(),
     ))?;
     let trash_files: Vec<TrashFileModel> = collect_trash_file_models(&trash_dir);
-    let data = models_into_data_array(trash_files)?;
-    Ok(success_response(data, "Trash files retrieved successfully"))
+    let data: Vec<serde_json::Value> = trash_files
+      .into_iter()
+      .map(serde_json::to_value)
+      .collect::<Result<_, _>>()?;
+    Ok(Response::success(
+      serde_json::Value::Array(data),
+      Some("Trash files retrieved successfully"),
+    ))
   }
   pub fn clear_selected_trash_files(
     &self,
@@ -28,13 +31,16 @@ impl TrashCleaningService {
   ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
     let outcome = remove_paths_with_errors(paths);
     if outcome.errors.is_empty() {
-      Ok(success_response(
-        data_empty_string(),
-        format!("Successfully cleared {} trash files", outcome.cleared),
+      Ok(Response::success(
+        serde_json::Value::String(String::new()),
+        Some(&format!(
+          "Successfully cleared {} trash files",
+          outcome.cleared
+        )),
       ))
     } else {
       Err(
-        AppError::Unknown(format!(
+        AppError::Internal(format!(
           "Cleared {} files, failed on: {}",
           outcome.cleared,
           outcome.errors.join("; ")
@@ -57,9 +63,9 @@ impl TrashCleaningService {
             }
           }
         }
-        Ok(success_response(
-          data_empty_string(),
-          "Trash cleared successfully",
+        Ok(Response::success(
+          serde_json::Value::String(String::new()),
+          Some("Trash cleared successfully"),
         ))
       }
       Err(e) => Err(AppError::from(e).into_response()),

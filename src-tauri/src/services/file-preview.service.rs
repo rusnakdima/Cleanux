@@ -1,7 +1,7 @@
 /* helpers */
-use crate::utils::{data_empty_string, error_response};
 /* models */
-use tauri_shared::response::{Response, Status};
+use crate::Response;
+use tauri_shared::response::Status;
 /* sys lib */
 use base64::{engine::general_purpose::STANDARD, Engine};
 use serde_json::json;
@@ -13,9 +13,9 @@ impl FilePreviewService {
   pub fn preview_file(path: String) -> Result<Response<Value>, Response<Value>> {
     let file_path = Path::new(&path);
     if !file_path.exists() {
-      return Err(error_response(
-        "File not found",
+      return Err(Response::error_with_data(
         Value::String(String::new()),
+        "File not found",
       ));
     }
     let extension = file_path
@@ -32,7 +32,10 @@ impl FilePreviewService {
     let response_data = match file_type {
       FileKind::Image => {
         let bytes = fs::read(&path).map_err(|e| {
-          error_response(format!("Failed to read file: {}", e), data_empty_string())
+          Response::error_with_data(
+            Value::String(String::new()),
+            format!("Failed to read file: {}", e),
+          )
         })?;
         let base64 = STANDARD.encode(&bytes);
         let mime_type = match extension.as_str() {
@@ -53,7 +56,10 @@ impl FilePreviewService {
       }
       FileKind::Text => {
         let bytes = fs::read(&path).map_err(|e| {
-          error_response(format!("Failed to read file: {}", e), data_empty_string())
+          Response::error_with_data(
+            Value::String(String::new()),
+            format!("Failed to read file: {}", e),
+          )
         })?;
         let content = String::from_utf8_lossy(&bytes).into_owned();
         let truncated_content = if content.len() > 50000 {

@@ -1,5 +1,4 @@
 use crate::services::log_manager_service::LogManagerService;
-use crate::utils::array_response;
 use crate::Response;
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
@@ -46,7 +45,15 @@ pub fn get_rotated_logs_size() -> Result<Response<serde_json::Value>, Response<s
 #[allow(non_snake_case)]
 pub fn get_rotated_logs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let logs = LogManagerService::get_rotated_logs();
-  array_response(logs, "Rotated logs retrieved")
+  let data: Vec<serde_json::Value> = logs
+    .into_iter()
+    .map(serde_json::to_value)
+    .collect::<Result<_, _>>()
+    .map_err(|e| Response::error(format!("Serialization error: {}", e)))?;
+  Ok(Response::success(
+    serde_json::Value::Array(data),
+    Some("Rotated logs retrieved"),
+  ))
 }
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
@@ -59,7 +66,15 @@ pub fn clean_rotated_logs(
 #[allow(non_snake_case)]
 pub fn get_logrotate_configs() -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let configs = LogManagerService::get_logrotate_configs();
-  array_response(configs, "Logrotate configs retrieved")
+  let data: Vec<serde_json::Value> = configs
+    .into_iter()
+    .map(serde_json::to_value)
+    .collect::<Result<_, _>>()
+    .map_err(|e| Response::error(format!("Serialization error: {}", e)))?;
+  Ok(Response::success(
+    serde_json::Value::Array(data),
+    Some("Logrotate configs retrieved"),
+  ))
 }
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
@@ -85,7 +100,15 @@ pub fn get_largest_log_files(
   limit: usize,
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let files = LogManagerService::get_largest_log_files(limit);
-  array_response(files, "Largest log files retrieved")
+  let data: Vec<serde_json::Value> = files
+    .into_iter()
+    .map(serde_json::to_value)
+    .collect::<Result<_, _>>()
+    .map_err(|e| Response::error(format!("Serialization error: {}", e)))?;
+  Ok(Response::success(
+    serde_json::Value::Array(data),
+    Some("Largest log files retrieved"),
+  ))
 }
 #[tauri::command(rename_all = "camelCase")]
 #[allow(non_snake_case)]
