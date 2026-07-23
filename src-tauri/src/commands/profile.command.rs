@@ -3,6 +3,7 @@ use crate::crud_delete_command;
 use crate::crud_get_all_command;
 use crate::crud_get_command;
 use crate::crud_update_command;
+use nosql_orm::provider::DatabaseProvider;
 crud_get_command!(get_cleaning_profile, "cleaning_profiles");
 crud_get_all_command!(get_cleaning_profiles, "cleaning_profiles");
 crud_create_command!(create_cleaning_profile, "cleaning_profiles");
@@ -23,8 +24,15 @@ pub async fn apply_cleaning_profile(
     nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let profiles = state
     .data
-    .repository_service
-    .find_many("cleaning_profiles", Some(filter), None, Some(1), None, true)
+    .json_provider
+    .find_many(
+      "cleaning_profiles",
+      Some(&filter),
+      None,
+      Some(1),
+      None,
+      true,
+    )
     .await
     .map_err(|e| Response::error(e.to_string()))?;
   let profile = profiles

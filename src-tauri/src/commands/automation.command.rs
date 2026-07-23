@@ -3,6 +3,7 @@ use crate::crud_delete_command;
 use crate::crud_get_all_command;
 use crate::crud_get_command;
 use crate::crud_update_command;
+use nosql_orm::provider::DatabaseProvider;
 crud_get_command!(get_automation_recipe, "automation_recipes");
 crud_get_all_command!(get_automation_recipes, "automation_recipes");
 crud_create_command!(create_automation_recipe, "automation_recipes");
@@ -19,7 +20,7 @@ pub async fn crud_get_execution_history(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let docs = state
     .data
-    .repository_service
+    .json_provider
     .find_many(
       "execution_history",
       None,
@@ -65,10 +66,10 @@ pub async fn crud_execute_recipe(
     nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let recipes = state
     .data
-    .repository_service
+    .json_provider
     .find_many(
       "automation_recipes",
-      Some(filter),
+      Some(&filter),
       None,
       Some(1),
       None,

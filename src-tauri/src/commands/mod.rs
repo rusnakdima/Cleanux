@@ -2,8 +2,6 @@
 pub mod automation_command;
 #[path = "cleaner.command.rs"]
 pub mod cleaner_command;
-#[path = "crud_command.rs"]
-pub mod crud_command;
 #[path = "macros.rs"]
 pub mod crud_macros;
 #[path = "dashboard.command.rs"]

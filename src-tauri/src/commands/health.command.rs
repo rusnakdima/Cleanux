@@ -1,6 +1,7 @@
 use crate::crud_create_command;
 use crate::crud_get_all_command;
 use crate::crud_get_command;
+use nosql_orm::provider::DatabaseProvider;
 crud_get_command!(crud_get_health_snapshot, "health_snapshots");
 crud_get_all_command!(crud_get_health_snapshots, "health_snapshots");
 crud_create_command!(crud_create_health_snapshot, "health_snapshots");
@@ -22,10 +23,10 @@ pub async fn crud_get_health_history(
     nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let docs = state
     .data
-    .repository_service
+    .json_provider
     .find_many(
       "health_snapshots",
-      Some(filter),
+      Some(&filter),
       None,
       None,
       Some("timestamp"),
@@ -54,10 +55,10 @@ pub async fn crud_get_health_trends(
     nosql_orm::query::Filter::from_json(&filter).map_err(|e| Response::error(e.to_string()))?;
   let docs = state
     .data
-    .repository_service
+    .json_provider
     .find_many(
       "health_snapshots",
-      Some(filter),
+      Some(&filter),
       None,
       None,
       Some("timestamp"),
@@ -115,7 +116,7 @@ pub async fn crud_save_health_snapshot(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   let doc = state
     .data
-    .repository_service
+    .json_provider
     .insert("health_snapshots", data)
     .await
     .map_err(|e| Response::error(e.to_string()))?;

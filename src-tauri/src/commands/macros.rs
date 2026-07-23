@@ -7,11 +7,12 @@ macro_rules! crud_get_command {
       state: tauri::State<'_, crate::AppState>,
       id: Option<String>,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use nosql_orm::provider::DatabaseProvider;
       use tauri_shared::response::Response;
       if let Some(id) = id {
         let doc = state
           .data
-          .repository_service
+          .json_provider
           .find_by_id($table, &id)
           .await
           .map_err(|e| Response::error(e.to_string()))?
@@ -33,10 +34,11 @@ macro_rules! crud_get_all_command {
       page: Option<u64>,
       limit: Option<u64>,
     ) -> Result<crate::Response<Vec<serde_json::Value>>, crate::Response<serde_json::Value>> {
+      use nosql_orm::provider::DatabaseProvider;
       use tauri_shared::response::Response;
       let docs = state
         .data
-        .repository_service
+        .json_provider
         .find_many($table, None, page, limit, None, true)
         .await
         .map_err(|e| Response::error(e.to_string()))?;
@@ -53,10 +55,11 @@ macro_rules! crud_create_command {
       state: tauri::State<'_, crate::AppState>,
       data: serde_json::Value,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use nosql_orm::provider::DatabaseProvider;
       use tauri_shared::response::Response;
       let doc = state
         .data
-        .repository_service
+        .json_provider
         .insert($table, data)
         .await
         .map_err(|e| Response::error(e.to_string()))?;
@@ -74,10 +77,11 @@ macro_rules! crud_update_command {
       id: String,
       data: serde_json::Value,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use nosql_orm::provider::DatabaseProvider;
       use tauri_shared::response::Response;
       let doc = state
         .data
-        .repository_service
+        .json_provider
         .update($table, &id, data)
         .await
         .map_err(|e| Response::error(e.to_string()))?;
@@ -94,10 +98,11 @@ macro_rules! crud_delete_command {
       state: tauri::State<'_, crate::AppState>,
       id: String,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use nosql_orm::provider::DatabaseProvider;
       use tauri_shared::response::Response;
       let _ = state
         .data
-        .repository_service
+        .json_provider
         .delete($table, &id)
         .await
         .map_err(|e| Response::error(e.to_string()))?;
@@ -118,10 +123,11 @@ macro_rules! crud_patch_command {
       id: String,
       patch: serde_json::Value,
     ) -> Result<crate::Response<serde_json::Value>, crate::Response<serde_json::Value>> {
+      use nosql_orm::provider::DatabaseProvider;
       use tauri_shared::response::{Response, Status};
       let doc = state
         .data
-        .repository_service
+        .json_provider
         .patch($table, &id, patch)
         .await
         .map_err(|e| Response::error(e.to_string()))?;

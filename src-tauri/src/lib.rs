@@ -1,13 +1,15 @@
 /* imports */
 // pub mod commands; // removed - moved to routes/
 pub mod commands;
+pub mod domain;
 pub mod entities;
 pub mod errors;
 pub mod models;
-pub mod repositories;
-
 pub mod security;
 pub mod services;
+
+use tauri_shared::algorithms::AlgorithmRegistry;
+use tauri_shared::crud::service::CrudService;
 pub mod utils;
 
 // tauri_shared re-exports for use across the crate
@@ -24,6 +26,7 @@ use crate::entities::health_snapshot_entity::HealthSnapshotEntity;
 use nosql_orm::relations::register_relations_for_entity;
 use std::sync::Arc;
 use tauri::Manager;
+use tauri_shared::storage::{setup_schema_system, SchemaConfig, SchemaSyncState};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -37,32 +40,32 @@ pub fn run() {
       register_relations_for_entity::<AutomationRecipeEntity>();
       register_relations_for_entity::<ExecutionHistoryEntity>();
       register_relations_for_entity::<HealthSnapshotEntity>();
-      let json_provider =
-        tauri::async_runtime::block_on(nosql_orm::providers::JsonProvider::new(&app_data_dir))
-          .expect("Failed to create JSON provider");
-      let repository_service = Arc::new(repositories::service::RepositoryService::new(
-        json_provider.clone(),
-      ));
-      let crud_service = Arc::new(services::crud_service::CrudService::new(
-        json_provider.clone(),
-      ));
-      let schema_state =
-        commands::schema_command::SchemaState::new(Arc::new(json_provider.clone()));
+
+      let config = SchemaConfig::from_env("cleanux", app_data_dir.clone());
+      let system = tauri::async_runtime::block_on(setup_schema_system(config))
+        .expect("Failed to setup schema system");
+      let json_provider = system.db;
+
+      let crud_service = Arc::new(CrudService::new((*json_provider).clone()));
+      let schema_state = commands::schema_command::SchemaState::new(json_provider.clone());
       app.manage(AppState {
         data: DataState {
-          repository_service,
+          json_provider: json_provider.clone(),
           crud_service,
         },
         schema: schema_state,
       });
-      app.manage(json_provider);
+      app.manage(json_provider.clone());
+      if let Some(sync) = system.sync_service {
+        app.manage(sync);
+      }
+      app.manage(AlgorithmRegistry::new());
       Ok(())
     })
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_mcp_bridge::init())
     .invoke_handler(tauri::generate_handler![
-      commands::crud_command::crud_execute,
       commands::health_command::crud_get_health_snapshot,
       commands::health_command::crud_get_health_snapshots,
       commands::health_command::crud_create_health_snapshot,
@@ -210,11 +213,12 @@ pub fn run() {
       commands::log_command::get_largest_log_files,
       commands::log_command::get_log_manager_summary,
       commands::schema_command::get_schema,
+      tauri_shared::commands::algorithm_commands::execute_algorithm,
+      tauri_shared::commands::algorithm_commands::list_algorithms,
+      tauri_shared::get_schema,
       commands::schema_command::save_schema,
       commands::schema_command::get_all_schemas,
       commands::schema_command::delete_schema,
-      tauri_shared::get_ui_schema,
-      tauri_shared::save_ui_schema,
       tauri_shared::check_for_update_command,
       tauri_shared::download_update_command,
       tauri_shared::install_update_command,
@@ -230,6 +234,6 @@ pub struct AppState {
   pub schema: commands::schema_command::SchemaState,
 }
 pub struct DataState {
-  pub repository_service: Arc<repositories::service::RepositoryService>,
-  pub crud_service: Arc<services::crud_service::CrudService>,
+  pub json_provider: Arc<nosql_orm::providers::JsonProvider>,
+  pub crud_service: Arc<CrudService>,
 }

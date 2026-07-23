@@ -1,6 +1,7 @@
 use crate::crud_create_command;
 use crate::crud_get_all_command;
 use crate::crud_get_command;
+use nosql_orm::provider::DatabaseProvider;
 crud_get_command!(get_cleaning_report, "cleaning_reports");
 crud_get_all_command!(get_cleaning_reports, "cleaning_reports");
 crud_create_command!(create_cleaning_report, "cleaning_reports");
@@ -24,7 +25,7 @@ pub async fn crud_generate_cleaning_report(
   });
   state
     .data
-    .repository_service
+    .json_provider
     .insert("cleaning_reports", data)
     .await
     .map(|doc| Response::success(doc, Some("Report generated")))
@@ -37,7 +38,7 @@ pub async fn crud_get_cleaning_history(
 ) -> Result<Response<serde_json::Value>, Response<serde_json::Value>> {
   state
     .data
-    .repository_service
+    .json_provider
     .find_many("cleaning_reports", None, None, limit, Some("date"), false)
     .await
     .map(|docs| {
@@ -57,14 +58,14 @@ pub async fn crud_compare_snapshots(
   use crate::entities::cleaning_report_entity::{ComparisonDetails, SnapshotComparison};
   let before_doc = state
     .data
-    .repository_service
+    .json_provider
     .find_by_id("cleaning_reports", &before_id)
     .await
     .map_err(|e| Response::error(e.to_string()))?
     .ok_or_else(|| Response::error("Before report not found".to_string()))?;
   let after_doc = state
     .data
-    .repository_service
+    .json_provider
     .find_by_id("cleaning_reports", &after_id)
     .await
     .map_err(|e| Response::error(e.to_string()))?
