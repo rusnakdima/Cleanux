@@ -1,7 +1,8 @@
-use crate::services::schema_service::{SchemaService, UiSchema};
+use crate::services::schema_service::SchemaService;
 use crate::Response;
 use std::sync::Arc;
 use tauri::State;
+use tauri_shared::schema::UiSchema;
 
 #[tauri::command(rename_all = "camelCase")]
 pub async fn get_schema(

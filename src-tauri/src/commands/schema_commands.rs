@@ -1,6 +1,6 @@
-use crate::services::schema_service::UiSchema;
 use crate::AppState;
 use crate::Response;
+use tauri_shared::schema::UiSchema;
 
 #[tauri::command]
 pub async fn get_cleanux_schema(
