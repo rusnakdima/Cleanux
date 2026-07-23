@@ -11,8 +11,7 @@ pub mod backup_service;
 pub mod cache_cleaning_service;
 #[path = "container.service.rs"]
 pub mod container_service;
-#[path = "crud_service.rs"]
-pub mod crud_service;
+
 #[path = "dashboard.service.rs"]
 pub mod dashboard_service;
 #[path = "dev-cache.service.rs"]
