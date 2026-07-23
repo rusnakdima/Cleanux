@@ -1,6 +1,7 @@
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
+use tauri_shared::quick_sort_by;
 use tauri_shared::response::{Response, Status};
 use walkdir::WalkDir;
 #[derive(Debug, Clone, serde::Serialize)]
@@ -111,7 +112,7 @@ impl DirectoryService {
           }
         }
       }
-      children.sort_by_key(|b| std::cmp::Reverse(b.size));
+      quick_sort_by(&mut children, |a, b| b.size.cmp(&a.size));
       node.children = children;
       node.size = dir_size;
     }

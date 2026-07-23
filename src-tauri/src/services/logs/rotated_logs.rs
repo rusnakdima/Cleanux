@@ -4,6 +4,7 @@ use chrono::{DateTime, Local};
 use std::fs;
 use std::path::Path;
 use std::time::SystemTime;
+use tauri_shared::quick_sort_by;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct RotatedLogInfo {
   pub path: String,
@@ -98,7 +99,7 @@ impl RotatedLogHandler {
         }
       }
     }
-    logs.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
+    quick_sort_by(&mut logs, |a, b| b.size_bytes.cmp(&a.size_bytes));
     Ok(logs)
   }
   pub fn clean_old_logs(days: u32) -> Result<(u64, Vec<String>), AppError> {

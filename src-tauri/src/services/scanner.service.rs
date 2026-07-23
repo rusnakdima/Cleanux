@@ -1,5 +1,6 @@
 /* models */
 use crate::utils::validation_helper::validate_path;
+use tauri_shared::quick_sort_by;
 use tauri_shared::response::Response;
 /* sys lib */
 use sha2::{Digest, Sha256};
@@ -107,7 +108,9 @@ impl ScannerService {
         });
       }
     }
-    duplicate_groups.sort_by_key(|b| std::cmp::Reverse(b.wasted_space));
+    quick_sort_by(&mut duplicate_groups, |a, b| {
+      b.wasted_space.cmp(&a.wasted_space)
+    });
     let total_duplicates: u64 = duplicate_groups.iter().map(|g| g.files.len() as u64).sum();
     let result = serde_json::json!({
         "groups": duplicate_groups,
