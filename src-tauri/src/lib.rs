@@ -46,31 +46,33 @@ pub fn run() {
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_mcp_bridge::init())
+    .plugin(
+      tauri_plugin_log::Builder::new()
+        .format(|out, message, record| {
+          out.finish(format_args!(
+            "[{}] [{}] [{}] [{}] {}",
+            chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+            record.level(),
+            "cleanux",
+            record.target(),
+            message
+          ))
+        })
+        .build(),
+    )
     .invoke_handler(tauri::generate_handler![
       commands::crud_command::crud_execute,
-      commands::health_command::crud_get_health_snapshot,
-      commands::health_command::crud_get_health_snapshots,
-      commands::health_command::crud_create_health_snapshot,
+      // health_snapshot - special logic commands only
       commands::health_command::crud_get_health_history,
       commands::health_command::crud_get_health_trends,
       commands::health_command::crud_save_health_snapshot,
-      commands::report_command::get_cleaning_report,
-      commands::report_command::get_cleaning_reports,
-      commands::report_command::create_cleaning_report,
+      // cleaning_report - special logic commands only
       commands::report_command::crud_generate_cleaning_report,
       commands::report_command::crud_get_cleaning_history,
       commands::report_command::crud_compare_snapshots,
-      commands::profile_command::get_cleaning_profile,
-      commands::profile_command::get_cleaning_profiles,
-      commands::profile_command::create_cleaning_profile,
-      commands::profile_command::update_cleaning_profile,
-      commands::profile_command::delete_cleaning_profile,
+      // cleaning_profile - special logic commands only
       commands::profile_command::apply_cleaning_profile,
-      commands::automation_command::get_automation_recipe,
-      commands::automation_command::get_automation_recipes,
-      commands::automation_command::create_automation_recipe,
-      commands::automation_command::update_automation_recipe,
-      commands::automation_command::delete_automation_recipe,
+      // automation_recipe - special logic commands only
       commands::automation_command::crud_get_execution_history,
       commands::automation_command::crud_get_quick_actions,
       commands::automation_command::crud_execute_action,
