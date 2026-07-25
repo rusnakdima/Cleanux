@@ -27,6 +27,7 @@ rayon = "1.8"
 walkdir = "2.4"
 sha2 = "0.10"
 sysinfo = "0.32"
+tauri-plugin-log = "2"
 tauri-plugin-mcp-bridge = { version = "0.8", optional = true }
 tar = "0.4"
 flate2 = "1.0"
