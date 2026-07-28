@@ -33,7 +33,7 @@ impl PathValidator {
       )));
     }
     if !is_path_allowed(&canonical) {
-      return Err(AppError::PathOutsideAllowed(format!(
+      return Err(AppError::PermissionDenied(format!(
         "Path '{}' is outside allowed directories",
         canonical.display()
       )));
@@ -57,7 +57,7 @@ impl PathValidator {
       .canonicalize()
       .map_err(|e| AppError::InvalidPath(format!("Failed to canonicalize home: {}", e)))?;
     if !validated.starts_with(&home_canonical) {
-      return Err(AppError::PathOutsideAllowed(
+      return Err(AppError::PermissionDenied(
         "Path must be within home directory".to_string(),
       ));
     }

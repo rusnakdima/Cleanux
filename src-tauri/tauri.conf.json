@@ -4,8 +4,8 @@
   "version": "0.2.1",
   "identifier": "com.tcs.cleanux",
   "build": {
-    "beforeDevCommand": "bun run start",
-    "devUrl": "http://localhost:1422",
+    "beforeDevCommand": "vite dev",
+    "devUrl": "http://localhost:5173",
     "beforeBuildCommand": "bun run build:prod",
     "frontendDist": "../dist/cleanux/browser"
   },

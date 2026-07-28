@@ -10,7 +10,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'$lib': '/src/lib',
-			'@tauri-front/shared': '/home/dmitriy/Projects/tauri-front-shared/projects/shared/dist'
+			'@tauri-front/shared': '/home/dmitriy/Projects/tauri-front-shared/projects/shared/src/lib'
 		}
 	},
 	optimizeDeps: {

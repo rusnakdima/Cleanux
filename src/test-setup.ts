@@ -1,4 +1,3 @@
-import '@angular/compiler';
 import { afterEach } from 'vitest';
 
 /* Mock indexedDB for LogStorageService tests in Node environment */

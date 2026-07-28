@@ -1,8 +1,14 @@
-import { Response, ResponseStatus } from '@tauri-front/shared';
+type ResponseStatus = 'Success' | 'Error';
+
+interface Response<T> {
+  status: ResponseStatus;
+  message: string;
+  data: T;
+}
 
 export function createSuccessResponse<T>(data: T, message = 'Success'): Response<T> {
   return {
-    status: ResponseStatus.Success,
+    status: 'Success',
     message,
     data,
   };
@@ -10,7 +16,7 @@ export function createSuccessResponse<T>(data: T, message = 'Success'): Response
 
 export function createErrorResponse(message = 'Error'): Response<null> {
   return {
-    status: ResponseStatus.Error,
+    status: 'Error',
     message,
     data: null,
   };

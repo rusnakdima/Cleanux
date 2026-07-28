@@ -112,7 +112,7 @@ impl BackupService {
   fn delete_backup_inner(archive_path: &str) -> BackupResult<Response<Value>> {
     let path = Path::new(archive_path);
     if !path.exists() {
-      return Err(AppError::BackupFailed("Backup file not found".to_string()));
+      return Err(AppError::Internal("Backup file not found".to_string()));
     }
     fs::remove_file(path)?;
     Ok(Response::success(

@@ -55,10 +55,10 @@ impl ProcessService {
           data: Some(Value::String(pid.to_string())),
         })
       } else {
-        Err(AppError::ProcessNotFound(pid.to_string()))
+        Err(AppError::NotFound(format!("Process {}", pid)))
       }
     } else {
-      Err(AppError::ProcessNotFound(pid.to_string()))
+      Err(AppError::NotFound(format!("Process {}", pid)))
     }
   }
 }

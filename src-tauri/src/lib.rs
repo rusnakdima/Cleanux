@@ -46,7 +46,7 @@ pub fn run() {
         .expect("Failed to setup schema system");
       let json_provider = system.db;
 
-      let crud_service = Arc::new(CrudService::new((*json_provider).clone()));
+      let crud_service = Arc::new(CrudService::new(Arc::new((&*json_provider).clone())));
       let schema_state = commands::schema_command::SchemaState::new(json_provider.clone());
       app.manage(AppState {
         data: DataState {
@@ -213,7 +213,7 @@ pub fn run() {
       commands::log_command::get_largest_log_files,
       commands::log_command::get_log_manager_summary,
       commands::schema_command::get_schema,
-      tauri_shared::commands::algorithm_commands::execute_algorithm,
+      tauri_shared::commands::algorithm_commands::algo_execute,
       tauri_shared::commands::algorithm_commands::list_algorithms,
       tauri_shared::get_schema,
       commands::schema_command::save_schema,
@@ -223,6 +223,9 @@ pub fn run() {
       tauri_shared::download_update_command,
       tauri_shared::install_update_command,
       tauri_shared::get_current_version,
+      tauri_shared::commands::logger_commands::get_log_entries,
+      tauri_shared::commands::logger_commands::set_log_level,
+      tauri_shared::commands::logger_commands::clear_logs,
     ])
     .run(tauri::generate_context!())
     .unwrap_or_else(|_e| {

@@ -1,54 +1,26 @@
 {
-  "compileOnSave": false,
+  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@components/*": ["src/app/components/*"],
-      "@pages/*": ["src/app/pages/*"],
-      "@entities/*": ["src/app/entities/*"],
-      "@services/*": ["src/app/services/*"],
-      "@shared/*": ["src/app/shared/*"],
-      "@app/*": ["src/app/*"],
-      "@assets/*": ["src/assets/*"],
-      "@styles/*": ["src/styles/*"],
-      "@env/*": ["src/environments/*"],
-      "@api/*": ["src/app/api/*"],
-      "@store/*": ["src/app/store/*"],
-      "@features/*": ["src/app/features/*"],
-      "@interceptors/*": ["src/app/interceptors/*"],
-      "@resolvers/*": ["src/app/resolvers/*"],
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"],
+      "$app": ["./src/app"],
+      "$app/*": ["./src/app/*"],
       "@tauri-front/shared": ["../tauri-front-shared/projects/shared/dist"],
       "@tauri-front/shared/*": ["../tauri-front-shared/projects/shared/dist/*"]
     },
     "strict": true,
-    "useDefineForClassFields": false,
+    "useDefineForClassFields": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
-    "isolatedModules": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "preserve",
-    "ignoreDeprecations": "6.0"
-  },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true,
-    "disableTypeScriptVersionCheck": true
-  },
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
-  ]
+    "isolatedModules": true,
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "module": "ESNext",
+    "verbatimModuleSyntax": true
+  }
 }

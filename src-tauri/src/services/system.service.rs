@@ -26,7 +26,7 @@ impl SystemService {
         Some(&format!("Service {} stopped", service)),
       ))
     } else {
-      Err(AppError::ServiceNotFound(format!(
+      Err(AppError::NotFound(format!(
         "Failed to stop service {}: {}",
         service,
         stderr_string(&output)
@@ -66,7 +66,7 @@ impl SystemService {
         Some(&format!("Stopped {} services successfully", service_count)),
       ))
     } else {
-      Err(AppError::ServiceNotFound(format!(
+      Err(AppError::NotFound(format!(
         "Failed to stop services: {}",
         stderr_string(&output).trim()
       )))
@@ -88,7 +88,7 @@ impl SystemService {
   ) -> ServiceResult<Response<serde_json::Value>> {
     let path_buf = PathBuf::from(path);
     if !is_path_allowed(&path_buf) {
-      return Err(AppError::PathOutsideAllowed(format!(
+      return Err(AppError::PermissionDenied(format!(
         "Path '{}' is not in allowed directories",
         path
       )));
@@ -162,7 +162,7 @@ impl SystemService {
         Some(&format!("Service {} enabled", service)),
       ))
     } else {
-      Err(AppError::ServiceNotFound(stderr_string(&output)))
+      Err(AppError::NotFound(stderr_string(&output)))
     }
   }
   pub fn start_service(
@@ -181,7 +181,7 @@ impl SystemService {
         Some(&format!("Service {} started", service)),
       ))
     } else {
-      Err(AppError::ServiceNotFound(stderr_string(&output)))
+      Err(AppError::NotFound(stderr_string(&output)))
     }
   }
   pub fn enable_selected_services(
@@ -217,7 +217,7 @@ impl SystemService {
         Some(&format!("Enabled {} services successfully", service_count)),
       ))
     } else {
-      Err(AppError::ServiceNotFound(format!(
+      Err(AppError::NotFound(format!(
         "Failed to enable services: {}",
         stderr_string(&output).trim()
       )))
