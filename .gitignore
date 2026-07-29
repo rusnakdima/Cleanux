@@ -48,3 +48,6 @@ Thumbs.db
 /src-tauri/capabilities/mcp-bridge.json
 
 docs/
+# SvelteKit
+.svelte-kit/
+build/
