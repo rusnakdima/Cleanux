@@ -51,3 +51,4 @@ docs/
 # SvelteKit
 .svelte-kit/
 build/
+.omo/
