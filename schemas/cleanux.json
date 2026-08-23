@@ -1,0 +1,263 @@
+{
+  "app_id": "cleanux",
+  "version": "1.0.0",
+  "pages": [
+    {
+      "id": "dashboard-page",
+      "title": "Dashboard",
+      "route": "/dashboard",
+      "layout": "stacked",
+      "elements": [
+        {
+          "id": "header",
+          "component": "header",
+          "props": {},
+          "children": [
+            {
+              "id": "header-content",
+              "component": "div",
+              "props": {"classes": "flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700"},
+              "children": [
+                {
+                  "id": "header-title-area",
+                  "component": "div",
+                  "props": {"classes": "flex items-center gap-3"},
+                  "children": [
+                    {
+                      "id": "logo",
+                      "component": "text",
+                      "props": {"text": "Cleanux", "classes": "text-2xl font-bold text-primary"}
+                    }
+                  ]
+                },
+                {
+                  "id": "header-controls",
+                  "component": "div",
+                  "props": {"classes": "flex items-center gap-2"},
+                  "children": [
+                    {
+                      "id": "theme-btn",
+                      "component": "action-button",
+                      "props": {
+                        "label": "theme-toggle",
+                        "action": "toggle-theme",
+                        "classes": "btn btn-ghost btn-sm"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "nav-tabs",
+          "component": "div",
+          "props": {"classes": "flex gap-1 p-2 bg-gray-100 dark:bg-gray-800"},
+          "children": [
+            {
+              "id": "nav-dashboard",
+              "component": "action-button",
+              "props": {
+                "label": "Dashboard",
+                "action": "navigate",
+                "route": "/dashboard",
+                "classes": "btn btn-sm"
+              }
+            },
+            {
+              "id": "nav-system",
+              "component": "action-button",
+              "props": {
+                "label": "System",
+                "action": "navigate",
+                "route": "/system",
+                "classes": "btn btn-sm"
+              }
+            },
+            {
+              "id": "nav-storage",
+              "component": "action-button",
+              "props": {
+                "label": "Storage",
+                "action": "navigate",
+                "route": "/storage",
+                "classes": "btn btn-sm"
+              }
+            },
+            {
+              "id": "nav-cleaner",
+              "component": "action-button",
+              "props": {
+                "label": "Cleaner",
+                "action": "navigate",
+                "route": "/cleaner",
+                "classes": "btn btn-sm"
+              }
+            }
+          ]
+        },
+        {
+          "id": "stats-grid",
+          "component": "div",
+          "props": {"classes": "grid grid-cols-4 gap-4 p-4"},
+          "children": [
+            {
+              "id": "memory-stat",
+              "component": "card",
+              "props": {"classes": "p-4"},
+              "children": [
+                {
+                  "id": "memory-title",
+                  "component": "text",
+                  "props": {"text": "Memory", "classes": "text-sm text-gray-500"}
+                },
+                {
+                  "id": "memory-value",
+                  "component": "text",
+                  "props": {"text": "memory_used / memory_total", "classes": "text-2xl font-bold"}
+                }
+              ]
+            },
+            {
+              "id": "cpu-stat",
+              "component": "card",
+              "props": {"classes": "p-4"},
+              "children": [
+                {
+                  "id": "cpu-title",
+                  "component": "text",
+                  "props": {"text": "CPU", "classes": "text-sm text-gray-500"}
+                },
+                {
+                  "id": "cpu-value",
+                  "component": "text",
+                  "props": {"text": "system_cpu_percent%", "classes": "text-2xl font-bold"}
+                }
+              ]
+            },
+            {
+              "id": "storage-stat",
+              "component": "card",
+              "props": {"classes": "p-4"},
+              "children": [
+                {
+                  "id": "storage-title",
+                  "component": "text",
+                  "props": {"text": "Storage", "classes": "text-sm text-gray-500"}
+                },
+                {
+                  "id": "storage-value",
+                  "component": "text",
+                  "props": {"text": "storage_used / storage_total", "classes": "text-2xl font-bold"}
+                }
+              ]
+            },
+            {
+              "id": "temp-stat",
+              "component": "card",
+              "props": {"classes": "p-4"},
+              "children": [
+                {
+                  "id": "temp-title",
+                  "component": "text",
+                  "props": {"text": "Temperature", "classes": "text-sm text-gray-500"}
+                },
+                {
+                  "id": "temp-value",
+                  "component": "text",
+                  "props": {"text": "system_temperature°C", "classes": "text-2xl font-bold"}
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "quick-actions",
+          "component": "div",
+          "props": {"classes": "p-4"},
+          "children": [
+            {
+              "id": "actions-title",
+              "component": "text",
+              "props": {"text": "Quick Actions", "classes": "text-lg font-semibold mb-3"}
+            },
+            {
+              "id": "actions-grid",
+              "component": "div",
+              "props": {"classes": "grid grid-cols-3 gap-3"},
+              "children": [
+                {
+                  "id": "action-memory",
+                  "component": "action-button",
+                  "props": {
+                    "label": "Optimize Memory",
+                    "action": "optimize-memory",
+                    "classes": "btn btn-primary"
+                  }
+                },
+                {
+                  "id": "action-scan",
+                  "component": "action-button",
+                  "props": {
+                    "label": "Scan System",
+                    "action": "scan-system",
+                    "classes": "btn btn-secondary"
+                  }
+                },
+                {
+                  "id": "action-refresh",
+                  "component": "action-button",
+                  "props": {
+                    "label": "Refresh Stats",
+                    "action": "refresh-memory",
+                    "classes": "btn btn-outline"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "system-page",
+      "title": "System",
+      "route": "/system",
+      "layout": "stacked",
+      "elements": [
+        {
+          "id": "header",
+          "component": "header",
+          "props": {},
+          "children": [
+            {
+              "id": "header-content",
+              "component": "div",
+              "props": {"classes": "flex items-center justify-between p-4 border-b"},
+              "children": [
+                {
+                  "id": "back-btn",
+                  "component": "action-button",
+                  "props": {
+                    "label": "Back",
+                    "action": "navigate",
+                    "route": "/dashboard",
+                    "classes": "btn btn-sm btn-ghost"
+                  }
+                },
+                {
+                  "id": "title",
+                  "component": "text",
+                  "props": {"text": "System Information", "classes": "text-xl font-bold"}
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "shortcuts": [],
+  "modals": []
+}

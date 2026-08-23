@@ -1,0 +1,116 @@
+@startuml
+title Cleanux — AS-IS Entity Class Diagram
+skinparam componentStyle rectangle
+skinparam classAttributeIconSize 0
+
+class CleaningProfileEntity {
+  +id: Option<String>
+  +name: String
+  +description: String
+  +created_at: DateTime<Utc>
+  +paths: Vec<String>
+  +exclude_patterns: Vec<String>
+  +clean_cache: bool
+  +clean_trash: bool
+  +clean_logs: bool
+  +min_large_file_size: u64
+}
+
+class AutomationRecipeEntity {
+  +id: Option<String>
+  +name: String
+  +steps: Vec<ActionStep>
+  +enabled: bool
+  +trigger: RecipeTrigger
+  +created_at: DateTime<Utc>
+  +updated_at: DateTime<Utc>
+}
+
+class ActionStep {
+  +CleanCategory { category: String }
+  +RunProfile { profile_name: String }
+  +ExecuteCommand { command: String }
+  +Wait { seconds: u32 }
+}
+
+class RecipeTrigger {
+  +Manual
+  +Scheduled
+  +Event
+}
+
+class ExecutionHistoryEntity {
+  +id: Option<String>
+  +name: String
+  +status: String
+  +started_at: String
+  +completed_at: Option<String>
+  +steps_executed: u32
+  +total_steps: u32
+}
+
+class HealthSnapshotEntity {
+  +id: Option<String>
+  +timestamp: DateTime<Utc>
+  +health_score: f64
+  +cache_size: u64
+  +trash_size: u64
+  +log_size: u64
+  +large_files_count: i64
+}
+
+class HealthTrendEntity {
+  +trend: String
+  +change_percent: f64
+  +days_analyzed: u32
+}
+
+class CleaningReportEntity {
+  +id: Option<String>
+  +date: String
+  +items_cleaned: i64
+  +space_reclaimed: u64
+  +duration: f64
+  +categories: ReportCategories
+}
+
+class ReportCategories {
+  +cache: i64
+  +trash: i64
+  +logs: i64
+  +large_files: i64
+  +duplicates: i64
+}
+
+class SnapshotComparison {
+  +before_id: String
+  +after_id: String
+  +space_reclaimed: u64
+  +items_cleaned: i64
+  +health_improvement: f64
+  +details: ComparisonDetails
+}
+
+class ComparisonDetails {
+  +cache_change: i64
+  +trash_change: i64
+  +log_change: i64
+  +large_file_change: i64
+}
+
+AutomationRecipeEntity "1" -- "*" ExecutionHistoryEntity : records >
+AutomationRecipeEntity --> RecipeTrigger
+AutomationRecipeEntity --> ActionStep
+CleaningReportEntity --> ReportCategories
+SnapshotComparison --> ComparisonDetails
+
+note bottom of CleaningProfileEntity
+  nosql_orm Model with table_name = "cleaning_profiles"
+  Indexed by "name"
+end note
+
+note bottom of AutomationRecipeEntity
+  nosql_orm Model with table_name = "automation_recipes"
+  Indexed by "name"
+end note
+@enduml

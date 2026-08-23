@@ -1,0 +1,58 @@
+@startuml
+title Cleanux — TO-BE KAS Handler Taxonomy
+skinparam componentStyle usecase
+left to right direction
+
+package "invoke handlers" {
+  (crud_execute) <<invoke>>
+  (get_cleaning_profiles) <<invoke>>
+  (get_cleaning_profile) <<invoke>>
+  (create_cleaning_profile) <<invoke>>
+  (update_cleaning_profile) <<invoke>>
+  (delete_cleaning_profile) <<invoke>>
+  (apply_cleaning_profile) <<invoke>>
+  (get_system_services) <<invoke>>
+  (get_cache_summary) <<invoke>>
+  (scan_directory) <<invoke>>
+  (find_duplicates) <<invoke>>
+  (get_junk_summary) <<invoke>>
+  (clean_junk_category) <<invoke>>
+  (get_processes) <<invoke>>
+  (kill_process) <<invoke>>
+  (optimize_memory) <<invoke>>
+}
+
+package "navigate handlers" {
+  (open_dashboard) <<navigate>>
+  (open_settings) <<navigate>>
+  (open_backup_manager) <<navigate>>
+  (open_automation_editor) <<navigate>>
+}
+
+package "set handlers" {
+  (set_power_profile) <<set>>
+  (update_health_snapshot) <<set>>
+}
+
+package "toast handlers" {
+  (show_cleanup_complete) <<toast>>
+  (show_scan_progress) <<toast>>
+  (show_error_toast) <<toast>>
+}
+
+package "modal handlers" {
+  (show_confirm_clean) <<modal>>
+  (show_backup_restore_dialog) <<modal>>
+  (show_kill_process_dialog) <<modal>>
+}
+
+package "guard handlers" {
+  (check_elevated_permissions) <<guard>>
+}
+
+note bottom of invoke handlers
+  Each #[kas_handler] replaces one #[tauri::command]
+  Routing determined by handler type annotation
+  invoke = data operations, navigate = page transitions
+end note
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+title Cleanux — AS-IS Sequence: Profile Apply Flow
+participant "Angular Frontend" as FE
+participant "apply_cleaning_profile\n(command)" as CMD
+participant "RepositoryService" as REPO
+participant "nosql_orm\nJsonProvider" as ORM
+database "JSON Files" as DB
+
+FE -> CMD : apply_cleaning_profile(name)
+CMD -> REPO : find_many("cleaning_profiles", filter, ...)
+REPO -> ORM : query(filter)
+ORM -> DB : read "cleaning_profiles".json
+
+alt clean_cache
+  CMD -> CMD : dirs::cache_dir()
+  CMD -> CMD : std::fs::remove_dir_all()
+end
+
+alt clean_trash
+  CMD -> CMD : home/.local/share/Trash/files
+  CMD -> CMD : std::fs::remove_file()
+end
+
+alt clean_logs
+  CMD -> CMD : /var/log
+  CMD -> CMD : requires elevated permissions
+end
+
+CMD --> FE : Response::success(results)
+
+note right of CMD
+  Profile-based cleaning execution
+  Combines cache, trash, logs cleaning
+  Large file threshold from profile
+end note
+@enduml

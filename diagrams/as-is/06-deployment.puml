@@ -1,0 +1,64 @@
+@startuml
+title Cleanux — AS-IS Deployment Architecture
+skinparam componentStyle rectangle
+
+package "Angular Frontend" {
+  [Angular v21.1.0] as angular
+  [Standalone Components] as components
+  [TauriApiService] as api_service
+  [CrudService] as crud_svc
+}
+
+package "Tauri Backend (Rust)" {
+  [src-tauri/src/] as tauri_src
+  package "commands/" {
+    [12 command modules] as cmds
+  }
+  package "services/" {
+    [30+ business services] as svc
+  }
+  package "entities/" {
+    [5 entity models] as ent
+  }
+  package "repositories/" {
+    [RepositoryService] as repo
+  }
+}
+
+package "Data Layer" {
+  [nosql_orm] as orm
+  database "JSON Files" as json_db {
+    folder "app_data_dir()"
+  }
+}
+
+package "System" {
+  [sysinfo] as sysinfo
+  [process_service] as proc_svc
+  [kernel_cleaner_service] as kernel_svc
+}
+
+Angular --> api_service
+api_service --> crud_svc
+api_service --> tauri_src : invoke()
+tauri_src --> cmds
+tauri_src --> svc
+tauri_src --> repo
+repo --> orm
+orm --> json_db
+svc --> sysinfo
+svc --> proc_svc
+svc --> kernel_svc
+
+note bottom of Tauri Backend
+  Tauri v2.11.2 with tauri-plugin-fs, tauri-plugin-opener
+  tauri-plugin-mcp-bridge enabled
+  tauri-plugin-log for logging
+end note
+
+note bottom of Angular
+  Bun package manager
+  Standalone components with Signals
+  TauriApiService wraps invoke()
+end note
+@enduml
