@@ -4,14 +4,12 @@
 //! Architecture:
 //! - `domain/` - Cleaning entities (CleaningProfile, CleaningReport, etc.)
 //! - `application/` - Services and KAS handlers
-//! - `infrastructure/` - Storage, system commands, package managers
+//! - `infrastructure/` - Storage, system commands, package managers, MCP server
 //! - `presentation/` - Dioxus UI pages and components
-//! - `mcp/` - MCP server for bridge communication
 
 pub mod application;
 pub mod domain;
 pub mod infrastructure;
-pub mod mcp;
 pub mod presentation;
 
 // Re-export commonly used types

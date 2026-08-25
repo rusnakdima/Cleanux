@@ -9,7 +9,7 @@ use dioxus::prelude::*;
 use dioxus_desktop::{launch::launch_virtual_dom_blocking, Config};
 use tokio::runtime::Builder;
 
-use cleanux::mcp::DioxusMcpServer;
+use cleanux::infrastructure::mcp::DioxusMcpServer;
 use cleanux::Route;
 
 /// Global window handle for MCP server

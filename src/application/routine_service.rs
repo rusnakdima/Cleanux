@@ -5,6 +5,9 @@ use chrono::Utc;
 use std::sync::{Arc, RwLock};
 
 const TABLE_AUTOMATION_RECIPES: &str = "automation_recipes";
+/// Master `add_to_history` keeps at most this many entries (newest first).
+const EXECUTION_HISTORY_TABLE: &str = "execution_history";
+const EXECUTION_HISTORY_CAP: usize = 100;
 
 pub struct RoutineService {
     storage: Arc<JsonStorage>,
@@ -101,6 +104,29 @@ impl RoutineService {
             }
         };
         self.persist()?;
+        self.add_to_history(history.clone())?;
         Ok(history)
+    }
+
+    /// Append an entry to the persisted execution history, capped at
+    /// [`EXECUTION_HISTORY_CAP`] entries with the oldest truncated
+    /// (master `add_to_history` semantics).
+    pub fn add_to_history(&self, entry: ExecutionHistory) -> Result<(), String> {
+        let mut history = self
+            .storage
+            .load::<Vec<ExecutionHistory>>(EXECUTION_HISTORY_TABLE)
+            .unwrap_or_else(|_| Vec::new());
+        history.insert(0, entry);
+        history.truncate(EXECUTION_HISTORY_CAP);
+        self.storage
+            .save(EXECUTION_HISTORY_TABLE, &history)
+            .map_err(|e| e.to_string())
+    }
+
+    /// Load the persisted execution history (newest first).
+    pub fn get_history(&self) -> Result<Vec<ExecutionHistory>, String> {
+        self.storage
+            .load::<Vec<ExecutionHistory>>(EXECUTION_HISTORY_TABLE)
+            .map_err(|e| e.to_string())
     }
 }

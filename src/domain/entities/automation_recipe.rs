@@ -11,6 +11,7 @@ pub fn generate_id() -> String {
 pub struct AutomationRecipe {
     pub id: Option<String>,
     pub name: String,
+    #[serde(default)]
     pub description: String,
     pub trigger: Trigger,
     pub conditions: Vec<Condition>,

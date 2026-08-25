@@ -29,6 +29,13 @@ impl JsonStorage {
         let path = self.base_path.join(filename);
         let content = serde_json::to_string_pretty(data)
             .map_err(|e| format!("Failed to serialize {}: {}", filename, e))?;
-        std::fs::write(&path, content).map_err(|e| format!("Failed to write {}: {}", filename, e))
+        // Atomic whole-collection rewrite (master nosql_orm semantics): write to a
+        // temp file first, then rename over the target so a failed save never
+        // destroys the previously stored collection.
+        let tmp = self.base_path.join(format!("{}.tmp", filename));
+        std::fs::write(&tmp, content)
+            .map_err(|e| format!("Failed to write {}: {}", filename, e))?;
+        std::fs::rename(&tmp, &path)
+            .map_err(|e| format!("Failed to finalize {}: {}", filename, e))
     }
 }
