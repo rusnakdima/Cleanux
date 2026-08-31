@@ -1,26 +1,19 @@
 //! Cleanux - Pure Dioxus Desktop Application
 //!
-//! A system cleanup application migrated from Tauri to Dioxus with KAS handlers.
+//! A system cleanup application migrated to schema-driven UI (SDUI).
 
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 use std::thread;
 
 use dioxus::prelude::*;
-use dioxus_desktop::{launch::launch_virtual_dom_blocking, Config};
-use tokio::runtime::Builder;
+use dioxus_desktop::{Config, WindowBuilder};
 
-use cleanux::infrastructure::mcp::DioxusMcpServer;
-use cleanux::Route;
-
-/// Global window handle for MCP server
-static WINDOW_HANDLE: OnceLock<Arc<tao::window::Window>> = OnceLock::new();
-
-#[component]
-fn App() -> Element {
-    rsx! {
-        Router::<Route> {}
-    }
-}
+use cleanux::bridge::bridge_consumer_loop;
+use cleanux::infrastructure::json_storage::JsonStorage;
+use cleanux::presentation::sdui::RootApp;
+use dioxus_shared::env::data_dir;
+use dioxus_shared::mcp::bridge::McpBridge;
+use dioxus_shared::mcp::dynamic_port;
 
 fn main() {
     // Initialize tracing
@@ -30,54 +23,27 @@ fn main() {
 
     tracing::info!("Starting Cleanux Dioxus application");
 
-    // Create a single-threaded Tokio runtime for the webview
-    let rt = Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .expect("Failed to create Tokio runtime");
+    let port = dynamic_port();
+    let (bridge, bridge_state_raw): (McpBridge, _) = McpBridge::new(port);
 
-    // Create config with window
-    let desktop_config = Config::new().with_window(
-        tao::window::WindowBuilder::new()
-            .with_title("Cleanux")
-            .with_inner_size(tao::dpi::LogicalSize::new(1200, 800)),
-    );
+    // Spawn bridge thread immediately - bridge is consumed here
+    println!("MCP Bridge listening on ws://127.0.0.1:{}", port);
+    thread::spawn(move || bridge.run());
 
-    // Capture window and spawn MCP server on separate thread
-    let desktop_config = desktop_config.with_on_window(move |window, _| {
-        if WINDOW_HANDLE.get().is_none() {
-            let _ = WINDOW_HANDLE.set(window.clone());
+    // Spawn bridge consumer loop
+    thread::spawn(move || bridge_consumer_loop(bridge_state_raw));
 
-            tracing::info!("Window captured! Starting MCP server on separate thread...");
+    // Wire JsonStorage for application services
+    let storage: Arc<JsonStorage> = Arc::new(JsonStorage::new(data_dir("cleanux")));
+    provide_context(storage.clone());
 
-            thread::spawn(move || {
-                let rt =
-                    tokio::runtime::Runtime::new().expect("Failed to create MCP Tokio runtime");
-
-                rt.block_on(async {
-                    let server = DioxusMcpServer::new(window);
-                    match server.bind().await {
-                        Ok(port) => {
-                            let _ = std::fs::write("/tmp/cleanux-mcp.port", port.to_string());
-                            tracing::info!("MCP server listening on port {}", port);
-                            if let Err(e) = server.serve().await {
-                                tracing::error!("MCP server error: {}", e);
-                            }
-                        }
-                        Err(e) => {
-                            tracing::error!("Failed to bind MCP server: {}", e);
-                        }
-                    }
-                });
-            });
-        }
-    });
-
-    // Build virtual dom and launch - this BLOCKS the main thread
-    let dom = VirtualDom::new(App);
-
-    // Enter the runtime and run the event loop
-    rt.block_on(async move {
-        launch_virtual_dom_blocking(dom, desktop_config);
-    });
+    dioxus::LaunchBuilder::desktop()
+        .with_cfg(
+            Config::new().with_window(
+                WindowBuilder::new()
+                    .with_title("Cleanux")
+                    .with_inner_size(dioxus_desktop::LogicalSize::new(1200.0, 800.0)),
+            ),
+        )
+        .launch(RootApp)
 }

@@ -8,6 +8,7 @@
 //! - `presentation/` - Dioxus UI pages and components
 
 pub mod application;
+pub mod bridge;
 pub mod domain;
 pub mod infrastructure;
 pub mod presentation;
@@ -20,31 +21,5 @@ pub use dioxus::prelude::*;
 #[allow(ambiguous_glob_reexports)]
 pub use domain::*;
 
-// Import pages for routing
-#[allow(ambiguous_glob_reexports)]
-use presentation::pages::*;
-
-/// Application routes
-#[derive(Routable, Clone, PartialEq)]
-pub enum Route {
-    #[route("/")]
-    Home {},
-    #[route("/dashboard")]
-    Dashboard {},
-    #[route("/cleaner")]
-    Cleaner {},
-    #[route("/storage")]
-    Storage {},
-    #[route("/system")]
-    System {},
-    #[route("/automation")]
-    Automation {},
-    #[route("/logs")]
-    LogManager {},
-    #[route("/settings")]
-    Settings {},
-    #[route("/profiles")]
-    Profiles {},
-    #[route("/reports")]
-    Reports {},
-}
+pub use dioxus_shared::schema::load_schema;
+pub use presentation::sdui::SduiRoot;

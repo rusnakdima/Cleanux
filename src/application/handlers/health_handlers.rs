@@ -2,9 +2,11 @@
 //!
 //! Handles health monitoring, temperature, and system statistics.
 
-use super::crud_handlers::KasResponse;
+use dioxus_shared::response::Response;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+use crate::infrastructure::sys_utils::get_cpu_temp;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TemperatureInfo {
@@ -21,38 +23,39 @@ pub struct SystemStats {
 }
 
 /// Get CPU temperature
-pub async fn get_cpu_temperature() -> Result<KasResponse<f64>, String> {
-    // TODO: Read from /sys/class/thermal/
-    Ok(KasResponse::success(45.0, "CPU temperature retrieved"))
+pub async fn get_cpu_temperature() -> Result<Response<f64>, String> {
+    let temp = get_cpu_temp().await.unwrap_or(f64::NAN);
+    Ok(Response::success(temp, Some("CPU temperature retrieved")))
 }
 
 /// Get GPU temperature
-pub async fn get_gpu_temperature() -> Result<KasResponse<Option<f64>>, String> {
+pub async fn get_gpu_temperature() -> Result<Response<Option<f64>>, String> {
     // TODO: Read from NVIDIA or AMD GPU APIs
-    Ok(KasResponse::success(
-        Some(52.0),
-        "GPU temperature retrieved",
-    ))
+    Ok(Response::success(None, Some("GPU temperature retrieved")))
 }
 
 /// Get all temperatures
-pub async fn get_temperatures() -> Result<KasResponse<TemperatureInfo>, String> {
-    let cpu_temp: f64 = 45.0;
-    let gpu_temp: f64 = 52.0;
-    let max_temp = cpu_temp.max(gpu_temp);
+pub async fn get_temperatures() -> Result<Response<TemperatureInfo>, String> {
+    let cpu_temp = get_cpu_temp().await.unwrap_or(f64::NAN);
+    let gpu_temp: Option<f64> = None;
+    let max_temp = gpu_temp.map_or(cpu_temp, |g| cpu_temp.max(g));
 
-    Ok(KasResponse::success(
+    Ok(Response::success(
         TemperatureInfo {
-            cpu: Some(cpu_temp),
-            gpu: Some(gpu_temp),
+            cpu: if cpu_temp.is_nan() {
+                None
+            } else {
+                Some(cpu_temp)
+            },
+            gpu: gpu_temp,
             max: max_temp,
         },
-        "Temperatures retrieved",
+        Some("Temperatures retrieved"),
     ))
 }
 
 /// Get system statistics
-pub async fn get_system_stats() -> Result<KasResponse<SystemStats>, String> {
+pub async fn get_system_stats() -> Result<Response<SystemStats>, String> {
     // Use sysinfo crate for CPU and memory
     let sys = sysinfo::System::new_all();
     let cpu_percent = sys.global_cpu_usage();
@@ -62,45 +65,56 @@ pub async fn get_system_stats() -> Result<KasResponse<SystemStats>, String> {
         0.0
     };
 
-    // Estimate disk usage
-    let disk_percent = 65.0;
+    // Get disk usage for root mount point
+    let disks = sysinfo::Disks::new_with_refreshed_list();
+    let disk_percent = if let Some(disk) = disks.iter().find(|d| d.mount_point().eq("/")) {
+        let total = disk.total_space() as f32;
+        let used = disk.available_space() as f32;
+        if total > 0.0 {
+            ((total - used) / total) * 100.0
+        } else {
+            0.0
+        }
+    } else {
+        0.0
+    };
 
-    Ok(KasResponse::success(
+    Ok(Response::success(
         SystemStats {
             cpu_percent,
             memory_percent,
             disk_percent,
         },
-        "System stats retrieved",
+        Some("System stats retrieved"),
     ))
 }
 
 /// Get health history
-pub async fn get_health_history() -> Result<KasResponse<Vec<Value>>, String> {
-    Ok(KasResponse::success(
+pub async fn get_health_history() -> Result<Response<Vec<Value>>, String> {
+    Ok(Response::success(
         vec![
             serde_json::json!({"timestamp": "2026-08-14T10:00:00Z", "score": 85}),
             serde_json::json!({"timestamp": "2026-08-13T10:00:00Z", "score": 82}),
             serde_json::json!({"timestamp": "2026-08-12T10:00:00Z", "score": 88}),
         ],
-        "Health history retrieved",
+        Some("Health history retrieved"),
     ))
 }
 
 /// Get health trends
-pub async fn get_health_trends() -> Result<KasResponse<Value>, String> {
-    Ok(KasResponse::success(
+pub async fn get_health_trends() -> Result<Response<Value>, String> {
+    Ok(Response::success(
         serde_json::json!({
             "trend": "improving",
             "change_percent": 5.2,
             "days_tracked": 30
         }),
-        "Health trends retrieved",
+        Some("Health trends retrieved"),
     ))
 }
 
 /// Save health snapshot
-pub async fn save_health_snapshot() -> Result<KasResponse<Value>, String> {
+pub async fn save_health_snapshot() -> Result<Response<Value>, String> {
     let stats = get_system_stats().await?;
     let temps = get_temperatures().await?;
 
@@ -115,5 +129,5 @@ pub async fn save_health_snapshot() -> Result<KasResponse<Value>, String> {
         "temperature": temps_data.cpu,
     });
 
-    Ok(KasResponse::success(snapshot, "Health snapshot saved"))
+    Ok(Response::success(snapshot, Some("Health snapshot saved")))
 }

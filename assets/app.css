@@ -1,0 +1,45 @@
+/* Cleanux supplement utilities.
+ *
+ * The shared precompiled theme.css only contains utilities used by sibling
+ * apps. This file adds the few utilities Cleanux needs that are absent
+ * there, following the same conventions: var(--color-*) tokens,
+ * `@media (width >= 64rem)` for `lg:`, `:where([data-theme-mode="dark"], ...)
+ * for `dark:` and a `(hover: hover)` wrapper for `hover:`.
+ */
+
+/* Flowbite-like base-100 / base-300 tokens */
+:root {
+  --color-base-100: oklch(98% 0.003 247.839);
+  --color-base-200: oklch(96% 0.006 264.531);
+  --color-base-300: oklch(92% 0.01 258.338);
+  --color-base-content: oklch(21% 0.034 264.665);
+  --color-primary: oklch(62.3% 0.214 259.815);
+  --color-primary-content: oklch(98% 0.003 247.839);
+  --color-accent: oklch(76.9% 0.188 70.08);
+  --color-accent-content: oklch(21% 0.034 264.665);
+  --color-secondary: oklch(58.5% 0.233 277.117);
+  --color-secondary-content: oklch(98% 0.003 247.839);
+}
+
+.dark {
+  --color-base-100: oklch(27.8% 0.033 256.848);
+  --color-base-200: oklch(37.3% 0.034 259.733);
+  --color-base-300: oklch(44.6% 0.03 256.802);
+  --color-base-content: oklch(98.5% 0.002 247.839);
+}
+
+@media (hover: hover) {
+  .hover\:shadow-lg:hover {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+  .hover\:bg-primary-focus:hover {
+    background-color: color-mix(in oklab, var(--color-primary) 85%, black);
+  }
+  .hover\:bg-accent-focus:hover {
+    background-color: color-mix(in oklab, var(--color-accent) 85%, black);
+  }
+}
+
+.dark .dark\:text-gray-50 {
+  color: oklch(98.5% 0.002 247.839);
+}

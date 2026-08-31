@@ -8,8 +8,7 @@ pub mod cleaning_service;
 pub mod health_service;
 pub mod routine_service;
 
-// KAS handlers module
-pub mod kas;
+pub mod handlers;
 
 // Re-export for convenience
 pub use automation_service::*;

@@ -36,20 +36,19 @@ impl RoutineService {
         self: &Arc<Self>,
         mut recipe: AutomationRecipe,
     ) -> Result<AutomationRecipe, String> {
-        if recipe.id.is_none() {
+        if let Some(ref id) = recipe.id {
+            let mut cache = self.cache.write().map_err(|e| e.to_string())?;
+            if let Some(idx) = cache.iter().position(|r| r.id.as_ref() == Some(id)) {
+                cache[idx] = recipe.clone();
+            } else {
+                cache.push(recipe.clone());
+            }
+        } else {
             recipe.id = Some(crate::domain::entities::automation_recipe::generate_id());
             recipe.created_at = Utc::now();
             recipe.last_run = None;
             let mut cache = self.cache.write().map_err(|e| e.to_string())?;
             cache.push(recipe.clone());
-        } else {
-            let id = recipe.id.as_ref().unwrap().clone();
-            let mut cache = self.cache.write().map_err(|e| e.to_string())?;
-            if let Some(idx) = cache.iter().position(|r| r.id.as_ref() == Some(&id)) {
-                cache[idx] = recipe.clone();
-            } else {
-                cache.push(recipe.clone());
-            }
         }
         self.persist()?;
         Ok(recipe)

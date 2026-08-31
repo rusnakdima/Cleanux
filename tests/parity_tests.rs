@@ -11,15 +11,16 @@
 //! - Small divergence fixes to master semantics were applied where noted.
 
 use cleanux::application::kas::cleaner_handlers::clean_junk_category;
-use cleanux::application::kas::crud_handlers::KasResponse;
 use cleanux::application::kas::storage_handlers::{
     create_backup, find_empty_directories, get_directory_size, list_backups, scan_directory,
 };
 use cleanux::application::routine_service::RoutineService;
-use cleanux::domain::entities::automation_recipe::{Action, AutomationRecipe, Trigger};
+use cleanux::domain::entities::automation_recipe::AutomationRecipe;
 use cleanux::domain::entities::cleaning_profile::CleaningProfile;
 use cleanux::domain::entities::execution_history::{ExecutionHistory, ExecutionStatus};
 use cleanux::infrastructure::json_storage::JsonStorage;
+use dioxus_shared::response::Response;
+use dioxus_shared::response::Status;
 use serde::Serialize;
 use serde_json::json;
 use std::sync::Arc;
@@ -88,7 +89,8 @@ fn build_fs_scan_tree(root: &std::path::Path) -> u64 {
     put_file(&p("Downloads/iso/big.iso"), 104_857_601); // > 100 MiB threshold
     put_file(&p("Downloads/doc/small.pdf"), 104_857_599); // threshold - 1
 
-    10 + 2048 + 4096
+    10 + 2048
+        + 4096
         + 756_000_000
         + 1
         + 120_000_000
@@ -192,7 +194,11 @@ fn t3_5_crud_round_trip_on_json_storage() {
     let mut updated = saved.clone();
     updated.name = "Deep Clean v2".to_string();
     let updated = service.save_routine(updated).expect("update");
-    assert_eq!(service.get_routines().unwrap().len(), 1, "update not insert");
+    assert_eq!(
+        service.get_routines().unwrap().len(),
+        1,
+        "update not insert"
+    );
     assert_eq!(updated.name, "Deep Clean v2");
 
     // persistence is real: a fresh service over the same JsonStorage sees it
@@ -225,11 +231,16 @@ fn t6_1_execute_existing_routine_appends_history() {
     let saved = service.save_routine(recipe).expect("seed");
     let before = SystemTime::now();
 
-    let history = service.execute_routine(saved.id.as_deref().unwrap()).expect("execute");
+    let history = service
+        .execute_routine(saved.id.as_deref().unwrap())
+        .expect("execute");
     let after = SystemTime::now();
 
     assert_eq!(history.recipe_id, saved.id, "history carries recipe_id");
-    assert_eq!(history.recipe_name, "Deep Clean", "history carries recipe name");
+    assert_eq!(
+        history.recipe_name, "Deep Clean",
+        "history carries recipe name"
+    );
     assert!(matches!(history.status, ExecutionStatus::Completed));
     let started = history.started_at;
     assert!(started >= chrono_start(before) && started <= chrono_end(after));
@@ -287,7 +298,9 @@ fn t6_3_history_capped_at_100_with_oldest_truncated() {
         })
         .rev()
         .collect();
-    storage.save("execution_history", &seed).expect("seed history");
+    storage
+        .save("execution_history", &seed)
+        .expect("seed history");
 
     let entry = ExecutionHistory {
         id: Some("h-new".to_string()),
@@ -328,7 +341,9 @@ fn t6_6_persistence_survives_reload() {
         let mut recipe = deep_clean_recipe();
         recipe.id = None;
         let saved = service.save_routine(recipe).expect("seed");
-        service.delete_routine(saved.id.as_deref().unwrap()).expect("delete");
+        service
+            .delete_routine(saved.id.as_deref().unwrap())
+            .expect("delete");
         let second = deep_clean_recipe(); // keeps explicit id "r-1"
         service.save_routine(second).expect("add other");
     } // service dropped here
@@ -368,8 +383,7 @@ fn recipe_fixture_wire_shape_matches_master_doc() {
 /// `status`/`message`/`data`; success/error/not_found statuses.
 #[test]
 fn t8_kas_response_envelope_shape_stable() {
-    let ok: KasResponse<u64> = KasResponse::success(42, "all good");
-    assert_eq!(ok.status, "success");
+    let ok: Response<u64> = Response::success(42, Some("all good"));
     assert_eq!(ok.message, "all good");
     assert_eq!(ok.data, Some(42));
 
@@ -381,18 +395,22 @@ fn t8_kas_response_envelope_shape_stable() {
         .map(String::as_str)
         .collect();
     keys.sort_unstable();
-    assert_eq!(keys, vec!["data", "message", "status"], "envelope field set changed");
+    assert_eq!(
+        keys,
+        vec!["data", "message", "status"],
+        "envelope field set changed"
+    );
 
-    let err: KasResponse<()> = KasResponse::error("bad");
-    assert_eq!(err.status, "error");
+    let err: Response<()> = Response::error("bad");
+    assert_eq!(err.status, Status::Error);
     assert!(err.data.is_none());
 
-    let nf: KasResponse<String> = KasResponse::not_found("Profile");
-    assert_eq!(nf.status, "not_found");
+    let nf: Response<String> = Response::not_found("Profile");
+    assert_eq!(nf.status, Status::NotFound);
     assert_eq!(nf.message, "Profile not found");
 
     // Deserialization round-trip keeps the envelope usable across the bridge.
-    let back: KasResponse<u64> = serde_json::from_value(serialized).unwrap();
+    let back: Response<u64> = serde_json::from_value(serialized).unwrap();
     assert_eq!(back.data, Some(42));
 }
 
@@ -403,9 +421,10 @@ fn t8_json_storage_failed_save_preserves_previous_content() {
     let dir = TempDir::new().unwrap();
     let storage = JsonStorage::new(dir.path().to_path_buf());
 
-    storage.save("table", &json!({"version": 1})).expect("first save");
-    let original =
-        std::fs::read_to_string(dir.path().join("table")).expect("stored file exists");
+    storage
+        .save("table", &json!({"version": 1}))
+        .expect("first save");
+    let original = std::fs::read_to_string(dir.path().join("table")).expect("stored file exists");
 
     struct AlwaysFails;
     impl Serialize for AlwaysFails {
@@ -413,10 +432,16 @@ fn t8_json_storage_failed_save_preserves_previous_content() {
             Err(serde::ser::Error::custom("boom"))
         }
     }
-    assert!(storage.save("table", &AlwaysFails).is_err(), "serialization failure surfaces");
+    assert!(
+        storage.save("table", &AlwaysFails).is_err(),
+        "serialization failure surfaces"
+    );
 
     let after = std::fs::read_to_string(dir.path().join("table")).expect("file intact");
-    assert_eq!(original, after, "previous collection preserved on failed save");
+    assert_eq!(
+        original, after,
+        "previous collection preserved on failed save"
+    );
     // No temp litter left behind.
     let leftovers: Vec<_> = std::fs::read_dir(dir.path())
         .unwrap()
@@ -424,7 +449,11 @@ fn t8_json_storage_failed_save_preserves_previous_content() {
         .map(|e| e.file_name().to_string_lossy().into_owned())
         .filter(|n| n.ends_with(".tmp"))
         .collect();
-    assert!(leftovers.is_empty(), "temp file renamed away, got {:?}", leftovers);
+    assert!(
+        leftovers.is_empty(),
+        "temp file renamed away, got {:?}",
+        leftovers
+    );
 }
 
 /// T8 — corrupt-file simulation yields an error from load (never silently
@@ -438,7 +467,9 @@ fn t8_json_storage_corrupt_file_simulation() {
     let load_err = storage.load::<serde_json::Value>("table").unwrap_err();
     assert!(load_err.contains("Failed to parse"), "got: {}", load_err);
 
-    storage.save("table", &json!({"recovered": true})).expect("save over corrupt file");
+    storage
+        .save("table", &json!({"recovered": true}))
+        .expect("save over corrupt file");
     let recovered = storage.load::<serde_json::Value>("table").unwrap();
     assert_eq!(recovered, json!({"recovered": true}));
 
@@ -459,12 +490,18 @@ async fn walkdir_scan_directory_totals_fs_scan_tree() {
     let home = TempDir::new().unwrap();
     let expected_total = build_fs_scan_tree(home.path());
 
-    let response = scan_directory(home.path().to_str().unwrap()).await.expect("scan ok");
-    assert_eq!(response.status, "success");
+    let response = scan_directory(home.path().to_str().unwrap())
+        .await
+        .expect("scan ok");
+    assert_eq!(response.status, Status::Success);
     let info = response.data.expect("payload");
     assert_eq!(info.size, expected_total);
     assert_eq!(info.files, 13, "13 files planted by the fixture tree");
-    assert!(info.subdirs >= 10, "counts directories (incl. root), got {}", info.subdirs);
+    assert!(
+        info.subdirs >= 10,
+        "counts directories (incl. root), got {}",
+        info.subdirs
+    );
 }
 
 /// get_directory_size over `.cache`: 10+2048+4096+756000000+1+120000000.
@@ -474,8 +511,9 @@ async fn walkdir_get_directory_size_sums_cache_exactly() {
     build_fs_scan_tree(home.path());
 
     let cache = home.path().join(".cache");
-    let response =
-        get_directory_size(cache.to_str().unwrap()).await.expect("size ok");
+    let response = get_directory_size(cache.to_str().unwrap())
+        .await
+        .expect("size ok");
     assert_eq!(response.data, Some(876_006_155));
 
     // Trash summary bytes (plan T1.3): g.bin + h.txt == 256000012.
@@ -491,12 +529,17 @@ async fn walkdir_find_empty_directories_finds_flatpak_only() {
     let home = TempDir::new().unwrap();
     build_fs_scan_tree(home.path());
 
-    let response =
-        find_empty_directories(home.path().to_str().unwrap()).await.expect("walk ok");
+    let response = find_empty_directories(home.path().to_str().unwrap())
+        .await
+        .expect("walk ok");
     let empty = response.data.expect("payload");
     assert_eq!(
         empty,
-        vec![home.path().join(".cache/flatpak").to_string_lossy().into_owned()],
+        vec![home
+            .path()
+            .join(".cache/flatpak")
+            .to_string_lossy()
+            .into_owned()],
         "exactly the empty fixture dir"
     );
 }
@@ -513,7 +556,7 @@ async fn walkdir_find_empty_directories_finds_flatpak_only() {
 #[ignore = "gap: category cleaning engine missing; clean_junk_category returns a fixed fixture instead of validating categories"]
 async fn t2_4_unknown_category_errors_like_master() {
     let response = clean_junk_category("bogus").await.expect("call");
-    assert_eq!(response.status, "error");
+    assert_eq!(response.status, Status::Error);
     assert_eq!(response.message, "Invalid category: bogus");
 }
 
@@ -540,7 +583,10 @@ async fn t4_create_backup_writes_real_archive_into_default_dir() {
     let response = create_backup("weekly").await.expect("call");
     let info = response.data.unwrap();
     let archive = paths.backup_dir().join("weekly.tar.gz");
-    assert!(archive.exists(), "archive written to <config>/cleanux/backups");
+    assert!(
+        archive.exists(),
+        "archive written to <config>/cleanux/backups"
+    );
     assert!(info.size > 0, "real archived size reported");
 }
 

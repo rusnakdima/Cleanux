@@ -1,7 +1,5 @@
 //! Presentation layer for Cleanux
 //!
-//! UI components and page layouts built with Dioxus RSX.
+//! SDUI-driven UI via DynamicPage.
 
-pub mod components;
-pub mod layouts;
-pub mod pages;
+pub mod sdui;

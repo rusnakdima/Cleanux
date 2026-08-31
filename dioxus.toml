@@ -1,0 +1,9 @@
+[application]
+name = "Cleanux"
+base_path = ""
+
+[web]
+head_html = "index.html"
+
+[debug]
+devtools = true
