@@ -9,7 +9,7 @@ use crate::infrastructure::sys_utils::{
 
 use tokio::process::Command;
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 pub struct JunkSummary {
     pub cache: u64,
     pub trash: u64,

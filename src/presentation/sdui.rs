@@ -7,7 +7,7 @@ use dioxus_shared::get_theme_css;
 use dioxus_shared::mcp::bridge::BridgeStateHandle;
 use dioxus_shared::schema::{load_schema_with_status, AppSchema};
 use dioxus_shared::themes::{ThemeMode, ThemeVariant};
-use dioxus_shared::ui::components::{use_theme_mode, ActionBus, DynamicPage, ThemeProvider};
+use dioxus_shared::ui::components::{ActionBus, DynamicPage, ThemeProvider};
 
 use dioxus_shared::load_theme_pref;
 
@@ -73,21 +73,16 @@ fn SduiSurface(schema: AppSchema, app_id: String, schema_not_found: bool) -> Ele
     let bus = ActionBus::new("/");
     provide_context(bus.clone());
 
-    let is_dark = use_theme_mode() == ThemeMode::Dark;
-
     rsx! {
         div {
-            class: if is_dark { "dark" } else { "" },
-            div {
-                class: "min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors",
-                DynamicPage {
-                    schema: schema.clone(),
-                    app_id: app_id.clone(),
-                    initial_route: String::from("/"),
-                    bus: bus.clone(),
-                    registry: None,
-                    schema_not_found: schema_not_found,
-                }
+            class: "min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors",
+            DynamicPage {
+                schema: schema.clone(),
+                app_id: app_id.clone(),
+                initial_route: String::from("/"),
+                bus: bus.clone(),
+                registry: None,
+                schema_not_found: schema_not_found,
             }
         }
     }
