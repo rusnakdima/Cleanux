@@ -77,6 +77,7 @@ log = "0.4"
 
 [dev-dependencies]
 tempfile = "3"
+dioxus-shared = { path = "../dioxus-shared", features = ["test-utils"] }
 
 [lib]
 name = "cleanux"

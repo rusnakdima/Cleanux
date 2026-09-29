@@ -33,9 +33,7 @@ fn main() {
     // Spawn bridge consumer loop
     thread::spawn(move || bridge_consumer_loop(bridge_state_raw));
 
-    // Wire JsonStorage for application services
-    let storage: Arc<JsonStorage> = Arc::new(JsonStorage::new(data_dir("cleanux")));
-    provide_context(storage.clone());
+    // JsonStorage is wired via LazyLock statics in global_state.rs — no provide_context needed here.
 
     dioxus::LaunchBuilder::desktop()
         .with_cfg(
