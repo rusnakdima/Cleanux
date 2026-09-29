@@ -1,0 +1,201 @@
+{
+  "app": "cleanux",
+  "schema_version": "1.0.0",
+  "version": "1.0.0",
+  "health_snapshot": {
+    "cpu_percent": 42,
+    "cpu_speed_ghz": 3.2,
+    "disk_percent": 58,
+    "disk_used_gb": 297,
+    "disk_total_gb": 512,
+    "ram_percent": 67,
+    "ram_used_gb": 8.5,
+    "ram_total_gb": 16,
+    "temperature_c": 48,
+    "temperature_status": "OK",
+    "network_rx_bytes": 1245120,
+    "network_tx_bytes": 384210,
+    "uptime_seconds": 87412,
+    "last_check_iso": "2026-09-27T09:14:22Z"
+  },
+  "cleanup_targets": [
+    {
+      "id": "target-system-cache",
+      "label": "System Cache",
+      "path": "/var/cache/system",
+      "size_bytes": 734003200,
+      "selected": true,
+      "category": "cache"
+    },
+    {
+      "id": "target-user-cache",
+      "label": "User Cache",
+      "path": "/Users/you/Library/Caches",
+      "size_bytes": 4294967296,
+      "selected": true,
+      "category": "cache"
+    },
+    {
+      "id": "target-logs",
+      "label": "Application Logs",
+      "path": "/var/log/app",
+      "size_bytes": 104857600,
+      "selected": true,
+      "category": "logs"
+    },
+    {
+      "id": "target-trash",
+      "label": "Trash",
+      "path": "/Users/you/.Trash",
+      "size_bytes": 209715200,
+      "selected": true,
+      "category": "trash"
+    },
+    {
+      "id": "target-thumbnails",
+      "label": "Thumbnail Cache",
+      "path": "/Users/you/.thumbnails",
+      "size_bytes": 52428800,
+      "selected": false,
+      "category": "cache"
+    },
+    {
+      "id": "target-browser-cache",
+      "label": "Browser Cache",
+      "path": "/Users/you/Library/Caches/Browser",
+      "size_bytes": 314572800,
+      "selected": true,
+      "category": "cache"
+    },
+    {
+      "id": "target-xcode-derived",
+      "label": "Xcode DerivedData",
+      "path": "/Users/you/Library/Developer/Xcode/DerivedData",
+      "size_bytes": 10737418240,
+      "selected": false,
+      "category": "build"
+    },
+    {
+      "id": "target-ds-store",
+      "label": ".DS_Store Files",
+      "path": "/Users/you",
+      "size_bytes": 1048576,
+      "selected": true,
+      "category": "metadata"
+    }
+  ],
+  "scheduled_scans": [
+    {
+      "id": "sched-001",
+      "name": "Nightly Quick Clean",
+      "cron": "0 2 * * *",
+      "enabled": true,
+      "last_run_iso": "2026-09-27T02:00:11Z",
+      "next_run_iso": "2026-09-28T02:00:00Z",
+      "profile": "quick"
+    },
+    {
+      "id": "sched-002",
+      "name": "Weekly Deep Scan",
+      "cron": "0 4 * * 0",
+      "enabled": false,
+      "last_run_iso": "2026-09-21T04:00:09Z",
+      "next_run_iso": "2026-10-05T04:00:00Z",
+      "profile": "deep"
+    }
+  ],
+  "recent_reports": [
+    {
+      "id": "rep-20260927",
+      "timestamp_iso": "2026-09-27T09:14:22Z",
+      "profile": "quick",
+      "freed_bytes": 1283456000,
+      "items_removed": 1247,
+      "duration_seconds": 14
+    },
+    {
+      "id": "rep-20260926",
+      "timestamp_iso": "2026-09-26T08:01:09Z",
+      "profile": "deep",
+      "freed_bytes": 4127180800,
+      "items_removed": 8241,
+      "duration_seconds": 312
+    },
+    {
+      "id": "rep-20260925",
+      "timestamp_iso": "2026-09-25T18:42:55Z",
+      "profile": "cache-only",
+      "freed_bytes": 524288000,
+      "items_removed": 312,
+      "duration_seconds": 7
+    },
+    {
+      "id": "rep-20260924",
+      "timestamp_iso": "2026-09-24T22:11:40Z",
+      "profile": "quick",
+      "freed_bytes": 268435456,
+      "items_removed": 88,
+      "duration_seconds": 9
+    },
+    {
+      "id": "rep-20260923",
+      "timestamp_iso": "2026-09-23T10:30:02Z",
+      "profile": "deep",
+      "freed_bytes": 6442450944,
+      "items_removed": 14210,
+      "duration_seconds": 504
+    },
+    {
+      "id": "rep-20260922",
+      "timestamp_iso": "2026-09-22T07:15:18Z",
+      "profile": "logs-only",
+      "freed_bytes": 157286400,
+      "items_removed": 47,
+      "duration_seconds": 3
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "locale": "en",
+    "autostart": false,
+    "minimize_to_tray": true,
+    "show_notifications": true,
+    "scan_trash": true,
+    "scan_cache": true,
+    "scan_logs": true,
+    "scan_thumbnails": true,
+    "auto_clean": false,
+    "schedule": "daily",
+    "notify": true,
+    "sound": false
+  },
+  "optimization_suggestions": [
+    {
+      "id": "sug-startup-items",
+      "title": "Disable 4 startup launch agents",
+      "impact": "high",
+      "est_speedup_pct": 18,
+      "category": "startup"
+    },
+    {
+      "id": "sug-rebuild-spotlight",
+      "title": "Rebuild Spotlight index",
+      "impact": "medium",
+      "est_speedup_pct": 7,
+      "category": "search"
+    },
+    {
+      "id": "sug-flush-dns",
+      "title": "Flush DNS cache",
+      "impact": "low",
+      "est_speedup_pct": 2,
+      "category": "network"
+    }
+  ],
+  "profiles": [
+    { "id": "quick",  "name": "Quick Clean",     "duration_seconds": 15 },
+    { "id": "deep",   "name": "Deep Scan",       "duration_seconds": 600 },
+    { "id": "logs",   "name": "Logs Only",       "duration_seconds": 8 },
+    { "id": "cache",  "name": "Cache Only",      "duration_seconds": 12 }
+  ]
+}

@@ -54,3 +54,31 @@ build/
 .omo/
 
 /target
+
+# Local-machine artifacts (not part of the app repo)
+.target-check/
+.target-release/
+.omp/
+.omo/
+.last_gui.png
+architecture-overview.json
+index.html
+gen/
+MigrationData.md
+STATUS.md
+LICENSE.MD
+docs/
+diagrams/
+mobile.toml
+assets/branding/
+assets/index.html
+assets/assets/
+assets/css/
+logs/
+.openspec.yaml
+scripts/bridge-arms.json
+scripts/smoke.sh
+scripts/ws_probe.py
+scripts/rewrite_schema.py
+scripts/__pycache__/
+scripts/README.md

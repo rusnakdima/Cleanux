@@ -8,8 +8,10 @@
 //! - `presentation/` - Dioxus UI pages and components
 
 pub mod application;
+pub mod app;
 pub mod bridge;
 pub mod domain;
+pub mod global_state;
 pub mod infrastructure;
 pub mod presentation;
 

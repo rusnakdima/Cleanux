@@ -9,6 +9,7 @@ use std::sync::LazyLock;
 use chrono::{DateTime, Utc};
 use dioxus_shared::response::Response;
 use flate2::write::GzEncoder;
+use flate2::read::GzDecoder;
 use flate2::Compression;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -272,4 +273,94 @@ pub async fn scan_thumbnail_caches() -> Result<Response<u64>, String> {
         120_000_000,
         Some("Thumbnail cache: 120 MB"),
     ))
+}
+
+/// Restore a backup from archive
+pub async fn restore_backup(id: String) -> Result<Response<BackupInfo>, String> {
+    tracing::info!("Restoring backup: {}", id);
+
+    let backups = load_backup_list()?;
+    let backup = backups
+        .iter()
+        .find(|b| b.id == id)
+        .ok_or_else(|| format!("Backup not found: {}", id))?;
+
+    let archive_path = Path::new(&backup.path);
+    if !archive_path.exists() {
+        return Err(format!("Backup archive not found: {}", backup.path));
+    }
+
+    // Extract tarball to a temporary location
+    let temp_dir = std::env::temp_dir().join(format!("cleanux_restore_{}", id));
+    std::fs::create_dir_all(&temp_dir)
+        .map_err(|e| format!("Failed to create temp directory: {}", e))?;
+
+    let file = std::fs::File::open(archive_path)
+        .map_err(|e| format!("Failed to open archive: {}", e))?;
+    let decoder = flate2::read::GzDecoder::new(file);
+    let mut archive = tar::Archive::new(decoder);
+    archive
+        .unpack(&temp_dir)
+        .map_err(|e| format!("Failed to extract archive: {}", e))?;
+
+    // Copy contents to storage directory
+    let source_path = temp_dir.as_path();
+    let dest = &*STORAGE.base_path;
+
+    for entry in walkdir::WalkDir::new(source_path)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path() != source_path)
+    {
+        let src_path = entry.path();
+        let relative = src_path.strip_prefix(source_path).unwrap_or(src_path);
+        let dest_path = dest.join(relative);
+
+        if src_path.is_dir() {
+            std::fs::create_dir_all(&dest_path)
+                .map_err(|e| format!("Failed to create directory: {}", e))?;
+        } else {
+            if let Some(parent) = dest_path.parent() {
+                std::fs::create_dir_all(parent)
+                    .map_err(|e| format!("Failed to create parent directory: {}", e))?;
+            }
+            std::fs::copy(src_path, &dest_path)
+                .map_err(|e| format!("Failed to copy file: {}", e))?;
+        }
+    }
+
+    // Cleanup temp directory
+    let _ = std::fs::remove_dir_all(&temp_dir);
+
+    Ok(Response::success(
+        backup.clone(),
+        Some(&format!("Backup {} restored", id)),
+    ))
+}
+
+/// Delete a backup
+pub async fn delete_backup(id: String) -> Result<Response<bool>, String> {
+    tracing::info!("Deleting backup: {}", id);
+
+    let mut backups = load_backup_list()?;
+    let original_len = backups.len();
+
+    // Find and remove the backup
+    if let Some(pos) = backups.iter().position(|b| b.id == id) {
+        let backup = backups.remove(pos);
+
+        // Delete the archive file if it exists
+        let archive_path = Path::new(&backup.path);
+        if archive_path.exists() {
+            std::fs::remove_file(archive_path)
+                .map_err(|e| format!("Failed to delete archive file: {}", e))?;
+        }
+
+        // Save updated backup list
+        save_backup_list(&backups)?;
+
+        Ok(Response::success(true, Some("Backup deleted")))
+    } else {
+        Err(format!("Backup not found: {}", id))
+    }
 }

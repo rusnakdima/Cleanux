@@ -13,7 +13,7 @@ dioxus-signals = "0.8.0-alpha.1"
 dioxus-html = "0.8.0-alpha.1"
 dioxus-router = "0.8.0-alpha.1"
 
-dioxus-shared = { path = "../dioxus-shared", features = ["dioxus-desktop"] }
+dioxus-shared = { path = "../dioxus-shared", features = ["dioxus-desktop", "storage-json", "sdui", "mcp", "core", "schema-manager"] }
 
 # Database
 nosql_orm = { git = "https://github.com/rusnakdima/nosql_orm.git", rev = "756a681f151a6388413cf6b5d66f4476d26e8321", features = ["json", "mongo", "full", "validators"] }
@@ -55,6 +55,9 @@ tar = "0.4"
 flate2 = "1.0"
 rusqlite = { version = "0.32", features = ["bundled"] }
 uuid = { version = "1", features = ["v4"] }
+parking_lot = "0.12"
+open = "5"
+mime_guess = "2"
 
 # MCP Server
 rmcp = { version = "0.1", features = ["server"] }

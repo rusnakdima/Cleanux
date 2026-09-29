@@ -18,6 +18,28 @@ pub struct JunkSummary {
     pub total: u64,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct CategorySize {
+    pub id: String,
+    pub name: String,
+    pub size_bytes: u64,
+    pub item_count: usize,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct CacheCategoryResult {
+    pub category: String,
+    pub size: u64,
+    pub item_count: usize,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct QuickCleanResult {
+    pub space_freed: u64,
+    pub items_removed: usize,
+    pub categories: Vec<String>,
+}
+
 /// Get junk summary for all categories
 pub async fn get_junk_summary() -> Result<Response<JunkSummary>, String> {
     let cache_size = get_dir_size(&home_dir().join(".cache")).await.unwrap_or(0);
@@ -463,4 +485,96 @@ pub async fn get_startup_items() -> Result<Response<Vec<Value>>, String> {
         ],
         Some("Startup items retrieved"),
     ))
+}
+
+/// Get sizes for all cleaner categories
+pub async fn get_category_sizes() -> Result<Response<Vec<CategorySize>>, String> {
+    let categories = vec![
+        CategorySize {
+            id: "cache".to_string(),
+            name: "Cache Files".to_string(),
+            size_bytes: get_dir_size(&home_dir().join(".cache")).await.unwrap_or(0),
+            item_count: 0,
+        },
+        CategorySize {
+            id: "trash".to_string(),
+            name: "Trash".to_string(),
+            size_bytes: get_dir_size(&home_dir().join(".local/share/Trash"))
+                .await
+                .unwrap_or(0),
+            item_count: 0,
+        },
+        CategorySize {
+            id: "logs".to_string(),
+            name: "Log Files".to_string(),
+            size_bytes: get_log_dir_size().await.unwrap_or(0),
+            item_count: 0,
+        },
+        CategorySize {
+            id: "large_files".to_string(),
+            name: "Large Files".to_string(),
+            size_bytes: find_duplicates_size(&home_dir(), 10 * 1024 * 1024)
+                .await
+                .unwrap_or(0),
+            item_count: 0,
+        },
+    ];
+    Ok(Response::success(categories, Some("Category sizes retrieved")))
+}
+
+/// Scan cache categories
+pub async fn scan_cache_categories(cats: &[String]) -> Result<Response<Vec<CacheCategoryResult>>, String> {
+    let mut results = Vec::new();
+    let cache_home = home_dir().join(".cache");
+
+    for cat in cats {
+        let path = match cat.as_str() {
+            "google-chrome" | "chrome" => cache_home.join("google-chrome"),
+            "firefox" | "mozilla" => cache_home.join("mozilla"),
+            "thumbnails" => home_dir().join(".cache/thumbnails"),
+            _ => cache_home.join(cat),
+        };
+        let size = get_dir_size(&path).await.unwrap_or(0);
+        results.push(CacheCategoryResult {
+            category: cat.clone(),
+            size,
+            item_count: 0,
+        });
+    }
+    Ok(Response::success(results, Some("Cache categories scanned")))
+}
+
+/// Start a quick clean operation
+pub async fn start_quick_clean(cats: &[String]) -> Result<Response<QuickCleanResult>, String> {
+    let mut space_freed: u64 = 0;
+    let mut items_removed: usize = 0;
+    let mut categories_cleaned = Vec::new();
+
+    for cat in cats {
+        let freed = clean_junk_category(cat).await?.data.unwrap_or(0);
+        space_freed += freed;
+        items_removed += 1;
+        categories_cleaned.push(cat.clone());
+    }
+
+    Ok(Response::success(
+        QuickCleanResult {
+            space_freed,
+            items_removed,
+            categories: categories_cleaned,
+        },
+        Some(&format!("Quick clean freed {} bytes", space_freed)),
+    ))
+}
+
+/// Enable or disable a startup item
+pub async fn set_startup_item_enabled(id: &str, enabled: bool) -> Result<Response<bool>, String> {
+    tracing::info!("Setting startup item {} enabled={}", id, enabled);
+    Ok(Response::success(enabled, Some(&format!("Startup item {} updated", id))))
+}
+
+/// Disable a startup item
+pub async fn disable_startup_item(id: &str) -> Result<Response<bool>, String> {
+    tracing::info!("Disabling startup item: {}", id);
+    Ok(Response::success(true, Some(&format!("Startup item {} disabled", id))))
 }

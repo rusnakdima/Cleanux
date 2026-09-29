@@ -37,4 +37,8 @@ pub struct ComparisonDetails {
     pub trash_change: i64,
     pub log_change: i64,
     pub large_file_change: i64,
+    pub temperature_change: Option<f64>,
+    pub package_change: Option<i32>,
+    pub memory_change_percent: Option<f64>,
+    pub disk_change_percent: Option<f64>,
 }

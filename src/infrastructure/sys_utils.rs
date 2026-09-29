@@ -251,3 +251,112 @@ pub async fn get_log_dir_size() -> Result<u64, String> {
 
     Ok(size)
 }
+
+/// Read GPU temperature by probing nvidia-smi or AMD sysfs.
+/// Returns Ok(f64) with temperature in Celsius, or Err if unavailable.
+pub async fn get_gpu_temp() -> Result<f64, String> {
+    // Try NVIDIA first
+    if let Ok(output) = tokio::process::Command::new("nvidia-smi")
+        .args(["-q", "-d", "TEMPERATURE"])
+        .output()
+        .await
+    {
+        if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            if let Some(line) = stdout.lines().find(|l| l.contains("GPU Current Temp")) {
+                let temp_part = line.split(':').nth(1).unwrap_or("").trim();
+                let temp_str = temp_part.split_whitespace().next().unwrap_or("");
+                if let Ok(temp) = temp_str.parse::<f64>() {
+                    return Ok(temp);
+                }
+            }
+        }
+    }
+
+    // Try AMD GPU sysfs
+    for gpu_path in [
+        "/sys/class/drm/card0/device",
+        "/sys/class/drm/card1/device",
+    ] {
+        let hwmon_path = format!("{}/hwmon", gpu_path);
+        if let Ok(entries) = std::fs::read_dir(&hwmon_path) {
+            for entry in entries.filter_map(|e| e.ok()) {
+                let name_file = entry.path().join("name");
+                if let Ok(name) = std::fs::read_to_string(&name_file) {
+                    if name.trim().contains("amdgpu") || name.trim().contains("radeon") {
+                        let temp_file = entry.path().join("temp1_input");
+                        if let Ok(content) = tokio::fs::read_to_string(&temp_file).await {
+                            if let Ok(temp_milli) = content.trim().parse::<u32>() {
+                                return Ok(temp_milli as f64 / 1000.0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Err("GPU temperature not available (no nvidia-smi or AMD sysfs found)".to_string())
+}
+
+// ---------------------------------------------------------------------------
+// Fan speed
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct FanInfo {
+    pub name: String,
+    pub rpm: u32,
+}
+
+/// Read fan speeds from /sys/class/hwmon/.
+/// Used by the bridge layer which cannot call async functions directly.
+pub fn get_fan_info() -> Result<Vec<FanInfo>, String> {
+    let mut fans = Vec::new();
+
+    let hwmon_base = PathBuf::from("/sys/class/hwmon");
+    if !hwmon_base.exists() {
+        return Ok(fans);
+    }
+
+    if let Ok(entries) = std::fs::read_dir(&hwmon_base) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let path = entry.path();
+            let name = path.file_name().unwrap_or_default().to_string_lossy();
+
+            if !name.starts_with("hwmon") {
+                continue;
+            }
+
+            if let Ok(fan_entries) = std::fs::read_dir(&path) {
+                for fan_entry in fan_entries.filter_map(|e| e.ok()) {
+                    let fan_path = fan_entry.path();
+                    let fan_name = fan_path.file_name().unwrap_or_default().to_string_lossy();
+
+                    if fan_name.starts_with("fan") && fan_name.ends_with("_input") {
+                        let fan_num = fan_name
+                            .strip_prefix("fan")
+                            .and_then(|s| s.strip_suffix("_input"))
+                            .unwrap_or("?");
+                        let label_path = fan_path.with_file_name(format!("fan{}_label", fan_num));
+                        let label: String = if label_path.exists() {
+                            std::fs::read_to_string(&label_path)
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_else(|_| format!("Fan {}", fan_num))
+                        } else {
+                            format!("Fan {}", fan_num)
+                        };
+
+                        if let Ok(content) = std::fs::read_to_string(&fan_path) {
+                            if let Ok(rpm) = content.trim().parse::<u32>() {
+                                fans.push(FanInfo { name: label, rpm });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(fans)
+}

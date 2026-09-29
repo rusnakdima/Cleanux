@@ -6,6 +6,7 @@ use crate::infrastructure::memory_service::{MemoryError, MemoryService};
 use dioxus_shared::response::Response;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use tokio::process::Command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryInfo {
@@ -28,6 +29,13 @@ pub struct ProcessMemory {
     pub name: String,
     pub memory_mb: f64,
     pub cpu_percent: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProcessMemoryInfo {
+    pub processes: Vec<ProcessMemory>,
+    pub total_memory_mb: u64,
+    pub used_memory_mb: u64,
 }
 
 // Get memory information
@@ -143,5 +151,123 @@ pub async fn stop_service(service: String) -> Result<Response<()>, String> {
     Ok(Response::success(
         (),
         Some(&format!("Service {} stopped", service)),
+    ))
+}
+
+/// Get process memory information
+pub async fn get_process_memory() -> Result<Response<ProcessMemoryInfo>, String> {
+    let output = Command::new("ps")
+        .args(["aux", "--sort=-rss"])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to run ps: {}", e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut processes = Vec::new();
+
+    for line in stdout.lines().skip(1).take(20) {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() >= 11 {
+            let pid = parts[1].parse::<u32>().unwrap_or(0);
+            let name = parts[10..].join(" ");
+            let rss_kb: u64 = parts[5].parse().unwrap_or(0);
+            let memory_mb = rss_kb as f64 / 1024.0;
+            let cpu_percent: f32 = parts[2].parse().unwrap_or(0.0);
+            processes.push(ProcessMemory {
+                pid,
+                name,
+                memory_mb,
+                cpu_percent,
+            });
+        }
+    }
+
+    let service = MemoryService::new();
+    let mem_info = service.get_memory_info().await.map_err(|e| e.to_string())?;
+    let total_memory_mb = mem_info.total_kb / 1024;
+    let used_memory_mb = mem_info.used_kb / 1024;
+
+    Ok(Response::success(
+        ProcessMemoryInfo {
+            processes,
+            total_memory_mb,
+            used_memory_mb,
+        },
+        Some("Process memory info retrieved"),
+    ))
+}
+
+/// Remove a kernel
+pub async fn remove_kernel(kernel: String) -> Result<Response<bool>, String> {
+    tracing::info!("Removing kernel: {}", kernel);
+    let output = Command::new("sudo")
+        .args(["apt", "remove", "-y", &format!("linux-image-{}", kernel)])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to remove kernel: {}", e))?;
+
+    Ok(Response::success(
+        output.status.success(),
+        Some(&format!("Kernel {} removal attempted", kernel)),
+    ))
+}
+
+/// Refresh GRUB configuration
+pub async fn refresh_grub() -> Result<Response<bool>, String> {
+    tracing::info!("Refreshing GRUB configuration");
+    let output = Command::new("sudo")
+        .arg("update-grub")
+        .output()
+        .await
+        .map_err(|e| format!("Failed to refresh GRUB: {}", e))?;
+
+    Ok(Response::success(
+        output.status.success(),
+        Some("GRUB configuration updated"),
+    ))
+}
+
+/// Start a system service
+pub async fn start_service(svc: String) -> Result<Response<bool>, String> {
+    tracing::info!("Starting service: {}", svc);
+    let output = Command::new("sudo")
+        .args(["systemctl", "start", &svc])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to start service: {}", e))?;
+
+    Ok(Response::success(
+        output.status.success(),
+        Some(&format!("Service {} started", svc)),
+    ))
+}
+
+/// Enable a system service
+pub async fn enable_service(svc: String) -> Result<Response<bool>, String> {
+    tracing::info!("Enabling service: {}", svc);
+    let output = Command::new("sudo")
+        .args(["systemctl", "enable", &svc])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to enable service: {}", e))?;
+
+    Ok(Response::success(
+        output.status.success(),
+        Some(&format!("Service {} enabled", svc)),
+    ))
+}
+
+/// Disable a system service
+pub async fn disable_service(svc: String) -> Result<Response<bool>, String> {
+    tracing::info!("Disabling service: {}", svc);
+    let output = Command::new("sudo")
+        .args(["systemctl", "disable", &svc])
+        .output()
+        .await
+        .map_err(|e| format!("Failed to disable service: {}", e))?;
+
+    Ok(Response::success(
+        output.status.success(),
+        Some(&format!("Service {} disabled", svc)),
     ))
 }
