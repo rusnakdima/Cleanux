@@ -4,7 +4,6 @@
 //! Implementations live in `infrastructure`.
 
 use crate::domain::CleaningReport;
-use crate::domain::entities::cleaning_profile::CleaningProfile;
 use crate::error::Result;
 
 /// Scans for junk items across configured paths.

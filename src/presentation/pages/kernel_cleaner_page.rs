@@ -115,7 +115,7 @@ pub fn KernelCleanerPage(state: AppState) -> Element {
   let status_msg = status_message.read().clone();
   let show_confirm_val = *show_confirm.read();
   let confirm_act = confirm_action.read().clone();
-  let pending_ker = pending_kernel.read().clone().unwrap_or_default();
+  let _pending_ker = pending_kernel.read().clone().unwrap_or_default();
   let pending_cnt = *pending_count.read();
 
   // Boot infos: filter for boot partitions

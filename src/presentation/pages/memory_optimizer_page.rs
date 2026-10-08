@@ -7,6 +7,7 @@ use serde::Deserialize;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct MemoryInfo {
+  #[allow(dead_code)]
   pub total: u64,
   pub used: u64,
   pub available: u64,
@@ -16,6 +17,7 @@ pub struct MemoryInfo {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct SwapInfo {
+  #[allow(dead_code)]
   pub total: u64,
   pub used: u64,
   pub free: u64,
@@ -33,17 +35,19 @@ pub struct MemProcess {
 #[derive(Debug, Clone, Deserialize)]
 pub struct MemProcessInfo {
   pub processes: Vec<MemProcess>,
+  #[allow(dead_code)]
   pub total_memory_mb: u64,
+  #[allow(dead_code)]
   pub used_memory_mb: u64,
 }
 
 fn format_bytes(bytes: u64) -> String {
-  const GiB: u64 = 1024 * 1024 * 1024;
-  const MiB: u64 = 1024 * 1024;
-  if bytes >= GiB {
-    format!("{:.1} GB", bytes as f64 / GiB as f64)
+  const GIB: u64 = 1024 * 1024 * 1024;
+  const MIB: u64 = 1024 * 1024;
+  if bytes >= GIB {
+    format!("{:.1} GB", bytes as f64 / GIB as f64)
   } else {
-    format!("{:.0} MB", bytes as f64 / MiB as f64)
+    format!("{:.0} MB", bytes as f64 / MIB as f64)
   }
 }
 
@@ -92,15 +96,15 @@ enum SortBy {
 
 #[component]
 pub fn MemoryOptimizerPage(state: AppState) -> Element {
-  let mut memory_info = use_signal(|| Option::<MemoryInfo>::None);
-  let mut swap_info = use_signal(|| Option::<SwapInfo>::None);
-  let mut processes = use_signal(|| Vec::<MemProcess>::new());
-  let mut auto_refresh = use_signal(|| false);
+  let memory_info = use_signal(|| Option::<MemoryInfo>::None);
+  let swap_info = use_signal(|| Option::<SwapInfo>::None);
+  let processes = use_signal(|| Vec::<MemProcess>::new());
+  let _auto_refresh = use_signal(|| false);
   let mut sort_by = use_signal(|| SortBy::Memory);
   let mut kill_confirm = use_signal(|| Option::<u32>::None);
   let mut optimizing = use_signal(|| false);
   let mut error_msg = use_signal(|| Option::<String>::None);
-  let mut refreshing = use_signal(|| false);
+  let refreshing = use_signal(|| false);
 
   // Load memory info on mount
   {

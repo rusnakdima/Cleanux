@@ -20,7 +20,7 @@ fn format_bytes(bytes: u64) -> String {
   }
 }
 
-fn basename(path: &str) -> String {
+fn _basename(path: &str) -> String {
   std::path::Path::new(path)
     .file_name()
     .map(|s| s.to_string_lossy().to_string())
@@ -28,6 +28,7 @@ fn basename(path: &str) -> String {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct DirEntry {
   pub name: String,
   pub path: String,
@@ -37,6 +38,7 @@ pub struct DirEntry {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 struct DirectoryScanData {
   pub path: String,
   pub size: u64,

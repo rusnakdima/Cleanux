@@ -47,8 +47,8 @@ pub enum SortDir {
 
 #[component]
 pub fn ProcessesPage(state: AppState) -> Element {
-  let mut processes = use_signal(|| Vec::<SystemProcessEntry>::new());
-  let mut is_loading = use_signal(|| false);
+  let processes = use_signal(|| Vec::<SystemProcessEntry>::new());
+  let is_loading = use_signal(|| false);
   let mut search_query = use_signal(|| String::new());
   let mut sort_col = use_signal(|| SortColumn::Cpu);
   let mut sort_dir = use_signal(|| SortDir::Desc);
@@ -152,7 +152,7 @@ pub fn ProcessesPage(state: AppState) -> Element {
 
   let selected = selected_pids.read().clone();
   let all_selected = !paginated.is_empty() && paginated.iter().all(|p| selected.contains(&p.pid));
-  let some_selected = paginated.iter().any(|p| selected.contains(&p.pid)) && !all_selected;
+  let _some_selected = paginated.iter().any(|p| selected.contains(&p.pid)) && !all_selected;
 
   let sort_arrow = |c: SortColumn| -> &'static str {
     if col == c {
@@ -166,7 +166,7 @@ pub fn ProcessesPage(state: AppState) -> Element {
     }
   };
 
-  let format_bytes = |bytes: u64| -> String {
+  let _format_bytes = |bytes: u64| -> String {
     if bytes >= 1_073_741_824 {
       format!("{:.1} GB", bytes as f64 / 1_073_741_824.0)
     } else if bytes >= 1_048_576 {

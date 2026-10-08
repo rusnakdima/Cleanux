@@ -37,7 +37,7 @@ fn format_timestamp(ts: i64) -> String {
   }
 }
 
-fn truncate_preview(content: &str, max_len: usize) -> String {
+fn _truncate_preview(content: &str, max_len: usize) -> String {
   if content.len() <= max_len {
     content.to_string()
   } else {
@@ -45,7 +45,7 @@ fn truncate_preview(content: &str, max_len: usize) -> String {
   }
 }
 
-fn detect_content_type(content: &str) -> String {
+fn _detect_content_type(content: &str) -> String {
   if content.starts_with("file://")
     || content.contains("\n")
       && content

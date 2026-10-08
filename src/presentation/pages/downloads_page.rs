@@ -50,6 +50,7 @@ enum SortBy {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
 enum AgeFilter {
   All,
   Today,
@@ -59,6 +60,7 @@ enum AgeFilter {
 }
 
 impl AgeFilter {
+  #[allow(dead_code)]
   fn label(&self) -> &'static str {
     match self {
       AgeFilter::All => "All",

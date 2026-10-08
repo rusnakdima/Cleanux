@@ -65,12 +65,12 @@ fn format_bytes(bytes: u64) -> String {
 
 #[component]
 pub fn PackageDeepCleanPage(state: AppState) -> Element {
-  let mut cache_summary = use_signal(|| Option::<PackageCacheSummary>::None);
-  let mut active_tab = use_signal(|| String::from("apt"));
-  let mut is_cleaning = use_signal(|| false);
+  let cache_summary = use_signal(|| Option::<PackageCacheSummary>::None);
+  let active_tab = use_signal(|| String::from("apt"));
+  let is_cleaning = use_signal(|| false);
   let mut show_confirm = use_signal(|| false);
   let mut confirm_manager = use_signal(|| String::new());
-  let mut last_clean_result = use_signal(|| Option::<String>::None);
+  let last_clean_result = use_signal(|| Option::<String>::None);
 
   // Load package cache info on mount
   use_effect(move || {

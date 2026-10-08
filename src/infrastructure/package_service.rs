@@ -91,7 +91,7 @@ pub fn detect_package_managers() -> Vec<PackageManager> {
 }
 
 /// Get cache directory size in bytes using du
-fn get_dir_size(dir: &str) -> u64 {
+fn _get_dir_size(dir: &str) -> u64 {
   let output = Command::new("du").args(["-sb", dir]).output();
 
   match output {

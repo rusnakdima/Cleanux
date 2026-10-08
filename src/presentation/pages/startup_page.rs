@@ -23,15 +23,6 @@ pub enum StartupCategory {
 }
 
 impl StartupCategory {
-  fn label(&self) -> &'static str {
-    match self {
-      StartupCategory::All => "All",
-      StartupCategory::Systemd => "Systemd Services",
-      StartupCategory::Xdg => "XDG Autostart",
-      StartupCategory::Cron => "Cron @reboot",
-    }
-  }
-
   fn matches(&self, source: &str) -> bool {
     match self {
       StartupCategory::All => true,

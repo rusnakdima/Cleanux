@@ -8,6 +8,7 @@ use dioxus::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub struct MediaCacheItem {
   pub name: String,
   pub path: String,
@@ -47,6 +48,7 @@ enum Tab {
 }
 
 impl Tab {
+  #[allow(dead_code)]
   fn label(&self) -> &'static str {
     match self {
       Tab::Steam => "Steam",

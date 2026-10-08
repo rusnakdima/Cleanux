@@ -147,7 +147,7 @@ pub fn FilesPage(state: AppState) -> Element {
   let mut exclude_dirs = use_signal(|| String::new());
   let mut is_scanning = use_signal(|| false);
   let mut files = use_signal(|| Vec::<LargeFile>::new());
-  let mut search_query = use_signal(|| String::new());
+  let search_query = use_signal(|| String::new());
   let mut status_msg = use_signal(|| String::new());
   let mut selected = use_signal(|| std::collections::HashSet::<String>::new());
   let mut show_confirm = use_signal(|| false);

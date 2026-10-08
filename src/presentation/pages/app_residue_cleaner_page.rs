@@ -17,12 +17,15 @@ pub struct ResidueItem {
 
 #[derive(Debug, Clone, Deserialize)]
 struct ApiResponse<T> {
+  #[allow(dead_code)]
   status: String,
+  #[allow(dead_code)]
   message: String,
   data: Option<T>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
+#[allow(dead_code)]
 pub struct ResidueSummary {
   pub configs_count: u32,
   pub data_count: u32,
@@ -66,6 +69,7 @@ struct ResidueRowProps {
 }
 
 impl ResidueRowProps {
+  #[allow(dead_code)]
   fn new(
     item: ResidueItem,
     selected: Signal<std::collections::HashSet<String>>,
@@ -141,7 +145,7 @@ fn format_size(bytes: u64) -> String {
 #[component]
 pub fn AppResidueCleanerPage(state: AppState) -> Element {
   let mut active_tab = use_signal(|| Tab::Configs);
-  let mut items = use_signal(|| Vec::<ResidueItem>::new());
+  let items = use_signal(|| Vec::<ResidueItem>::new());
   let mut selected = use_signal(|| std::collections::HashSet::<String>::new());
   let loading = use_signal(|| false);
   let mut search_query = use_signal(|| String::new());

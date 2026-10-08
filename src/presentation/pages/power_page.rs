@@ -22,7 +22,7 @@ pub struct ThermalInfo {
 #[component]
 pub fn PowerPage(state: AppState) -> Element {
   let power_actions = global_state::get_power_actions();
-  let mut schedules = use_signal(|| global_state::get_schedules());
+  let schedules = use_signal(|| global_state::get_schedules());
   let mut profiles = use_signal(|| Option::<PowerProfileInfo>::None);
   let thermals = use_signal(|| Vec::<ThermalInfo>::new());
   let mut profile_setting = use_signal(|| Option::<String>::None);
@@ -179,7 +179,6 @@ pub fn PowerPage(state: AppState) -> Element {
                           schedule: schedule,
                           on_toggle: move |(id, enabled): (String, bool)| {
                               global_state::toggle_schedule(&id, enabled);
-                              drop(schedules);
                           },
                           on_edit: move |s: ScheduleEntry| {
                               let _ = bridge::invoke_app_command("schedule_edit", &serde_json::json!({

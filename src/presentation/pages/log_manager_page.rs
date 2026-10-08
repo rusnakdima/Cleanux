@@ -79,15 +79,15 @@ pub fn LogManagerPage(state: AppState) -> Element {
   let mut journal_size = use_signal(|| Option::<JournalSize>::None);
   let mut journal_usage = use_signal(|| Option::<JournalUsage>::None);
   let mut rotated_logs = use_signal(|| Vec::<RotatedLogUi>::new());
-  let mut rotated_size = use_signal(|| 0u64);
+  let rotated_size = use_signal(|| 0u64);
   let mut largest_logs = use_signal(|| Vec::<LargestLogFile>::new());
   let mut var_log_usage = use_signal(|| 0u64);
   let mut logrotate_configs = use_signal(|| Vec::<LogrotateConfig>::new());
-  let mut vacuum_size = use_signal(|| "500M".to_string());
-  let mut vacuum_days = use_signal(|| 30u32);
+  let vacuum_size = use_signal(|| "500M".to_string());
+  let vacuum_days = use_signal(|| 30u32);
   let mut is_loading = use_signal(|| false);
-  let mut status_msg = use_signal(|| String::new());
-  let mut selected_logs = use_signal(|| std::collections::HashSet::<String>::new());
+  let status_msg = use_signal(|| String::new());
+  let selected_logs = use_signal(|| std::collections::HashSet::<String>::new());
 
   // Load initial data
   use_effect(move || {
@@ -345,7 +345,7 @@ struct RotatedTabProps {
 
 #[component]
 fn RotatedTab(props: RotatedTabProps) -> Element {
-  let mut rotated_logs = props.rotated_logs.clone();
+  let rotated_logs = props.rotated_logs.clone();
   let mut selected_logs = props.selected_logs.clone();
   let mut is_loading = props.is_loading.clone();
   let mut status_msg = props.status_msg.clone();

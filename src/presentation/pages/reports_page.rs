@@ -31,15 +31,7 @@ pub enum SortColumn {
   Duration,
 }
 
-impl SortColumn {
-  fn label(&self) -> &'static str {
-    match self {
-      SortColumn::Date => "Date",
-      SortColumn::Size => "Size",
-      SortColumn::Duration => "Duration",
-    }
-  }
-}
+impl SortColumn {}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum SortDir {
@@ -373,7 +365,7 @@ pub fn ReportsPage(state: AppState) -> Element {
     let all = reports.read().clone();
     let col = *sort_col.read();
     let dir = *sort_dir.read();
-    let mut sorted = match col {
+    let sorted = match col {
       SortColumn::Date => {
         let mut s = all;
         s.sort_by(|a, b| {
