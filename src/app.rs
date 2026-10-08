@@ -128,7 +128,13 @@ pub fn App() -> Element {
     ThemeProvider {
       initial_mode: ThemeMode::Dark,
       initial_variant: ThemeVariant::MaterialDesign3,
-      style { {get_theme_css()} {include_str!("../assets/app.css")} }
+      style { {get_theme_css()} }
+      // The workspace's bundled Tailwind v4 CSS — covers every utility
+      // class Cleanux's rsx! uses (flex, grid, text-*, bg-*, etc.) and
+      // the @theme tokens for color/font/animation re-tinting.
+      // Symlinked from `assets/theme.generated.css` at the workspace root.
+      style { {include_str!("../assets/theme.generated.css")} }
+      style { {include_str!("../assets/app.css")} }
       div {
         class: "min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased overflow-x-hidden",
         AppLayout { state }
