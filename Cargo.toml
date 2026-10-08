@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Dmitriy303"]
 
+[features]
+headless = []
+
 [dependencies]
 # Dioxus
 dioxus = { version = "0.8.0-alpha.1", features = ["desktop", "html", "hooks", "signals", "macro", "lib", "router"] }
@@ -13,10 +16,8 @@ dioxus-signals = "0.8.0-alpha.1"
 dioxus-html = "0.8.0-alpha.1"
 dioxus-router = "0.8.0-alpha.1"
 
-dioxus-shared = { path = "../dioxus-shared", features = ["dioxus-desktop", "storage-json", "sdui", "mcp", "core", "schema-manager"] }
-
 # Database
-nosql_orm = { git = "https://github.com/rusnakdima/nosql_orm.git", rev = "756a681f151a6388413cf6b5d66f4476d26e8321", features = ["json", "mongo", "full", "validators"] }
+nosql_orm = { path = "../nosql_orm", features = ["json", "mongo", "full", "validators"] }
 
 # Serialization
 serde = { version = "1", features = ["derive"] }
@@ -58,10 +59,12 @@ uuid = { version = "1", features = ["v4"] }
 parking_lot = "0.12"
 open = "5"
 mime_guess = "2"
+hex = "0.4"
 
 # MCP Server
 rmcp = { version = "0.1", features = ["server"] }
 tokio-tungstenite = "0.21"
+
 # Window APIs
 tao = "0.35"
 
@@ -74,10 +77,8 @@ async-trait = "0.1"
 paste = "1.0"
 log = "0.4"
 
-
 [dev-dependencies]
 tempfile = "3"
-dioxus-shared = { path = "../dioxus-shared", features = ["test-utils"] }
 
 [lib]
 name = "cleanux"

@@ -5,7 +5,7 @@
 
 use crate::domain::CleaningReport;
 use crate::domain::entities::cleaning_profile::CleaningProfile;
-use dioxus_shared::Result;
+use crate::error::Result;
 
 /// Scans for junk items across configured paths.
 pub trait CleaningService: Send + Sync {

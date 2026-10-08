@@ -3,6 +3,7 @@
 //! Core business entities: CleaningProfile, CleaningReport, AutomationRecipe, HealthSnapshot
 
 pub mod entities;
+pub mod services;
 pub mod settings;
 
 // Re-export all entities from entities/ subdirectory

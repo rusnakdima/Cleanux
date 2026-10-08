@@ -1,27 +1,37 @@
-//! Cleanux - Schema-Driven UI Dioxus Application
+//! Cleanux - Standalone DDD Dioxus Desktop Application
 //!
-//! This app uses schema-driven UI via `dioxus-shared::DynamicPage`.
+//! A system cleanup application with hardcoded UI (no SDUI dependency).
 //! Architecture:
 //! - `domain/` - Cleaning entities (CleaningProfile, CleaningReport, etc.)
 //! - `application/` - Services and KAS handlers
 //! - `infrastructure/` - Storage, system commands, package managers, MCP server
 //! - `presentation/` - Dioxus UI pages and components
 
-pub mod application;
+pub mod allowlist;
 pub mod app;
+pub mod application;
 pub mod bridge;
+pub mod bridge_state;
 pub mod domain;
+pub mod env;
+pub mod error;
 pub mod global_state;
 pub mod infrastructure;
+pub mod mcp_bridge;
 pub mod presentation;
+pub mod provider;
+pub mod response;
+pub mod themes;
 
-// Re-export commonly used types
-#[allow(ambiguous_glob_reexports)]
-pub use application::*;
-#[allow(ambiguous_glob_reexports)]
-pub use dioxus::prelude::*;
-#[allow(ambiguous_glob_reexports)]
-pub use domain::*;
+// Local re-exports for compatibility
+pub use error::{AppError, Result};
+pub use response::Response;
+pub use themes::{get_theme_css, load_theme_pref, ThemeMode, ThemeVariant};
 
-pub use dioxus_shared::schema::load_schema;
-pub use presentation::sdui::SduiRoot;
+/// Headless test root — mirrors the App component but without the desktop
+/// launch plumbing. Used by `dioxus-vdom-inspector` to drive the VirtualDom
+/// without a window.
+#[cfg(feature = "headless")]
+pub fn root_app_for_test() -> dioxus::prelude::Element {
+  app::App()
+}

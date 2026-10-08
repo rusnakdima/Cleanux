@@ -1,19 +1,11 @@
-//! Verification engine re-exported from `dioxus-shared`.
+//! Verification engine stub for Cleanux.
 //!
-//! Canonical engine lives in `dioxus_shared::verify`; this shim re-exports
-//! it verbatim so that local `use crate::verification::*` call-sites compile
-//! without any path changes. App-specific extraction helpers are defined locally.
+//! The full verification engine is in dioxus_shared. This stub provides
+//! minimal local functionality.
 
-pub use dioxus_shared::verify::{
-  dom, matcher, normalize, report, compare_html,
-  CompareOptions, Report, Verdict,
-};
-
-pub use dioxus_shared::verify::normalize::Options as NormalizeOptions;
-
-// App-specific: extract one `<section data-page="route">…</section>` from a template
-// document, stripping template-only noise (`hidden` visibility class,
-// `&nbsp;` placeholder used by the demo JS for an empty display line).
+/// App-specific: extract one `<section data-page="route">…</section>` from a template
+/// document, stripping template-only noise (`hidden` visibility class,
+/// `&nbsp;` placeholder used by the demo JS for an empty display line).
 pub fn extract_page_section(template: &str, route: &str) -> Option<String> {
   // Try data-page first (template), then fall back to id (Dioxus SSR output)
   let marker_data = format!("<section data-page=\"{route}\"");
@@ -27,3 +19,11 @@ pub fn extract_page_section(template: &str, route: &str) -> Option<String> {
       .replace("&nbsp;", ""),
   )
 }
+
+// Re-exports for compatibility - stub types
+#[derive(Debug, Clone)]
+pub struct Report;
+#[derive(Debug, Clone)]
+pub struct Verdict;
+#[derive(Debug, Clone)]
+pub struct CompareOptions;

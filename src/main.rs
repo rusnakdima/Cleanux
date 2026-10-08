@@ -1,47 +1,39 @@
 //! Cleanux - Pure Dioxus Desktop Application
 //!
-//! A system cleanup application migrated to schema-driven UI (SDUI).
+//! A system cleanup application with hardcoded UI.
 
-use std::sync::Arc;
 use std::thread;
 
-use dioxus::prelude::*;
 use dioxus_desktop::{Config, WindowBuilder};
 
-use cleanux::bridge::bridge_consumer_loop;
-use cleanux::infrastructure::json_storage::JsonStorage;
-use cleanux::presentation::sdui::RootApp;
-use dioxus_shared::env::data_dir;
-use dioxus_shared::mcp::bridge::McpBridge;
-use dioxus_shared::mcp::dynamic_port;
+use cleanux::app::App;
+use cleanux::env::dynamic_port;
+use cleanux::mcp_bridge::{bridge_consumer_loop, start_mcp_bridge};
 
 fn main() {
-    // Initialize tracing
-    tracing_subscriber::fmt()
-        .with_env_filter("info,cleanux=debug")
-        .init();
+  // Initialize tracing
+  tracing_subscriber::fmt()
+    .with_env_filter("info,cleanux=debug")
+    .init();
 
-    tracing::info!("Starting Cleanux Dioxus application");
+  tracing::info!("Starting Cleanux Dioxus application");
 
-    let port = dynamic_port();
-    let (bridge, bridge_state_raw): (McpBridge, _) = McpBridge::new(port);
+  let port = dynamic_port();
+  let (_bridge, bridge_state) = start_mcp_bridge(port);
 
-    // Spawn bridge thread immediately - bridge is consumed here
-    println!("MCP Bridge listening on ws://127.0.0.1:{}", port);
-    thread::spawn(move || bridge.run());
+  // Spawn bridge consumer loop
+  println!("MCP Bridge listening on ws://127.0.0.1:{}", port);
+  thread::spawn(move || bridge_consumer_loop(bridge_state));
 
-    // Spawn bridge consumer loop
-    thread::spawn(move || bridge_consumer_loop(bridge_state_raw));
-
-    // JsonStorage is wired via LazyLock statics in global_state.rs — no provide_context needed here.
-
-    dioxus::LaunchBuilder::desktop()
-        .with_cfg(
-            Config::new().with_window(
-                WindowBuilder::new()
-                    .with_title("Cleanux")
-                    .with_inner_size(dioxus_desktop::LogicalSize::new(1200.0, 800.0)),
-            ),
-        )
-        .launch(RootApp)
+  // DevTools URL — consumed by Conductor midscene.launch handler
+  println!("DevTools listening on ws://127.0.0.1:9222");
+  dioxus::LaunchBuilder::desktop()
+    .with_cfg(
+      Config::new().with_window(
+        WindowBuilder::new()
+          .with_title("Cleanux")
+          .with_inner_size(dioxus_desktop::LogicalSize::new(1200.0, 800.0)),
+      ),
+    )
+    .launch(App)
 }
