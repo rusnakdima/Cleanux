@@ -53,7 +53,8 @@ impl LogCleanerService {
       }
 
       let mut cmd = tokio::process::Command::new("find");
-      cmd.arg(dir)
+      cmd
+        .arg(dir)
         .args(["-type", "f", "-name", "*.log", "-o", "-name", "*.log.*"])
         .args(["-printf", "%p %s %T+\n"]);
 
@@ -69,9 +70,7 @@ impl LogCleanerService {
           if parts.len() >= 3 {
             let path = PathBuf::from(parts[0]);
             let size_bytes = parts[1].parse::<u64>().unwrap_or(0);
-            let modified_secs = parts[2]
-              .parse::<u64>()
-              .unwrap_or(0);
+            let modified_secs = parts[2].parse::<u64>().unwrap_or(0);
 
             entries.push(LogEntry {
               path,
@@ -290,9 +289,7 @@ impl LogCleanerService {
         if e.to_string().contains("Permission denied")
           || e.to_string().contains("Operation not permitted")
         {
-          AppError::PermissionDenied(
-            "Root privileges required to clear journal".to_string(),
-          )
+          AppError::PermissionDenied("Root privileges required to clear journal".to_string())
         } else {
           AppError::System(e.to_string())
         }

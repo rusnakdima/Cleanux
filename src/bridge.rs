@@ -236,6 +236,23 @@ impl CleanuxBridge {
         .await
         .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
         .map_err(|e| AppError::Internal(e)),
+      "system_get_network_stats" => {
+        use crate::infrastructure::monitor_service::get_network_stats;
+        let stats = get_network_stats();
+        Ok(serde_json::to_value(stats).unwrap_or(Value::Null))
+      }
+      "system_get_disk_io" => {
+        use crate::infrastructure::monitor_service::get_disk_io;
+        let io = get_disk_io();
+        Ok(serde_json::to_value(io).unwrap_or(Value::Null))
+      }
+      "system_get_temperature" => {
+        use crate::infrastructure::temperature_service::TemperatureService;
+        let svc = TemperatureService::new();
+        let cpu_temp = svc.get_cpu_temp();
+        let gpu_temp = svc.get_gpu_temp();
+        Ok(serde_json::json!({ "cpu": cpu_temp, "gpu": gpu_temp }))
+      }
 
       // ── Health ─────────────────────────────────────────────────────────────
       "health_get_temperatures" => health_handlers::get_temperatures()
@@ -246,10 +263,7 @@ impl CleanuxBridge {
         .await
         .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
         .map_err(|e| AppError::Internal(e)),
-      "health_get_history" => health_handlers::get_health_history()
-        .await
-        .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
-        .map_err(|e| AppError::Internal(e)),
+
       "health_get_trends" => health_handlers::get_health_trends()
         .await
         .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
@@ -259,6 +273,41 @@ impl CleanuxBridge {
         .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
         .map_err(|e| AppError::Internal(e)),
       "health_get_snapshot" => health_handlers::get_health_snapshot()
+        .await
+        .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
+        .map_err(|e| AppError::Internal(e)),
+      "health_record_snapshot" => {
+        use crate::infrastructure::health_history_service::HealthHistoryService;
+        let svc = HealthHistoryService::new();
+        match svc.record_snapshot() {
+          Ok(snap) => Ok(serde_json::to_value(snap).unwrap_or(Value::Null)),
+          Err(e) => Err(AppError::Internal(e.to_string())),
+        }
+      }
+      "health_get_history" => {
+        use crate::infrastructure::health_history_service::HealthHistoryService;
+        let svc = HealthHistoryService::new();
+        let days = payload.get("days").and_then(|v| v.as_u64()).unwrap_or(30) as u32;
+        let history = svc.get_history(days);
+        Ok(serde_json::to_value(history).unwrap_or(Value::Null))
+      }
+      "health_compare" => {
+        use crate::infrastructure::health_history_service::HealthHistoryService;
+        let svc = HealthHistoryService::new();
+        let id1 = payload
+          .get("id1")
+          .and_then(|v| v.as_str())
+          .unwrap_or_default();
+        let id2 = payload
+          .get("id2")
+          .and_then(|v| v.as_str())
+          .unwrap_or_default();
+        match svc.compare_snapshots(id1, id2) {
+          Ok(cmp) => Ok(serde_json::to_value(cmp).unwrap_or(Value::Null)),
+          Err(e) => Err(AppError::Internal(e.to_string())),
+        }
+      }
+      "health_get_current" => health_handlers::get_health_history()
         .await
         .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
         .map_err(|e| AppError::Internal(e)),
@@ -475,6 +524,79 @@ impl CleanuxBridge {
           .await
           .map(|r| serde_json::to_value(r).unwrap_or(Value::Null))
           .map_err(|e| AppError::Internal(e))
+      }
+
+      // ── Junk Cleaner ───────────────────────────────────────────────────────
+      "junk_scan" => {
+        use crate::infrastructure::junk_cleaner_service::JunkCleanerService;
+        let svc = JunkCleanerService::new();
+        let items = svc.scan_junk().await;
+        Ok(serde_json::to_value(items).unwrap_or(Value::Null))
+      }
+      "junk_clean" => {
+        use crate::infrastructure::junk_cleaner_service::{JunkCleanerService, JunkItem};
+        let items: Vec<JunkItem> = payload
+          .get("items")
+          .and_then(|v| serde_json::from_value(v.clone()).ok())
+          .unwrap_or_default();
+        let svc = JunkCleanerService::new();
+        let freed = svc.clean_junk(items).await;
+        Ok(serde_json::json!({ "freed": freed }))
+      }
+
+      // ── Trash Cleaner ─────────────────────────────────────────────────────
+      "trash_scan" => {
+        use crate::infrastructure::trash_cleaner_service::TrashCleanerService;
+        let svc = TrashCleanerService::new();
+        let items = svc.scan_trash().await;
+        Ok(serde_json::to_value(items).unwrap_or(Value::Null))
+      }
+      "trash_empty" => {
+        use crate::infrastructure::trash_cleaner_service::TrashCleanerService;
+        let svc = TrashCleanerService::new();
+        let freed = svc.empty_trash().await;
+        Ok(serde_json::json!({ "freed": freed }))
+      }
+
+      // ── Large Files Cleaner ───────────────────────────────────────────────
+      "large_files_scan" => {
+        use crate::infrastructure::large_file_cleaner_service::LargeFileCleanerService;
+        let path = payload.get("path").and_then(|v| v.as_str()).unwrap_or("~/");
+        let min_size = payload
+          .get("min_size")
+          .and_then(|v| v.as_u64())
+          .unwrap_or(100 * 1024 * 1024);
+        let svc = LargeFileCleanerService::new();
+        let files = svc.scan_large_files(path, min_size).await;
+        Ok(serde_json::to_value(files).unwrap_or(Value::Null))
+      }
+      "large_files_delete" => {
+        use crate::infrastructure::large_file_cleaner_service::LargeFileCleanerService;
+        let paths: Vec<String> = payload
+          .get("paths")
+          .and_then(|v| serde_json::from_value(v.clone()).ok())
+          .unwrap_or_default();
+        let svc = LargeFileCleanerService::new();
+        let freed = svc.delete_files(paths).await;
+        Ok(serde_json::json!({ "freed": freed }))
+      }
+
+      // ── Downloads Cleaner ──────────────────────────────────────────────────
+      "downloads_scan" => {
+        use crate::infrastructure::downloads_cleaner_service::DownloadsCleanerService;
+        let svc = DownloadsCleanerService::new();
+        let items = svc.scan_downloads().await;
+        Ok(serde_json::to_value(items).unwrap_or(Value::Null))
+      }
+      "downloads_clean" => {
+        use crate::infrastructure::downloads_cleaner_service::DownloadsCleanerService;
+        let older_than_days = payload
+          .get("older_than_days")
+          .and_then(|v| v.as_u64())
+          .unwrap_or(30) as u32;
+        let svc = DownloadsCleanerService::new();
+        let freed = svc.clean_old_downloads(older_than_days).await;
+        Ok(serde_json::json!({ "freed": freed }))
       }
 
       // ── Cleaning (app-level commands) ─────────────────────────────────────

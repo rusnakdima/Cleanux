@@ -1,8 +1,8 @@
 //! PackageService — package cache info and cleaning for apt/dnf/pacman/zypper
 
 use crate::error::AppError;
-use crate::response::Response;
 use crate::infrastructure::{apt_service, dnf_service, pacman_service, zypper_service};
+use crate::response::Response;
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 

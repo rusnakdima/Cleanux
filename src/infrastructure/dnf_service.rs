@@ -46,12 +46,10 @@ pub fn get_orphaned_count() -> usize {
     .output();
 
   match output {
-    Ok(out) if out.status.success() => {
-      String::from_utf8_lossy(&out.stdout)
-        .lines()
-        .filter(|l| !l.trim().is_empty())
-        .count()
-    }
+    Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout)
+      .lines()
+      .filter(|l| !l.trim().is_empty())
+      .count(),
     _ => 0,
   }
 }

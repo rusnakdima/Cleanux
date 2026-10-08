@@ -725,6 +725,34 @@ pub fn health_snapshot_service() -> JsonDocService<HealthSnapshot> {
 }
 
 // ---------------------------------------------------------------------------
+// Health History Service
+// ---------------------------------------------------------------------------
+use crate::infrastructure::health_history_service::HealthHistoryService;
+
+/// Global HealthHistoryService for recording and comparing snapshots.
+static HEALTH_HISTORY_SERVICE: std::sync::LazyLock<Arc<HealthHistoryService>> =
+  std::sync::LazyLock::new(|| Arc::new(HealthHistoryService::new()));
+
+/// Returns the global HealthHistoryService.
+pub fn health_history_service() -> Arc<HealthHistoryService> {
+  HEALTH_HISTORY_SERVICE.clone()
+}
+
+// ---------------------------------------------------------------------------
+// Temperature Service
+// ---------------------------------------------------------------------------
+use crate::infrastructure::temperature_service::TemperatureService;
+
+/// Global TemperatureService for CPU/GPU temperature readings.
+static TEMPERATURE_SERVICE: std::sync::LazyLock<Arc<TemperatureService>> =
+  std::sync::LazyLock::new(|| Arc::new(TemperatureService::new()));
+
+/// Returns the global TemperatureService.
+pub fn temperature_service() -> Arc<TemperatureService> {
+  TEMPERATURE_SERVICE.clone()
+}
+
+// ---------------------------------------------------------------------------
 // Automation Routines (RoutineService)
 // ---------------------------------------------------------------------------
 

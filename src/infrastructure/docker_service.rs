@@ -252,7 +252,10 @@ impl DockerService {
     let stdout = String::from_utf8_lossy(&output.stdout);
 
     if !output.status.success() {
-      return Err(AppError::System(format!("docker system prune failed: {}", stderr)));
+      return Err(AppError::System(format!(
+        "docker system prune failed: {}",
+        stderr
+      )));
     }
 
     // Parse "Total reclaimed space: X.Y GB/MB/KB/B" from stdout
@@ -260,7 +263,11 @@ impl DockerService {
       .lines()
       .filter(|l| l.contains("reclaimed"))
       .rfind(|_| true)
-      .and_then(|l| l.split(':').nth(1).map(|s| Self::parse_size_to_bytes(s.trim())))
+      .and_then(|l| {
+        l.split(':')
+          .nth(1)
+          .map(|s| Self::parse_size_to_bytes(s.trim()))
+      })
       .unwrap_or(0);
 
     tracing::info!("Docker system prune completed: {} bytes freed", freed);
@@ -297,7 +304,10 @@ impl DockerService {
     let stdout = String::from_utf8_lossy(&output.stdout);
 
     if !output.status.success() {
-      return Err(AppError::System(format!("podman system prune failed: {}", stderr)));
+      return Err(AppError::System(format!(
+        "podman system prune failed: {}",
+        stderr
+      )));
     }
 
     // Parse bytes freed from output

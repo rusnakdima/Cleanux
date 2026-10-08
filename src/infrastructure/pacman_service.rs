@@ -46,17 +46,13 @@ pub fn get_cache_info() -> PackageCacheInfo {
 
 /// Get orphaned packages count for Pacman
 pub fn get_orphaned_count() -> usize {
-  let output = Command::new("pacman")
-    .args(["-Qtdq"])
-    .output();
+  let output = Command::new("pacman").args(["-Qtdq"]).output();
 
   match output {
-    Ok(out) if out.status.success() => {
-      String::from_utf8_lossy(&out.stdout)
-        .lines()
-        .filter(|l| !l.trim().is_empty())
-        .count()
-    }
+    Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout)
+      .lines()
+      .filter(|l| !l.trim().is_empty())
+      .count(),
     _ => 0,
   }
 }

@@ -63,9 +63,7 @@ pub fn get_cache_info() -> PackageCacheInfo {
 pub fn get_orphaned_count() -> usize {
   // APT doesn't have a direct orphaned package command like other package managers.
   // We check for packages that were installed as dependencies but are no longer required.
-  let output = Command::new("apt")
-    .args(["-markauto", "--help"])
-    .output();
+  let output = Command::new("apt").args(["-markauto", "--help"]).output();
 
   if output.is_err() {
     return 0;

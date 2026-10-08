@@ -51,12 +51,10 @@ pub fn get_orphaned_count() -> usize {
     .output();
 
   match output {
-    Ok(out) if out.status.success() => {
-      String::from_utf8_lossy(&out.stdout)
-        .lines()
-        .filter(|l| !l.trim().is_empty())
-        .count()
-    }
+    Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout)
+      .lines()
+      .filter(|l| !l.trim().is_empty())
+      .count(),
     _ => 0,
   }
 }
@@ -72,7 +70,10 @@ pub async fn clean_cache() -> Result<PackageCleanResult, AppError> {
 
   if !output.status.success() {
     let stderr = String::from_utf8_lossy(&output.stderr);
-    return Err(AppError::Internal(format!("zypper clean failed: {}", stderr)));
+    return Err(AppError::Internal(format!(
+      "zypper clean failed: {}",
+      stderr
+    )));
   }
 
   let after_size = get_dir_size(ZYPPER_CACHE_PATH);
